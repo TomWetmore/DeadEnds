@@ -4,7 +4,7 @@
 //  readnode.c -- Functions that read Gedcom nodes and node trees from files and strings.
 //
 //  Created by Thomas Wetmore on 17 December 2022.
-//  Last changed on 26 November 2023.
+//  Last changed on 27 November 2023.
 //
 
 #include "readnode.h"
