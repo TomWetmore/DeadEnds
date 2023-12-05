@@ -4,13 +4,15 @@
 //  errors.c -- Code for handling DeadEnds errors.
 //
 //  Created by Thomas Wetmore on 4 July 2023.
-//  Last changed on 27 November 2023.
+//  Last changed on 3 December 2023.
 //
 
 #include "errors.h"
 #include "list.h"
 
-//  getErrorKey -- Get the comparison key of an error.
+static bool debugging = true;
+
+//  getErrKey -- Get the comparison key of an error. Required list function.
 //
 //    This needs a little thought. We need to sort the errors by a key made up of the file name
 //    and the line number. But The sorting has to be done numerically with the line numbers and
@@ -32,7 +34,7 @@ static String getErrKey(Word error)
 	return scratch;
 }
 
-//  cmpError -- Compare two errors for their placement in an error log.
+//  cmpError -- Compare two errors for their placement in an error log. Required list function.
 //--------------------------------------------------------------------------------------------------
 static int cmpError(Word errorOne, Word errorTwo)
 {
@@ -41,7 +43,7 @@ static int cmpError(Word errorOne, Word errorTwo)
 	return strcmp(key1, key2);
 }
 
-//  delError -- Free up the memory for an error when an error log is freed.
+//  delError -- Free up the memory for an error when an error log is freed. Required list function.
 //--------------------------------------------------------------------------------------------------
 static void delError(Word error)
 {
@@ -70,6 +72,7 @@ Error *createError(ErrorType type, String fileName, int lineNumber, String messa
 	error->fileName = fileName;  // MNOTE: Not saved; do not free.
 	error->lineNumber = lineNumber;
 	error->message = strsave(message);
+	if (debugging) printf("            CREATE ERROR: %s, %d, %s\n", fileName, lineNumber, message);
 	return error;
 }
 
@@ -109,29 +112,30 @@ void oldAddErrorToLog(ErrorLog *errorLog, ErrorType errorType, String fileName, 
 //-------------------------------------------------------------------------------------------------
 void showError (Error *error)
 {
-	switch (error->severity) {
+	/*switch (error->severity) {
 		case fatalError: printf("fatal "); break;
 		case severeError: printf("severe "); break;
 		case warningError: printf("warning: "); break;
 		case commentError: printf("comment: "); break;
 		default: printf("unknown (can't happen):"); break;
-	}
+	}*/
 	switch (error->type) {
-		case systemError: printf("system error: "); break;
-		case syntaxError: printf("syntax error: "); break;
-		case gedcomError: printf("semantic error: "); break;
-		case linkageError: printf("linkage error: "); break;
-		default: printf("unknown error (can't happen): "); break;
+		case systemError: printf("system error "); break;
+		case syntaxError: printf("syntax error "); break;
+		case gedcomError: printf("semantic error "); break;
+		case linkageError: printf("linkage error "); break;
+		default: printf("unknown error (can't happen) "); break;
 	}
-	printf("file: %s: ", error->fileName ? error->fileName : "no filename");
-	printf("line: %d: ", error->lineNumber);
-	printf("message: %s\n", error->message ? error->message : "no message");
+	printf("in %s ", error->fileName ? error->fileName : "no filename");
+	printf("at line %d: ", error->lineNumber);
+	printf("%s\n", error->message ? error->message : "no message");
 }
 
 //  showErrorLog -- Show the contents of an ErrorLog on standard output.
 //-------------------------------------------------------------------------------------------------
 void showErrorLog (ErrorLog *errorLog)
 {
+	sortList(errorLog, true);
 	FORLIST(errorLog, error)
 		showError((Error*) error);
 	ENDLIST

@@ -7,7 +7,7 @@
 //    records is also done.
 //
 //  Created by Thomas Wetmore on 10 November 2022.
-//  Last changed 25 November 2023.
+//  Last changed 28 November 2023.
 //
 
 #include "database.h"
@@ -17,8 +17,10 @@
 #include "stringtable.h"
 #include "nameindex.h"
 #include "path.h"
+#include "errors.h"
 
 static bool debugging = false;
+static int keyLineNumber(Database*, String key);
 
 //  createDatabase -- Create a database.
 //--------------------------------------------------------------------------------------------------
@@ -139,7 +141,7 @@ static int count = 0;  // Debugging.
 //  storeRecord -- Store a Gedcom node tree in the database by adding it to the record index of
 //    its type. Return true if the record was added successfully.
 //--------------------------------------------------------------------------------------------------
-bool storeRecord(Database *database, GNode* root, int lineNumber)
+bool storeRecord(Database *database, GNode* root, int lineNumber, ErrorLog *errorLog)
 //  database -- Database to add the record to
 //  root -- Root of a record tree to store in the database.
 //  lineNumber -- Line number in the Gedcom file where the record began.
@@ -149,9 +151,22 @@ bool storeRecord(Database *database, GNode* root, int lineNumber)
 	RecordType type = recordType(root);
 	if (debugging) printf("type of record is %d\n", type);
 	if (type == GRHeader || type == GRTrailer) return true;  // Ignore HEAD and TRLR records.
-	ASSERT(root->key);
+	if (!root->key) {
+		Error *error = createError(syntaxError, database->fileName, lineNumber, "This record has no key.");
+		addErrorToLog(errorLog, error);
+		return false;
+	}
 	count++;
 	String key = root->key;  // MNOTE: insertInRecord copies the key.
+	
+	// Duplicate key check done here.
+	int previousLine = keyLineNumber(database, key);
+	if (previousLine) {
+		char scratch[MAXLINELEN];
+		sprintf(scratch, "A record with key %s exists at line %d.", key, previousLine);
+		Error *error = createError(gedcomError, database->fileName, lineNumber, scratch);
+		addErrorToLog(errorLog, error);
+	}
 	switch (type) {
 		case GRPerson:
 			insertInRecordIndex(database->personIndex, key, root, lineNumber);
@@ -219,6 +234,20 @@ void indexNames(Database* database)
 	}
 	showNameIndex(database->nameIndex);
 	/*if (debugging) */ printf("The number of names indexed was %d\n", count);
+}
+
+//  keyLineNumber -- See if a record with the key is in the database. If so return the line number
+//    in the original Gedcom file where the record began. Check all five indexes.
+//-------------------------------------------------------------------------------------------------
+static int keyLineNumber (Database *database, String key)
+{
+	RecordIndexEl* element = (RecordIndexEl*)searchHashTable(database->personIndex, key);
+	if (!element) element = searchHashTable(database->familyIndex, key);
+	if (!element) element = searchHashTable(database->sourceIndex, key);
+	if (!element) element = searchHashTable(database->eventIndex, key);
+	if (!element) element = searchHashTable(database->otherIndex, key);
+	if (!element) return 0; // Hasn't been seen before.
+	return element->lineNumber;
 }
 
 //  Some debugging functions.
