@@ -4,7 +4,7 @@
 //  database.h
 //
 //  Created by Thomas Wetmore on 10 November 2022.
-//  Last changed on 28 November 2023.
+//  Last changed on 6 December 2023.
 //
 
 #ifndef database_h
@@ -22,14 +22,14 @@ typedef HashTable RecordIndex;
 //  Database -- Database structure for genealogical data encoded in Gedcom form.
 //--------------------------------------------------------------------------------------------------
 typedef struct Database {
-    String fileName;  // Name of Gedcom file this database was built from.
-    String lastSegment;
-    RecordIndex *personIndex;
-    RecordIndex *familyIndex;
-    RecordIndex *sourceIndex;
-    RecordIndex *eventIndex;
-    RecordIndex *otherIndex;
-    NameIndex *nameIndex;
+    String filePath;  // Path to the Gedcom file this database was built from.
+    String lastSegment;  // Last segment of the path for error messages.
+    RecordIndex *personIndex;  // Index of persons in this database.
+    RecordIndex *familyIndex;  // Index of families in this database.
+    RecordIndex *sourceIndex;  // Index of sources in this database.
+    RecordIndex *eventIndex;  // Index of events in this database.
+    RecordIndex *otherIndex;  // Indes of other records in this database.
+    NameIndex *nameIndex;  // Index of the names of the persons in this database.
 } Database;
 
 Database *createDatabase(String fileName); // Create an empty database.

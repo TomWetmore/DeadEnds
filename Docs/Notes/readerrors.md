@@ -109,3 +109,7 @@ At any time a line might have syntax errors.
 A line might have have an invalid level, that is, two or more deeper than the current line.
 
 Certain semantic errors can be found, for example, reuse of keys.
+
+## Redesign Ideas
+
+Read each line of a Gedcom file into a GNode and create a List of those GNodes. The elements could either be the GNodes themselves or a structure that refers to the GNode and has other fields. Possible other fields would be the line's line number in the file, an error created while processing the line, if any; and . Maybe if the line is in horrible shape, the GNode field might even be empty, or have a thrid field which is a copy of the string actually read from the file.

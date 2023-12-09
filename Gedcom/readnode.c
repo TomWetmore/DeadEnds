@@ -5,11 +5,12 @@
 //    and strings.
 //
 //  Created by Thomas Wetmore on 17 December 2022.
-//  Last changed on 4 December 2023.
+//  Last changed on 9 December 2023.
 //
 
 #include "readnode.h"
 #include "stringtable.h"
+#include "list.h"
 #include "errors.h"
 
 static bool debugging = true;
@@ -34,10 +35,6 @@ typedef enum ReadReturn {
 //static String rerilv = (String) "Line %d: This line has an illegal level.";
 //static String rerwlv = (String) "The record begins at wrong level.";
 
-//  extractFields -- Local static function that extracts Gedcom files from a string.
-//--------------------------------------------------------------------------------------------------
-static ReadReturn extractFields (String p, Error **error);
-
 //  Static variables that maintain state between functions in this file.
 //--------------------------------------------------------------------------------------------------
 static String fileName;   // Name of the file being read.
@@ -47,65 +44,6 @@ static String key;    // Key, if any, on the last line read.
 static String tag;    // Tag on the last line read.
 static String value;  // Value, if any, on the last line read.
 static bool ateof = false;  //  Whether the Gedcom file has reached end of file.
-
-//  fileToLine -- Reads the next Gedcom line from a file. Empty lines are counted and ignored.
-//    The line is passed to extractFields for field extraction. An error message is returned if
-//    a problem is found. Returns a code of be ReadOkay, ReadEOF, or ReadError, which is found
-//    when fileToLine calls extractFields. The function uses fgets to read the lines.
-//--------------------------------------------------------------------------------------------------
-static ReadReturn fileToLine(FILE *file, Error **error)
-//  file -- File to read the line from.
-//  level -- (out) Level of the returned line.
-//  key -- (out) Key (cross reference) of the returned line; can be null.
-//  tag -- (out) Tag of the returned line; manadatory.
-//  value -- (out) Value of the returned line; can be null.
-//  message -- (out) Error message when things go wrong.
-{
-	static char buffer[MAXLINELEN];  // Buffer to store the line.
-	char *p = buffer;  // Buffer cursor.
-	*error = null;
-	while (true) {
-		//  Read a line from the file; if fgets returns 0 assume reading is over.
-		if (!(p = fgets(buffer, MAXLINELEN, file))) {
-			ateof = true;
-			return ReadEOF;
-		}
-		if (debugging) printf("        FILE TO LINE: %s", buffer);
-		fileLine++;  // Increment the file line number.
-		if (!allwhite(p)) break; // If the line is all white continue to the next line.
-	}
-
-	// Read a line and convert it to field values. The values point to locations in the buffer.
-	return extractFields(p, error);
-}
-
-//  stringToLine -- Get the next Gedcom line as fields from a string holding one or more Gedcom
-//    lines. This function reads to the next newline, if any, and processes that part of the
-//    string. If there are remaining characters the address of the next character is returned
-//    in ps
-//--------------------------------------------------------------------------------------------------
-/*static ReadReturn stringToLine(String *ps, int *plevel, String *pkey, String *ptag, String *pvalue,
-						 Error **error)
-//  ps -- (in/out) Pointer to string.
-//  plevel -- (out) Pointer to level.
-//  pxref -- (out) Pointer to cross reference string of this line.
-//  ptag -- (out) Pointer to tag of this line.
-//  pval -- (out) Pointer to value of this line.
-//  pmsg -- (out) Pointer to error message if anything goes wrong.
-{
-	String s0, s;
-	*error = null;
-	s0 = s = *ps;
-	if (!s || *s == 0) return false;
-	while (*s && *s != '\n') s++;
-	if (*s == 0)
-		*ps = s;
-	else {
-		*s = 0;
-		*ps = s + 1;
-	}
-	return extractFields(s0, plevel, pkey, ptag, pvalue, error) == ReadOkay;
-}*/
 
 //  extractFields -- Process a String holding a single Gedcom line by extracting the level, key
 //    (if any), tag, and value (if any). The line may have a newline at the end. This function is
@@ -124,7 +62,7 @@ static ReadReturn extractFields (String p, Error **error)
 		*error = createError(syntaxError, fileName, fileLine, "Empty string");
 		return ReadError;
 	}
-	if (debugging) printf("          EXTRACT FIELDS: %s", p);  // No \n because the buffer has it.
+	//if (debugging) printf("          EXTRACT FIELDS: %s", p);  // No \n because the buffer has it.
 	// Initialize the output parameters.
 	key = value = null;  // Shifting over to using the static variables.
 	// Strip trailing white space from the String. TODO: THIS SEEMS WASTEFUL.
@@ -146,7 +84,7 @@ static ReadReturn extractFields (String p, Error **error)
 	}
 
 	// Use ascii arithmetic to convert the digit characters to integers.
-	int level = *p++ - '0';
+	level = *p++ - '0';
 	while (chartype(*p) == DIGIT) level = level*10 + *p++ - '0';
 
 	// Pass any white space that precedes the key or tag.
@@ -199,6 +137,67 @@ gettag:
 	return ReadOkay;
 }
 
+//  fileToLine -- Reads the next Gedcom line from a file. Empty lines are counted and ignored.
+//    The line is passed to extractFields for field extraction. An error message is returned if
+//    a problem is found. Returns a code of be ReadOkay, ReadEOF, or ReadError, which is found
+//    when fileToLine calls extractFields. The function uses fgets to read the lines.
+//--------------------------------------------------------------------------------------------------
+static ReadReturn fileToLine(FILE *file, Error **error)
+//  file -- File to read the line from.
+//  level -- (out) Level of the returned line.
+//  key -- (out) Key (cross reference) of the returned line; can be null.
+//  tag -- (out) Tag of the returned line; manadatory.
+//  value -- (out) Value of the returned line; can be null.
+//  message -- (out) Error message when things go wrong.
+{
+	static char buffer[MAXLINELEN];  // Buffer to store the line.
+	char *p = buffer;  // Buffer cursor.
+	*error = null;
+	while (true) {
+		//  Read a line from the file; if fgets returns 0 assume reading is over.
+		if (!(p = fgets(buffer, MAXLINELEN, file))) {
+			ateof = true;
+			return ReadEOF;
+		}
+		//if (debugging) printf("        FILE TO LINE: %s", buffer);
+		fileLine++;  // Increment the file line number.
+		if (!allwhite(p)) break; // If the line is all white continue to the next line.
+	}
+
+	// Read a line and convert it to field values. The values point to locations in the buffer.
+	return extractFields(p, error);
+}
+
+//  stringToLine -- Get the next Gedcom line as fields from a string holding one or more Gedcom
+//    lines. This function reads to the next newline, if any, and processes that part of the
+//    string. If there are remaining characters the address of the next character is returned
+//    in ps
+//--------------------------------------------------------------------------------------------------
+/*static ReadReturn stringToLine(String *ps, int *plevel, String *pkey, String *ptag, String *pvalue,
+						 Error **error)
+//  ps -- (in/out) Pointer to string.
+//  plevel -- (out) Pointer to level.
+//  pxref -- (out) Pointer to cross reference string of this line.
+//  ptag -- (out) Pointer to tag of this line.
+//  pval -- (out) Pointer to value of this line.
+//  pmsg -- (out) Pointer to error message if anything goes wrong.
+{
+	String s0, s;
+	*error = null;
+	s0 = s = *ps;
+	if (!s || *s == 0) return false;
+	while (*s && *s != '\n') s++;
+	if (*s == 0)
+		*ps = s;
+	else {
+		*s = 0;
+		*ps = s + 1;
+	}
+	return extractFields(s0, plevel, pkey, ptag, pvalue, error) == ReadOkay;
+}*/
+
+
+
 // firstNodeTreeFromFile -- Convert the first Gedcom record in a file to a Gedcom node tree.
 //--------------------------------------------------------------------------------------------------
 GNode* firstNodeTreeFromFile (FILE *fp, String fName, int *lineNo, ErrorLog *errorLog)
@@ -224,6 +223,122 @@ GNode* firstNodeTreeFromFile (FILE *fp, String fName, int *lineNo, ErrorLog *err
 	}
 	return nextNodeTreeFromFile(fp, lineNo, errorLog);
 }
+
+/*//  nextNodeTreeFromFile -- Convert the next Gedcom record in a file to a Node tree.
+//  THIS IS A NEW VERSION OF NEXTNODETREEFROMFILE TRYING TO DO BETTER HANDLING ERRORS.
+//--------------------------------------------------------------------------------------------------
+GNode* newNextNodeTreeFromFile(FILE *fp, int *lineNo, ErrorLog *errorLog)
+//  fp -- File that holds the Gedcom records.
+//  pmsg -- (out) Possible error message.
+//  peof -- (out) Set to true if the file is at end of file.
+{
+	// Precondition for this function: A 0 level line must have been read and its fields set in the state variables.
+	if (debugging) printf("      NEXT NODE TREE FROM FILE\n");
+	// If file is at end return EOF.
+	if (ateof) return null;
+	ReadReturn bcode, rc;
+	GNode *root, *node, *curnode;
+	Error *error;
+
+	// *********************REGROUPING THE CODE INTO THIS FOREVER LOOP********************
+	while (true) {
+		// Invariant at top of loop: state variables must hold level 0 fields.
+		ASSERT(level == 0 && tag);
+		int curlevel;
+		// fileLine state variable should hold the line number of the 0 level line from the file.
+		*lineNo = fileLine;  // lineNo passes the defining line number back to caller.
+		if (level != 0) {  // Really make sure that the line has level 0.
+			addErrorToLog(errorLog, createError(syntaxError, fileName, fileLine, "Record does not start at level 0"));
+			goto skip;
+		}
+
+		// Create the root of a node tree.
+		curlevel = level;
+		root = curnode = creaeGNode(key, tag, value, null);
+		if (debugging) printf("      NNTFF: Creating root node: %s\n", gnodeToString(root, level));
+		bcode = ReadOkay;
+		if (debugging) printf("      NNTFF: before read loop: fileToLine on next line\n");
+
+		// THE LOOP THAT READS THE LINES IN THE CURRENT NODE TREE BEING BUILT.
+		// PRIME THE LOOP WITH WHAT SHOULD BE THE SECOND LINE IN THE RECORD.
+		if (debugging) printf("      NNTFF: Now reading the second line in the record\n");
+		rc = fileToLine(fp, &error);
+		while (rc == ReadOkay) {
+			//  If the level is zero the current record has now been read and fully built.
+			if (level == 0) {
+				bcode = ReadOkay;
+			}
+		}
+		
+skip:
+	}
+
+	rc = fileToLine(fp, &error);
+	while (rc == ReadOkay) {
+
+		//  If the level is zero the the record has been read and built.
+		if (level == 0) {
+			bcode = ReadOkay;
+			break;
+		}
+
+		//  If the level of this line is the same as the last, add a sibling node.
+		if (level == curlev) {
+			node = createGNode(key, tag, value, curnode->parent);
+			if (debugging) printf("      NNTFF: read node at same level: %s\n", gnodeToString(node, level));
+			curnode->sibling = node;
+			curnode = node;
+
+		//  If the level of this line is one deeper than the last, add a child node.
+		} else if (level == curlev + 1) {
+			node = createGNode(key, tag, value, curnode);
+			if (debugging) printf("      NNTFF: read node a level deeper; add child: %s\n", gnodeToString(node, level));
+			curnode->child = node;
+			curnode = node;
+			curlev = level;
+		//  If the level of this line is less than the last move up the parent chain.
+		} else if (level < curlev) {
+			if (debugging) printf("      NNTFF: read node at higher level: moving up...\n");
+			// Check for an illegal level.
+			if (level < 0) {
+				addErrorToLog(errorLog, createError(syntaxError, fileName, fileLine, "Illegal level number."));
+				bcode = ReadError;
+				break;
+			}
+			//  Move up the parent list until reaching the node with the same level.
+			while (level < curlev) {
+				curnode = curnode->parent;
+				curlev--;
+			}
+			//  Add the new node as a sibling.
+			node = createGNode(key, tag, value, curnode->parent);
+			if (debugging) printf("      NNTFF: adding and moving to sibling: %s\n", gnodeToString(node, 0));
+			curnode->sibling = node;
+			curnode = node;
+
+		//  Anything else is an error.
+		} else {
+			if (debugging) printf("      NNTFF: illegal line level\n");
+			Error *error = createError(syntaxError, fileName, fileLine, "Illegal level number");
+			if (debugging) showError(error);
+			addErrorToLog(errorLog, error);
+			bcode = ReadError;
+			break;
+		}
+		//  The line was converted to a node and inserted. Read the next line and continue.
+		if (debugging) printf("      NNTFF: reading next line and looping back up\n");
+		rc = fileToLine(fp, &error);
+	}
+
+	//  If successful return the tree root.
+	if (bcode == ReadOkay) return root;
+	if (bcode == ReadError || rc == ReadError) {
+		freeGNodes(root);
+		return null;
+	}
+	ateof = true ;
+	return root;
+}*/
 
 //  nextNodeTreeFromFile -- Convert the next Gedcom record in a file to a Node tree.
 //--------------------------------------------------------------------------------------------------
@@ -251,7 +366,7 @@ GNode* nextNodeTreeFromFile(FILE *fp, int *lineNo, ErrorLog *errorLog)
 
 	//  Create the root of a node tree.
 	root = curnode = createGNode(key, tag, value, null);
-	if (debugging) printf("      NNTFF: Creating root node: %s\n", gnodeToString(root, 0));
+	if (debugging) printf("      NNTFF: Creating root node: %s\n", gnodeToString(root, level));
 	bcode = ReadOkay;
 
 	//  Read the lines of the current record and build its tree.
@@ -268,23 +383,23 @@ GNode* nextNodeTreeFromFile(FILE *fp, int *lineNo, ErrorLog *errorLog)
 		//  If the level of this line is the same as the last, add a sibling node.
 		if (level == curlev) {
 			node = createGNode(key, tag, value, curnode->parent);
-			if (debugging) printf("      NNTFF: read node at same level: %s\n", gnodeToString(node, 0));
+			if (debugging) printf("      NNTFF: read node at same level: %s\n", gnodeToString(node, level));
 			curnode->sibling = node;
 			curnode = node;
 
 		//  If the level of this line is one deeper than the last, add a child node.
 		} else if (level == curlev + 1) {
 			node = createGNode(key, tag, value, curnode);
-			if (debugging) printf("      NNTFF: read node one level deeper; adding child: %s\n", gnodeToString(node, 0));
+			if (debugging) printf("      NNTFF: read node a level deeper; add child: %s\n", gnodeToString(node, level));
 			curnode->child = node;
 			curnode = node;
 			curlev = level;
 		//  If the level of this line is less than the last move up the parent chain.
 		} else if (level < curlev) {
-			if (debugging) printf("      NNTFF: read node at higher level: moving up\n");
+			if (debugging) printf("      NNTFF: read node at higher level: moving up...\n");
 			// Check for an illegal level.
 			if (level < 0) {
-				addErrorToLog(errorLog, createError(syntaxError, fileName, fileLine, "Illegal level"));
+				addErrorToLog(errorLog, createError(syntaxError, fileName, fileLine, "Illegal level number."));
 				bcode = ReadError;
 				break;
 			}
@@ -302,7 +417,7 @@ GNode* nextNodeTreeFromFile(FILE *fp, int *lineNo, ErrorLog *errorLog)
 		//  Anything else is an error.
 		} else {
 			if (debugging) printf("      NNTFF: illegal line level\n");
-			Error *error = createError(syntaxError, fileName, fileLine, "Illegal level");
+			Error *error = createError(syntaxError, fileName, fileLine, "Illegal level number");
 			if (debugging) showError(error);
 			addErrorToLog(errorLog, error);
 			bcode = ReadError;
@@ -381,8 +496,8 @@ GNode* nextNodeTreeFromFile(FILE *fp, int *lineNo, ErrorLog *errorLog)
 ReadReturn readToNextRoot (FILE *fp, int *lineNo, ErrorLog *errorLog)
 {
 	ReadReturn result;
-	Error **error = null;
-	while ((result = fileToLine(fp, error)) != ReadEOF) {
+	Error *error;
+	while ((result = fileToLine(fp, &error)) != ReadEOF) {
 		if (result == ReadOkay && level == 0) return ReadOkay;
 		if (result == ReadOkay) continue;
 		if (result == ReadError) {
@@ -390,4 +505,69 @@ ReadReturn readToNextRoot (FILE *fp, int *lineNo, ErrorLog *errorLog)
 		}
 	}
 	return ReadEOF;
+}
+
+//  Following code is an experiemnet in adding another layer to the read stack in order to make
+//    the next higher layer simpler. In this layer as each line is read from a Gedcom file, it
+//    either leads to a GNode or an Error. These GNodes and/or Errors are kept in a list. The
+//    layer above, now the fNTFF and nNTFF functions, will be replaced by code that iterates
+//    through the list. That layer I hope will become a fairly simple state machine. Let's get
+//    to it.
+//=================================================================================================
+
+
+
+NodeListElement *createNodeListElement(GNode *node, int level, int lineNo, Error *error)
+{
+	NodeListElement *element = (NodeListElement*) malloc(sizeof(NodeListElement));
+	element->node = node;
+	element->level = level;
+	element->lineNo = lineNo;
+	element->error = error;
+	return element;
+}
+
+typedef List NodeList;
+
+NodeList *createNodeList(void)
+{
+	NodeList *nodeList = createList(null, null, null);  // TODO: Do need to write one of the functions.
+	return nodeList;
+}
+
+NodeList *getNodeList(FILE *fp, ErrorLog *errorLog)
+{
+	NodeList *nodes = createNodeList();
+	Error *error;
+
+	ReadReturn rc = fileToLine(fp, &error);
+	while (rc != ReadEOF) {
+		if (rc == ReadOkay) {
+			// Create the GNode from the extracted fields and add it to the list.
+			appendListElement(nodes, createNodeListElement(createGNode(key, tag, value, null), level, fileLine, null));
+		} else {
+			// Add an error entry to the node list.
+			appendListElement(nodes, createNodeListElement(null, level, fileLine, error));
+		}
+		rc = fileToLine(fp, &error);
+	}
+
+	if (debugging) {
+		printf("Length of the root nodes and errors list is %d\n", lengthList(nodes));
+	}
+	return nodes;
+}
+
+void showNodeList(NodeList *nodeList)
+{
+	FORLIST(nodeList, element)
+		NodeListElement *nodeListElement = (NodeListElement*) element;
+		printf("%d ", nodeListElement->lineNo);
+		if (nodeListElement->error) {
+			printf("Error: "); showError(nodeListElement->error);
+		} else if (nodeListElement->node) {
+			// TODO: change show_node to showGNode.
+			printf("Node: "); showSingleGNode(nodeListElement->level, nodeListElement->node);
+		}
+	ENDLIST
 }

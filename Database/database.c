@@ -7,7 +7,7 @@
 //    records is also done.
 //
 //  Created by Thomas Wetmore on 10 November 2022.
-//  Last changed 28 November 2023.
+//  Last changed 6 December 2023.
 //
 
 #include "database.h"
@@ -24,11 +24,11 @@ static int keyLineNumber(Database*, String key);
 
 //  createDatabase -- Create a database.
 //--------------------------------------------------------------------------------------------------
-Database *createDatabase(String fileName)
+Database *createDatabase(String filePath)
 {
 	Database *database = (Database*) stdalloc(sizeof(Database));
-	database->fileName = strsave(fileName);
-	database->lastSegment = strsave(lastPathSegment(fileName));
+	database->filePath = strsave(filePath);
+	database->lastSegment = strsave(lastPathSegment(filePath));
 	database->personIndex = createRecordIndex();
 	database->familyIndex = createRecordIndex();
 	database->sourceIndex = createRecordIndex();
@@ -152,7 +152,7 @@ bool storeRecord(Database *database, GNode* root, int lineNumber, ErrorLog *erro
 	if (debugging) printf("type of record is %d\n", type);
 	if (type == GRHeader || type == GRTrailer) return true;  // Ignore HEAD and TRLR records.
 	if (!root->key) {
-		Error *error = createError(syntaxError, database->fileName, lineNumber, "This record has no key.");
+		Error *error = createError(syntaxError, database->lastSegment, lineNumber, "This record has no key.");
 		addErrorToLog(errorLog, error);
 		return false;
 	}
@@ -164,7 +164,7 @@ bool storeRecord(Database *database, GNode* root, int lineNumber, ErrorLog *erro
 	if (previousLine) {
 		char scratch[MAXLINELEN];
 		sprintf(scratch, "A record with key %s exists at line %d.", key, previousLine);
-		Error *error = createError(gedcomError, database->fileName, lineNumber, scratch);
+		Error *error = createError(gedcomError, database->lastSegment, lineNumber, scratch);
 		addErrorToLog(errorLog, error);
 	}
 	switch (type) {

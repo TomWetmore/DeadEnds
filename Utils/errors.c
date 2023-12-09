@@ -135,7 +135,7 @@ void showError (Error *error)
 //-------------------------------------------------------------------------------------------------
 void showErrorLog (ErrorLog *errorLog)
 {
-	sortList(errorLog, true);
+	//sortList(errorLog, true);
 	FORLIST(errorLog, error)
 		showError((Error*) error);
 	ENDLIST

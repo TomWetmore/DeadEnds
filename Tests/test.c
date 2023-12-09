@@ -1,7 +1,7 @@
 //  test.c -- Test program.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 27 November 2023.
+//  Last changed on 8 December 2023.
 
 #include <stdio.h>
 #include "standard.h"
@@ -14,6 +14,7 @@
 #include "sequence.h"
 #include "list.h"
 #include "path.h"
+#include "readnode.h"
 
 extern String currentProgramFileName;
 extern int currentProgramLineNumber;
@@ -28,6 +29,7 @@ static void validateDatabaseTest(Database*, int);
 static void forTraverseTest(Database*, int);
 static void showHashTableTest(HashTable*, int);
 static void indexNamesTest(Database*, int);
+static void testNewReadLayer(String);
 extern bool validateDatabase(Database*, ErrorLog*);
 
 //  main -- Main function for the batch program that tests the DeadEnds infrastructure software.
@@ -35,11 +37,16 @@ extern bool validateDatabase(Database*, ErrorLog*);
 int main (void)
 {
 	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/bad.ged";
-	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/main.ged";
+	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/main.ged";
+	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/small.ged";
 	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/notthere.ged";
-	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/threezeros.ged";
+	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/threezeros.ged";
 	int testNumber = 0;
 	ErrorLog *errorLog = createErrorLog();
+
+	// OKAY, got to stop this stuff and get a new read laryer working. So ...
+	testNewReadLayer(gedcomFile);
+	return 0;
 
 	Database *database = createDatabaseTest(gedcomFile, ++testNumber, errorLog);
 	showErrorLog(errorLog);
@@ -192,4 +199,18 @@ static void indexNamesTest(Database *database, int testNumber)
 	printf("\n%d: START OF INDEX NAMES TEST\n", testNumber);
 	indexNames(database);
 	printf("END OF INDEX NAMES TEST\n");
+}
+
+static void testNewReadLayer(String fileName)
+{
+	printf("Hello from testNewReadLayer\n");
+	FILE *fp = fopen(fileName, "r");
+	if (fp == NULL) {
+		printf("FAILURE IN TESTNEWREADLAYER\n");
+		return;
+	}
+	ErrorLog *errorLog = createErrorLog();
+	
+	NodeList *nodeList = getNodeList(fp, errorLog);
+	showNodeList(nodeList);
 }

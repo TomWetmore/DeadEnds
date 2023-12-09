@@ -4,7 +4,7 @@
 //  gnode.c -- Functions involving the GNode type.
 //
 //  Created by Thomas Wetmore on 12 November 2022.
-//  Last changed on 25 November 2023.
+//  Last changed on 9 December 2023.
 
 #include "standard.h"
 #include "gnode.h"
@@ -16,6 +16,8 @@
 #include "splitjoin.h"
 #include "readnode.h"
 #include "database.h"
+
+typedef struct HashTable StringTable;
 
 //  Tag table. Ensures there is one persistent copy of each tag used in all GNode trees.
 static StringTable *tagTable = null;
@@ -190,18 +192,18 @@ String event_to_plac (GNode* node, bool shorten)
 	if (shorten) return shorten_plac(node->value);
 	return node->value;
 }
-/*================================
- * show_node -- Show tree -- For debugging.
- *==============================*/
-void show_node(GNode* node)
+
+//  showGNode -- Show a tree of GNodes; for debugging.
+//--------------------------------------------------------------------------------------------------
+ void showGNode(GNode* node)
 {
 	if (!node) return;
-	show_node_rec(0, node);
+	showGNodeRecursive(0, node);
 }
 
-// show_node_rec -- Recursive version of show_node.
+// showGNodeRecursive -- Recursive version of show_node.
 //--------------------------------------------------------------------------------------------------
-void show_node_rec(int levl, GNode* node)
+void showGNodeRecursive(int levl, GNode* node)
 {
 	if (!node) return;
 	for (int i = 1;  i < levl;  i++)
@@ -212,8 +214,17 @@ void show_node_rec(int levl, GNode* node)
 	printf(" %s", node->tag);
 	if (node->value) printf(" %s", node->value);
 	printf("\n");
-	show_node_rec(levl + 1, node->child);
-	show_node_rec(levl    , node->sibling);
+	showGNodeRecursive(levl + 1, node->child);
+	showGNodeRecursive(levl    , node->sibling);
+}
+
+void showSingleGNode(int level, GNode *node)
+{
+	printf("%d", level);
+	if (node->key) printf(" %s", node->key);
+	printf(" %s", node->tag);
+	if (node->value) printf(" %s", node->value);
+	printf("\n");
 }
 
 // length_nodes -- Return the length of the list of Nodes starting with first.

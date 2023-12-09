@@ -4,7 +4,7 @@
 //  validate.c -- Functions that validate Gedcom records.
 //
 //  Created by Thomas Wetmore on 12 April 2023.
-//  Last changed on 16 November 2023.
+//  Last changed on 6 December 2023.
 //
 
 #include "validate.h"
@@ -81,9 +81,9 @@ static void validatePerson(GNode *person, Database *database, ErrorLog *errorLog
 			if (person == child) numOccurrences++;
 		ENDCHILDREN
 		if (numOccurrences == 0) {
-			addErrorToLog(errorLog, createError(linkageError, database->fileName, 0, "Child not found"));
+			addErrorToLog(errorLog, createError(linkageError, database->lastSegment, 0, "Child not found"));
 		} else if (numOccurrences > 1) {
-			addErrorToLog(errorLog, createError(linkageError, database->fileName, 0, "Too many children found"));
+			addErrorToLog(errorLog, createError(linkageError, database->lastSegment, 0, "Too many children found"));
 		}
 	ENDFAMCS
 
