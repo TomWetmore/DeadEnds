@@ -1,7 +1,7 @@
 //  test.c -- Test program.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 8 December 2023.
+//  Last changed on 10 December 2023.
 
 #include <stdio.h>
 #include "standard.h"
@@ -201,6 +201,7 @@ static void indexNamesTest(Database *database, int testNumber)
 	printf("END OF INDEX NAMES TEST\n");
 }
 
+NodeList *upperHalf(NodeList*, ErrorLog*);
 static void testNewReadLayer(String fileName)
 {
 	printf("Hello from testNewReadLayer\n");
@@ -211,6 +212,14 @@ static void testNewReadLayer(String fileName)
 	}
 	ErrorLog *errorLog = createErrorLog();
 	
+	// getNodeList is the "lower half" of the new read stack layer.
 	NodeList *nodeList = getNodeList(fp, errorLog);
-	showNodeList(nodeList);
+	//showNodeList(nodeList);
+	//  upperHalf is the "upper half" of the new read stack layer. Need better names.
+	NodeList *rootNodeList = upperHalf(nodeList, errorLog);
+	printf("The length of the rootNodeList is %d\n", lengthList(rootNodeList));
+	FORLIST(rootNodeList, element)
+		NodeListElement *e = (NodeListElement*) element;
+		showGNode(e->node);
+	ENDLIST
 }

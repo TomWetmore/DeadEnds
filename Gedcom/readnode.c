@@ -5,7 +5,7 @@
 //    and strings.
 //
 //  Created by Thomas Wetmore on 17 December 2022.
-//  Last changed on 9 December 2023.
+//  Last changed on 10 December 2023.
 //
 
 #include "readnode.h"
@@ -224,122 +224,6 @@ GNode* firstNodeTreeFromFile (FILE *fp, String fName, int *lineNo, ErrorLog *err
 	return nextNodeTreeFromFile(fp, lineNo, errorLog);
 }
 
-/*//  nextNodeTreeFromFile -- Convert the next Gedcom record in a file to a Node tree.
-//  THIS IS A NEW VERSION OF NEXTNODETREEFROMFILE TRYING TO DO BETTER HANDLING ERRORS.
-//--------------------------------------------------------------------------------------------------
-GNode* newNextNodeTreeFromFile(FILE *fp, int *lineNo, ErrorLog *errorLog)
-//  fp -- File that holds the Gedcom records.
-//  pmsg -- (out) Possible error message.
-//  peof -- (out) Set to true if the file is at end of file.
-{
-	// Precondition for this function: A 0 level line must have been read and its fields set in the state variables.
-	if (debugging) printf("      NEXT NODE TREE FROM FILE\n");
-	// If file is at end return EOF.
-	if (ateof) return null;
-	ReadReturn bcode, rc;
-	GNode *root, *node, *curnode;
-	Error *error;
-
-	// *********************REGROUPING THE CODE INTO THIS FOREVER LOOP********************
-	while (true) {
-		// Invariant at top of loop: state variables must hold level 0 fields.
-		ASSERT(level == 0 && tag);
-		int curlevel;
-		// fileLine state variable should hold the line number of the 0 level line from the file.
-		*lineNo = fileLine;  // lineNo passes the defining line number back to caller.
-		if (level != 0) {  // Really make sure that the line has level 0.
-			addErrorToLog(errorLog, createError(syntaxError, fileName, fileLine, "Record does not start at level 0"));
-			goto skip;
-		}
-
-		// Create the root of a node tree.
-		curlevel = level;
-		root = curnode = creaeGNode(key, tag, value, null);
-		if (debugging) printf("      NNTFF: Creating root node: %s\n", gnodeToString(root, level));
-		bcode = ReadOkay;
-		if (debugging) printf("      NNTFF: before read loop: fileToLine on next line\n");
-
-		// THE LOOP THAT READS THE LINES IN THE CURRENT NODE TREE BEING BUILT.
-		// PRIME THE LOOP WITH WHAT SHOULD BE THE SECOND LINE IN THE RECORD.
-		if (debugging) printf("      NNTFF: Now reading the second line in the record\n");
-		rc = fileToLine(fp, &error);
-		while (rc == ReadOkay) {
-			//  If the level is zero the current record has now been read and fully built.
-			if (level == 0) {
-				bcode = ReadOkay;
-			}
-		}
-		
-skip:
-	}
-
-	rc = fileToLine(fp, &error);
-	while (rc == ReadOkay) {
-
-		//  If the level is zero the the record has been read and built.
-		if (level == 0) {
-			bcode = ReadOkay;
-			break;
-		}
-
-		//  If the level of this line is the same as the last, add a sibling node.
-		if (level == curlev) {
-			node = createGNode(key, tag, value, curnode->parent);
-			if (debugging) printf("      NNTFF: read node at same level: %s\n", gnodeToString(node, level));
-			curnode->sibling = node;
-			curnode = node;
-
-		//  If the level of this line is one deeper than the last, add a child node.
-		} else if (level == curlev + 1) {
-			node = createGNode(key, tag, value, curnode);
-			if (debugging) printf("      NNTFF: read node a level deeper; add child: %s\n", gnodeToString(node, level));
-			curnode->child = node;
-			curnode = node;
-			curlev = level;
-		//  If the level of this line is less than the last move up the parent chain.
-		} else if (level < curlev) {
-			if (debugging) printf("      NNTFF: read node at higher level: moving up...\n");
-			// Check for an illegal level.
-			if (level < 0) {
-				addErrorToLog(errorLog, createError(syntaxError, fileName, fileLine, "Illegal level number."));
-				bcode = ReadError;
-				break;
-			}
-			//  Move up the parent list until reaching the node with the same level.
-			while (level < curlev) {
-				curnode = curnode->parent;
-				curlev--;
-			}
-			//  Add the new node as a sibling.
-			node = createGNode(key, tag, value, curnode->parent);
-			if (debugging) printf("      NNTFF: adding and moving to sibling: %s\n", gnodeToString(node, 0));
-			curnode->sibling = node;
-			curnode = node;
-
-		//  Anything else is an error.
-		} else {
-			if (debugging) printf("      NNTFF: illegal line level\n");
-			Error *error = createError(syntaxError, fileName, fileLine, "Illegal level number");
-			if (debugging) showError(error);
-			addErrorToLog(errorLog, error);
-			bcode = ReadError;
-			break;
-		}
-		//  The line was converted to a node and inserted. Read the next line and continue.
-		if (debugging) printf("      NNTFF: reading next line and looping back up\n");
-		rc = fileToLine(fp, &error);
-	}
-
-	//  If successful return the tree root.
-	if (bcode == ReadOkay) return root;
-	if (bcode == ReadError || rc == ReadError) {
-		freeGNodes(root);
-		return null;
-	}
-	ateof = true ;
-	return root;
-}*/
-
 //  nextNodeTreeFromFile -- Convert the next Gedcom record in a file to a Node tree.
 //--------------------------------------------------------------------------------------------------
 GNode* nextNodeTreeFromFile(FILE *fp, int *lineNo, ErrorLog *errorLog)
@@ -489,33 +373,9 @@ GNode* nextNodeTreeFromFile(FILE *fp, int *lineNo, ErrorLog *errorLog)
 	return null;
 } */
 
-//  readToNextRoot -- Read a Gedcom file until the next level 0 line is found. It returns
-//    ReadOkay if such a line is found, or ReadEOF if it reaches EOF without finding one.
-//    If fileToLine finds any errors during the process, those errors are added to the log.
-//-------------------------------------------------------------------------------------------------
-ReadReturn readToNextRoot (FILE *fp, int *lineNo, ErrorLog *errorLog)
-{
-	ReadReturn result;
-	Error *error;
-	while ((result = fileToLine(fp, &error)) != ReadEOF) {
-		if (result == ReadOkay && level == 0) return ReadOkay;
-		if (result == ReadOkay) continue;
-		if (result == ReadError) {
-			addErrorToLog(errorLog, error);
-		}
-	}
-	return ReadEOF;
-}
-
 //  Following code is an experiemnet in adding another layer to the read stack in order to make
-//    the next higher layer simpler. In this layer as each line is read from a Gedcom file, it
-//    either leads to a GNode or an Error. These GNodes and/or Errors are kept in a list. The
-//    layer above, now the fNTFF and nNTFF functions, will be replaced by code that iterates
-//    through the list. That layer I hope will become a fairly simple state machine. Let's get
-//    to it.
-//=================================================================================================
-
-
+//    the next higher layer simpler.
+//--------------------------------------------------------------------------------------------------
 
 NodeListElement *createNodeListElement(GNode *node, int level, int lineNo, Error *error)
 {
@@ -566,8 +426,115 @@ void showNodeList(NodeList *nodeList)
 		if (nodeListElement->error) {
 			printf("Error: "); showError(nodeListElement->error);
 		} else if (nodeListElement->node) {
-			// TODO: change show_node to showGNode.
 			printf("Node: "); showSingleGNode(nodeListElement->level, nodeListElement->node);
 		}
 	ENDLIST
+}
+
+enum ExStates { InitialState, MainState, ErrorState, DoneState };
+
+#define isZeroLevelNode(element) ((element)->node && (element)->level == 0)
+#define isNonZeroLevelNode(element) ((element)->node && (element)->level != 0)
+#define isNodeElement(element) ((element)->node)
+#define isErrorElement(element) ((element)->error)
+#define elementFields(element) element->node->key, element->node->tag, element->node->value, null
+
+//=================================== UPPER HALF; UPPER HALF ======================================
+NodeList *upperHalf(NodeList *lowerList, ErrorLog *errorLog)
+{
+	enum ExStates state = InitialState;
+	int prevLevel = 0;
+	int curLevel = 0;
+	int line0Number;  // Line number of current root node.
+	GNode *curRoot = null;
+	GNode *curNode = null;
+	NodeList *rootNodeList = createNodeList();
+
+	for (int index = 0; index < lengthList(lowerList); index++) {
+		NodeListElement *element = getListElement(lowerList, index);
+		if (isNodeElement(element)) {
+			prevLevel = curLevel;
+			curLevel = element->level;
+		}
+		switch (state) {
+		case InitialState:
+			if (isZeroLevelNode(element)) {
+				curRoot = curNode = createGNode(elementFields(element));
+				line0Number = element->lineNo;
+				state = MainState;
+				continue;
+			}
+			if (isNonZeroLevelNode(element)) {
+				addErrorToLog(errorLog, createError(syntaxError, fileName, element->lineNo, "Illegal line level."));
+				state = ErrorState;
+				continue;
+			}
+			if (isErrorElement(element)) {
+				addErrorToLog(errorLog, element->error);
+				state = ErrorState;
+				continue;
+			}
+			break;
+		case MainState:
+			// On error enter ErrorState but return the possibly partial current node tree.
+			if (isErrorElement(element)) {
+				addErrorToLog(errorLog, element->error);
+				appendListElement(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
+				state = ErrorState;
+				continue;
+			}
+			// A 0-level node is the first node of the next record. Return current node tree.
+			if (isZeroLevelNode(element)) {
+				appendListElement(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
+				curRoot = curNode = createGNode(elementFields(element));
+				prevLevel = curLevel = 0;
+				line0Number = element->lineNo;
+				continue;
+			}
+			// Found sibling node. Add it to the tree and make it current.
+			if (curLevel == prevLevel) {
+				GNode *newNode = createGNode(elementFields(element));
+				newNode->parent = curNode->parent;
+				curNode->sibling = newNode;
+				curNode = newNode;
+				continue;
+			}
+			// Found child node. Add it to the tree and make it current.
+			if (curLevel == prevLevel + 1) {
+				GNode *newNode = createGNode(elementFields(element));
+				newNode->parent = curNode;
+				curNode->child = newNode;
+				curNode = newNode;
+				continue;
+			}
+			// Found higher level node. Make it a sibling to higher node and make it current.
+			if (curLevel < prevLevel) {
+				while (curLevel < prevLevel) {
+					curNode = curNode->parent;
+					prevLevel--;
+				}
+				GNode *newNode = createGNode(elementFields(element));
+				curNode->sibling = newNode;
+				newNode->parent = curNode->parent;
+				curNode = newNode;
+				continue;
+			}
+			// Anything else is an error.
+			addErrorToLog(errorLog, createError(syntaxError, fileName, element->lineNo, "Illegal level number."));
+			appendListElement(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
+			state = ErrorState;
+			continue;
+		case ErrorState:
+			if (isErrorElement(element)) continue;
+			if (isNonZeroLevelNode(element)) continue;
+			line0Number = element->lineNo;
+			curRoot = curNode = createGNode(elementFields(element));
+			prevLevel = curLevel = 0;
+			state = MainState;
+			continue;
+		default:
+			ASSERT(false);
+		}
+	}
+	return rootNodeList;
 }
