@@ -1,7 +1,7 @@
 //  test.c -- Test program.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 10 December 2023.
+//  Last changed on 12 December 2023.
 
 #include <stdio.h>
 #include "standard.h"
@@ -43,10 +43,6 @@ int main (void)
 	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/threezeros.ged";
 	int testNumber = 0;
 	ErrorLog *errorLog = createErrorLog();
-
-	// OKAY, got to stop this stuff and get a new read laryer working. So ...
-	testNewReadLayer(gedcomFile);
-	return 0;
 
 	Database *database = createDatabaseTest(gedcomFile, ++testNumber, errorLog);
 	showErrorLog(errorLog);
@@ -199,27 +195,4 @@ static void indexNamesTest(Database *database, int testNumber)
 	printf("\n%d: START OF INDEX NAMES TEST\n", testNumber);
 	indexNames(database);
 	printf("END OF INDEX NAMES TEST\n");
-}
-
-NodeList *upperHalf(NodeList*, ErrorLog*);
-static void testNewReadLayer(String fileName)
-{
-	printf("Hello from testNewReadLayer\n");
-	FILE *fp = fopen(fileName, "r");
-	if (fp == NULL) {
-		printf("FAILURE IN TESTNEWREADLAYER\n");
-		return;
-	}
-	ErrorLog *errorLog = createErrorLog();
-	
-	// getNodeList is the "lower half" of the new read stack layer.
-	NodeList *nodeList = getNodeList(fp, errorLog);
-	//showNodeList(nodeList);
-	//  upperHalf is the "upper half" of the new read stack layer. Need better names.
-	NodeList *rootNodeList = upperHalf(nodeList, errorLog);
-	printf("The length of the rootNodeList is %d\n", lengthList(rootNodeList));
-	FORLIST(rootNodeList, element)
-		NodeListElement *e = (NodeListElement*) element;
-		showGNode(e->node);
-	ENDLIST
 }

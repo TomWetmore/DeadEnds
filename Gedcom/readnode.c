@@ -5,7 +5,7 @@
 //    and strings.
 //
 //  Created by Thomas Wetmore on 17 December 2022.
-//  Last changed on 10 December 2023.
+//  Last changed on 12 December 2023.
 //
 
 #include "readnode.h"
@@ -14,26 +14,6 @@
 #include "errors.h"
 
 static bool debugging = true;
-
-//  Return codes from fileToLine and extractFields.
-//-------------------------------------------------------------------------------------------------
-typedef enum ReadReturn {
-	ReadEOF = 0, // File is at end of file.
-	ReadOkay,    // Last line read was syntactically correct.
-	ReadError    // Last line read had an error.
-} ReadReturn;
-
-//  Error messages used in this file.
-//--------------------------------------------------------------------------------------------------
-//static String fileof = (String) "The file is positioned at EOF.";
-//static String reremp = (String) "Line %d: This line is empty; EOF?";
-//static String rerlng = (String) "Line %d: This line is too long.";
-//static String rernlv = (String) "Line %d: This line has no level number.";
-//static String rerinc = (String) "Line %d: This line is incomplete.";
-//static String rerbln = (String) "Line %d: This line has a bad link.";
-//static String rernwt = (String) "Line %d: This line needs white space before tag.";
-//static String rerilv = (String) "Line %d: This line has an illegal level.";
-//static String rerwlv = (String) "The record begins at wrong level.";
 
 //  Static variables that maintain state between functions in this file.
 //--------------------------------------------------------------------------------------------------
@@ -48,10 +28,10 @@ static bool ateof = false;  //  Whether the Gedcom file has reached end of file.
 //  extractFields -- Process a String holding a single Gedcom line by extracting the level, key
 //    (if any), tag, and value (if any). The line may have a newline at the end. This function is
 //    called by both fileToLine and stringToLine. The key, tag and value fields are stored in
-//    the state variables key, tag and value.
+//    the static state variables key, tag and value.
 //
-//    MNOTE: The three variables will all hold pointers into the input string p. Callers must
-//    copy those strings before the next line is extracted.
+//    MNOTE: key, tag, and value are pointers into the input string. Callers must use or copy
+//    them before the next line is extracted.
 //--------------------------------------------------------------------------------------------------
 static ReadReturn extractFields (String p, Error **error)
 //  p -- Gedcom line before processing. Within the function p is used as a cursor.
@@ -100,7 +80,7 @@ static ReadReturn extractFields (String p, Error **error)
 	if (*p != '@') goto gettag;
 
 	// Get the key including @'s.
-	key = p++;  // Points into original string.
+	key = p++;  // MNOTE: key points into the input string.
 	if (*p == '@') {  // @@ is illegal.
 		*error = createError(syntaxError, fileName, fileLine, "Illegal key (@@)");
 		return ReadError;
@@ -126,29 +106,25 @@ gettag:
 		*error = createError(syntaxError, fileName, fileLine, "The line is incomplete");
 		return ReadError;
 	}
-	tag = p++; // MNOTE: Tag points into the original string.
+	tag = p++; // MNOTE: tag points into the input string.
 	while (!iswhite(*p) && *p != 0) p++;
 	if (*p == 0) return ReadOkay;
 	*p++ = 0;
 
 	// Get the value field.
 	while (iswhite(*p)) p++;
-	value = p;  // MNOTE: Value points into the original string.
+	value = p;  // MNOTE: value points into the input string.
 	return ReadOkay;
 }
 
 //  fileToLine -- Reads the next Gedcom line from a file. Empty lines are counted and ignored.
 //    The line is passed to extractFields for field extraction. An error message is returned if
-//    a problem is found. Returns a code of be ReadOkay, ReadEOF, or ReadError, which is found
+//    a problem is found. Returns a value of ReadOkay, ReadEOF, or ReadError, which is found
 //    when fileToLine calls extractFields. The function uses fgets to read the lines.
 //--------------------------------------------------------------------------------------------------
 static ReadReturn fileToLine(FILE *file, Error **error)
 //  file -- File to read the line from.
-//  level -- (out) Level of the returned line.
-//  key -- (out) Key (cross reference) of the returned line; can be null.
-//  tag -- (out) Tag of the returned line; manadatory.
-//  value -- (out) Value of the returned line; can be null.
-//  message -- (out) Error message when things go wrong.
+//  weeie -- (out) Error, if any.
 {
 	static char buffer[MAXLINELEN];  // Buffer to store the line.
 	char *p = buffer;  // Buffer cursor.
@@ -195,132 +171,6 @@ static ReadReturn fileToLine(FILE *file, Error **error)
 	}
 	return extractFields(s0, plevel, pkey, ptag, pvalue, error) == ReadOkay;
 }*/
-
-
-
-// firstNodeTreeFromFile -- Convert the first Gedcom record in a file to a Gedcom node tree.
-//--------------------------------------------------------------------------------------------------
-GNode* firstNodeTreeFromFile (FILE *fp, String fName, int *lineNo, ErrorLog *errorLog)
-//  fp -- (in) File that holds Gedcom records.
-//  fName 
-//  pmsg -- (out) Possible error message.
-//  peof -- (out) Set to true if the file is at end of file.
-{
-	if (debugging) printf("    FIRST NODE TREE FROM FILE: fName: %s\n", fName);
-	ateof = false;
-	fileName = fName; // Put the file name in a state variable.
-	fileLine = 0;     // Initialize the line number state variable at start of each file.
-	Error *error = null;
-	ReadReturn rc = fileToLine(fp, &error);
-	if (rc == ReadEOF) {
-		ateof = true;
-		addErrorToLog(errorLog, createError(systemError, fileName, fileLine, "The Gedcom file is empty."));
-		if (error) deleteError((Word) error);
-		return null;
-	} else if (rc == ReadError) {
-		addErrorToLog(errorLog, error);
-		return null;
-	}
-	return nextNodeTreeFromFile(fp, lineNo, errorLog);
-}
-
-//  nextNodeTreeFromFile -- Convert the next Gedcom record in a file to a Node tree.
-//--------------------------------------------------------------------------------------------------
-GNode* nextNodeTreeFromFile(FILE *fp, int *lineNo, ErrorLog *errorLog)
-//  fp -- File that holds the Gedcom records.
-//  pmsg -- (out) Possible error message.
-//  peof -- (out) Set to true if the file is at end of file.
-{
-	if (debugging) printf("      NEXT NODE TREE FROM FILE\n");
-	ReadReturn bcode, rc;
-	GNode *root, *node, *curnode;
-	Error *error;
-	// If file is at end return EOF.
-	if (ateof) return null;
-
-	//  The first line in the record has been read and must have level 0.
-	*lineNo = fileLine;  // Transfer static fileLine of first record line to "outside world" form.
-	int curlev = level;
-	if (curlev != 0)  {
-		addErrorToLog(errorLog, createError(syntaxError, fileName, fileLine, "Record does not start at level 0"));
-		//  Read ahead for a line with level 0.
-		//while ((rc = fileToLine(fp, &level, &key, &value, &error)))
-		return null;
-	}
-
-	//  Create the root of a node tree.
-	root = curnode = createGNode(key, tag, value, null);
-	if (debugging) printf("      NNTFF: Creating root node: %s\n", gnodeToString(root, level));
-	bcode = ReadOkay;
-
-	//  Read the lines of the current record and build its tree.
-	if (debugging) printf("      NNTFF: before read loop: fileToLine on next line\n");
-	rc = fileToLine(fp, &error);
-	while (rc == ReadOkay) {
-
-		//  If the level is zero the the record has been read and built.
-		if (level == 0) {
-			bcode = ReadOkay;
-			break;
-		}
-
-		//  If the level of this line is the same as the last, add a sibling node.
-		if (level == curlev) {
-			node = createGNode(key, tag, value, curnode->parent);
-			if (debugging) printf("      NNTFF: read node at same level: %s\n", gnodeToString(node, level));
-			curnode->sibling = node;
-			curnode = node;
-
-		//  If the level of this line is one deeper than the last, add a child node.
-		} else if (level == curlev + 1) {
-			node = createGNode(key, tag, value, curnode);
-			if (debugging) printf("      NNTFF: read node a level deeper; add child: %s\n", gnodeToString(node, level));
-			curnode->child = node;
-			curnode = node;
-			curlev = level;
-		//  If the level of this line is less than the last move up the parent chain.
-		} else if (level < curlev) {
-			if (debugging) printf("      NNTFF: read node at higher level: moving up...\n");
-			// Check for an illegal level.
-			if (level < 0) {
-				addErrorToLog(errorLog, createError(syntaxError, fileName, fileLine, "Illegal level number."));
-				bcode = ReadError;
-				break;
-			}
-			//  Move up the parent list until reaching the node with the same level.
-			while (level < curlev) {
-				curnode = curnode->parent;
-				curlev--;
-			}
-			//  Add the new node as a sibling.
-			node = createGNode(key, tag, value, curnode->parent);
-			if (debugging) printf("      NNTFF: adding and moving to sibling: %s\n", gnodeToString(node, 0));
-			curnode->sibling = node;
-			curnode = node;
-
-		//  Anything else is an error.
-		} else {
-			if (debugging) printf("      NNTFF: illegal line level\n");
-			Error *error = createError(syntaxError, fileName, fileLine, "Illegal level number");
-			if (debugging) showError(error);
-			addErrorToLog(errorLog, error);
-			bcode = ReadError;
-			break;
-		}
-		//  The line was converted to a node and inserted. Read the next line and continue.
-		if (debugging) printf("      NNTFF: reading next line and looping back up\n");
-		rc = fileToLine(fp, &error);
-	}
-
-	//  If successful return the tree root.
-	if (bcode == ReadOkay) return root;
-	if (bcode == ReadError || rc == ReadError) {
-		freeGNodes(root);
-		return null;
-	}
-	ateof = true ;
-	return root;
-}
 
 //  stringToNodeTree -- Convert a string with a single Gedcom record into a node tree. Was used
 //    by LifeLines when reading records from its database to convert them to node tree format.
@@ -373,12 +223,12 @@ GNode* nextNodeTreeFromFile(FILE *fp, int *lineNo, ErrorLog *errorLog)
 	return null;
 } */
 
-//  Following code is an experiemnet in adding another layer to the read stack in order to make
-//    the next higher layer simpler.
+//  createNodeListElement -- Create an element for a NodeList. Either node or error must be null
+//    but not both.
 //--------------------------------------------------------------------------------------------------
-
 NodeListElement *createNodeListElement(GNode *node, int level, int lineNo, Error *error)
 {
+	ASSERT(node || error && (!node || !error));  // Ugly exclusive or.
 	NodeListElement *element = (NodeListElement*) malloc(sizeof(NodeListElement));
 	element->node = node;
 	element->level = level;
@@ -387,15 +237,20 @@ NodeListElement *createNodeListElement(GNode *node, int level, int lineNo, Error
 	return element;
 }
 
-typedef List NodeList;
-
+//  createNodeList -- Create a NodeList. Two NodeLists are used by the code. One that holds the
+//    list of all indidicual GNodes extracted from a Gedcom file, and one that holds the final
+//    GNode tree records.
+//-------------------------------------------------------------------------------------------------
 NodeList *createNodeList(void)
 {
-	NodeList *nodeList = createList(null, null, null);  // TODO: Do need to write one of the functions.
+	NodeList *nodeList = createList(null, null, null);
 	return nodeList;
 }
 
-NodeList *getNodeList(FILE *fp, ErrorLog *errorLog)
+//  getNodeListFromFile -- Use fileToLine and extractFields to create a GNode for each line in a
+//    Gedcom file. Lines with errors store Errors in the list rather than GNodes.
+//-------------------------------------------------------------------------------------------------
+NodeList *getNodeListFromFile(FILE *fp)
 {
 	NodeList *nodes = createNodeList();
 	Error *error;
@@ -418,6 +273,8 @@ NodeList *getNodeList(FILE *fp, ErrorLog *errorLog)
 	return nodes;
 }
 
+//  showNodeList -- Show contents of a NodeList. For debugging.
+//-------------------------------------------------------------------------------------------------
 void showNodeList(NodeList *nodeList)
 {
 	FORLIST(nodeList, element)
@@ -440,12 +297,12 @@ enum ExStates { InitialState, MainState, ErrorState, DoneState };
 #define elementFields(element) element->node->key, element->node->tag, element->node->value, null
 
 //=================================== UPPER HALF; UPPER HALF ======================================
-NodeList *upperHalf(NodeList *lowerList, ErrorLog *errorLog)
+NodeList *getNodeTreesFromNodeList(NodeList *lowerList, ErrorLog *errorLog)
 {
 	enum ExStates state = InitialState;
 	int prevLevel = 0;
 	int curLevel = 0;
-	int line0Number;  // Line number of current root node.
+	int line0Number = 0;  // Line number of current root node.
 	GNode *curRoot = null;
 	GNode *curNode = null;
 	NodeList *rootNodeList = createNodeList();
@@ -536,5 +393,33 @@ NodeList *upperHalf(NodeList *lowerList, ErrorLog *errorLog)
 			ASSERT(false);
 		}
 	}
+	//  If in MainState at the end there is a a tree to add to the list.
+	if (state == MainState) {
+		appendListElement(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
+	}
 	return rootNodeList;
+}
+
+//  numberNodesInNodeList -- Return the number of GNodes (or GNode trees) in a NodeList.
+//-------------------------------------------------------------------------------------------------
+int numberNodesInNodeList(NodeList *list)
+{
+	int numNodes = 0;
+	FORLIST(list, element)
+		NodeListElement *e = (NodeListElement*) element;
+		if (e->node) numNodes++;
+	ENDLIST
+	return numNodes;
+}
+
+//  numberErrorsInNodeList -- Return the number of errors in a NodeList.
+//-------------------------------------------------------------------------------------------------
+int numberErrorsInNodeList(NodeList *list)
+{
+	int numErrors = 0;
+	FORLIST(list, element)
+		NodeListElement *e = (NodeListElement*) element;
+		if (e->error) numErrors++;
+	ENDLIST
+	return numErrors;
 }

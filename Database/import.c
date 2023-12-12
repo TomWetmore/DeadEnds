@@ -4,7 +4,7 @@
 //  import.c -- Read Gedcom files and build a database from them.
 //
 //  Created by Thomas Wetmore on 13 November 2022.
-//  Last changed on 6 December 2023.
+//  Last changed on 12 December 2023.
 //
 
 #include <unistd.h> // access
@@ -86,18 +86,31 @@ Database *importFromFile(String filePath, ErrorLog *errorLog)
 	}
 
 	Database *database = createDatabase(filePath);
-	int recordCount = 0;
-	int lineNo; // Line number kept up to date by the nodeTreeFromFile functions.
+	//int recordCount = 0;
+	//int lineNo; // Line number kept up to date by the nodeTreeFromFile functions.
 
-	//  Read the records and add them to the database.
-	GNode *root = firstNodeTreeFromFile(file, lastSegment, &lineNo, errorLog);
-	while (root) {
-		storeRecord(database, normalizeNodeTree(root), lineNo, errorLog);
-		recordCount += 1;
-		root = nextNodeTreeFromFile(file, &lineNo, errorLog);
+	// Read the lines from the Gedcom file into a NodeList of GNodes and Errors.
+	NodeList *listOfNodes = getNodeListFromFile(file);
+
+	// Convert the list of GNodes into a NodeList of GNode trees, to become the records in the
+	//   database.
+	NodeList *listOfTrees = getNodeTreesFromNodeList(listOfNodes, errorLog);
+
+	// During the testing phase, bail out if there are any errors.
+	int numErrors = numberErrorsInNodeList(listOfTrees);
+	if (numErrors > 0) {
+		printf("There are %d errors in the listOfTrees. Bailing out for the time being.\n", numErrors);
+		exit(1);  // Bail at this point in the testing.
 	}
+
+	// Add the node trees to the database.
+	FORLIST(listOfTrees, element)
+		NodeListElement *e = (NodeListElement*) element;
+		storeRecord(database, normalizeNodeTree(e->node), e->lineNo, errorLog);
+	ENDLIST
+
 	if (debugging) {
-		printf("Read %d records.\n", recordCount);
+		//printf("Read %d records.\n", recordCount);
 		printf("There were %d errors importing file %s.\n", lengthList(errorLog), lastSegment);
 		showErrorLog(errorLog);
 	}
