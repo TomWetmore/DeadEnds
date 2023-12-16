@@ -505,7 +505,7 @@ Sequence *childSequence(Sequence *sequence)
 		GNode *person = keyToPerson(el->key, database);
 
 		//  For each family the person is a spouse in.
-		FORFAMSS(person, fam, database)
+		FORFAMSS(person, fam, key, database)
 			//  For the children in that family.
 			FORCHILDREN(fam, chil, num2, database)
 				//  Add child to sequence if not there.
@@ -529,7 +529,7 @@ Sequence *personToChildren(GNode* person, Database *database)
 	if (!person) return null;
 	Sequence *children = createSequence(database);
 
-	FORFAMSS(person, family, database)
+	FORFAMSS(person, family, key, database)
 		FORCHILDREN(family, child, count, database)
 			appendToSequence(children, personToKey(child), null, null);
 		ENDCHILDREN
@@ -549,7 +549,7 @@ Sequence *personToSpouses(GNode *person, Database *database)
 	SexType sex = SEXV(person);
 	if (sex != sexMale && sex != sexFemale) return null;
 	Sequence *spouses = createSequence(database);
-	FORFAMSS(person, family, database)
+	FORFAMSS(person, family, key, database)
 		GNode *spouse = (sex == sexMale) ? familyToWife(family, database) : familyToHusband(family, database);
 		if (spouse) appendToSequence(spouses, personToKey(spouse), null, null);
 	ENDFAMSS
@@ -567,7 +567,7 @@ Sequence *personToFathers(GNode *person, Database *database)
 	if (!person) return null;
 	Sequence *fathers = createSequence(database);
 
-	FORFAMCS(person, family, database)  // For each family the person is a child in...
+	FORFAMCS(person, family, key, database)  // For each family the person is a child in...
 		FORHUSBS(family, husb, database)  // For each husband in that family...
 			appendToSequence(fathers, personToKey(husb), null, null);  // Add him to the sequence.
 		ENDHUSBS
@@ -585,7 +585,7 @@ Sequence *personToMothers (GNode* indi, Database *database)
 {
 	if (!indi) return null;
 	Sequence *mothers = createSequence(database);
-	FORFAMCS(indi, fam, database)  // For each family the person is a child in...
+	FORFAMCS(indi, fam, key, database)  // For each family the person is a child in...
 		FORWIFES(fam, wife, database)  // For each wife in that family...
 			appendToSequence(mothers, personToKey(wife), null, null);  // Add her to the sequence.
 		ENDWIFES
@@ -604,16 +604,16 @@ Sequence *personToFamilies (GNode* person, bool fams, Database *database)
 //  fams -- Families as spouse (true) or families as child (false).
 {
 	if (!person) return null;
-	String key;
+	//String key;
 	Sequence *families = createSequence(database);
 	if (fams) {
-		FORFAMSS(person, family, database)
-			key = familyToKey(family);
+		FORFAMSS(person, family, key, database)
+			//key = familyToKey(family);
 			appendToSequence(families, key, null, null);
 		ENDFAMSS
 	} else {
-		FORFAMCS(person, family, database)
-			key = familyToKey(family);
+		FORFAMCS(person, family, key, database)
+			//key = familyToKey(family);
 			appendToSequence(families, key, null, null);
 		ENDFAMCS
 	}
@@ -781,9 +781,9 @@ Sequence *descendentSequence(Sequence *startSequence)
 		GNode *person = keyToPerson(key, database);
 
 		//  All children in the person's FAMS families are descendents.
-		FORFAMSS(person, family, database) {
-			if (isInHashTable(familyKeys, familyKey = familyToKey(family))) goto a;
-			insertInStringTable(familyKeys, strsave(familyKey), null);
+		FORFAMSS(person, family, key, database) {
+			if (isInHashTable(familyKeys, key)) goto a;
+			insertInStringTable(familyKeys, strsave(key), null);
 			FORCHILDREN(family, child, num, database)
 				if (!isInHashTable(descendentKeys, descendentKey = personToKey(child))) {
 					appendToSequence(descendentSequence, descendentKey, null, null);
@@ -856,7 +856,7 @@ void sequenceToGedcom(Sequence *sequence, FILE *fp)
 		SexType sex = SEXV(person);  //  And the person's sex.
 		
 		//  Check the person's parent families to see if any FAMC families should be output.
-		FORFAMCS(person, family, database)
+		FORFAMCS(person, family, key, database)
 			if (isInHashTable(familyTable, family->key)) goto a;
 			normalizeFamily(family);
 			GNode *husband = HUSB(family);
@@ -883,7 +883,7 @@ void sequenceToGedcom(Sequence *sequence, FILE *fp)
 		ENDFAMCS
 
 		//  Check the person's as parent families to see if they should output.
-	a:	FORFAMSS(person, family, database)
+	a:	FORFAMSS(person, family, key, database)
 			if (isInHashTable(familyTable, familyToKey(family))) goto b;
 			GNode *spouse = familyToSpouse(family, oppositeSex(sex), database);
 			if (spouse && isInHashTable(personTable, personToKey(spouse))) {

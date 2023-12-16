@@ -4,7 +4,7 @@
 //  gedcom.h
 //
 //  Created by Thomas Wetmore on 7 November 2022.
-//  Last changed on 14 November 2023.
+//  Last changed on 14 December 2023.
 //
 
 #ifndef gedcom_h
@@ -69,13 +69,16 @@ int compareRecordKeys(String, String);  // gedcom.c
     }\
 }
 
-#define FORFAMCS(person, family, database)\
+//  FORFAMCS / ENDFAMCS -- Iterator for the family as child nodes in a record.
+//-------------------------------------------------------------------------------------------------
+#define FORFAMCS(person, family, key, database)\
 {\
     GNode *__node = FAMC(person);\
     GNode *family;\
+    String key;\
     while (__node) {\
-        family = keyToFamily(__node->value, database);\
-        ASSERT(family);\
+        key = __node->value;\
+        family = keyToFamily(key, database);\
         {
 
     #define ENDFAMCS\
@@ -85,13 +88,15 @@ int compareRecordKeys(String, String);  // gedcom.c
     }\
 }
 
-#define FORFAMSS(person, family, database)\
+//  FORFAMSS / ENDFAMS -- Iterator for the family as spouse nodes in a record.
+#define FORFAMSS(person, family, key, database)\
 {\
     GNode *__node = FAMS(person);\
     GNode *family;\
+    String key;\
     while (__node) {\
-        family = keyToFamily(__node->value, database);\
-        ASSERT(family);\
+        key = __node->value;\
+        family = keyToFamily(key, database);\
         {
 
 #define ENDFAMSS\

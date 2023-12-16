@@ -4,7 +4,7 @@
 //  gnode.c -- Functions involving the GNode type.
 //
 //  Created by Thomas Wetmore on 12 November 2022.
-//  Last changed on 9 December 2023.
+//  Last changed on 15 December 2023.
 
 #include "standard.h"
 #include "gnode.h"
@@ -19,7 +19,8 @@
 
 typedef struct HashTable StringTable;
 
-//  Tag table. Ensures there is one persistent copy of each tag used in all GNode trees.
+//  tagTable -- Table that ensures there is one persistent copy of each tag used in all GNodes.
+//--------------------------------------------------------------------------------------------------
 static StringTable *tagTable = null;
 
 //  numNodeAllocs -- Return the number of nodes that have been allocated in the heap. Debugging.
@@ -352,11 +353,11 @@ void traverseNodes (GNode* node, int level, bool (*func)(GNode*, int))
 
 //  countNodes -- Return the number of gedcom nodes in a record tree.
 //--------------------------------------------------------------------------------------------------
-int countNodes(GNode* node)
+int countNodes (GNode* node)
 {
 	if (node == null) return 0;
 	int count = 1 + countNodes(node->child) + countNodes(node->sibling);
-	if (count > 5000) {
+	if (count > 100000) {
 		printf("Recursing forever?????\n");
 		exit(3);
 	}
@@ -575,4 +576,43 @@ String full_value(GNode* node)
 	}
 	*(p - 1) = 0;
 	return str;
+}
+
+//  countNodesInTree -- Count the nodes in the tree rooted at node. Siblings of the node are
+//    not in the tree so and not counted.
+//--------------------------------------------------------------------------------------------------
+static int countNodesInTree (GNode *node)
+{
+	if (!node) return 0;
+	return 1 + countNodes(node->child);
+}
+
+//  countNodesBefore -- Return the number of nodes that occur before this node in depth first,
+//    left-to-rignt order. This is used in generating error messages.
+//--------------------------------------------------------------------------------------------------
+int countNodesBefore (GNode *node)
+//  node -- Node in a node tree.
+{
+	if (!node) return 0;  // Should not happen.
+	int count = 0;
+
+	// Loop over original node and its ancestors...
+	while (node->parent) {
+		// Get the node's parent and parent's first child.
+		GNode *parent = node->parent;
+		GNode *child = parent->child;
+		// Count nodes in the subtrees of previous siblings.
+		while (child && child != node) {
+			count += countNodesInTree(child);
+			if (count > 100000) {
+				printf("Recursing forever?????\n");
+				ASSERT(false);
+			}
+			child = child->sibling;
+		}
+		// Move up an ancestor and repeat.
+		node = parent;
+		count++;
+	}
+	return count;
 }

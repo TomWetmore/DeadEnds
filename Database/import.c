@@ -85,15 +85,11 @@ Database *importFromFile(String filePath, ErrorLog *errorLog)
 		return null;
 	}
 
-	Database *database = createDatabase(filePath);
-	//int recordCount = 0;
-	//int lineNo; // Line number kept up to date by the nodeTreeFromFile functions.
-
-	// Read the lines from the Gedcom file into a NodeList of GNodes and Errors.
+	// Get the lines of the Gedcom file as a node list of nodes and errors.
 	NodeList *listOfNodes = getNodeListFromFile(file);
+	if (!listOfNodes) return null;
 
-	// Convert the list of GNodes into a NodeList of GNode trees, to become the records in the
-	//   database.
+	// Convert the list of nodes and errors into a node list of node trees.
 	NodeList *listOfTrees = getNodeTreesFromNodeList(listOfNodes, errorLog);
 
 	// During the testing phase, bail out if there are any errors.
@@ -103,14 +99,15 @@ Database *importFromFile(String filePath, ErrorLog *errorLog)
 		exit(1);  // Bail at this point in the testing.
 	}
 
-	// Add the node trees to the database.
+	// Create the database and add the node trees to the database.
+	Database *database = createDatabase(filePath);
 	FORLIST(listOfTrees, element)
 		NodeListElement *e = (NodeListElement*) element;
 		storeRecord(database, normalizeNodeTree(e->node), e->lineNo, errorLog);
 	ENDLIST
 
 	if (debugging) {
-		//printf("Read %d records.\n", recordCount);
+		printf("There were %d gnode tree records extracted from the file.\n", numberNodesInNodeList(listOfTrees));
 		printf("There were %d errors importing file %s.\n", lengthList(errorLog), lastSegment);
 		showErrorLog(errorLog);
 	}

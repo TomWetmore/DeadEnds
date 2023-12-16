@@ -252,25 +252,25 @@ NodeList *createNodeList(void)
 //-------------------------------------------------------------------------------------------------
 NodeList *getNodeListFromFile(FILE *fp)
 {
-	NodeList *nodes = createNodeList();
+	NodeList *nodeList = createNodeList();
 	Error *error;
 
 	ReadReturn rc = fileToLine(fp, &error);
 	while (rc != ReadEOF) {
 		if (rc == ReadOkay) {
 			// Create the GNode from the extracted fields and add it to the list.
-			appendListElement(nodes, createNodeListElement(createGNode(key, tag, value, null), level, fileLine, null));
+			appendListElement(nodeList, createNodeListElement(createGNode(key, tag, value, null), level, fileLine, null));
 		} else {
 			// Add an error entry to the node list.
-			appendListElement(nodes, createNodeListElement(null, level, fileLine, error));
+			appendListElement(nodeList, createNodeListElement(null, level, fileLine, error));
 		}
 		rc = fileToLine(fp, &error);
 	}
+	if (debugging) printf("Length of the root nodes and errors list is %d\n", lengthList(nodeList));
 
-	if (debugging) {
-		printf("Length of the root nodes and errors list is %d\n", lengthList(nodes));
-	}
-	return nodes;
+	if (lengthList(nodeList) > 0) return nodeList;
+	deleteList(nodeList);
+	return null;
 }
 
 //  showNodeList -- Show contents of a NodeList. For debugging.

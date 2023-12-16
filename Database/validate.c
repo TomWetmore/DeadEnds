@@ -4,7 +4,7 @@
 //  validate.c -- Functions that validate Gedcom records.
 //
 //  Created by Thomas Wetmore on 12 April 2023.
-//  Last changed on 6 December 2023.
+//  Last changed on 14 December 2023.
 //
 
 #include "validate.h"
@@ -66,28 +66,48 @@ bool validateFamilyIndex(Database *database, ErrorLog *errorLog)
 
 extern String nameString(String);
 
-//  validatePerson -- Validate a person record. Check all FAMC and FAMS links to families.
+//  validatePerson -- Validate a person record. Persons do not require NAME or SEX lines, but
+//    if there is a SEX line its value is checked. Check all FAMC and FAMS links to families,
+//    and that the families have the correct links back.
 //--------------------------------------------------------------------------------------------------
 static void validatePerson(GNode *person, Database *database, ErrorLog *errorLog)
 {
-	if (debugging) { printf("Validating %s %s\n", person->key, NAME(person)->value); }
+	if (debugging) printf("Validating %s %s\n", person->key, NAME(person)->value);
+	String segment = database->lastSegment;
+	int errorCount = 0;
 
-	//  Loop through the families the person is a child in.
-	FORFAMCS(person, family, database)
-		if (debugging) printf("Person is a child in family %s.\n", family->key);
+	//  Make sure all FAMC and FAMS values link to families.
+	FORFAMCS(person, family, key, database)
+		if (!family) {
+			addErrorToLog(errorLog, createError(linkageError, segment, 0, "Family does not exist"));
+			errorCount++;
+		}
+	ENDFAMCS
+	FORFAMSS(person, family, key, database)
+		if (!family) {
+			addErrorToLog(errorLog, createError(linkageError, segment, 0, "Family does not exist"));
+			errorCount++;
+		}
+	ENDFAMSS
+
+	// Loop through the families the person is a child in. Be sure the family has a CHIL link back.
+	FORFAMCS(person, family, key, database)
+		if (debugging) printf("Person is a child in family %s.\n", key);
 		int numOccurrences = 0;
+		//  Loop through the children in a family the person should be a child in.
 		FORCHILDREN(family, child, count, database)
 			if (debugging) { printf("    Child %d: %s %s\n", count, child->key, NAME(child)->value); }
 			if (person == child) numOccurrences++;
 		ENDCHILDREN
 		if (numOccurrences == 0) {
-			addErrorToLog(errorLog, createError(linkageError, database->lastSegment, 0, "Child not found"));
+			addErrorToLog(errorLog, createError(linkageError, segment, 0, "Child not found"));
 		} else if (numOccurrences > 1) {
-			addErrorToLog(errorLog, createError(linkageError, database->lastSegment, 0, "Too many children found"));
+			addErrorToLog(errorLog, createError(linkageError, segment, 0, "Too many children found"));
 		}
 	ENDFAMCS
 
-	//  Loop through the families the person is a spouse in.
+	// Loop through the families the person is a spouse in. Be sure the family has a HUSB or WIFE
+	// link back.
 	if (debugging) printf("Doing the FAMS part.\n");
 	SexType sex = SEXV(person);
 	FORFAMILIES(person, family, database) {
@@ -97,11 +117,14 @@ static void validatePerson(GNode *person, Database *database, ErrorLog *errorLog
 			parent = familyToHusband(family, database);
 		} else if (sex == sexFemale) {
 			parent = familyToWife(family, database);
+		} else {
+			addErrorToLog(errorLog, createError(linkageError, segment, 0, "Person used as spouse has no sex."));
 		}
-		ASSERT(person == parent);  // TODO: SHOULD NOT BE AS ASSERT HERE: SHOULD BE AN ERROR.
+		if (person != parent)
+			addErrorToLog(errorLog, createError(linkageError, segment, 0, "Family does not link back to spouse."));
 	} ENDFAMILIES
 
-	if (debugging) printf("validate person: %s: \n", person->key);  //  REMOVE: FOR DEBUGGING.
+	if (debugging) printf("validate person: %s: \n", person->key);
 	//  Validate existance of NAME and SEX lines.
 	//  Find all other links in the record and validate them.
 }
@@ -111,14 +134,13 @@ static void validatePerson(GNode *person, Database *database, ErrorLog *errorLog
 //--------------------------------------------------------------------------------------------------
 static void validateFamily(GNode *family, Database *database, ErrorLog* errorLog)
 {
-	if (debugging) {
-		printf("validateFamily(%s)\n", family->key);
-	}
+	if (debugging) printf("validateFamily(%s)\n", family->key);
+	String segment = database->lastSegment;
 	// For each HUSB line in the family (multiples in non-traditional cases).
 	FORHUSBS(family, husband, database)
 		// The husband must have one FAMS link back to this family.
 		int numOccurences = 0;
-		FORFAMSS(husband, fam, database)
+		FORFAMSS(husband, fam, key, database)
 			numValidations++;
 			if (family == fam) numOccurences++;
 		ENDFAMSS
@@ -128,7 +150,7 @@ static void validateFamily(GNode *family, Database *database, ErrorLog* errorLog
 	//  For each WIFE line in the family (multiples in non-traditional cases)...
 	FORWIFES(family, wife, database) {
 		int numOccurences = 0;
-		FORFAMSS(wife, fam, database) {
+		FORFAMSS(wife, fam, key, database) {
 			numValidations++;
 			if (family == fam) numOccurences++;
 		} ENDFAMSS
@@ -138,12 +160,19 @@ static void validateFamily(GNode *family, Database *database, ErrorLog* errorLog
 	//  For each CHIL node in the family.
 	FORCHILDREN(family, child, n, database)
 		int numOccurences = 0;
-		FORFAMCS(child, fam, database)
+		FORFAMCS(child, fam, key, database)
 			numValidations++;
 			if (family == fam) numOccurences++;
 		ENDFAMCS
 		ASSERT(numOccurences == 1);
 	ENDFAMCS
+
+	bool hasHusb = HUSB(family) != null;
+	bool hasWife = WIFE(family) != null;
+	bool hasChild = CHIL(family) != null;
+	if (!(hasHusb || hasWife || hasChild)) {
+		addErrorToLog(errorLog, createError(warningError, segment, family->key, "Family has no HUSB, WIFE or CHIL links"));
+	}
 	//printf("validate family: %s\n", family->gKey);
 	//  Validate existance of at least one of HUSB, WIFE, CHIL.
 	//  Validate that the HUSBs are male.

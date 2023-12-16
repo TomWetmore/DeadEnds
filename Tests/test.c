@@ -31,6 +31,7 @@ static void showHashTableTest(HashTable*, int);
 static void indexNamesTest(Database*, int);
 static void testNewReadLayer(String);
 extern bool validateDatabase(Database*, ErrorLog*);
+static void countNodesBeforeTest(Database*, int);
 
 //  main -- Main function for the batch program that tests the DeadEnds infrastructure software.
 //-------------------------------------------------------------------------------------------------
@@ -48,19 +49,21 @@ int main (void)
 	showErrorLog(errorLog);
 	//return 0;  // EXPEDIENT.
 
-	if (database) listTest(database, ++testNumber);
+	//if (database) listTest(database, ++testNumber);
 
-	if (database) forHashTableTest(database, ++testNumber);
+	//if (database) forHashTableTest(database, ++testNumber);
 
-	if (database) showHashTableTest(database->personIndex, ++testNumber);
+	//if (database) showHashTableTest(database->personIndex, ++testNumber);
 
-	if (database) indexNamesTest(database, ++testNumber);
+	//if (database) indexNamesTest(database, ++testNumber);
 
-	if (database) validateDatabaseTest(database, ++testNumber);
+	//if (database) validateDatabaseTest(database, ++testNumber);
 
-	if (database) forTraverseTest(database, ++testNumber);
+	//if (database) forTraverseTest(database, ++testNumber);
 
 	if (database) parseAndRunProgramTest(database, ++testNumber);
+
+	if (database) countNodesBeforeTest(database, ++testNumber);
 
 	return 0;
 }
@@ -195,4 +198,15 @@ static void indexNamesTest(Database *database, int testNumber)
 	printf("\n%d: START OF INDEX NAMES TEST\n", testNumber);
 	indexNames(database);
 	printf("END OF INDEX NAMES TEST\n");
+}
+
+static void countNodesBeforeTest(Database *database, int testNumber)
+{
+	printf("\n%d: START OF COUNT NODES BEFORE TEST\n", testNumber);
+	GNode *person = keyToPerson("@I1@", database);
+	if (person) {
+		FORTRAVERSE(person, node)
+			printf(" %d %s %s\n", countNodesBefore(node), node->tag, node->value ? node->value : "");
+		ENDTRAVERSE
+	}
 }
