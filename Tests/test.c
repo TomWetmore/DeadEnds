@@ -1,7 +1,7 @@
 //  test.c -- Test program.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 12 December 2023.
+//  Last changed on 16 December 2023.
 
 #include <stdio.h>
 #include "standard.h"
@@ -25,7 +25,7 @@ static Database *createDatabaseTest(String, int, ErrorLog*);
 static void listTest(Database*, int);
 static void forHashTableTest(Database*, int);
 static void parseAndRunProgramTest(Database*, int);
-static void validateDatabaseTest(Database*, int);
+static bool validateDatabaseTest(Database*, int);
 static void forTraverseTest(Database*, int);
 static void showHashTableTest(HashTable*, int);
 static void indexNamesTest(Database*, int);
@@ -38,7 +38,8 @@ static void countNodesBeforeTest(Database*, int);
 int main (void)
 {
 	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/bad.ged";
-	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/main.ged";
+	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/main.ged";
+	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/test.ged";
 	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/small.ged";
 	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/notthere.ged";
 	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/threezeros.ged";
@@ -46,6 +47,7 @@ int main (void)
 	ErrorLog *errorLog = createErrorLog();
 
 	Database *database = createDatabaseTest(gedcomFile, ++testNumber, errorLog);
+	bool validated = false;
 	showErrorLog(errorLog);
 	//return 0;  // EXPEDIENT.
 
@@ -57,13 +59,13 @@ int main (void)
 
 	//if (database) indexNamesTest(database, ++testNumber);
 
-	//if (database) validateDatabaseTest(database, ++testNumber);
+	if (database) validated = validateDatabaseTest(database, ++testNumber);
 
 	//if (database) forTraverseTest(database, ++testNumber);
 
-	if (database) parseAndRunProgramTest(database, ++testNumber);
+	if (database && validated) parseAndRunProgramTest(database, ++testNumber);
 
-	if (database) countNodesBeforeTest(database, ++testNumber);
+	if (database && validated) countNodesBeforeTest(database, ++testNumber);
 
 	return 0;
 }
@@ -157,12 +159,13 @@ void parseAndRunProgramTest(Database *database, int testNumber)
 
 //  validateDatabaseTest -- Validate the a database.
 //-------------------------------------------------------------------------------------------------
-void validateDatabaseTest(Database *database, int testNumber)
+bool validateDatabaseTest(Database *database, int testNumber)
 {
 	printf("\n%d: START OF VALIDATE DATABASE TEST\n", testNumber);
 	ErrorLog* errorLog = createErrorLog();
-	validateDatabase(database, errorLog);
+	bool validated = validateDatabase(database, errorLog);
 	printf("END OF VALIDATE DATABASE TEST\n");
+	return validated;
 }
 
 //  forTraverseTest -- Check that the FORTRAVERSE macro works.
@@ -200,13 +203,16 @@ static void indexNamesTest(Database *database, int testNumber)
 	printf("END OF INDEX NAMES TEST\n");
 }
 
+extern int personLineNumber(GNode*, Database*);
+
 static void countNodesBeforeTest(Database *database, int testNumber)
 {
 	printf("\n%d: START OF COUNT NODES BEFORE TEST\n", testNumber);
 	GNode *person = keyToPerson("@I1@", database);
+	int startLineNumber = personLineNumber(person, database);
 	if (person) {
 		FORTRAVERSE(person, node)
-			printf(" %d %s %s\n", countNodesBefore(node), node->tag, node->value ? node->value : "");
+			printf(" %d %s %s\n", startLineNumber + countNodesBefore(node), node->tag, node->value ? node->value : "");
 		ENDTRAVERSE
 	}
 }

@@ -384,6 +384,22 @@ GNode* find_node (GNode* parent, String tag, String value, GNode **plast)
 	return null;
 }
 
+//  recordKey -- Return the key of the record the node is from.
+//--------------------------------------------------------------------------------------------------
+String recordKey (GNode* node)
+{
+	if (!node) return null;
+	int count = 0;
+	while (node->parent) {
+		if (++count > 100) {
+			printf("Infinite loop in tree parent chain?");
+			ASSERT(false);
+		}
+		node = node->parent;
+	}
+	return node->key;
+}
+
 // fatherNodes -- Given a list of FAMS or FAMC nodes, return the list of HUSB nodes they contain.
 //--------------------------------------------------------------------------------------------------
 GNode* fatherNodes (Database* database, GNode* faml)

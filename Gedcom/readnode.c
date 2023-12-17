@@ -5,7 +5,7 @@
 //    and strings.
 //
 //  Created by Thomas Wetmore on 17 December 2022.
-//  Last changed on 12 December 2023.
+//  Last changed on 16 December 2023.
 //
 
 #include "readnode.h"
@@ -266,7 +266,7 @@ NodeList *getNodeListFromFile(FILE *fp)
 		}
 		rc = fileToLine(fp, &error);
 	}
-	if (debugging) printf("Length of the root nodes and errors list is %d\n", lengthList(nodeList));
+	if (debugging) printf("Length of the node and error list is %d\n", lengthList(nodeList));
 
 	if (lengthList(nodeList) > 0) return nodeList;
 	deleteList(nodeList);

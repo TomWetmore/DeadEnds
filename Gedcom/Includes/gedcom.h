@@ -4,7 +4,7 @@
 //  gedcom.h
 //
 //  Created by Thomas Wetmore on 7 November 2022.
-//  Last changed on 14 December 2023.
+//  Last changed on 16 December 2023.
 //
 
 #ifndef gedcom_h
@@ -62,6 +62,7 @@ int compareRecordKeys(String, String);  // gedcom.c
         fam = keyToFamily(__node->value, database);\
         ASSERT(fam);\
         {
+
 #define ENDFAMILIES\
         }\
         __node = __node->sibling;\
@@ -81,7 +82,7 @@ int compareRecordKeys(String, String);  // gedcom.c
         family = keyToFamily(key, database);\
         {
 
-    #define ENDFAMCS\
+#define ENDFAMCS\
         }\
         __node = __node->sibling;\
         if (__node && nestr(__node->tag, "FAMC")) __node = null;\
@@ -89,6 +90,7 @@ int compareRecordKeys(String, String);  // gedcom.c
 }
 
 //  FORFAMSS / ENDFAMS -- Iterator for the family as spouse nodes in a record.
+//--------------------------------------------------------------------------------------------------
 #define FORFAMSS(person, family, key, database)\
 {\
     GNode *__node = FAMS(person);\
@@ -105,7 +107,6 @@ int compareRecordKeys(String, String);  // gedcom.c
         if (__node && nestr(__node->tag, "FAMS")) __node = null;\
     }\
 }
-
 
 //  FORTAGVALUES -- Iterate a list of nodes looking for a particular tag.
 //--------------------------------------------------------------------------------------------------
