@@ -1,8 +1,8 @@
 CC=clang
 CFLAGS=-g -c -Wall -Wno-unused-function
-INCLUDES= -I../Utils/Includes -I../DataTypes/Includes -I../Parser/Includes -I../Interp/Includes -I../Gedcom/Includes -I../Database/Includes
-LIBLOCNS=-L../Utils/ -L../DataTypes/ -L../Parser/ -L../Interp -L../Gedcom -L../Database
-LIBS=-lutils -lparser -ldatatypes -linterp -lgedcom -ldatabase
+INCLUDES= -I../Utils/Includes -I../DataTypes/Includes -I../Parser/Includes -I../Interp/Includes -I../Gedcom/Includes -I../Database/Includes -I../Validate/Includes
+LIBLOCNS=-L../Utils/ -L../DataTypes/ -L../Parser/ -L../Interp -L../Gedcom -L../Database -L../Validate
+LIBS=-lutils -lparser -ldatatypes -linterp -lgedcom -ldatabase -lvalidate
 
 all: test hashtabletest stringtabletest testset
 
@@ -12,7 +12,7 @@ hashtabletest: testhashtable.o
 stringtabletest: teststringtable.o
 	$(CC) -o stringtabletest teststringtable.o $(LIBLOCNS) $(LIBS) -lc
 
-test: test.o ../Database/libdatabase.a ../Parser/libparser.a ../DataTypes/libdatatypes.a ../Interp/libinterp.a ../Gedcom/libgedcom.a
+test: test.o ../Database/libdatabase.a ../Parser/libparser.a ../DataTypes/libdatatypes.a ../Interp/libinterp.a ../Gedcom/libgedcom.a ../Validate/libvalidate.a
 	$(CC) -o test test.o $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
 testset: testset.o ../Database/libdatabase.a ../Parser/libparser.a ../DataTypes/libdatatypes.a ../Interp/libinterp.a ../Gedcom/libgedcom.a

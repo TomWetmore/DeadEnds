@@ -1,7 +1,7 @@
 //  test.c -- Test program.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 16 December 2023.
+//  Last changed on 17 December 2023.
 
 #include <stdio.h>
 #include "standard.h"
@@ -15,6 +15,7 @@
 #include "list.h"
 #include "path.h"
 #include "readnode.h"
+#include "validate.h"
 
 extern String currentProgramFileName;
 extern int currentProgramLineNumber;

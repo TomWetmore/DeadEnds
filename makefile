@@ -5,4 +5,5 @@ all:
 	cd Parser; make
 	cd DataTypes; make
 	cd Utils; make
+	cd Validate; make
 	cd Tests; make
