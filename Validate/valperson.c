@@ -13,6 +13,7 @@
 #include "recordindex.h"
 #include "lineage.h"
 #include "errors.h"
+#include "list.h"
 
 static bool validatePerson(GNode*, Database*, ErrorLog*);
 
@@ -25,7 +26,12 @@ bool validatePersonIndex(Database *database, ErrorLog *errorLog)
 	bool valid = true;
 	FORHASHTABLE(database->personIndex, element)
 		GNode* person = ((RecordIndexEl*) element)->root;
+		int errors = lengthList(errorLog);
+		if (debugging) printf("Start validating %s %s\n", person->key, NAME(person)->value);
 		if (!validatePerson(person, database, errorLog)) valid = false;
+		if (debugging && lengthList(errorLog) > errors)
+			printf("There were %d errors validating %s\n", lengthList(errorLog) - errors, person->key);
+		if (debugging) printf("Done validating %s %s\n", person->key, NAME(person)->value);
 	ENDHASHTABLE
 	return valid;
 }
