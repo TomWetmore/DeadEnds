@@ -1,5 +1,8 @@
 {
     "terminal.integrated.fontSize": 11,
     "editor.fontSize": 10,
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "__node_handle": "c"
+    }
 }

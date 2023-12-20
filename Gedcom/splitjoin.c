@@ -6,7 +6,7 @@
 //    canonical order. This can make followon operations more efficient.
 //
 //  Created by Thomas Wetmore on 7 November 2022.
-//  Last changed on 10 September 2023.
+//  Last changed on 19 December 2023.
 //
 
 #include "standard.h"
@@ -179,15 +179,16 @@ void joinFamily (GNode *fam, GNode *refn, GNode *husb, GNode *wife, GNode *chil,
         else fam->child = node = wife;
         while (node->sibling) node = node->sibling;
     }
-    if (rest) {
-        if (node) node = node->sibling = rest;
-        else fam->child = node = rest;
-        while (node->sibling) node = node->sibling;
-    }
     if (chil) {
-        if (node) node->sibling = chil;
-        else fam->child = chil;
+        if (node) node = node->sibling = chil;
+        else fam->child = node = chil;
+		while (node->sibling) node = node->sibling;
     }
+	if (rest) {
+		if (node) node = node->sibling = rest;
+		else fam->child = node = rest;
+		while (node->sibling) node = node->sibling;
+	}
 }
 
 //  normalizePerson - Get a person gedcom tree into standard format.

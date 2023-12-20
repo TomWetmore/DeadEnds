@@ -367,7 +367,7 @@ InterpType interpChildren (PNode *pnode, Context *context, PValue* pval)
 		prog_error(pnode, "the first argument to children must be a family");
 		return InterpError;
 	}
-	FORCHILDREN(fam, chil, nchil, context->database) {
+	FORCHILDREN(fam, chil, key, nchil, context->database) {
 		assignValueToSymbol(context->symbolTable, pnode->childIden, PVALUE(PVPerson, uGNode, chil));
 		assignValueToSymbol(context->symbolTable, pnode->countIden, PVALUE(PVInt, uInt, nchil));
 		InterpType irc = interpret(pnode->loopState, context, pval);

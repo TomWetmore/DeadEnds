@@ -4,7 +4,7 @@
 //  errors.c -- Code for handling DeadEnds errors.
 //
 //  Created by Thomas Wetmore on 4 July 2023.
-//  Last changed on 3 December 2023.
+//  Last changed on 19 December 2023.
 //
 
 #include "errors.h"
@@ -72,7 +72,7 @@ Error *createError(ErrorType type, String fileName, int lineNumber, String messa
 	error->fileName = fileName;  // MNOTE: Not saved; do not free.
 	error->lineNumber = lineNumber;
 	error->message = strsave(message);
-	if (debugging) printf("            CREATE ERROR: %s, %d, %s\n", fileName, lineNumber, message);
+	if (debugging) printf("CREATE ERROR: %s, %d, %s\n", fileName, lineNumber, message);
 	return error;
 }
 

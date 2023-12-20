@@ -4,7 +4,7 @@
 //  valperson.c -- Functions that validate person records.
 //
 //  Created by Thomas Wetmore on 17 December 2023.
-//  Last changed on 18 December 2023.
+//  Last changed on 19 December 2023.
 //
 
 #include "validate.h"
@@ -19,7 +19,7 @@ static bool validatePerson(GNode*, Database*, ErrorLog*);
 
 static bool debugging = true;
 
-//  validatePersonIndex -- Validate the person index of the current database.
+//  validatePersonIndex -- Validate the person index of a database.
 //-------------------------------------------------------------------------------------------------
 bool validatePersonIndex(Database *database, ErrorLog *errorLog)
 {
@@ -42,7 +42,6 @@ bool validatePersonIndex(Database *database, ErrorLog *errorLog)
 //--------------------------------------------------------------------------------------------------
 static bool validatePerson(GNode *person, Database *database, ErrorLog *errorLog)
 {
-	if (debugging) printf("Validating %s %s\n", person->key, NAME(person)->value);
 	String segment = database->lastSegment;
 	int errorCount = 0;
 	static char s[4096];
@@ -51,7 +50,7 @@ static bool validatePerson(GNode *person, Database *database, ErrorLog *errorLog
 	FORFAMCS(person, family, key, database)
 		if (!family) {
 			int lineNumber = personLineNumber(person, database);
-			sprintf(s, "INDI %s (line %d): FAMC %s (line %d) does not refer to a family.",
+			sprintf(s, "INDI %s (line %d): FAMC %s (line %d) does not exist.",
 					person->key, lineNumber, key, lineNumber + countNodesBefore(__node));
 			addErrorToLog(errorLog, createError(linkageError, segment, lineNumber, s));
 			errorCount++;
@@ -60,7 +59,7 @@ static bool validatePerson(GNode *person, Database *database, ErrorLog *errorLog
 	FORFAMSS(person, family, key, database)
 		if (!family) {
 				int lineNumber = personLineNumber(person, database);
-				sprintf(s, "INDI %s (line %d): FAMS %s (line %d) does not refer to a family.",
+				sprintf(s, "INDI %s (line %d): FAMS %s (line %d) does not exist.",
 						person->key, lineNumber, key, lineNumber + countNodesBefore(__node));
 				addErrorToLog(errorLog, createError(linkageError, segment, lineNumber, s));
 			errorCount++;
@@ -73,7 +72,7 @@ static bool validatePerson(GNode *person, Database *database, ErrorLog *errorLog
 		if (debugging) printf("DB: Person is a child in family %s.\n", key);
 		int numOccurrences = 0;
 		//  Loop through the children in a family the person should be a child in.
-		FORCHILDREN(family, child, count, database)
+		FORCHILDREN(family, child, chilKey, count, database)
 			if (debugging) { printf("DB: Child %d: %s %s\n", count, child->key, NAME(child)->value); }
 			if (person == child) numOccurrences++;
 		ENDCHILDREN
@@ -111,4 +110,16 @@ static bool validatePerson(GNode *person, Database *database, ErrorLog *errorLog
 	//  Validate existance of NAME and SEX lines.
 	//  Find all other links in the record and validate them.
 	return errorCount == 0;
+}
+
+//  personLineNumber -- Given a person root node, return its location (line number) in the
+//    original Gedcom file. Uses searchHashTable to get the RecordIndexEl of the record and
+//    takes the line number from there. Obviously won't work correctly for records that
+//    arrived from another source.
+//--------------------------------------------------------------------------------------------------
+int personLineNumber (GNode *person, Database* database)
+{
+	RecordIndexEl *element = searchHashTable(database->personIndex, person->key);
+	if (!element) return 0;  // Should not happen.
+	return element->lineNumber;  // Assume this is zero for records not from Gedcom files.
 }

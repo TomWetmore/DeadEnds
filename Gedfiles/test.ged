@@ -1,14 +1,18 @@
 0 @I1@ INDI
   1 NAME Thomas Trask /Wetmore/
   1 SEX M
+  1 NOTE Nothing wrong with this record.
 0 @I2@ INDI
   1 NAME Luann Frances /Grenda/
   1 SEX F
+  1 NOTE Nothing wrong with this record.
   1 FAMS @F1@
 0 @I3@ INDI
   1 NAME Anna Vivian /Wetmore/
+  1 NOTE Error in this record, the FAMC link is to an undefined family.
   1 FAMC @F2@
 0 @F1@ FAM
+  1 NOTE Two errors in this file as I1 and I3 don't point back.
   1 HUSB @I1@
-  1 WIFE @I2@
+  1 WIFE @I4@
   1 CHIL @I3@

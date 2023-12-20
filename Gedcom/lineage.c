@@ -4,7 +4,7 @@
 //  lineage.c -- Operations on Gedcom nodes based on genealogical relationsips and properties.
 //
 //  Created by Thomas Wetmore on 17 February 2023.
-//  Last changed on 14 November 2023.
+//  Last changed on 19 December 2023.
 //
 
 #include "lineage.h"
@@ -223,10 +223,10 @@ String personToTitle(GNode* indi, int len)
 GNode* fam_to_spouse(Database* database, GNode* family, GNode* person)
 {
 	if (!family) return null;
-	FORHUSBS(family, husband, database)
+	FORHUSBS(family, husband, key, database)
 		if(husband != person) return(husband);
 	ENDHUSBS
-	FORWIFES(family, wife, database)
+	FORWIFES(family, wife, key, database)
 		if(wife != person) return(wife);
 	ENDWIFES
 	return null;

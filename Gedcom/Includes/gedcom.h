@@ -36,12 +36,14 @@ int compareRecordKeys(String, String);  // gedcom.c
 
 // FORCHILDREN / ENDCHILDREN -- Iterator for the children of a family.
 //--------------------------------------------------------------------------------------------------
-#define FORCHILDREN(fam, childd, num, database) \
+#define FORCHILDREN(fam, childd, key, num, database) \
     {\
     GNode* __node = findTag(fam->child, "CHIL");\
     GNode* childd;\
     int num = 0;\
+    String key = null;\
     while (__node) {\
+        key = __node->value;\
         childd = keyToPerson(__node->value, database);\
         ASSERT(childd);\
         num++;\
@@ -130,14 +132,14 @@ int compareRecordKeys(String, String);  // gedcom.c
 
 //  FORHUSBS -- Iterate over the husbands in one family; handles non-traditional families.
 //--------------------------------------------------------------------------------------------------
-#define FORHUSBS(fam, husb, database)\
+#define FORHUSBS(fam, husb, key, database)\
 {\
     GNode* __node = findTag(fam->child, "HUSB");\
-    GNode* husb=0;\
-    String __key=0;\
+    GNode* husb = null;\
+    String key = null;\
     while (__node) {\
-        __key = __node->value;\
-        if (!__key || !(husb = keyToPerson(__key, database))) {\
+        key = __node->value;\
+        if (!key || !(husb = keyToPerson(key, database))) {\
             __node = __node->sibling;\
             continue;\
         }\
@@ -152,14 +154,14 @@ int compareRecordKeys(String, String);  // gedcom.c
 
 //  FORWIFES -- Iterate over the wives in one family; handles non-traditional families.
 //--------------------------------------------------------------------------------------------------
-#define FORWIFES(fam, wife, database)\
+#define FORWIFES(fam, wife, key, database)\
 {\
     GNode* __node = findTag(fam->child, "WIFE");\
     GNode* wife = null;\
-    String __key = null;\
+    String key = null;\
     while (__node) {\
-        __key = __node->value;\
-        if (!__key || !(wife = keyToPerson(__key, database))) {\
+        key = __node->value;\
+        if (!key || !(wife = keyToPerson(key, database))) {\
             __node = __node->sibling;\
             if (__node && nestr(__node->tag, "WIFE")) __node = null;\
                 continue;\

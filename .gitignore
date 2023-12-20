@@ -1,6 +1,6 @@
 *.o
 *.a
-*/.DS_store
+**/.DS_Store
 *test
 output.txt
 y.tab.c
