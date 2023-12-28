@@ -4,7 +4,7 @@
 //  valperson.c -- Functions that validate person records.
 //
 //  Created by Thomas Wetmore on 17 December 2023.
-//  Last changed on 19 December 2023.
+//  Last changed on 27 December 2023.
 //
 
 #include "validate.h"
@@ -46,7 +46,7 @@ static bool validatePerson(GNode *person, Database *database, ErrorLog *errorLog
 	int errorCount = 0;
 	static char s[4096];
 
-	//  Make sure all FAMC and FAMS values link to families.
+	//  Check that the FAMC and FAMS nodes link to existing families.
 	FORFAMCS(person, family, key, database)
 		if (!family) {
 			int lineNumber = personLineNumber(person, database);
@@ -65,6 +65,7 @@ static bool validatePerson(GNode *person, Database *database, ErrorLog *errorLog
 			errorCount++;
 		}
 	ENDFAMSS
+	if (debugging && errorCount) printf("Returning from valpperson early.\n");
 	if (errorCount) return false;
 
 	// Loop through the families the person is a child in. Be sure the family has a CHIL link back.

@@ -5,7 +5,7 @@
 //    and strings.
 //
 //  Created by Thomas Wetmore on 17 December 2022.
-//  Last changed on 16 December 2023.
+//  Last changed on 27 December 2023.
 //
 
 #include "readnode.h"
@@ -250,11 +250,12 @@ NodeList *createNodeList(void)
 //  getNodeListFromFile -- Use fileToLine and extractFields to create a GNode for each line in a
 //    Gedcom file. Lines with errors store Errors in the list rather than GNodes.
 //-------------------------------------------------------------------------------------------------
-NodeList *getNodeListFromFile(FILE *fp)
+NodeList *getNodeListFromFile(FILE *fp, int *numErrors)
 {
 	NodeList *nodeList = createNodeList();
 	Error *error;
 
+	*numErrors = 0;
 	ReadReturn rc = fileToLine(fp, &error);
 	while (rc != ReadEOF) {
 		if (rc == ReadOkay) {
@@ -263,11 +264,14 @@ NodeList *getNodeListFromFile(FILE *fp)
 		} else {
 			// Add an error entry to the node list.
 			appendListElement(nodeList, createNodeListElement(null, level, fileLine, error));
+			if (numErrors) *numErrors++;
 		}
 		rc = fileToLine(fp, &error);
 	}
-	if (debugging) printf("Length of the node and error list is %d\n", lengthList(nodeList));
-
+	if (debugging) {
+		printf("Length of the node and error list is %d\n", lengthList(nodeList));
+		printf("  Number of errors is %d\n", *numErrors);
+	}
 	if (lengthList(nodeList) > 0) return nodeList;
 	deleteList(nodeList);
 	return null;
@@ -288,18 +292,19 @@ void showNodeList(NodeList *nodeList)
 	ENDLIST
 }
 
-enum ExStates { InitialState, MainState, ErrorState, DoneState };
-
 #define isZeroLevelNode(element) ((element)->node && (element)->level == 0)
 #define isNonZeroLevelNode(element) ((element)->node && (element)->level != 0)
 #define isNodeElement(element) ((element)->node)
 #define isErrorElement(element) ((element)->error)
 #define elementFields(element) element->node->key, element->node->tag, element->node->value, null
 
-//=================================== UPPER HALF; UPPER HALF ======================================
+//  getNodeTreesFromNodeList -- Scans a NodeList of GNodes and creates NodeList of GNode trees.
+//    Uses a three state state machine to keep track of levels and errors.
+//-------------------------------------------------------------------------------------------------
 NodeList *getNodeTreesFromNodeList(NodeList *lowerList, ErrorLog *errorLog)
 {
-	enum ExStates state = InitialState;
+	enum ExState { InitialState, MainState, ErrorState };
+	enum ExState state = InitialState;
 	int prevLevel = 0;
 	int curLevel = 0;
 	int line0Number = 0;  // Line number of current root node.
@@ -400,7 +405,7 @@ NodeList *getNodeTreesFromNodeList(NodeList *lowerList, ErrorLog *errorLog)
 	return rootNodeList;
 }
 
-//  numberNodesInNodeList -- Return the number of GNodes (or GNode trees) in a NodeList.
+//  numberNodesInNodeList -- Return the number of GNodes or GNode trees in a NodeList.
 //-------------------------------------------------------------------------------------------------
 int numberNodesInNodeList(NodeList *list)
 {
@@ -412,7 +417,7 @@ int numberNodesInNodeList(NodeList *list)
 	return numNodes;
 }
 
-//  numberErrorsInNodeList -- Return the number of errors in a NodeList.
+//  numberErrorsInNodeList -- Return the number of Errors in a NodeList.
 //-------------------------------------------------------------------------------------------------
 int numberErrorsInNodeList(NodeList *list)
 {

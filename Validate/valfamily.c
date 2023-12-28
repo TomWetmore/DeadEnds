@@ -4,7 +4,7 @@
 //  valfamily.c -- Functions that validate family records.
 //
 //  Created by Thomas Wetmore on 18 December 2023.
-//  Last changed on 19 December 2023.
+//  Last changed on 27 December 2023.
 //
 
 #include "validate.h"
@@ -16,7 +16,6 @@
 
 static bool validateFamily(GNode *family, Database*, ErrorLog*);
 static int familyLineNumber (GNode *family, Database*);
-
 
 static bool debugging = true;
 
@@ -37,8 +36,8 @@ bool validateFamilyIndex(Database *database, ErrorLog *errorLog)
 	return valid;
 }
 
-//  validateFamily -- Validate a family node tree record. Check all HUSB, WIFE and CHIL links
-//    to persons.
+//  validateFamily -- Validate a family node tree record. Check that all HUSB, WIFE and CHIL
+//    links refer to existing persons. If so, check that all return links also exist.
 //--------------------------------------------------------------------------------------------------
 static bool validateFamily(GNode *family, Database *database, ErrorLog* errorLog)
 {
@@ -77,19 +76,25 @@ static bool validateFamily(GNode *family, Database *database, ErrorLog* errorLog
 		}
 	ENDCHILDREN
 
-	FORHUSBS(family, husband, key, database)
+	// If there were errors above then the following code should not run.
+	if (errorCount) return false;
+
+	FORHUSBS(family, husband, hkey, database)
 		// The husband must have one FAMS link back to this family.
 		int numOccurences = 0;
-		FORFAMSS(husband, fam, key, database)
+		FORFAMSS(husband, fam, fkey, database)
 			if (family == fam) numOccurences++;
 		ENDFAMSS
-		ASSERT(numOccurences == 1);
+		if (numOccurences != 1) {
+			addErrorToLog(errorLog, createError(linkageError, segment, 111, "GET ERROR MESSAGE"));
+			errorCount++;
+		}
 	ENDHUSBS
 
 	//  For each WIFE line in the family (multiples in non-traditional cases)...
-	FORWIFES(family, wife, wifeKey, database) {
+	FORWIFES(family, wife, wkey, database) {
 		int numOccurences = 0;
-		FORFAMSS(wife, fam, famKey, database)
+		FORFAMSS(wife, fam, fkey, database)
 			if (family == fam) numOccurences++;
 		ENDFAMSS
 		ASSERT(numOccurences == 1);

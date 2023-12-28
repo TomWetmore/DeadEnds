@@ -139,12 +139,8 @@ int compareRecordKeys(String, String);  // gedcom.c
     String key = null;\
     while (__node) {\
         key = __node->value;\
-        if (!key || !(husb = keyToPerson(key, database))) {\
-            __node = __node->sibling;\
-            continue;\
-        }\
+		husb = key ? keyToPerson(key, database) : null;\
         {
-
 #define ENDHUSBS\
         }\
         __node = __node->sibling;\
@@ -161,11 +157,7 @@ int compareRecordKeys(String, String);  // gedcom.c
     String key = null;\
     while (__node) {\
         key = __node->value;\
-        if (!key || !(wife = keyToPerson(key, database))) {\
-            __node = __node->sibling;\
-            if (__node && nestr(__node->tag, "WIFE")) __node = null;\
-                continue;\
-        }\
+		wife = key ? keyToPerson(key, database) : null;\
         {
 #define ENDWIFES\
         }\

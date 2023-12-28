@@ -20,7 +20,7 @@ The *Read Stack* is the layering of software functions that convert Gedcom recor
 ### Layers of the Stack
 |||
 |:--|:--|
-|List *importFromFiles(String[] files, int count, ErrorLog\*)|Import the Gedcom  record trees from a list of Gedcom files. If all imports are successful, return a list of Databases, one for each file. If there were errors then no Databases are returned, and the ErrorLog holds the list of errors found.|
+|List *importFromFiles(String[] files, int count, ErrorLog\*)|Import Gedcom  record trees from a list of Gedcom files. If all imports are successful, return a list of Databases, one for each file. If there were errors then no Databases are returned, and the ErrorLog holds the list of errors found.|
 |Database *importFromFile(String file, ErrorLog\*)|Import the Gedcom record trees from a single Gedcom file. If the import is successful return the Database of the records read from the file. If there were errors no Database is returned, and the ErrorLog holds the list of errors found.|
 |GNode *firstNodeTreeFromFile(FILE\*, String file, int \*lineno, ErrorLog\*)|Read and return the first GNode tree in a file.|
 |GNode \*nextNodeTreeFromFile(FILE\*, int \*lineNo, ErrorLog\*e)|Read and return the next GNode tree in the file.|
@@ -37,19 +37,13 @@ The *Read Stack* is the layering of software functions that convert Gedcom recor
 
 To read records from the file, *importFromFile* calls *firstNodeTreeFromFile* and *nextNodeTreeFromFile*, the former being called once to set up state variables. After each call to these functions, *importFromFile* calls *storeRecord* to put the record in the database.
 
-#### GNode *firstNodeTreeFromFile(FILE\*, String file, int \*lineno, ErrorLog\*)
-*firstNodeTreeFromFile* first calls *fileToLine* to read the first line of the Gedcom file and puts the key, level, tag and value fields into static variables. It then calls *nextNodeTreeFromFile* to get the the first record, which it returns to its caller.
+#### NodeList *getNodeTreesFromNodeList(NodeList *lowerList, ErrorLog *errorLog)
+*getNodeTreesFromNodeList* is passed a list of GNodes and an ErrorLog. It is called by *importFromFile* after *importFromFile* has called *getNodeListFromFile*.
 
-#### GNode* nextNodeTreeFromFile(FILE\*, int \*lineo, ErrorLog\*)
-The task of *nextNodeTreeFromFile* is to read the lines from the Gedcom file that make up the next Gedcom record, convert them to a GNode tree, and return the tree to its caller. To get each line it calls the *fileToLine* function.
+#### NodeList \*getNodeListFromFile (FILE\*)
+*getNodeListFromFile* uses *fileToLine* and *extractFields* to create a GNode for each line in a Gedcom file. Lines with errors store Errors in the list rather than GNodes.
 
-The complexity in *nextNodeTreeFromFile* is caused by its need to track of the levels of each line in the Gedcom record, so it can build the record's GNode tree with the correct structure.
 
-When *nextNodeTreeFromFile* is called, the first line of the new record will have been previosly read and placed in the state variables (by *firstNodeTreeFromFile* for the first record; by the preceding call to *nextNodeTreeFromFile* for all others.)
-
-*nextNodeTreeFromFile* calls *fileToLine* repeatedly to get all the lines making up a Gedcom record. When the record is not the last one in the file, *nextNodeTreeFromFile* will call *fileToLine* an extra time, as it cannot know when the next 0 level line will be found. To prevent rereading the file, the contents of this 0 level line are kept as static data between calls to *nextNodeTreeFromFile*. Whenever *nextNodeTreeFromFile* is called the first line of the new record will have been read and its contents put in the static variables.
-
-*nextNodeTreeFromFile* also calls *createGNode* to build the GNode tree that is returned. If there are errors, the function may also call *deleteGNode*
 
 #### static ReadReturn fileToLine(FILE *file, int *level, String *key, String *tag, String *value, Error **error)
 

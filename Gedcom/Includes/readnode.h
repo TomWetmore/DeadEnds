@@ -4,7 +4,7 @@
 //  readnode.h -- Header file for routines and variables that read Gedcom files.
 //
 //  Created by Thomas Wetmore on 17 December 2022.
-//  Last changed on 12 December 2023.
+//  Last changed on 27 December 2023.
 //
 
 #ifndef readnode_h
@@ -37,7 +37,7 @@ typedef struct NodeListElement {
 
 NodeList *createNodeList(void);
 NodeListElement *createNodeListElement(GNode*, int level, int lineNo, Error*);
-NodeList *getNodeListFromFile(FILE*);
+NodeList *getNodeListFromFile(FILE*, int*);
 NodeList *getNodeTreesFromNodeList(NodeList*, ErrorLog*);
 void showNodeList(NodeList *nodeList);  // Debugging.
 int numberNodesInNodeList(NodeList *list);
