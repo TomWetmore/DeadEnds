@@ -1,0 +1,9 @@
+0 HEAD
+0 @I1@ INDI
+  1 NAME Thomas Trask /Wetmore/
+  1 SEX M
+  1 NOTE This record is okay.
+  1 FAMS @F1@
+0 @F1@ FAM
+  1 NOTE This family refers to a husband that does not exist.
+  1 HUSB @I4@

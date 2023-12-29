@@ -4,13 +4,13 @@
 //  errors.c -- Code for handling DeadEnds errors.
 //
 //  Created by Thomas Wetmore on 4 July 2023.
-//  Last changed on 19 December 2023.
+//  Last changed on 29 December 2023.
 //
 
 #include "errors.h"
 #include "list.h"
 
-static bool debugging = true;
+static bool debugging = false;
 
 //  getErrKey -- Get the comparison key of an error. Required list function.
 //
@@ -126,8 +126,11 @@ void showError (Error *error)
 		case linkageError: printf("linkage error "); break;
 		default: printf("unknown error (can't happen) "); break;
 	}
-	printf("in %s ", error->fileName ? error->fileName : "no filename");
-	printf("at line %d: ", error->lineNumber);
+	printf("in %s", error->fileName ? error->fileName : "no filename");
+	if (error->lineNumber)
+		printf(" line %d: ", error->lineNumber);
+	else
+		printf(": ");
 	printf("%s\n", error->message ? error->message : "no message");
 }
 

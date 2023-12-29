@@ -1,0 +1,19 @@
+0 @I1@ INDI
+  1 NAME Thomas Trask /Wetmore/
+  1 SEX M
+  1 NOTE Nothing wrong with this record.
+  1 FAMS @F1@
+0 @I2@ INDI
+  1 NAME Luann Frances /Grenda/
+  1 SEX F
+  1 NOTE Nothing wrong with this record.
+  1 FAMS @F1@
+0 @I3@ INDI
+  1 NAME Anna Vivian /Wetmore/
+  1 NOTE Nothing wrong with this record.
+  1 FAMC @F1@
+0 @F1@ FAM
+  1 NOTE Nothing wrong with this record.
+  1 HUSB @I1@
+  1 WIFE @I2@
+  1 CHIL @I3@

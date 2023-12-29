@@ -1,0 +1,8 @@
+0 @I1@ INDI
+  1 NAME Thomas Trask /Wetmore/
+  1 SEX U
+  1 NOTE Sex value of U should not be allowed.
+  1 FAMS @F1@
+0 @F1@ FAM
+  1 NOTE No errors in this record.
+  1 HUSB @I1@
