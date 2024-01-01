@@ -4,13 +4,8 @@ INCLUDES= -I../Utils/Includes -I../DataTypes/Includes -I../Parser/Includes -I../
 LIBLOCNS=-L../Utils/ -L../DataTypes/ -L../Parser/ -L../Interp -L../Gedcom -L../Database -L../Validate
 LIBS=-lutils -lparser -ldatatypes -linterp -lgedcom -ldatabase -lvalidate
 
-all: test hashtabletest stringtabletest testset
+all: test
 
-hashtabletest: testhashtable.o
-	$(CC) -o hashtabletest testhashtable.o $(LIBLOCNS) $(LIBS) -lc
-
-stringtabletest: teststringtable.o
-	$(CC) -o stringtabletest teststringtable.o $(LIBLOCNS) $(LIBS) -lc
 
 test: test.o ../Database/libdatabase.a ../Parser/libparser.a ../DataTypes/libdatatypes.a ../Interp/libinterp.a ../Gedcom/libgedcom.a ../Validate/libvalidate.a
 	$(CC) -o test test.o $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
