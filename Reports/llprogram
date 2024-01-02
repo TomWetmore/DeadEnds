@@ -23,12 +23,12 @@ proc main()
 	"Luann has " d(lengthset(m)) " ancestors." nl()
 
 	/*gengedcom(a)*/
-	/*call ahnen(indi)*/
+	call ahnen(indi("@I1@"))
 }
 
 proc ahnen(indi)
 {
-
+"HELLO PROC AHNEN" nl()
 	list(ilist)
 	list(alist)
 	enqueue(ilist, indi)

@@ -19,7 +19,7 @@ typedef struct RefnIndexEl {
 typedef HashTable RefnIndex;
 
 RefnIndexEl *createRefnIndexEl(String refn, String key);
-RefnIndex *createRefnIndex();
+RefnIndex *createRefnIndex(void);
 void deleteRefnIndex(RefnIndex*);
 bool insertInRefnIndex(RefnIndex*, String refn, String key);
 String searchRefnIndex(RefnIndex*, String refn);
