@@ -4,7 +4,7 @@
 //  gedcom.h
 //
 //  Created by Thomas Wetmore on 7 November 2022.
-//  Last changed on 28 December 2023.
+//  Last changed on 2 January 2024.
 //
 
 #ifndef gedcom_h
@@ -198,7 +198,7 @@ int compareRecordKeys(String, String);  // gedcom.c
 //--------------------------------------------------------------------------------------------------
 #define NAME(indi)  findTag(indi->child,"NAME")
 #define SEX(indi)   findTag(indi->child,"SEX")
-#define SEXV(indi)  val_to_sex(findTag(indi->child,"SEX"))
+#define SEXV(indi)  valueToSex(findTag(indi->child,"SEX"))
 #define BIRT(indi)  findTag(indi->child,"BIRT")
 #define DEAT(indi)  findTag(indi->child,"DEAT")
 #define BAPT(indi)  findTag(indi->child,"CHR")

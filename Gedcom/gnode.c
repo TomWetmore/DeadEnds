@@ -4,7 +4,7 @@
 //  gnode.c -- Functions involving the GNode type.
 //
 //  Created by Thomas Wetmore on 12 November 2022.
-//  Last changed on 15 December 2023.
+//  Last changed on 2 January 2024..
 
 #include "standard.h"
 #include "gnode.h"
@@ -545,9 +545,9 @@ GNode* findTag(GNode* node, String tag)
 	return null;
 }
 
-// val_to_sex -- Convert SEX value to internal form.
+// valueToSex -- Convert SEX value to internal form.
 //--------------------------------------------------------------------------------------------------
-SexType val_to_sex (GNode* node)
+SexType valueToSex (GNode* node)
 //  node -- Node whose tag should be SEX and whose value should be M, F, or U.
 {
 	if (!node || !node->value) return sexUnknown;

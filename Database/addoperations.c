@@ -1,22 +1,16 @@
 //  
 //  DeadEnds
 //
-//  addoperation.c -- Add operations for a Database.
+//  addoperations.c -- Add operations for a Database.
 //
 //  Created by Thomas Wetmore on 30 December 2023.
-//  Last changed on 1 January 2024.
+//  Last changed on 2 January 2024.
 //
 
 #include "stdlib.h"
 #include "splitjoin.h"
 #include "gnode.h"
 #include "gedcom.h"
-
-//  These functions are loose ends, probably to be removed when doing it the "DeadEnds way".
-//-------------------------------------------------------------------------------------------------
-void resolveLinks(GNode *node, Database *database){}
-void fam_to_dbase(GNode *node, Database *database){}
-void indi_to_dbase(GNode *node, Database *database){}
 
 //  addChildToFamily -- Add an existing child to an existing family in a Database.
 //-------------------------------------------------------------------------------------------------
@@ -67,12 +61,6 @@ bool addChildToFamily (GNode *person, GNode *family, int index, Database *databa
 	else
 		prev->sibling = nfmc;
 	joinPerson(person, names, irefns, sex, body, famcs, famss);
-
-    // Change the following to the DeadEnds way.
-	resolveLinks(person, database);
-	resolveLinks(family, database);
-	fam_to_dbase(family, database);
-	indi_to_dbase(person, database);
 
     return true;
 }
@@ -129,11 +117,5 @@ bool addSpouseToFamily (GNode *spouse, GNode *family, SexType sext, Database *da
 	else
 		prev->sibling = nfams;
 	joinPerson(spouse, names, irefns, sex, body, famcs, famss);
-	
-    // Do the following the DeadEnds way.
-	resolveLinks(spouse, database);
-	resolveLinks(family, database);
-	indi_to_dbase(spouse, database);
-	fam_to_dbase(family, database);
     return true;
 }
