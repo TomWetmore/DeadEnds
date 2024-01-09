@@ -14,7 +14,7 @@
 
 //  addChildToFamily -- Add an existing child to an existing family in a Database.
 //-------------------------------------------------------------------------------------------------
-bool addChildToFamily (GNode *person, GNode *family, int index, Database *database)
+bool addChildToFamily (GNode *child, GNode *family, int index, Database *database)
 //  person -- Person to add as a child to the family.
 //  family -- Family to add the child to.
 //  index -- Order number for the new child.
@@ -38,7 +38,7 @@ bool addChildToFamily (GNode *person, GNode *family, int index, Database *databa
 			node = node->sibling;
 		}
 	}
-    GNode *new = createGNode(null, "CHIL", person->key, family);
+    GNode *new = createGNode(null, "CHIL", child->key, family);
 	new->sibling = node;
 	if (prev)
 		prev->sibling = new;
@@ -48,8 +48,8 @@ bool addChildToFamily (GNode *person, GNode *family, int index, Database *databa
 
 	// Add a FAMC node to the child.
     GNode *names, *irefns, *sex, *body, *famcs, *famss;
-    splitPerson(person, &names, &irefns, &sex, &body, &famcs, &famss);
-	GNode *nfmc = createGNode(null, "FAMC", family->key, person);
+    splitPerson(child, &names, &irefns, &sex, &body, &famcs, &famss);
+	GNode *nfmc = createGNode(null, "FAMC", family->key, child);
 	prev = null;
 	GNode *this = famcs;
 	while (this) {
@@ -60,7 +60,7 @@ bool addChildToFamily (GNode *person, GNode *family, int index, Database *databa
 		famcs = nfmc;
 	else
 		prev->sibling = nfmc;
-	joinPerson(person, names, irefns, sex, body, famcs, famss);
+	joinPerson(child, names, irefns, sex, body, famcs, famss);
 
     return true;
 }

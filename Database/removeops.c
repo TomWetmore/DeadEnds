@@ -15,14 +15,14 @@
 
 //  removeChildFromFamily -- Remove an existing child from an existing family in a Database.
 //-------------------------------------------------------------------------------------------------
-bool removeChildFromFamily (GNode *person, GNode *family, Database *database)
+bool removeChildFromFamily (GNode *child, GNode *family, Database *database)
 {
     // Find the CHIL node in the family that links to the person.
     GNode *frefn, *husb, *wife, *chil, *rest;
     splitFamily(family, &frefn, &husb, &wife, &chil, &rest);
     GNode *fprev = null;
     GNode *fnode = chil;
-    while (fnode && nestr(person->key, fnode->value)) {
+    while (fnode && nestr(child->key, fnode->value)) {
         fprev = fnode;
         fnode = fnode->sibling;
     }
@@ -33,7 +33,7 @@ bool removeChildFromFamily (GNode *person, GNode *family, Database *database)
     }
     // Find the FAMC node in the child that links to the family.
     GNode *names, *irefns, *sex, *body, *famcs, *famss;
-    splitPerson(person, &names, &irefns, &sex, &body, &famcs, &famss);
+    splitPerson(child, &names, &irefns, &sex, &body, &famcs, &famss);
     GNode *pprev = null;
     GNode *pnode = famcs;
     while (pnode && nestr(family->key, pnode->value)) {
@@ -43,7 +43,7 @@ bool removeChildFromFamily (GNode *person, GNode *family, Database *database)
     // If there is no FAMC link to the family, there is nothing to do.
     if (!pnode) {
         joinFamily(family, frefn, husb, wife, chil, rest);
-        joinPerson(person, names, irefns, sex, body, famcs, famss);
+        joinPerson(child, names, irefns, sex, body, famcs, famss);
         return false;  // Family is not family as child for the person.
     }
     // Remove the CHIL link from the family.
@@ -61,13 +61,13 @@ bool removeChildFromFamily (GNode *person, GNode *family, Database *database)
     freeGNode(fnode);
     freeGNode(pnode);
     joinFamily(family, frefn, husb, wife, chil, rest);
-    joinPerson(person, names, irefns, sex, body, famcs, famss);
+    joinPerson(child, names, irefns, sex, body, famcs, famss);
     return true;
 }
 
 //  removeSpouseFromFamily -- Remove an existing spouse from an existing family.
 //-------------------------------------------------------------------------------------------------
-bool removeSpouseFromFamily (GNode *spouse, GNode *family, Database *database)
+bool removeSpouseFromFamily (GNode *spouse, GNode *family, Error *error)
 {
 	// Split the person and get its sex type..
 	GNode *names, *irefns, *sex, *body, *famcs, *famss;
