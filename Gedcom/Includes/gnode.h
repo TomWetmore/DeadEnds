@@ -4,7 +4,7 @@
 //  gnode.h -- GNode datatype. GNodes represent lines in a Gedcom file. GNodes are heap objects.
 //
 //  Created by Thomas Wetmore on 4 November 2022.
-//  Last changed on 2 January 2024.
+//  Last changed on 9 February 2024.
 //
 
 #ifndef gnode_h
@@ -58,7 +58,7 @@ GNode* personToFamilyAsChild(GNode *person, Database*);
 String personToEvent(GNode*, String, String, int, bool);
 String eventToString(GNode*, bool);
 String eventToDate(GNode*, bool);
-String event_to_plac(GNode*, bool);
+String eventToPlace(GNode*, bool);
 void showGNode(GNode*);
 void showGNodeRecursive(int, GNode*);
 void showSingleGNode(int level, GNode*);

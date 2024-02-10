@@ -22,8 +22,18 @@ proc main()
 	set(m, ancestorset(m))
 	"Luann has " d(lengthset(m)) " ancestors." nl()
 
+	/*See if we can delete Luann from the set*/
+	deletefromset(l, i, 0)
+	"The set that had Luann now has " d(lengthset(l)) " persons." nl()
+
 	/*gengedcom(a)*/
 	call ahnen(indi("@I1@"))
+
+	/*See if date(EVENT) works*/
+	set(i, indi("@I1@"))
+	date(birth(i)) nl()
+	place(birth(i)) nl()
+	
 }
 
 proc ahnen(indi)

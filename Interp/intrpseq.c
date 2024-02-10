@@ -170,7 +170,7 @@ PValue __deletefromset (PNode *node, Context *context, bool *eflg)
     if (!key || *key == 0) return nullPValue;
 
     // Get the boolean argument. If true remove all elements with the key, else just the first.
-    PValue value3 = evaluate(arg3, context, eflg);
+    PValue value3 = evaluateBoolean(arg3, context, eflg);
     if (*eflg || value3.type != PVBool) {
         *eflg = true;
         prog_error(node, "the third argument to deletefromset must be a boolean.");

@@ -4,7 +4,7 @@
 //  validate.c -- Functions that validate Gedcom records.
 //
 //  Created by Thomas Wetmore on 12 April 2023.
-//  Last changed on 19 December 2023.
+//  Last changed on 25 January 2024.
 //
 
 #include "validate.h"
@@ -13,16 +13,17 @@
 #include "recordindex.h"
 #include "lineage.h"
 #include "errors.h"
+#include "refnindex.h"
 
 bool validateDatabase(Database*, ErrorLog*);
+
 
 //static bool debugging = true;
 
 static void validateSource(GNode*, Database*, ErrorLog*);
 static void validateEvent(GNode*, Database*, ErrorLog*);
 static void validateOther(GNode*, Database*, ErrorLog*);
-
-
+static void validateReferences(Database *database, ErrorLog*);
 
 int numValidations = 0;  //  DEBUG.
 
@@ -37,6 +38,7 @@ bool validateDatabase(Database *database, ErrorLog *errorLog)
 	//if (!validateIndex(database->eventIndex)) isOkay = false;
 	//if (!validateIndex(database->otherIndex)) isOkay = false;
 	//return isOkay;
+	validateReferences(database, errorLog);
 	if (lengthList(errorLog)) {
 		printf("THERE WERE ERRORS DURING VALIDATION:\n");
 		showErrorLog(errorLog);
@@ -66,4 +68,58 @@ static GNode *getPerson(String key, RecordIndex *index)
 {
 	GNode *root = searchRecordIndex(index, key);
 	return root && recordType(root) == GRPerson ? root : null;
+}
+
+#define LN(person, database, node)\
+	personLineNumber(person, database) + countNodesBefore(node)
+
+//  validateReferences -- Validate the 1 REFN nodes in the records.
+//--------------------------------------------------------------------------------------------------
+static void validateReferences(Database *database, ErrorLog* errorLog)
+//  database -- Database to have its REFN values checked.
+{
+	String segment = database->lastSegment;
+	RefnIndex *refnIndex = database->refnIndex;
+
+	// Validate the REFN values found in persons.
+	FORHASHTABLE(database->personIndex, element)
+		GNode* person = ((RecordIndexEl*) element)->root;
+		GNode* refn = findTag(person->child, "REFN");
+		while (refn) {
+			String refString = refn->value;
+			if (refString == null || strlen(refString) == 0) {
+				Error *error = createError(gedcomError, segment, LN(person, database, refn),
+										   "Missing REFN value");
+				addErrorToLog(errorLog, error);
+			} else if (!insertInRefnIndex (refnIndex, refString, person->key)) {
+				Error *error = createError(gedcomError, segment, LN(person, database, refn),
+										   "REFN value already in index");
+				addErrorToLog(errorLog, error);
+			}
+			refn = refn->sibling;
+			if (refn && nestr(refn->tag, "REFN")) refn = null;
+		}
+	ENDHASHTABLE
+
+	// Validate the REFN values found in families.
+	FORHASHTABLE(database->familyIndex, element)
+		GNode* family = ((RecordIndexEl*) element)->root;
+		GNode* refn = findTag(family->child, "REFN");
+		while (refn) {
+			String refString = refn->value;
+			if (refString == null || strlen(refString) == 0) {
+				Error *error = createError(gedcomError, segment, LN(family, database, refn),
+										   "Missing REFN value");
+				addErrorToLog(errorLog, error);
+			} else if (!insertInRefnIndex (refnIndex, refString, family->key)) {
+				Error *error = createError(gedcomError, segment, LN(family, database, refn),
+										   "REFN value already in index");
+				addErrorToLog(errorLog, error);
+			}
+			refn = refn->sibling;
+			if (refn && nestr(refn->tag, "REFN")) refn = null;
+		}
+	ENDHASHTABLE
+
+	// Handle the other record types.
 }

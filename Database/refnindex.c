@@ -4,12 +4,10 @@
 //  refnindex.c -- Handle user reference indexing.
 //
 //  Gedcom records can have 1 REFN nodes whose values give records unique identifiers. A record
-//  can have only one REFN value. Other records cannot reference other records using those records'
-//  REFN values. LifeLines allowed records to have any number of REFN nodes, and it also allowed
-//  links to be made to records with REFN values. Each REFN value in a database must be unique.
+//  can have more than one 1 REFN node with different values.
 //
 //  Created by Thomas Wetmore on 16 December 2023.
-//  Last changed on 1 January 2024.
+//  Last changed on 25 January 2024.
 //
 
 #include "refnindex.h"
@@ -17,8 +15,10 @@
 
 //  searchRefnIndex -- Search a RefnIndex for a reference (REFN) value.
 //--------------------------------------------------------------------------------------------------
-
 String searchRefnIndex(RefnIndex *index, String refn)
+//  index -- Reference index to search
+//  refn -- Reference value to search for
+//  Returns the key of the record with the reference, if exists, or null otherwise
 {
 	RefnIndexEl *el = (RefnIndexEl*) searchHashTable(index, refn);
 	return el ? el->key : null;

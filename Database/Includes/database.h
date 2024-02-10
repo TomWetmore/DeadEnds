@@ -4,7 +4,7 @@
 //  database.h
 //
 //  Created by Thomas Wetmore on 10 November 2022.
-//  Last changed on 6 December 2023.
+//  Last changed on 25 January 2024.
 //
 
 #ifndef database_h
@@ -14,6 +14,7 @@
 #include "hashtable.h"
 #include "recordindex.h"
 #include "nameindex.h"
+#include "refnindex.h"
 #include "gnode.h"
 #include "errors.h"
 
@@ -30,6 +31,7 @@ typedef struct Database {
     RecordIndex *eventIndex;  // Index of events in this database.
     RecordIndex *otherIndex;  // Indes of other records in this database.
     NameIndex *nameIndex;  // Index of the names of the persons in this database.
+	RefnIndex *refnIndex;  // Inde of the REFN values in this database.
 } Database;
 
 Database *createDatabase(String fileName); // Create an empty database.

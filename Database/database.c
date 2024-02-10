@@ -35,6 +35,7 @@ Database *createDatabase(String filePath)
 	database->eventIndex = createRecordIndex();
 	database->otherIndex = createRecordIndex();
 	database->nameIndex = createNameIndex();
+	database->refnIndex = createRefnIndex();
 	return database;
 }
 

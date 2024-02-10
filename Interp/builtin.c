@@ -385,39 +385,34 @@ PValue __strlen (PNode *node, Context *context, bool* eflg)
 	if (*eflg || value.type != PVString) return nullPValue;
 	return PVALUE(PVInt, uInt, (long) strlen(value.value.uString));
 }
-///*==============================================
-// * __concat -- Catenate strings
-// *   usage: concat(STRING [, STRING]+) -> STRING
-// *============================================*/
-//WORD __concat (node, stab, eflg)
-//INTERP node; TABLE stab; bool *eflg;
-//{
-//        INTERP arg = (INTERP) ielist(node);
-//        INT len = 0, i, nstrs = 0;
-//        STRING hold[32];
-//        STRING p, new, str;
-//
-//        while (arg) {
-//                str = (STRING) evaluate(arg, stab, eflg);
-//                if (*eflg) return NULL;
-//                if (str) {
-//                        len += strlen(str);
-//                        hold[nstrs++] = strsave(str);
-//                } else
-//                        hold[nstrs++] = NULL;
-//                arg = inext(arg);
-//        }
-//        p = new = (STRING) stdalloc(len + 1);
-//        for (i = 0; i < nstrs; i++) {
-//                str = hold[i];
-//                if (str) {
-//                        strcpy(p, str);
-//                        p += strlen(p);
-//                        stdfree(str);
-//                }
-//        }
-//        return (WORD) new;
-//}
+
+//  __concat -- Catenate potentially many strings.
+//    usage: concat(STRING [, STRING]+) -> STRING
+//--------------------------------------------------------------------------------------------------
+PValue __concat (PNode *pnode, Context *context, bool *errflg)
+{
+	PNode *arg = pnode->arguments;
+	if (arg == null) return nullPValue;
+	int len = 0, nstrs = 0;
+	String hold[100];
+	PValue svalue = evaluate(arg, context, errflg);
+	while (arg != null) {
+		PValue svalue = evaluate(arg, context, errflg);
+		if (*errflg || svalue.type != PVString) return nullPValue;
+		len += strlen(svalue.value.uString);
+		hold[nstrs++] = svalue.value.uString;
+		arg = arg->next;
+	}
+	String nstring = stdalloc(len + 1);
+	String p = nstring;
+	for (int i = 0; i < nstrs; i++) {
+		strcpy(p, hold[i]);
+		p += strlen(p);
+		stdfree(hold[i]);
+	}
+	*p = 0;
+	return PVALUE(PVString, uString, nstring);
+}
 
 //  __lower -- Convert string to lower case.
 //    usage: lower(STRING) -> STRING
@@ -718,4 +713,3 @@ PValue __deletenode (PNode *node, Context *context, bool *eflg)
 		prev->sibling = next;
 	return nullPValue;
 }
-

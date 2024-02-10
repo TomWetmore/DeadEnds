@@ -4,7 +4,7 @@
 //  gnode.c -- Functions involving the GNode type.
 //
 //  Created by Thomas Wetmore on 12 November 2022.
-//  Last changed on 2 January 2024..
+//  Last changed on 9 February 2024.
 
 #include "standard.h"
 #include "gnode.h"
@@ -183,9 +183,9 @@ String eventToDate (GNode* node, bool shorten)
 	return node->value;
 }
 
-//  event_to_plac -- Convert event to place
+//  eventToPlace -- Convert event to place
 //--------------------------------------------------------------------------------------------------
-String event_to_plac (GNode* node, bool shorten)
+String eventToPlace (GNode* node, bool shorten)
 {
 	if (!node) return null;
 	node = PLAC(node);

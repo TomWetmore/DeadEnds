@@ -173,7 +173,7 @@ bool removeFromSequence(Sequence *sequence, String key, String name, int index)
 	SequenceEl* data = IData(sequence);
 	int i = 0;
 	if (key) {
-		if (*key != 'I') return false;  // Gotta be a person.
+		//if (*key != 'I') return false;  // Gotta be a person.
 		for (i = 0; i < len; i++) {
 			if (eqstr(key, (data[i])->key) && (!name || eqstr(name, (data[i])->name))) break;
 		}
