@@ -4,7 +4,7 @@ INCLUDES=-I./Includes -I../Utils/Includes -I../DataTypes/Includes -I../Gedcom/In
 AR=ar
 ARFLAGS=-cr
 OFILES= builtin.o builtintable.o evaluate.o functable.o functiontable.o interp.o intrpevent.o intrpfamily.o intrpgnode.o \
-        intrpmath.o intrpperson.o intrpseq.o pnode.o pvalue.o pvaluetable.o sequence.o symboltable.o builtinlist.o
+        intrpmath.o intrpperson.o intrpseq.o pnode.o pvalue.o pvaluetable.o sequence.o symboltable.o builtinlist.o rassa.o
 LIBNAME=interp
 
 lib$(LIBNAME).a: $(OFILES)

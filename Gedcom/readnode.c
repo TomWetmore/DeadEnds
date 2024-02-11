@@ -264,7 +264,7 @@ NodeList *getNodeListFromFile(FILE *fp, int *numErrors)
 		} else {
 			// Add an error entry to the node list.
 			appendListElement(nodeList, createNodeListElement(null, level, fileLine, error));
-			if (numErrors) *numErrors++;
+			(*numErrors)++;
 		}
 		rc = fileToLine(fp, &error);
 	}

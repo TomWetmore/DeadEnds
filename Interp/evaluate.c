@@ -317,6 +317,30 @@ GNode* evaluateGNode(PNode *pnode, Context *context, bool* errflg)
     return pvalue.value.uGNode;
 }
 
+//  evaluateInteger -- Evaluate an expression that should resolve to an integer.
+//--------------------------------------------------------------------------------------------------
+int evaluateInteger(PNode *pnode, Context *context, bool *errflg)
+{
+	ASSERT(pnode && context);
+	PValue pvalue = evaluate(pnode, context, errflg);
+	if (*errflg || pvalue.type != PVInt) {
+		*errflg = true;
+		return 0;
+	}
+	return (int) pvalue.value.uInt;
+}
+
+String evaluateString(PNode *pnode, Context *context, bool *errflg)
+{
+	ASSERT(pnode && context);
+	PValue pvalue = evaluate(pnode, context, errflg);
+	if (*errflg || pvalue.type != PVString) {
+		*errflg = true;
+		return "";
+	}
+	return pvalue.value.uString;
+}
+
 // iistype -- See if a program node has the specified type.
 //--------------------------------------------------------------------------------------------------
 bool iistype (PNode *pnode, int type)
