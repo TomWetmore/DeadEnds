@@ -55,10 +55,11 @@ List *createList(int(*comp)(Word, Word), void(*del)(Word), String(*getKey)(Word)
 void setSortThreshold(int);  // Set the sort threshold property for the list.
 void setKeepSorted(bool);  // Set the keep sorted property for the list.
 void deleteList(List*);  // Delete the list.
+void emptyList(List*);  // Make the List empty.
 void appendListElement(List*, Word);  // Append an element to the list.
 void prependListElement(List*, Word);  // Prepends an element to the list.
 bool insertListElement(List*, int, Word);  // Insert an element at a fixed location in the list.
-Word getListElement(List*, int index);  //  Get an element from a fixed location in a list.
+Word getListElement(List*, int index);        //  Get an element from a fixed location in a list.
 void setListElement(List*, int index, Word);  //  Set an element in a list.
 bool insertSortedListElement(List*, Word);  // Insert an element in a sorted List.
 

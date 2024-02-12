@@ -4,7 +4,7 @@
 //  date.c
 //
 //  Created by Thomas Wetmore on 22 February 2023.
-//  Last changed on 29 September 2023.
+//  Last changed on 11 February 2024.
 //
 
 #include <time.h>
@@ -24,7 +24,7 @@ static String format_day(int, int);
 static String format_month(int, int);
 static String format_year(int, int);
 static void set_date_string(String);
-static int get_date_tok(int*, String*);
+static int getDateToken(int*, String*);
 static void init_monthtbl(void);
 
 static struct {
@@ -93,7 +93,7 @@ String format_date (String str, int dfmt, int mfmt, int yfmt, int sfmt, bool cmp
     static char scratch[50], daystr[4];
     String p = scratch;
     if (!str) return null;
-    extract_date(str, &mod, &da, &mo, &yr, &syr);
+    extractDate(str, &mod, &da, &mo, &yr, &syr);
     if ((sda = format_day(da, dfmt))) sda = strcpy(daystr, sda);
     smo = format_month(mo, mfmt);
     if (!cmplx) syr = format_year(yr, yfmt);
@@ -102,7 +102,7 @@ String format_date (String str, int dfmt, int mfmt, int yfmt, int sfmt, bool cmp
     if (cmplx && (mod%100 == 4 || mod%100 == 6)) {
         *p++ = ' ';
         format_mod(mod%100 + 1, &p);
-        extract_date(null, &mod, &da, &mo, &yr, &syr);
+        extractDate(null, &mod, &da, &mo, &yr, &syr);
         if ((sda = format_day(da, dfmt))) sda = strcpy(daystr, sda);
         smo = format_month(mo, mfmt);
         format_ymd(syr, smo, sda, sfmt, mod, &p);
@@ -412,23 +412,23 @@ format_year (int yr,
     return (String) scratch;
 }
 
-//  extract_date -- Extract date from free format string
+//  extractDate -- Attempt to extract a date from free format string.
 //--------------------------------------------------------------------------------------------------
-void
-extract_date (String str,
-              int *pmod,
-              int *pda,
-              int *pmo,
-              int *pyr,
-              String *pyrstr)
+void extractDate (String str, int *pmod, int *pda, int *pmo, int *pyr, String *pyrstr)
+//  str -- String assumed to hold a date in some format.
+//  pmod -- Month or day ???
+//  pda -- Integer returned with extracted day of the month.
+//  pmo -- Integer returned with extracted month.
+//  pyr -- Integer returned with extracted year.
+//  pyrstr -- ???
 {
     int tok, ival, era = 0;
     String sval;
     static unsigned char yrstr[10];  // Year string?
     *pyrstr = "";
     *pmod = *pda = *pmo = *pyr = 0;
-    if (str) set_date_string(str);
-    while ((tok = get_date_tok(&ival, &sval))) {
+    if (str) set_date_string(str);  // I think this shares the value of the string with token getter.
+    while ((tok = getDateToken(&ival, &sval))) {
         switch (tok) {
             case MONTH_TOK:
                 if (*pmo == 0) *pmo = ival;
@@ -447,7 +447,7 @@ extract_date (String str,
                 if (ival >= 100 ||
                     (ival > 0 && sval[0] == '0' && sval[1] == '0')) {
                     if (eqstr(*pyrstr,"")) {
-                        strcpy((char*) yrstr,sval);
+                        strcpy((char*) yrstr, sval);
                         *pyrstr = (char*) yrstr;
                         *pyr = ival;
                     }
@@ -469,26 +469,28 @@ static void set_date_string (String str)
     sstr = str;
     if (!monthtbl) init_monthtbl();
 }
-/*==================================================
- * get_date_tok -- Return next date extraction token
- *================================================*/
-static int
-get_date_tok (int *pival,
-              String *psval)
+
+//  getDateToken -- Return next date extraction token.
+//--------------------------------------------------------------------------------------------------
+static int getDateToken (int *pival, String *psval)
 {
-    static unsigned char scratch[30];
-    String p = (String) scratch;
+    static unsigned char scratch[256];
+    String p = (String) scratch;  // p is the cursor when finding words.
     int i, c;
+	// sstr must be set up before the first call.
     if (!sstr) return 0;
+	// Move past white space.
     while (iswhite(*sstr++))
         ;
     sstr--;
+	// Found a letter so look for a word.
     if (isLetter(*sstr)) {
-        while (isLetter(*p++ = *sstr++))
+        while (isLetter(*p++ = *sstr++)) // Loads the word in scratch.
             ;
         *--p = 0;
         sstr--;
         *psval = (String) scratch;
+		// If the word is in the month table, return the month's integer.
         if ((i = searchIntegerTable(monthtbl, upper((String)scratch))) > 0 && i <= 12) {
             *pival = i;
             return MONTH_TOK;

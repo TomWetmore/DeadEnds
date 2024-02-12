@@ -30,5 +30,6 @@ int compareNames(String name1, String name2); // Compare two Gedcom names.
 String* personKeysFromName(String name, Database*, int* pcount /*[, bool exact]*/);
 String nameString(String name);  // Remove slashes from a name.
 String trimName (String name, int len);  // Trim name to specific length.
+bool nameToList(String name, List*, int *len, int *sind);
 
 #endif // name_h

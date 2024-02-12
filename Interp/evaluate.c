@@ -304,11 +304,11 @@ GNode* evaluateFamily(PNode *pnode, Context *context, bool* errflg)
     return fam;
 }
 
-//  evaluateGNode -- Evaluate any Gedcom node expression. Return the Gedcom node.
+//  evaluateGNode -- Evaluate a Gedcom node expression. Return the Gedcom node.
 //--------------------------------------------------------------------------------------------------
 GNode* evaluateGNode(PNode *pnode, Context *context, bool* errflg)
 //  pnode -- Program node expression that should evaluate to an arbitrary Gedcom node.
-//  context -- Local symbol table.
+//  context -- Current context (symbol table and database).
 //  errflg -- Error flag.
 {
     ASSERT(pnode && context);
@@ -320,6 +320,9 @@ GNode* evaluateGNode(PNode *pnode, Context *context, bool* errflg)
 //  evaluateInteger -- Evaluate an expression that should resolve to an integer.
 //--------------------------------------------------------------------------------------------------
 int evaluateInteger(PNode *pnode, Context *context, bool *errflg)
+//  pnode -- Program node expression that should evaluate to an integer.
+//  context -- Current context (symbol table and database).
+//  errflg -- Error flag.
 {
 	ASSERT(pnode && context);
 	PValue pvalue = evaluate(pnode, context, errflg);
@@ -330,7 +333,12 @@ int evaluateInteger(PNode *pnode, Context *context, bool *errflg)
 	return (int) pvalue.value.uInt;
 }
 
+//  evaluateString -- Evaluate an expression that should resolve to a String.
+//--------------------------------------------------------------------------------------------------
 String evaluateString(PNode *pnode, Context *context, bool *errflg)
+//  pnode -- Program node expression that should evaluate to a String.
+//  context -- Current context (symbol table and database).
+//  errflg -- Error flag.
 {
 	ASSERT(pnode && context);
 	PValue pvalue = evaluate(pnode, context, errflg);

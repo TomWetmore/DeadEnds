@@ -5,7 +5,7 @@
 //    static memory. Callers of those functions must be aware of the consequences.
 //
 //  Created by Thomas Wetmore on 7 November 2022.
-//  Last changed on 16 November 2023.
+//  Last changed on 12 February 2024`.
 //
 
 #include "standard.h"
@@ -524,6 +524,38 @@ static void nameToParts(String name, String* parts)
         }
     }
 }
+
+//  name_to_list -- Convert name to string list
+//--------------------------------------------------------------------------------------------------
+bool nameToList(String name, List *list, int *plen, int *psind)
+// name	-- Gedcom name
+// list	-- list (must exist)
+// plen	-- returned length
+// psind -- index (rel 1) of surname in list
+{
+	int i;
+	String str;
+	String parts[MAXPARTS];
+	if (!name || *name == 0 || !list) return false;
+	emptyList(list);
+	*psind = 0;
+	nameToParts(name, parts);
+	for (i = 0; i < MAXPARTS; i++) {
+		if (!parts[i]) break;
+		if (*parts[i] == '/') {
+			*psind = i + 1;
+			str = strsave(parts[i] + 1);
+			if (str[strlen(str) - 1] == '/')
+				str[strlen(str) - 1] = 0;
+		} else
+			str = strsave(parts[i]);
+		setListElement(list, i + 1, str);
+	}
+	*plen = i;
+	ASSERT(*psind);
+	return true;
+}
+
 
 //  partsToName -- Convert a list of name parts back to a string.
 //    MNOTE: The returned string is in static memory.

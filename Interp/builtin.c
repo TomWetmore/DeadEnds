@@ -22,6 +22,8 @@
 #include "evaluate.h"  // evaluate.
 #include "path.h"      // fopenPath.
 #include "symboltable.h"
+#include "date.h"
+#include "place.h"
 
 //#define Table SymbolTable
 
@@ -503,33 +505,129 @@ PValue __capitalize(PNode *node, Context *context, bool* eflg)
 //  __extractdate -- Extract date from EVENT or DATE NODE
 //    usage: extractdate(NODE, VARB, VARB, VARB) -> VOID
 //--------------------------------------------------------------------------------------------------
-//PValue __extractdate (PNode *node, Table stab, bool* eflg)
-//{
-//    int da = 0, mo = 0, yr = 0;
-//    String str;
-//    PNode *arg = node->pArguments;
-//    PNode *dvar = arg->pNext;
-//    PNode *mvar = dvar->pNext;
-//    PNode *yvar = mvar->pNext;
-//    GNode gnode = evaluate(arg, stab, eflg);
-//    GNode lin = (NODE) evaluate(arg, stab, eflg);
-//    if (*eflg) return NULL;
-//    *eflg = TRUE;
-//    if (!lin) return NULL;
-//    if (!iistype(dvar, IIDENT)) return NULL;
-//    if (!iistype(mvar, IIDENT)) return NULL;
-//    if (!iistype(yvar, IIDENT)) return NULL;
-//    if (nestr("DATE", ntag(lin)))
-//        str = eventToDate(lin, NULL, FALSE);
-//    else
-//        str = nval(lin);
-//    extract_date(str, &da, &mo, &yr);
-//    assignIdent(stab, iident(dvar), (WORD) da);
-//    assignIdent(stab, iident(mvar), (WORD) mo);
-//    assignIdent(stab, iident(yvar), (WORD) yr);
-//    *eflg = FALSE;
-//    return NULL;
-//}
+PValue __extractdate (PNode *pnode, Context *context, bool* errflg)
+{
+    int da = 0, mo = 0, yr = 0, daormo = 0;
+    String str;
+    PNode *arg = pnode->arguments;
+    PNode *dvar = arg->next;
+    PNode *mvar = dvar->next;
+    PNode *yvar = mvar->next;
+    GNode *gnode = evaluateGNode(arg, context, errflg);
+	if (*errflg) {
+		prog_error(pnode, "The first argument to extractdate must be a event or DATE node.");
+		return nullPValue;
+	}
+    *errflg = true;
+	bool error = false;
+	if (dvar->type != PNIdent) error = true;
+	if (mvar->type != PNIdent) error = true;
+	if (yvar->type != PNIdent) error = true;
+	if (error) {
+		*errflg = true;
+		prog_error(pnode, "The day, month and year arguments must be identifiers.");
+		return nullPValue;
+	}
+	// gnode should be either a DATE node or an event node.
+    if (nestr("DATE", gnode->tag))
+        str = eventToDate(gnode, false);
+    else
+        str = gnode->value;
+	if (!str || *str == 0) return nullPValue;  // Not considered an error.
+	String stryear;
+    extractDate(str, &daormo, &da, &mo, &yr, &stryear);
+    assignValueToSymbol(context->symbolTable, dvar->identifier, PVALUE(PVInt, uInt, da));
+	assignValueToSymbol(context->symbolTable, mvar->identifier, PVALUE(PVInt, uInt, mo));
+	assignValueToSymbol(context->symbolTable, yvar->identifier, PVALUE(PVInt, uInt, yr));
+    *errflg = false;
+    return nullPValue;
+}
+
+//  __extractnames -- Extract name parts from person or NAME node.
+//    usage: extractnames(NODE, LIST, VARB, VARB) -> VOID
+//--------------------------------------------------------------------------------------------------
+PValue __extractnames (PNode *pnode, Context *context, bool *errflg)
+{
+	PNode *nexp = pnode->arguments;
+	PNode *lexp = nexp->next;
+	PNode *lvar = lexp->next;
+	PNode *svar = lvar->next;
+	GNode *name = evaluateGNode(nexp, context, errflg);
+	if (*errflg || nestr(name->tag, "NAME")) {
+		*errflg = true;
+		prog_error(pnode, "The first argument to extractnames must be a NAME node.");
+		return nullPValue;
+	}
+	// Get the list to put the names in.
+	PValue pvalue = evaluate(lexp, context, errflg);
+	if (*errflg || pvalue.type != PVList) {
+		*errflg = true;
+		prog_error(pnode, "The second argument to extractnames must be a list.");
+		return nullPValue;
+	}
+	List *list = pvalue.value.uList;
+	bool error = false;
+	if (!iistype(lvar, PNIdent)) error = true;
+	if (!iistype(svar, PNIdent)) error = true;
+	if (error) {
+		*errflg = true;
+		prog_error(pnode, "The third and fourth arguments to extract names must be identifiers.");
+		return nullPValue;
+	}
+	String str = name->value;
+	if (!str || *str == 0) {
+		assignValueToSymbol(context->symbolTable, lvar->identifier, PVALUE(PVInt, uInt, 0));
+		assignValueToSymbol(context->symbolTable, svar->identifier, PVALUE(PVInt, uInt, 0));
+		return nullPValue;
+	}
+	int len, sind;
+	*errflg = false;
+	nameToList(str, list, &len, &sind);
+	assignValueToSymbol(context->symbolTable, lvar->identifier, PVALUE(PVInt, uInt, len));
+	assignValueToSymbol(context->symbolTable, svar->identifier, PVALUE(PVInt, uInt, sind));
+	return nullPValue;
+}
+
+/*===============================================================
+ * _extractplaces -- Extract place parts from event or PLAC NODE.
+ *   usage: extractplaces(NODE, LIST, VARB) -> VOID
+ *=============================================================*/
+PValue __extractplaces (PNode *pnode, Context *context, bool *errflg)
+{
+	// Get the PLAC GNode to extract the places from.
+	PNode *nexp = pnode->arguments;
+	GNode *place = evaluateGNode(nexp, context, errflg);
+	if (*errflg) {
+		prog_error(pnode, "The first argument to extractplaces must be a PLAC or event node.");
+		return nullPValue;
+	}
+	if (nestr(place->tag, "PLAC")) place = PLAC(place);
+	if (!place) {
+		*errflg = true;
+		prog_error(pnode, "The first argument to extractplaces must be a PLAC or event node.");
+		return nullPValue;
+	}
+	// Get the List to put the places in.
+	PNode *lexp = nexp->next;
+	PValue pvalue = evaluate(lexp, context, errflg);
+	if (*errflg || pvalue.type != PVList) {
+		prog_error(pnode, "The second argument to extractplaces must be a List.");
+		return nullPValue;
+	}
+	List *list = pvalue.value.uList;
+	// Get the variable to put the number of places in.
+	PNode *varb = lexp->next;
+	if (varb->type != PNIdent) {
+		prog_error(pnode, "The third argument to extractplaces must be an identifier.");
+		*errflg = true;
+		return nullPValue;
+	}
+	String pstr = place->value;
+	int len;
+	placeToList(pstr, list, &len);
+	assignValueToSymbol(context->symbolTable, varb->identifier, PVALUE(PVInt, uInt, len));
+	return nullPValue;
+}
 
 //  __copyfile -- Copy the contents of a file to the output stream.
 //    usage: copyfile(STRING) -> VOID
