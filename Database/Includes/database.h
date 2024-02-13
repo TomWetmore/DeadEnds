@@ -49,6 +49,7 @@ GNode *keyToFamily(String key, Database*); // Get a family record from the datab
 GNode *keyToSource(String key, Database*); // Get a source record from the database.
 GNode *keyToEvent(String key, Database*); // Get an event record from the database.
 GNode *keyToOther(String Key, Database*); // Get an other record from the database.
+GNode *getRecord(Database*, String key);  // Get an arbitraray record from the database.
 bool storeRecord(Database*, GNode*, int lineno, ErrorLog*); // Add a record to the database.
 void showTableSizes(Database*);  // Show the sizes of the database tables. Debugging.
 void showPersonIndex(Database*); // Show the person index. Debugging.

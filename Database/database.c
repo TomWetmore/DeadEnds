@@ -7,7 +7,7 @@
 //    records is also done.
 //
 //  Created by Thomas Wetmore on 10 November 2022.
-//  Last changed 6 December 2023.
+//  Last changed 13 February 2024.
 //
 
 #include "database.h"
@@ -137,6 +137,14 @@ GNode *keyToEvent(String key, Database *database)
 	return element ? element->root : null;
 }
 
+//  keyToOther -- Get an other record from a database.
+//--------------------------------------------------------------------------------------------------
+GNode *keyToOther(String key, Database *database)
+{
+	RecordIndexEl *element = (RecordIndexEl*) searchHashTable(database->otherIndex, key);
+	return element ? element->root : null;
+}
+
 static int count = 0;  // Debugging.
 
 //  storeRecord -- Store a Gedcom node tree in the database by adding it to the record index of
@@ -249,6 +257,17 @@ static int keyLineNumber (Database *database, String key)
 	if (!element) element = searchHashTable(database->otherIndex, key);
 	if (!element) return 0; // Hasn't been seen before.
 	return element->lineNumber;
+}
+
+GNode *getRecord(Database *database, String key)
+{
+	GNode *root;
+	if ((root = keyToPerson(key, database))) return root;
+	if ((root = keyToFamily(key, database))) return root;
+	if ((root = keyToSource(key, database))) return root;
+	if ((root = keyToEvent(key, database))) return root;
+	if ((root = keyToOther(key, database))) return root;
+	return null;
 }
 
 //  Some debugging functions.

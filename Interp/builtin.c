@@ -398,7 +398,6 @@ PValue __concat (PNode *pnode, Context *context, bool *errflg)
 	if (arg == null) return nullPValue;
 	int len = 0, nstrs = 0;
 	String hold[100];
-	PValue svalue = evaluate(arg, context, errflg);
 	while (arg != null) {
 		PValue svalue = evaluate(arg, context, errflg);
 		if (*errflg || svalue.type != PVString) return nullPValue;
@@ -701,8 +700,6 @@ PValue __version(PNode *pnode, Context *context, bool* errflg)
 //--------------------------------------------------------------------------------------------------
 PValue __noop(PNode *pnode, Context *context, bool* errflg) { return nullPValue; }
 
-//  FUNCTIONS ORIGINALLY FOUND IN INTERP/WRITE.C //
-
 //  __createnode -- Create a Gedcom node.
 //    usage: createnode(STRING, STRING) -> NODE
 //--------------------------------------------------------------------------------------------------
@@ -798,5 +795,86 @@ PValue __deletenode (PNode *node, Context *context, bool *eflg)
 		parent->child = next;
 	else
 		prev->sibling = next;
+	return nullPValue;
+}
+
+//  __getrecord -- Read GEDCOM record from database.
+//    usage: getrecord(STRING) -> NODE
+//    usage: dereference(STRING) -> NODE
+//--------------------------------------------------------------------------------------------------
+PValue __getrecord (PNode *pnode, Context *context, bool *errflg)
+{
+	String key = evaluateString(pnode->arguments, context, errflg);
+	if (*errflg || !key || *key == 0) {
+		prog_error(pnode, "The first parameter to getrecord (dereference) must be a record key.");
+		*errflg = true;
+		return nullPValue;
+	}
+	GNode* root = getRecord(context->database, key);
+	return root ? PVALUE(PVGNode, uGNode, root) : nullPValue;
+}
+
+//  __freerecord
+//    usage: freerecord(NODE) -> VOID
+//--------------------------------------------------------------------------------------------------
+PValue __freerecord (PNode *pnode, Context *context, bool *errflg)
+{
+	// With an in-RAM database this function is a no-op.
+	return nullPValue;
+}
+
+//  __reference -- Check if STRING is record reference.
+//    usage: reference(STRING) -> BOOLEAN
+//--------------------------------------------------------------------------------------------------
+PValue __reference (PNode *pnode, Context *context, bool *errflg)
+{
+	String key = evaluateString(pnode->arguments, context, errflg);
+	if (*errflg) {
+		prog_error(pnode, "The argument to reference must be formatted as a record key.");
+		return nullPValue;
+	}
+	bool rvalue = (*key && (strlen(key)) > 2 && (*key == '@') &&
+		(key[strlen(key)-1] == '@'));
+	return PVALUE(PVBool, uBool, rvalue);
+}
+
+//  __extracttokens -- Extract tokens from a STRING value
+//    usage: extracttokens(STRING, LIST, VARB, STRING) -> VOID
+//--------------------------------------------------------------------------------------------------
+PValue __extracttokens (PNode *pnode, Context *context, bool *errflg)
+{
+	// Get the String to be tokenized.
+	PNode *sexp = pnode->arguments;
+	String str = evaluateString(sexp, context, errflg);
+	if (*errflg) {
+		prog_error(pnode, "The first argument to extracttokens must be a string.");
+		return nullPValue;
+	}
+	// Get the List to hold the tokens.
+	PNode *lexp = sexp->next;
+	PValue pvalue = evaluate(lexp, context, errflg);
+	if (*errflg || pvalue.type != PVList) {
+		prog_error(pnode, "The second argument to extracttokens must be a list.");
+		*errflg = true;
+		return nullPValue;
+	}
+	List *list = pvalue.value.uList;
+	// Get the identifier to hold the number of tokens returned.
+	PNode *lvar = lexp->next;
+	if (lvar->type != PNIdent) {
+		prog_error(pnode, "The third argument to extracttokens must be an identifier.");
+		*errflg = true;
+		return nullPValue;
+	}
+	// Get the delimiter between tokens.
+	String dlm = evaluateString(lvar->next, context, errflg);
+	if (*errflg || !dlm || *dlm == 0) {
+		prog_error(pnode, "The fourth argument to extracttokens must be a string delimiter");
+		*errflg = true;
+		return nullPValue;
+	}
+	int len = 0;
+	valueToList(str, list, &len, dlm);
+	assignValueToSymbol(context->symbolTable, lvar->identifier, PVALUE(PVInt, uInt, len));
 	return nullPValue;
 }

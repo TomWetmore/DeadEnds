@@ -3,7 +3,7 @@
 //  CloneOne
 //
 //  Created by Thomas Wetmore on 12 February 2024.
-//  Last changed on 12 February 2024.
+//  Last changed on 13 February 2024.
 //
 
 #include <stdio.h>
@@ -11,19 +11,18 @@
 #include "list.h"
 
 static bool inString (int chr, String str);
-bool value_to_list (String str, List *list, int *plen, String dlm);
+bool valueToList (String str, List *list, int *plen, String dlm);
 
-/*===================================================
- * place_to_list -- Convert place string to word list
- *=================================================*/
+//  place_to_list -- Convert place string to word list
+//--------------------------------------------------------------------------------------------------
 bool placeToList(String place, List *list, int *plen)
 {
-	return value_to_list(place, list, plen, ",");
+	return valueToList(place, list, plen, ",");
 }
-/*=============================================
- * value_to_list -- Convert string to word list
- *===========================================*/
-bool value_to_list (String str, List *list, int *plen, String dlm)
+
+//  valueToList -- Convert string to phrase list.
+//--------------------------------------------------------------------------------------------------
+bool valueToList (String str, List *list, int *plen, String dlm)
 {
 	static String buf = null;
 	static int len0 = 0;
