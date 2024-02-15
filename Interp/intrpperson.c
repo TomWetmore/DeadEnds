@@ -430,15 +430,14 @@ PValue __indi(PNode *pnode, Context *context, bool* errflg)
 //--------------------------------------------------------------------------------------------------
 PValue __firstindi (PNode *node, Context *context, bool *eflg)
 {
-    static char key[10];  // Static buffer used to hold person keys.
-    int i = 0;
-    *eflg = false;
-    while (true) {
-        sprintf(key, "I%d", ++i);
-        GNode *indi = keyToPerson(key, context->database);
-        if (!indi) return nullPValue;
-        return PVALUE(PVPerson, uGNode, indi);
-    }
+	List *personKeys = context->database->personKeys;
+	if (!personKeys || lengthList(personKeys) == 0) {
+		*eflg = true;
+		prog_error(node, "There must be persons in the database to call firstindi.");
+		return nullPValue;
+	}
+	sortList(personKeys, true);
+	return PVALUE(PVPerson, uGNode, keyToPerson((String) getListElement(personKeys, 0), context->database));
 }
 
 //  nextindi -- Return the next person in the database.
@@ -446,46 +445,71 @@ PValue __firstindi (PNode *node, Context *context, bool *eflg)
 //--------------------------------------------------------------------------------------------------
 PValue __nextindi (PNode *pnode, Context *context, bool *eflg)
 {
+	// Get the person that follows the argument person.
     GNode *indi = evaluatePerson(pnode->arguments, context, eflg);
     if (*eflg || !indi) {
         *eflg = true;
-        prog_error(pnode, "the argument to nextindi must be a person");
+        prog_error(pnode, "The argument to nextindi must be a person.");
         return nullPValue;
     }
-    static char key[10];
-    strcpy(key, personToKey(indi));
-    int i = atoi(&key[1]);
-    while (true) {
-        sprintf(key, "I%d", ++i);
-        indi = keyToPerson(key, context->database);
-        if (!indi) return nullPValue;
-        return PVALUE(PVPerson, uGNode, indi);
-    }
+	List *personKeys = context->database->personKeys;
+	sortList(personKeys, true);
+	int index;
+	searchList(personKeys, indi->key, &index);
+	if (index < 0 || index >= lengthList(personKeys)) {
+		*eflg = true;
+		prog_error(pnode, "The argument person doesn't have a valid index; call maintenance.");
+		return nullPValue;
+	}
+	if (index == lengthList(personKeys) - 1) { // We are at the last person.
+		return nullPValue;
+	}
+	return PVALUE(PVPerson, uGNode,
+				  keyToPerson((String) getListElement(personKeys, index + 1), context->database));
 }
 
 //  previndi -- Return the previous person in the database.
 //    usage: previndi(INDI) -> INDI
 //--------------------------------------------------------------------------------------------------
-PValue __previndi (PNode *node, Context *context, bool *eflg)
+PValue __previndi (PNode *pnode, Context *context, bool *eflg)
 {
-    GNode *indi = evaluatePerson(node->arguments, context, eflg);
-    static char key[10];
-    int i;
-    if (*eflg) return nullPValue;
-    strcpy(key, personToKey(indi));
-    i = atoi(&key[1]);
-    while (true) {
-        sprintf(key, "I%d", --i);
-        indi = keyToPerson(key, context->database);
-        if (!indi) return nullPValue;
-        return PVALUE(PVPerson, uGNode, indi);
-    }
+	// Get the person that precedes the argument person.
+	GNode *indi = evaluatePerson(pnode->arguments, context, eflg);
+	if (*eflg || !indi) {
+		*eflg = true;
+		prog_error(pnode, "The argument to previndi must be a person.");
+		return nullPValue;
+	}
+	List *personKeys = context->database->personKeys;
+	sortList(personKeys, true);
+	int index;
+	searchList(personKeys, indi->key, &index);
+	if (index < 0 || index >= lengthList(personKeys)) {
+		*eflg = true;
+		prog_error(pnode, "The argument person doesn't have a valid index; call maintenance.");
+		return nullPValue;
+	}
+	if (index == 0) { // We are at the first person.
+		return nullPValue;
+	}
+	return PVALUE(PVPerson, uGNode,
+				  keyToPerson((String) getListElement(personKeys, index - 1), context->database));
 }
 
 //  lastindi -- Return the last person in the database.
 //    usage: lastindi() -> INDI
 //--------------------------------------------------------------------------------------------------
-//WORD __lastindi (node, stab, eflg)
-//INTERP node; TABLE stab; BOOLEAN *eflg;
-//{
-//}
+PValue __lastindi (PNode *pnode, Context *context, bool *eflg)
+{
+	List *personKeys = context->database->personKeys;
+	if (!personKeys || lengthList(personKeys) == 0) {
+		*eflg = true;
+		prog_error(pnode, "There must be persons in the database to call lastindi.");
+		return nullPValue;
+	}
+	sortList(personKeys, true);
+	return PVALUE(PVPerson,
+				  uGNode,
+				  keyToPerson((String) getListElement(personKeys, lengthList(personKeys) - 1),
+							  context->database));
+}

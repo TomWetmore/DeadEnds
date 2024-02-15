@@ -6,7 +6,7 @@
 //    type. The type RecordIndex is a synonym of HashTable.
 //
 //  Created by Thomas Wetmore on 29 November 2022.
-//  Last changed on 31 October 2023.
+//  Last changed on 14 February 2024.
 //
 
 #include "recordindex.h"
@@ -87,6 +87,11 @@ void insertInRecordIndex(RecordIndex *index, String key, GNode* root, int lineNu
 	//}
 	// TODO: Should there be a warning if the element exists?
 	// TODO: Should it be an error if the element exists?
+}
+
+void insertInKeyList(List *list, String key)
+{
+	appendListElement(list, (Word) key);
 }
 
 //  getRecordInsertCount -- Return the record insert count. For debugging.

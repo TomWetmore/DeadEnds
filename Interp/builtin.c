@@ -5,7 +5,7 @@
 //    language.
 //
 //  Created by Thomas Wetmore on 14 December 2022.
-//  Last changed on 22 November 2023.
+//  Last changed on 13 February 2024      	 	.
 //
 
 #include "standard.h"
@@ -464,42 +464,23 @@ PValue __capitalize(PNode *node, Context *context, bool* eflg)
 //    return NULL;
 //}
 
-//  __root -- Return root of cached record
-//    usage: root(INDI|FAM|EVEN|SOUR|OTHR) -> NODE
+//  __root -- Return root GNode of record the argument GNode is in.
+//    usage: root(NODE) -> NODE
 //--------------------------------------------------------------------------------------------------
-//PValue __rot (PNode *pnode, Context *context, bool *errflg)
-//{
-//    String key;
-//     CACHEEL cel = (CACHEEL) evaluate(ielist(node), stab, eflg);
-//        if (*eflg || !cel) return NULL;
-//        if (cnode(cel))
-//        return (WORD) cnode(cel);
-//    key = ckey(cel);
-//    switch (*key) {
-//    case 'I': return (WORD) key_to_indi(key); break;
-//    case 'F': return (WORD) key_to_fam(key);  break;
-//    case 'E': return (WORD) key_to_even(key); break;
-//    case 'S': return (WORD) key_to_sour(key); break;
-//    case 'X': return (WORD) key_to_othr(key); break;
-//    default:  FATAL();
-//    }
-//}
+PValue __root (PNode *pnode, Context *context, bool *errflg)
+{
+	GNode *gnode = evaluateGNode(pnode, context, errflg);
+	if (*errflg) {
+		prog_error(pnode, "The first argument to root must be a Gedcom node.");
+		return nullPValue;
+	}
+	while (gnode->parent) {
+		gnode = gnode->parent;
+	}
+	return PVALUE(PVGNode, uGNode, gnode);
+}
 
-///*=====================================
-// * __trim -- Trim string if too long
-// *   usage: trim(STRING, INT) -> STRING
-// *===================================*/
-//WORD __trim (node, stab, eflg)
-//INTERP node; TABLE stab; bool *eflg;
-//{
-//    INTERP arg = (INTERP) ielist(node);
-//    STRING str = (STRING) evaluate(arg, stab, eflg);
-//    INT len;
-//    if (*eflg) return NULL;
-//    len = (INT) evaluate(inext(arg), stab, eflg);
-//    if (*eflg) return NULL;
-//    return (WORD) trim(str, len);
-//}
+
 
 //  __extractdate -- Extract date from EVENT or DATE NODE
 //    usage: extractdate(NODE, VARB, VARB, VARB) -> VOID
@@ -877,4 +858,18 @@ PValue __extracttokens (PNode *pnode, Context *context, bool *errflg)
 	valueToList(str, list, &len, dlm);
 	assignValueToSymbol(context->symbolTable, lvar->identifier, PVALUE(PVInt, uInt, len));
 	return nullPValue;
+}
+
+//  __savenode -- Save Gedcom tree permanently.
+//    usage: savenode(NODE) -> NODE
+//--------------------------------------------------------------------------------------------------
+PValue __savenode (PNode *pnode, Context *context, bool *errflg)
+{
+	GNode *node = evaluateGNode(pnode->arguments, context, errflg);
+	if (*errflg || !node) {
+		prog_error(pnode, "The argument to savenode must be a Gedcom node.");
+		*errflg = true;
+		return nullPValue;
+	}
+	return PVALUE(PVGNode, uGNode, copyNodes(node, true, true));
 }

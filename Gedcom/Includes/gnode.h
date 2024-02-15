@@ -67,7 +67,7 @@ String shorten_date(String);
 String shorten_plac(String);
 //static bool allDigits(String)
 GNode* copy_node(GNode*);
-GNode* copy_nodes(GNode*, bool, bool);
+GNode* copyNodes(GNode*, bool, bool);
 void traverseNodes (GNode* node, int level, bool (*func)(GNode*, int));
 int num_spouses_of_indi(GNode*);
 GNode* find_node(GNode*, String, String, GNode**);

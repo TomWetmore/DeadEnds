@@ -49,8 +49,8 @@ GNode* union_nodes(GNode* node1, GNode* node2, bool kids, bool copy)
 {
 	GNode *curs1, *next1, *prev1, *curs2, *prev2;
 
-	if (copy) node1 = copy_nodes(node1, true, true);
-	if (copy) node2 = copy_nodes(node2, true, true);
+	if (copy) node1 = copyNodes(node1, true, true);
+	if (copy) node2 = copyNodes(node2, true, true);
 	prev2 = null;
 	curs2 = node2;
 	while (curs2) {
@@ -89,8 +89,8 @@ GNode* intersect_nodes (GNode* node1, GNode* node2, bool kids)
 	GNode *node3, *curs3;
 
 	if (!node1 || !node2) return null;
-	node1 = copy_nodes(node1, true, true);
-	node2 = copy_nodes(node2, true, true);
+	node1 = copyNodes(node1, true, true);
+	node2 = copyNodes(node2, true, true);
 	node3 = curs3 = null;
 
 	prev1 = null;
@@ -196,7 +196,7 @@ GNode* difference_nodes (GNode* node1, GNode* node2, bool kids)
 //  kids;	/* children matter */
 {
 	GNode *prev1, *next1, *curs1, *curs2;
-	node1 = copy_nodes(node1, true, true);
+	node1 = copyNodes(node1, true, true);
 	prev1 = null;
 	curs1 = node1;
 	while (curs1) {

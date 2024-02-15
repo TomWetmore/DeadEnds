@@ -309,9 +309,9 @@ GNode* copy_node(GNode* node)
 	return createGNode(node->key, node->tag, node->value, null);
 }
 
-// copy_nodes -- Copy a tree of Nodes.
+// copyNodes -- Copy a tree of Nodes.
 //--------------------------------------------------------------------------------------------------
-GNode* copy_nodes (GNode* node, bool kids, bool sibs)
+GNode* copyNodes (GNode* node, bool kids, bool sibs)
 //  node -- Node tree to copy.
 //  kids -- If true also copy children.
 //  sibs -- if true also cope siblings.
@@ -321,7 +321,7 @@ GNode* copy_nodes (GNode* node, bool kids, bool sibs)
 	if (!node) return null;
 	new = copy_node(node);
 	if (kids && node->child) {
-		kin = copy_nodes(node->child, true, true);
+		kin = copyNodes(node->child, true, true);
 		ASSERT(kin);
 		new->child = kin;
 		while (kin) {
@@ -330,7 +330,7 @@ GNode* copy_nodes (GNode* node, bool kids, bool sibs)
 		}
 	}
 	if (sibs && node->sibling) {
-		kin = copy_nodes(node->sibling, kids, true);
+		kin = copyNodes(node->sibling, kids, true);
 		ASSERT(kin);
 		new->sibling = kin;
 	}
