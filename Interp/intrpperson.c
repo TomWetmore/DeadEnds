@@ -27,7 +27,7 @@ PValue __name(PNode *pnode, Context *context, bool* errflg)
     GNode *indi = evaluatePerson(arg, context, errflg);
     if (*errflg || !indi) {
         *errflg = true;
-        prog_error(pnode, "the first argument to name must be a person");
+        scriptError(pnode, "the first argument to name must be a person");
         return nullPValue;
     }
 
@@ -37,7 +37,7 @@ PValue __name(PNode *pnode, Context *context, bool* errflg)
         PValue caps = evaluateBoolean(arg, context, errflg);
         if (caps.type != PVBool) {
             *errflg = true;
-            prog_error(pnode, "the second argument to name must be a boolean");
+            scriptError(pnode, "the second argument to name must be a boolean");
             return nullPValue;
         }
         useCaps = caps.value.uBool;
@@ -47,7 +47,7 @@ PValue __name(PNode *pnode, Context *context, bool* errflg)
     GNode *nameNode = NAME(indi);
     if (!nameNode) {
         *errflg = true;
-        prog_error(pnode, "the person argument to name does not have a name");
+        scriptError(pnode, "the person argument to name does not have a name");
         return nullPValue;
     }
 
@@ -67,13 +67,13 @@ PValue __fullname(PNode *pnode, Context *context, bool* eflg)
     PNode *arg = pnode->arguments;
     GNode* indi = evaluatePerson(arg, context, eflg);
     if (*eflg || !indi) {
-        prog_error(pnode, "the first argument to fullname must be a person");
+        scriptError(pnode, "the first argument to fullname must be a person");
         return nullPValue;
     }
     // Evaluate the second argument, whether to use all caps.
     PValue pvalue = evaluate(arg = arg->next, context, eflg);
     if (*eflg || pvalue.type != PVBool) {
-        prog_error(pnode, "the second argument to fullname must be a boolean");
+        scriptError(pnode, "the second argument to fullname must be a boolean");
         return nullPValue;
     }
     bool caps = pvalue.value.uBool;
@@ -81,7 +81,7 @@ PValue __fullname(PNode *pnode, Context *context, bool* eflg)
     // Evaluate the third argument, whether to use surname first with comma if false.
     pvalue = evaluate(arg = arg->next, context, eflg);
     if (*eflg || pvalue.type != PVBool) {
-        prog_error(pnode, "the third argument to fullname must be a boolean");
+        scriptError(pnode, "the third argument to fullname must be a boolean");
         return nullPValue;
     }
     bool reg = pvalue.value.uBool;
@@ -89,7 +89,7 @@ PValue __fullname(PNode *pnode, Context *context, bool* eflg)
     // Evaluate the fourth argument, the max number of characters available.
     pvalue = evaluate(arg = arg->next, context, eflg);
     if (*eflg || pvalue.type != PVInt) {
-        prog_error(pnode, "the fourth argument to fullname must be an integer");
+        scriptError(pnode, "the fourth argument to fullname must be an integer");
         return nullPValue;
     }
     int len = (int) pvalue.value.uInt;
@@ -98,7 +98,7 @@ PValue __fullname(PNode *pnode, Context *context, bool* eflg)
     GNode* name;
     if (!(name = NAME(indi)) || !name->value) {
         *eflg = true;
-        prog_error(pnode, "the person must have a name");
+        scriptError(pnode, "the person must have a name");
         return nullPValue;
     }
     return PVALUE(PVString, uString, manipulateName(name->value, caps, reg, len));
@@ -112,12 +112,12 @@ PValue __surname (PNode *pnode, Context *context, bool* errflg)
     GNode* gnode = evaluatePerson(pnode->arguments, context, errflg);
     if (*errflg || !gnode) {
         *errflg = true;
-        prog_error(pnode, "the argument to surname must be a person");
+        scriptError(pnode, "the argument to surname must be a person");
         return nullPValue;
     }
     if (!(gnode = NAME(gnode)) || !gnode->value) {
         *errflg = true;
-        prog_error(pnode, "the person must have a name");
+        scriptError(pnode, "the person must have a name");
         return nullPValue;
     }
     return PVALUE(PVString, uString, getSurname(gnode->value));
@@ -131,12 +131,12 @@ PValue __givens(PNode *pnode, Context *context, bool* errflg)
     GNode* this = evaluatePerson(pnode->arguments, context, errflg);
     if (*errflg || !this) {
         *errflg = true;
-        prog_error(pnode, "the argument to givens must be a person");
+        scriptError(pnode, "the argument to givens must be a person");
         return nullPValue;
     }
     if (!(this = NAME(this)) || !this->value) {
         *errflg = true;
-        prog_error(pnode, "the person must have a name");
+        scriptError(pnode, "the person must have a name");
         return nullPValue;
     }
     return PVALUE(PVString, uString, getGivenNames(this->value));
@@ -150,18 +150,18 @@ PValue __trimname (PNode *node, Context *context, bool *eflg)
     PNode *arg = node->arguments;
     GNode *indi = evaluatePerson(arg, context, eflg);
     if (*eflg || !indi) {
-        prog_error(node, "the first argument to trimname must be a person");
+        scriptError(node, "the first argument to trimname must be a person");
         return nullPValue;
     }
     *eflg = true;
     if (!(indi = NAME(indi)) || !indi->value) {
-        prog_error(node, "the person must have a name");
+        scriptError(node, "the person must have a name");
         return nullPValue;
     }
     *eflg = false;
     PValue length = evaluate(arg->next, context, eflg);
     if (*eflg || length.type != PVInt) {
-        prog_error(node, "the second argument to trimname must be an integer");
+        scriptError(node, "the second argument to trimname must be an integer");
         return nullPValue;
     }
     return PVALUE(PVString, uString, nameString(trimName(indi->value, (int) length.value.uInt)));
@@ -175,7 +175,7 @@ PValue __birth(PNode *pnode, Context *context, bool* errflg)
     GNode* indi = evaluatePerson(pnode->arguments, context, errflg);
     if (*errflg || !indi) {
         *errflg = true;
-        prog_error(pnode, "the argument to birth must be a person");
+        scriptError(pnode, "the argument to birth must be a person");
         return nullPValue;
     }
     GNode* event = BIRT(indi);
@@ -190,7 +190,7 @@ PValue __death(PNode *pnode, Context *context, bool* errflg)
     GNode* indi = evaluatePerson(pnode->arguments, context, errflg);
     if (*errflg || !indi) {
         *errflg = true;
-        prog_error(pnode, "the argument to death must be a person");
+        scriptError(pnode, "the argument to death must be a person");
         return nullPValue;
     }
     GNode* event = DEAT(indi);
@@ -205,7 +205,7 @@ PValue __baptism(PNode *pnode, Context *context, bool* errflg)
     GNode* indi = evaluatePerson(pnode->arguments, context, errflg);
     if (*errflg || !indi) {
         *errflg = true;
-        prog_error(pnode, "the argument to baptism must be a person");
+        scriptError(pnode, "the argument to baptism must be a person");
         return nullPValue;
     }
     GNode* event = BAPT(indi);
@@ -220,7 +220,7 @@ PValue __burial(PNode *pnode, Context *context, bool* errflg)
     GNode* indi = evaluatePerson(pnode->arguments, context, errflg);
     if (*errflg || !indi) {
         *errflg = true;
-        prog_error(pnode, "the argument to burial must be a person");
+        scriptError(pnode, "the argument to burial must be a person");
         return nullPValue;
     }
     GNode* event = BURI(indi);
@@ -396,7 +396,7 @@ PValue __inode(PNode *node, Context *context, bool *eflg)
     GNode *gnode = evaluatePerson(node->arguments, context, eflg);
     if (!gnode || nestr("INDI", gnode->tag)) {
         *eflg = true;
-        prog_error(node, "the argument to inode must be a person");
+        scriptError(node, "the argument to inode must be a person");
         return nullPValue;
     }
     return PVALUE(PVPerson, uGNode, gnode);
@@ -410,7 +410,7 @@ PValue __indi(PNode *pnode, Context *context, bool* errflg)
     // Get the key string.
     PValue value = evaluate(pnode->arguments, context, errflg);
     if (value.type != PVString) {
-        prog_error(pnode, "the argument to indi must be a string");
+        scriptError(pnode, "the argument to indi must be a string");
         *errflg = true;
         return nullPValue;
     }
@@ -419,7 +419,7 @@ PValue __indi(PNode *pnode, Context *context, bool* errflg)
     // Get the person with the key.
     GNode* person = keyToPerson(key, context->database);
     if (person == null) {
-        prog_error(pnode, "could not find a person with the key '%s'", key);
+        scriptError(pnode, "could not find a person with the key '%s'", key);
         return nullPValue;
     }
     return PVALUE(PVPerson, uGNode, person);
@@ -433,7 +433,7 @@ PValue __firstindi (PNode *node, Context *context, bool *eflg)
 	List *personKeys = context->database->personKeys;
 	if (!personKeys || lengthList(personKeys) == 0) {
 		*eflg = true;
-		prog_error(node, "There must be persons in the database to call firstindi.");
+		scriptError(node, "There must be persons in the database to call firstindi.");
 		return nullPValue;
 	}
 	sortList(personKeys, true);
@@ -449,7 +449,7 @@ PValue __nextindi (PNode *pnode, Context *context, bool *eflg)
     GNode *indi = evaluatePerson(pnode->arguments, context, eflg);
     if (*eflg || !indi) {
         *eflg = true;
-        prog_error(pnode, "The argument to nextindi must be a person.");
+        scriptError(pnode, "The argument to nextindi must be a person.");
         return nullPValue;
     }
 	List *personKeys = context->database->personKeys;
@@ -458,7 +458,7 @@ PValue __nextindi (PNode *pnode, Context *context, bool *eflg)
 	searchList(personKeys, indi->key, &index);
 	if (index < 0 || index >= lengthList(personKeys)) {
 		*eflg = true;
-		prog_error(pnode, "The argument person doesn't have a valid index; call maintenance.");
+		scriptError(pnode, "The argument person doesn't have a valid index; call maintenance.");
 		return nullPValue;
 	}
 	if (index == lengthList(personKeys) - 1) { // We are at the last person.
@@ -477,7 +477,7 @@ PValue __previndi (PNode *pnode, Context *context, bool *eflg)
 	GNode *indi = evaluatePerson(pnode->arguments, context, eflg);
 	if (*eflg || !indi) {
 		*eflg = true;
-		prog_error(pnode, "The argument to previndi must be a person.");
+		scriptError(pnode, "The argument to previndi must be a person.");
 		return nullPValue;
 	}
 	List *personKeys = context->database->personKeys;
@@ -486,7 +486,7 @@ PValue __previndi (PNode *pnode, Context *context, bool *eflg)
 	searchList(personKeys, indi->key, &index);
 	if (index < 0 || index >= lengthList(personKeys)) {
 		*eflg = true;
-		prog_error(pnode, "The argument person doesn't have a valid index; call maintenance.");
+		scriptError(pnode, "The argument person doesn't have a valid index; call maintenance.");
 		return nullPValue;
 	}
 	if (index == 0) { // We are at the first person.
@@ -504,7 +504,7 @@ PValue __lastindi (PNode *pnode, Context *context, bool *eflg)
 	List *personKeys = context->database->personKeys;
 	if (!personKeys || lengthList(personKeys) == 0) {
 		*eflg = true;
-		prog_error(pnode, "There must be persons in the database to call lastindi.");
+		scriptError(pnode, "There must be persons in the database to call lastindi.");
 		return nullPValue;
 	}
 	sortList(personKeys, true);

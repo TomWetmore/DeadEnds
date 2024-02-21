@@ -29,7 +29,7 @@ PValue __indiset(PNode *programNode, Context *context, bool* errorFlag)
     PNode *argument = programNode->arguments;
     if (argument->type != PNIdent) {
         *errorFlag = true;
-        prog_error(programNode, "The argument to indiset must be an identifier.");
+        scriptError(programNode, "The argument to indiset must be an identifier.");
         return nullPValue;
     }
 
@@ -52,7 +52,7 @@ PValue __addtoset(PNode *programNode, Context *context, bool *errflg)
     PValue pvalue = evaluate(setarg, context, errflg);
     if (*errflg || pvalue.type != PVSequence) {
         *errflg = true;
-        prog_error(programNode, "The first argument to addtoset must be a set.");
+        scriptError(programNode, "The first argument to addtoset must be a set.");
         return nullPValue;
     }
     Sequence *sequence = pvalue.value.uSequence;
@@ -62,7 +62,7 @@ PValue __addtoset(PNode *programNode, Context *context, bool *errflg)
     GNode *indi = evaluatePerson(indiarg, context, errflg);
     if (*errflg || !indi) {
         *errflg = true;
-        prog_error(programNode, "The second argument to addtoset must be a person.");
+        scriptError(programNode, "The second argument to addtoset must be a person.");
         return nullPValue;
     }
 
@@ -70,7 +70,7 @@ PValue __addtoset(PNode *programNode, Context *context, bool *errflg)
     String key = indi->key;
     if (!key || *key == 0) {
         *errflg = true;
-        prog_error(programNode, "could not get the key of the person.");
+        scriptError(programNode, "could not get the key of the person.");
         return nullPValue;
     }
 
@@ -78,7 +78,7 @@ PValue __addtoset(PNode *programNode, Context *context, bool *errflg)
     PNode *anyarg = indiarg->next;
     PValue value = evaluate(anyarg, context, errflg);
     if (*errflg) {
-        prog_error(programNode, "the third argument to addtoset has an error.");
+        scriptError(programNode, "the third argument to addtoset has an error.");
         return nullPValue;
     }
 
@@ -99,7 +99,7 @@ PValue __lengthset (PNode *programNode, Context *context, bool *errorFlag)
     PValue val = evaluate(programNode->arguments, context, errorFlag);
     if (*errorFlag || val.type != PVSequence) {
         *errorFlag = true;
-        prog_error(programNode, "The arg to lengthset must be a set.");
+        scriptError(programNode, "The arg to lengthset must be a set.");
         return nullPValue;
     }
     Sequence *sequence = val.value.uSequence;
@@ -117,7 +117,7 @@ PValue __inset (PNode *programNode, Context *context, bool *eflg)
     PValue value1 = evaluate(arg1, context, eflg);
     if (*eflg || value1.type != PVSequence) {
         *eflg = true;
-        prog_error(programNode, "the first argument to inset must be a set.");
+        scriptError(programNode, "the first argument to inset must be a set.");
         return nullPValue;
     }
     Sequence *seq = value1.value.uSequence;
@@ -128,7 +128,7 @@ PValue __inset (PNode *programNode, Context *context, bool *eflg)
     PValue value2 = evaluate(arg2, context, eflg);
     if (*eflg || value2.type != PVPerson) {
         *eflg = true;
-        prog_error(programNode, "the second argument to inset must be a person.");
+        scriptError(programNode, "the second argument to inset must be a person.");
         return nullPValue;
     }
     GNode *indi = value2.value.uGNode;
@@ -150,7 +150,7 @@ PValue __deletefromset (PNode *node, Context *context, bool *eflg)
     PValue value1 = evaluate(arg1, context, eflg);
     if (*eflg || value1.type != PVSequence) {
         *eflg = true;
-        prog_error(node, "the first argument to deletefromset must be a set.");
+        scriptError(node, "the first argument to deletefromset must be a set.");
         return nullPValue;
     }
     Sequence *seq = value1.value.uSequence;
@@ -160,7 +160,7 @@ PValue __deletefromset (PNode *node, Context *context, bool *eflg)
     PValue value2 = evaluate(arg2, context, eflg);
     if (*eflg || value2.type != PVPerson) {
         *eflg = true;
-        prog_error(node, "the second argument to deletefromset must be a person.");
+        scriptError(node, "the second argument to deletefromset must be a person.");
         return nullPValue;
     }
     GNode *indi = value2.value.uGNode;
@@ -173,7 +173,7 @@ PValue __deletefromset (PNode *node, Context *context, bool *eflg)
     PValue value3 = evaluateBoolean(arg3, context, eflg);
     if (*eflg || value3.type != PVBool) {
         *eflg = true;
-        prog_error(node, "the third argument to deletefromset must be a boolean.");
+        scriptError(node, "the third argument to deletefromset must be a boolean.");
     }
     bool all = value3.value.uBool;
     bool rc;
@@ -190,7 +190,7 @@ PValue __namesort(PNode *pnode, Context *context, bool *errflg)
 {
     PValue value = evaluate(pnode->arguments, context, errflg);
     if (*errflg || value.type != PVSequence) {
-        prog_error(pnode, "the argument to namesort must be a set.");
+        scriptError(pnode, "the argument to namesort must be a set.");
         return nullPValue;
     }
     Sequence *sequence = value.value.uSequence;
@@ -205,7 +205,7 @@ PValue __keysort (PNode *node, Context *context, bool *eflg)
 {
     PValue value = evaluate(node->arguments, context, eflg);
     if (*eflg || value.type != PVSequence) {
-        prog_error(node, "the arg to keysort must be a set.");
+        scriptError(node, "the arg to keysort must be a set.");
         return nullPValue;
     }
     Sequence *sequence = value.value.uSequence;
@@ -220,7 +220,7 @@ PValue __valuesort (PNode *node, Context *context, bool *eflg)
 {
     PValue value = evaluate(node->arguments, context, eflg);
     if (*eflg || value.type != PVSequence) {
-        prog_error(node, "the arg to valuesort must be a set.");
+        scriptError(node, "the arg to valuesort must be a set.");
         return nullPValue;
     }
     Sequence *sequence = value.value.uSequence;
@@ -235,7 +235,7 @@ PValue __uniqueset (PNode *node, Context *context, bool *eflg)
 {
     PValue value = evaluate(node->arguments, context, eflg);
     if (*eflg || value.type != PVSequence) {
-        prog_error(node, "the arg to uniqueset must be a set");
+        scriptError(node, "the arg to uniqueset must be a set");
         return nullPValue;
     }
     Sequence *sequence = value.value.uSequence;
@@ -251,7 +251,7 @@ PValue __union(PNode *node, Context *context, bool *eflg)
     PNode *arg1 = node->arguments, *arg2 = arg1->next;
     PValue val = evaluate(arg1, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(node, "the first argument to union must be a set.");
+        scriptError(node, "the first argument to union must be a set.");
         return nullPValue;
     }
     Sequence *op1 = val.value.uSequence;
@@ -259,7 +259,7 @@ PValue __union(PNode *node, Context *context, bool *eflg)
     // Get the second sequence for the union operatoin.
     val = evaluate(arg2, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(node, "the second arg to union must be a set.");
+        scriptError(node, "the second arg to union must be a set.");
         return nullPValue;
     }
     Sequence *op2 = val.value.uSequence;
@@ -276,7 +276,7 @@ PValue __intersect (PNode *node, Context *context, bool *eflg)
     PNode *arg1 = node->arguments, *arg2 = arg1->next;
     PValue val = evaluate(arg1, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(node, "the first argument to intersect must be a set.");
+        scriptError(node, "the first argument to intersect must be a set.");
         return nullPValue;
     }
     Sequence *op1 = val.value.uSequence;
@@ -284,7 +284,7 @@ PValue __intersect (PNode *node, Context *context, bool *eflg)
     // Get the second sequence for the intersection operatoin.
     val = evaluate(arg2, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(node, "the second arg to intersect must be a set.");
+        scriptError(node, "the second arg to intersect must be a set.");
         return nullPValue;
     }
     Sequence *op2 = val.value.uSequence;
@@ -301,7 +301,7 @@ PValue __difference(PNode *node, Context *context, bool *eflg)
     PNode *arg1 = node->arguments, *arg2 = arg1->next;
     PValue val = evaluate(arg1, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(node, "the first argument to difference must be a set.");
+        scriptError(node, "the first argument to difference must be a set.");
         return nullPValue;
     }
     Sequence *op1 = val.value.uSequence;
@@ -309,7 +309,7 @@ PValue __difference(PNode *node, Context *context, bool *eflg)
     // Get the second sequence for the difference operatoin.
     val = evaluate(arg2, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(node, "the second arg to difference must be a set.");
+        scriptError(node, "the second arg to difference must be a set.");
         return nullPValue;
     }
     Sequence *op2 = val.value.uSequence;
@@ -324,7 +324,7 @@ PValue __parentset(PNode *node, Context *context, bool *eflg)
 {
     PValue val = evaluate(node->arguments, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(node, "the arg to parentset must be a set.");
+        scriptError(node, "the arg to parentset must be a set.");
         return nullPValue;
     }
     Sequence *seq = val.value.uSequence;
@@ -338,7 +338,7 @@ PValue __childset(PNode *node, Context *context, bool *eflg)
 {
     PValue val = evaluate(node->arguments, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(node, "the arg to childset must be a set.");
+        scriptError(node, "the arg to childset must be a set.");
         return nullPValue;
     }
     Sequence *seq = val.value.uSequence;
@@ -352,7 +352,7 @@ PValue __siblingset(PNode *node, Context *context, bool *eflg)
 {
     PValue val = evaluate(node->arguments, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(node, "the argument to siblingset must be a set");
+        scriptError(node, "the argument to siblingset must be a set");
         return nullPValue;
     }
     Sequence *seq = val.value.uSequence;
@@ -366,7 +366,7 @@ PValue __spouseset (PNode *node, Context *context, bool *eflg)
 {
     PValue val = evaluate(node->arguments, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(node, "the argument to spouseset must be a set");
+        scriptError(node, "the argument to spouseset must be a set");
         return nullPValue;
     }
     Sequence *seq = val.value.uSequence;
@@ -381,7 +381,7 @@ PValue __ancestorset (PNode *programNode, Context *context, bool *errorFlag)
     PValue programValue = evaluate(programNode->arguments, context, errorFlag);
     if (*errorFlag || programValue.type != PVSequence) {
         *errorFlag = true;
-        prog_error(programNode, "the argument to ancestorset must be a set.");
+        scriptError(programNode, "the argument to ancestorset must be a set.");
         return nullPValue;
     }
     return PVALUE(PVSequence, uSequence, ancestorSequence(programValue.value.uSequence));
@@ -398,7 +398,7 @@ PValue __descendentset (PNode *programNode, Context *context, bool *eflg)
     //  The single argument must evaluate to a sequence.
     PValue val = evaluate(programNode->arguments, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(programNode, "the arg to descendentset must be a set.");
+        scriptError(programNode, "the arg to descendentset must be a set.");
         return nullPValue;
     }
     return PVALUE(PVSequence, uSequence, descendentSequence(val.value.uSequence));
@@ -414,7 +414,7 @@ PValue __gengedcom(PNode *programNode, Context *context, bool *eflg)
     //  The argument must evaluate to a sequence.
     PValue val = evaluate(programNode->arguments, context, eflg);
     if (*eflg || val.type != PVSequence) {
-        prog_error(programNode, "the argument to gengedcom must be a set");
+        scriptError(programNode, "the argument to gengedcom must be a set");
         return nullPValue;
     }
 

@@ -122,14 +122,14 @@ bool evaluateConditional(PNode *pnode, Context *context, bool *errflg)
     // The identifier must be an identifier.
     if (iden && iden->type != PNIdent) {
         *errflg = true;
-        prog_error(pnode, "The first argument in a conditional expression must be an identifier.");
+        scriptError(pnode, "The first argument in a conditional expression must be an identifier.");
         return false;
     }
 
     // Evaluate the expression.
     PValue value = evaluate(expr, context, errflg);
     if (*errflg) {
-        prog_error(pnode, "There was an error evaluating the conditional expression.");
+        scriptError(pnode, "There was an error evaluating the conditional expression.");
         return false;
     }
 
@@ -165,7 +165,7 @@ PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg)
     // Look up the function in the function table.
     PNode *func;
     if ((func = (PNode*) searchFunctionTable(functionTable, name)) == null) {
-        prog_error(pnode, "The function %s is undefined", pnode->funcName);
+        scriptError(pnode, "The function %s is undefined", pnode->funcName);
         return nullPValue;
     }
     // Create a symbol table for the function.
@@ -182,7 +182,7 @@ PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg)
         //  Evaluate the current argument; return if there is an error.
         PValue value = evaluate(arg, context, errflg);
         if (*errflg) {
-            prog_error(pnode, "could not evaluate an argument expression");
+            scriptError(pnode, "could not evaluate an argument expression");
             return nullPValue;
         }
         //  Assign the value of the argument to the parameter.
@@ -194,7 +194,7 @@ PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg)
     }
     //  Check there are the same number of arguments and parameters.
     if (arg || parm) {
-        prog_error(pnode, "there are different numbers of arguments and parameters");
+        scriptError(pnode, "there are different numbers of arguments and parameters");
         deleteHashTable(newtab);
         return nullPValue;
     }

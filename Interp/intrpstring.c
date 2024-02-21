@@ -20,19 +20,19 @@ PValue __substring (PNode *pnode, Context *context, bool *errflg)
 	PNode *arg = pnode->arguments;
 	String full = evaluateString(arg, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The first argument to substring must be a string.");
+		scriptError(pnode, "The first argument to substring must be a string.");
 		return nullPValue;
 	}
 	arg = arg->next;
 	int lo = evaluateInteger(arg, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The second argument to substring must be an integer.");
+		scriptError(pnode, "The second argument to substring must be an integer.");
 		return nullPValue;
 	}
 	arg = arg->next;
 	int hi = evaluateInteger(arg, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The third argument to substring must be an integer.");
+		scriptError(pnode, "The third argument to substring must be an integer.");
 		return nullPValue;
 	}
 	return PVALUE(PVString, uString, substring(full, lo, hi));
@@ -47,14 +47,14 @@ PValue __trim (PNode *pnode, Context *context, bool *errflg)
 	PNode *arg = pnode->arguments;
 	String string = evaluateString(arg, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The first argument to trim must be a string.");
+		scriptError(pnode, "The first argument to trim must be a string.");
 		return nullPValue;
 	}
 	// Get the maximum size of the String.
 	arg = arg->next;
 	int length = evaluateInteger(arg, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The second argument to time must be an integer.");
+		scriptError(pnode, "The second argument to time must be an integer.");
 		return nullPValue;
 	}
 	return PVALUE(PVString, uString, strsave(trim(string, length)));
@@ -69,14 +69,14 @@ PValue __rjustify (PNode *pnode, Context *context, bool *errflg)
 	PNode *arg = pnode->arguments;
 	String string = evaluateString(arg, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The first argument to rjustify must be a string.");
+		scriptError(pnode, "The first argument to rjustify must be a string.");
 		return nullPValue;
 	}
 	// Get the size of field to right justify the String into.
 	arg = arg->next;
 	int length = evaluateInteger(arg, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The second argument to rjustify must be an integer.");
+		scriptError(pnode, "The second argument to rjustify must be an integer.");
 		return nullPValue;
 	}
 	return PVALUE(PVString, uString, strsave(rightjustify(string, length)));

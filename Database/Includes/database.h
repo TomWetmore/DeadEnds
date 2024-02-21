@@ -4,7 +4,7 @@
 //  database.h
 //
 //  Created by Thomas Wetmore on 10 November 2022.
-//  Last changed on 25 January 2024.
+//  Last changed on 22 February 2024.
 //
 
 #ifndef database_h
@@ -17,8 +17,10 @@
 #include "refnindex.h"
 #include "gnode.h"
 #include "errors.h"
+#include "keylist.h"
 
 typedef HashTable RecordIndex;
+typedef List KeyList;
 
 //  Database -- Database structure for genealogical data encoded in Gedcom form.
 //--------------------------------------------------------------------------------------------------
@@ -29,11 +31,11 @@ typedef struct Database {
     RecordIndex *familyIndex;  // Index of families in this database.
     RecordIndex *sourceIndex;  // Index of sources in this database.
     RecordIndex *eventIndex;  // Index of events in this database.
-    RecordIndex *otherIndex;  // Indes of other records in this database.
+    RecordIndex *otherIndex;  // Index of other records in this database.
     NameIndex *nameIndex;  // Index of the names of the persons in this database.
 	RefnIndex *refnIndex;  // Inde of the REFN values in this database.
-	List *personKeys;  // List of all person keys in the database.
-	List *familyKeys;  // List of all family keys in the database.
+	KeyList *personKeys;  // List of all person keys in the database.
+	KeyList *familyKeys;  // List of all family keys in the database.
 } Database;
 
 Database *createDatabase(String fileName); // Create an empty database.
@@ -56,6 +58,6 @@ bool storeRecord(Database*, GNode*, int lineno, ErrorLog*); // Add a record to t
 void showTableSizes(Database*);  // Show the sizes of the database tables. Debugging.
 void showPersonIndex(Database*); // Show the person index. Debugging.
 void showFamilyIndex(Database*); // Show the family index. Debugging.
-void insertInKeyList(List*, String);
+//void insertInKeyList(List*, String);
 
 #endif // database_h

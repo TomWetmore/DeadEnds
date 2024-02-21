@@ -18,11 +18,10 @@
 #include "nameindex.h"
 #include "path.h"
 #include "errors.h"
+#include "keylist.h"
 
 static bool debugging = false;
 static int keyLineNumber(Database*, String key);
-static int keycmp(Word a, Word b) { return strcmp((String) a, (String) b); }
-static String keyget(Word a) { return (String) a; }
 
 //  createDatabase -- Create a database.
 //--------------------------------------------------------------------------------------------------
@@ -38,8 +37,8 @@ Database *createDatabase(String filePath)
 	database->otherIndex = createRecordIndex();
 	database->nameIndex = createNameIndex();
 	database->refnIndex = createRefnIndex();
-	database->personKeys = createList(keycmp, null, keyget);
-	database->familyKeys = createList(keycmp, null, keyget);
+	database->personKeys = createKeyList(database);
+	database->familyKeys = createKeyList(database);
 	return database;
 }
 

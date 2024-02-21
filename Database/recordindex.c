@@ -89,10 +89,7 @@ void insertInRecordIndex(RecordIndex *index, String key, GNode* root, int lineNu
 	// TODO: Should it be an error if the element exists?
 }
 
-void insertInKeyList(List *list, String key)
-{
-	appendListElement(list, (Word) key);
-}
+
 
 //  getRecordInsertCount -- Return the record insert count. For debugging.
 //--------------------------------------------------------------------------------------------------

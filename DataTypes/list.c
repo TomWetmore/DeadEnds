@@ -7,24 +7,24 @@
 //    list is created.
 //
 //  Created by Thomas Wetmore on 22 November 2022.
-//  Last changed on 1 November 2023.
+//  Last changed on 20 February 2024.
 //
 
 #include "list.h"
-#include "sort.h"  // sortList.
+#include "sort.h"
 
 static bool debugging = false;
 
-//  Local function.
+//  growList grows the size of a list when necessary. Is is a local function.
 //--------------------------------------------------------------------------------------------------
 static void growList(List*);
 
-// createList -- Create an array-based List.
+// createList creates an array-based list.
 //--------------------------------------------------------------------------------------------------
 List *createList(int (*compare)(Word, Word), void (*delete)(Word), String(*getKey)(Word))
-//  compare -- Compare function for elements; required for sorted lists.
-//  delete -- Optional delete function for elements.
-//  getkey -- Optional get key function for elements.
+//  compare is a function that compares list elements. It is required for sorted lists.
+//  delete is an optional function called on elements when they are deleted.
+//  getkey is an optional function that returns the key value of elements.
 {
 	List *list = (List*) stdalloc(sizeof(List));
 	list->isSorted = true;  // An empty List is a sorted List.
@@ -94,7 +94,7 @@ void prependListElement(List *list, Word value)
 	int length = list->length;
 	if (length >= list->maxLength) growList(list);
 	Word* data = list->data;
-	for (int i = length; i > 0; i--) {
+	for (int i = length; i > 0; i--) { // Expensive
 		data[i] = data[i - 1];
 	}
 	data[0] = value;
@@ -159,7 +159,7 @@ bool insertSortedListElement(List *list, Word value)
 
 //  removeListElement -- Remove an indexed value from a list. This does not affect the sorted
 //    state of the list. If the list is empty return the null pointer.
-//  MNOTE: The caller takes responsibility to delete the removed element.
+//    MNOTE: The caller takes on the responsibility of deleting the removed element.
 //--------------------------------------------------------------------------------------------------
 Word removeListElement(List *list, int index)
 {
@@ -174,7 +174,8 @@ Word removeListElement(List *list, int index)
 	return element;
 }
 
-//  removeFirstListElement -- Remove the first element from a list.
+//  removeFirstListElement removes the first element from a list.
+//    MNOTE: The caller takes on the responsibility of deleting the removed element.
 //-------------------------------------------------------------------------------------------------
 Word removeFirstListElement(List *list)
 {
@@ -184,6 +185,7 @@ Word removeFirstListElement(List *list)
 }
 
 //  removeLastListElement -- Remove the last element from a list.
+//    MNOTE: The caller takes on the responsibility of deleting the removed element.
 //-------------------------------------------------------------------------------------------------
 Word removeLastListElement(List *list)
 {
@@ -192,7 +194,7 @@ Word removeLastListElement(List *list)
 	return removeListElement(list, list->length - 1);
 }
 
-//  showList -- Show the contents of a List. Intended for debugging. If the describe function is
+//  showList shows the contents of a List. Intended for debugging. If the describe function is
 //    not null, call it to get the String from of the element to print. Otherwise assume the
 //    elements are strings.
 //--------------------------------------------------------------------------------------------------
@@ -207,7 +209,7 @@ void showList(List *list, String (*describe)(Word))
 	}
 }
 
-//  uniqueList -- Remove duplicates from a List. The List is sorted if it is not already.
+//  uniqueList removes duplicates from a List. The List is sorted if it is not already.
 //    Uniqueness is defined by the compare function. The list will be sorted even if its keep
 //    sorted flag is not set or its length is less that the sort threshold.
 //--------------------------------------------------------------------------------------------------

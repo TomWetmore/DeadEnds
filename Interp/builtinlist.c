@@ -21,7 +21,7 @@ PValue __list(PNode *pnode, Context *context, bool *eflg)
     // Get the identifier.
     PNode *var = pnode->arguments;
     if (var->type != PNIdent) {
-        prog_error(pnode, "the argument to list must be an identifier");
+        scriptError(pnode, "the argument to list must be an identifier");
         *eflg = true;
         return nullPValue;
     }
@@ -46,7 +46,7 @@ PValue __push(PNode *node, Context *context, bool *eflg)
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVList) {
         *eflg = true;
-        prog_error(node, "the first first argument to push/enqueue must be a list");
+        scriptError(node, "the first first argument to push/enqueue must be a list");
         return nullPValue;
     }
     List *list = pvalue.value.uList;
@@ -55,7 +55,7 @@ PValue __push(PNode *node, Context *context, bool *eflg)
     //  The second argument must be a program value.
     pvalue = evaluate(arg->next, context, eflg);
     if (*eflg) {
-        prog_error(node, "the second argument to push/enqueue must have a program value");
+        scriptError(node, "the second argument to push/enqueue must have a program value");
         return nullPValue;
     }
 
@@ -75,7 +75,7 @@ PValue __requeue (PNode *node, Context *context, bool *eflg)
     //  The first argument must be a list.
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVList) {
-        prog_error(node, "the first argument to requeue must be a list");
+        scriptError(node, "the first argument to requeue must be a list");
         *eflg = true;
         return nullPValue;
     }
@@ -84,7 +84,7 @@ PValue __requeue (PNode *node, Context *context, bool *eflg)
     //  The second argument must be a program value.
     pvalue = evaluate(node->arguments->next, context, eflg);
     if (*eflg) {
-        prog_error(node, "the second argument to requeue must be a program value");
+        scriptError(node, "the second argument to requeue must be a program value");
         return nullPValue;
     }
 
@@ -103,7 +103,7 @@ PValue __pop(PNode *node, Context *context, bool *eflg)
     //  The first argument must be a list.
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVList) {
-        prog_error(node, "the argument to pop must be a list");
+        scriptError(node, "the argument to pop must be a list");
         *eflg = true;
         return nullPValue;
     }
@@ -126,7 +126,7 @@ PValue __dequeue(PNode *node, Context *context, bool *eflg)
     //  The argument must be a list.
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVList) {
-        prog_error(node, "the argument to pop must be a list");
+        scriptError(node, "the argument to pop must be a list");
         *eflg = true;
         return nullPValue;
     }
@@ -149,7 +149,7 @@ PValue __empty (PNode *pnode, Context *context, bool *eflg)
     //  The argument must be a list.
     PValue pvalue = evaluate(pnode->arguments, context, eflg);
     if (*eflg || pvalue.type != PVList) {
-        prog_error(pnode, "the argument to empty is not a list");
+        scriptError(pnode, "the argument to empty is not a list");
         *eflg = true;
         return nullPValue;
     }
@@ -166,7 +166,7 @@ PValue __getel (PNode *node, Context *context, bool *eflg)
     PNode *arg = node->arguments;
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVList) {
-        prog_error(node, "the first argument to getel must be a list");
+        scriptError(node, "the first argument to getel must be a list");
         *eflg = true;
         return nullPValue;
     }
@@ -175,7 +175,7 @@ PValue __getel (PNode *node, Context *context, bool *eflg)
     //  Get the index.
     pvalue = evaluate(arg->next, context, eflg);
     if (*eflg || pvalue.type != PVInt) {
-        prog_error(node, "the second argument to getel must be an integer index");
+        scriptError(node, "the second argument to getel must be an integer index");
         *eflg = true;
         return nullPValue;
     }
@@ -183,7 +183,7 @@ PValue __getel (PNode *node, Context *context, bool *eflg)
 
     // Be sure the index is within range.
     if (index < 0 || index >= lengthList(list)) {
-        prog_error(node, "the index to getel is out of range");
+        scriptError(node, "the index to getel is out of range");
         *eflg = true;
         return nullPValue;
     }
@@ -203,7 +203,7 @@ PValue __setel (PNode *node, Context *context, bool *eflg)
     PNode *arg = node->arguments;
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVList) {
-        prog_error(node, "the first argument to setel must be a list");
+        scriptError(node, "the first argument to setel must be a list");
         *eflg = true;
         return nullPValue;
     }
@@ -213,7 +213,7 @@ PValue __setel (PNode *node, Context *context, bool *eflg)
     arg = arg->next;
     pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVInt) {
-        prog_error(node, "the second argument to setel must be a integer");
+        scriptError(node, "the second argument to setel must be a integer");
         *eflg = true;
         return nullPValue;
     }
@@ -221,7 +221,7 @@ PValue __setel (PNode *node, Context *context, bool *eflg)
 
     // Be sure the index is within range.
     if (index < 0 || index >= lengthList(list)) {
-        prog_error(node, "the index to setel is out of range");
+        scriptError(node, "the index to setel is out of range");
         *eflg = true;
         return nullPValue;
     }
@@ -230,7 +230,7 @@ PValue __setel (PNode *node, Context *context, bool *eflg)
     arg = arg->next;
     pvalue = evaluate(arg, context, eflg);
     if (*eflg) {
-        prog_error(node, "the third argument to setel is in error");
+        scriptError(node, "the third argument to setel is in error");
         return nullPValue;
     }
     PValue *ppvalue = (PValue*) stdalloc(sizeof(PValue));
@@ -248,7 +248,7 @@ PValue __length (PNode *node, Context *context, bool *eflg)
     PNode *arg = node->arguments;
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVList) {
-        prog_error(node, "the first argument to setel must be a list");
+        scriptError(node, "the first argument to setel must be a list");
         *eflg = true;
         return nullPValue;
     }
@@ -265,12 +265,12 @@ InterpType interpForList(PNode *node, Context *context, PValue *pval)
     bool eflg = false;
     PValue pvalue = evaluate(node->listExpr, context, &eflg);
     if (eflg) {
-        prog_error(node, "The first argument to forlist must be a list");
+        scriptError(node, "The first argument to forlist must be a list");
         return InterpError;
     }
     List *list = pvalue.value.uList;
     if (!list) {
-        prog_error(node, "The first argument to forlist is in error");
+        scriptError(node, "The first argument to forlist is in error");
         return InterpError;
     }
     int count = 0;

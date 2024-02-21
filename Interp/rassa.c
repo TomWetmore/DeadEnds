@@ -95,14 +95,14 @@ PValue __newfile (PNode *pnode, Context *context, bool *errflg)
 	PNode *arg = pnode->arguments;
 	PValue pvalue = evaluate(arg, context, errflg);
 	if (*errflg || pvalue.type != PVString || strlen(pvalue.value.uString) == 0) {
-		prog_error(pnode, "First argument to newfile must be a string.");
+		scriptError(pnode, "First argument to newfile must be a string.");
 		return nullPValue;
 	}
 	String name = pvalue.value.uString;
 	arg = arg->next;
 	pvalue = evaluateBoolean(arg, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "Second argument to newfile must be a boolean.");
+		scriptError(pnode, "Second argument to newfile must be a boolean.");
 		return nullPValue;
 	}
 	bool aflag = pvalue.value.uBool;
@@ -113,7 +113,7 @@ PValue __newfile (PNode *pnode, Context *context, bool *errflg)
 	}
 	outfilename = strsave(name);
 	if (!(Poutfp = fopenPath(name, aflag?"a":"w", "." /*llprograms*/))) {
-		prog_error(pnode, "Could not open file %s", name);
+		scriptError(pnode, "Could not open file %s", name);
 		return nullPValue;
 	}
 	return nullPValue;
@@ -144,18 +144,18 @@ PValue __pos (PNode *pnode, Context *context, bool *errflg)
 	PNode *arg = pnode->arguments;
 	int col = evaluateInteger(arg, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The first argument to pos must be an integer");
+		scriptError(pnode, "The first argument to pos must be an integer");
 		return nullPValue;
 	}
 	int row = evaluateInteger(arg->next, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The second argument to pos must be an integer.");
+		scriptError(pnode, "The second argument to pos must be an integer.");
 		return nullPValue;
 	}
 	*errflg = true;
 	if (outputmode != PAGEMODE || row < 1 || row > __rows ||
 		col < 1 || col > __cols) {
-		prog_error(pnode, "There is an error in the page mode, row or col values.");
+		scriptError(pnode, "There is an error in the page mode, row or col values.");
 		return nullPValue;
 	}
 	*errflg = false;
@@ -171,12 +171,12 @@ PValue __row (PNode *pnode, Context *context, bool *errflg)
 {
 	int row = evaluateInteger(pnode->arguments, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The argument to row must be an integer.");
+		scriptError(pnode, "The argument to row must be an integer.");
 		return nullPValue;
 	}
 	*errflg = true;
 	if (outputmode != PAGEMODE || row < 1 || row > __rows) {
-		prog_error(pnode, "There is an error in the output mode or row value.");
+		scriptError(pnode, "There is an error in the output mode or row value.");
 		return nullPValue;
 	};
 	*errflg = false;
@@ -192,7 +192,7 @@ PValue __col (PNode *pnode, Context *context, bool *errflg)
 {
 	int col = evaluateInteger(pnode->arguments, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The argument to col must be an integer.");
+		scriptError(pnode, "The argument to col must be an integer.");
 		return nullPValue;
 	}
 	if (col < 1) col = 1;

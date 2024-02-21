@@ -21,7 +21,7 @@ PValue __table(PNode *pnode, Context *context, bool *eflg)
     PNode *var = pnode->arguments;
     if (var->type != PNIdent) {
         *eflg = true;
-        prog_error(pnode, "the argument to table must be an identifier");
+        scriptError(pnode, "the argument to table must be an identifier");
         return nullPValue;
     }
 
@@ -40,7 +40,7 @@ PValue __insert (PNode *node, Context *context, bool *eflg)
     PNode *arg = node->arguments;
     if (arg->type != PNIdent) {
         *eflg = true;
-        prog_error(node, "the first argument to insert must be an identifier");
+        scriptError(node, "the first argument to insert must be an identifier");
         return nullPValue;
     }
 
@@ -48,7 +48,7 @@ PValue __insert (PNode *node, Context *context, bool *eflg)
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVTable) {
         *eflg = true;
-        prog_error(node, "the first argument to insert must identify a table");
+        scriptError(node, "the first argument to insert must identify a table");
     }
     PValueTable *table = pvalue.value.uTable;
 
@@ -56,7 +56,7 @@ PValue __insert (PNode *node, Context *context, bool *eflg)
     arg = arg->next;
     if (arg->type != PNIdent) {
         *eflg = true;
-        prog_error(node, "the second argument to insert must be an identifier");
+        scriptError(node, "the second argument to insert must be an identifier");
         return nullPValue;
     }
     String key = arg->stringCons;
@@ -65,7 +65,7 @@ PValue __insert (PNode *node, Context *context, bool *eflg)
     arg = arg->next;
     pvalue = evaluate(arg, context, eflg);
     if (*eflg) {
-        prog_error(node, "the third argument to insert must be a value");
+        scriptError(node, "the third argument to insert must be a value");
         return nullPValue;
     }
 
@@ -84,7 +84,7 @@ PValue __lookup (PNode *node, Context *context, bool *eflg)
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVTable) {
         *eflg = true;
-        prog_error(node, "the first argument to lookup must be a table");
+        scriptError(node, "the first argument to lookup must be a table");
         return nullPValue;
     }
     PValueTable *table = pvalue.value.uTable;
@@ -93,7 +93,7 @@ PValue __lookup (PNode *node, Context *context, bool *eflg)
     arg = arg->next;
     if (arg->type != PNIdent) {
         *eflg = true;
-        prog_error(node, "the second argument to lookup must be an identifier");
+        scriptError(node, "the second argument to lookup must be an identifier");
         return nullPValue;
     }
     String key = arg->stringCons;

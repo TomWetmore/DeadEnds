@@ -307,7 +307,7 @@ PValue __strcmp (PNode *pnode, Context *context, bool *eflg)
 	PNode *arg = pnode->arguments;
 	PValue pvalue = evaluate(arg, context, eflg);
 	if (pvalue.type != PVString) {
-		prog_error(pnode, "the first argument to strcmp must be a string");
+		scriptError(pnode, "the first argument to strcmp must be a string");
 		*eflg = true;
 		return nullPValue;
 	}
@@ -315,7 +315,7 @@ PValue __strcmp (PNode *pnode, Context *context, bool *eflg)
 	arg = arg->next;
 	pvalue = evaluate(arg, context, eflg);
 	if (pvalue.type != PVString) {
-		prog_error(pnode, "the second argument to strcmp must be a string");
+		scriptError(pnode, "the second argument to strcmp must be a string");
 		*eflg = true;
 		return nullPValue;
 	}
@@ -331,7 +331,7 @@ PValue __eqstr (PNode *node, Context *context, bool *eflg)
 	PNode *arg = node->arguments;
 	PValue pvalue = evaluate(arg, context, eflg);
 	if (pvalue.type != PVString) {
-		prog_error(node, "the first argument to eqstr must be a string");
+		scriptError(node, "the first argument to eqstr must be a string");
 		*eflg = true;
 		return nullPValue;
 	}
@@ -339,7 +339,7 @@ PValue __eqstr (PNode *node, Context *context, bool *eflg)
 	arg = arg->next;
 	pvalue = evaluate(arg, context, eflg);
 	if (pvalue.type != PVString) {
-		prog_error(node, "the second argument to eqstr must be a string");
+		scriptError(node, "the second argument to eqstr must be a string");
 		*eflg = true;
 		return nullPValue;
 	}
@@ -372,7 +372,7 @@ PValue __save (PNode *pnode, Context *context, bool *errflg)
 {
     String value = evaluateString(pnode->arguments, context, errflg);
 	if (*errflg || !value || *value == 0) {
-		prog_error(pnode, "The argument to save must be a string.");
+		scriptError(pnode, "The argument to save must be a string.");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -471,7 +471,7 @@ PValue __root (PNode *pnode, Context *context, bool *errflg)
 {
 	GNode *gnode = evaluateGNode(pnode, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The first argument to root must be a Gedcom node.");
+		scriptError(pnode, "The first argument to root must be a Gedcom node.");
 		return nullPValue;
 	}
 	while (gnode->parent) {
@@ -495,7 +495,7 @@ PValue __extractdate (PNode *pnode, Context *context, bool* errflg)
     PNode *yvar = mvar->next;
     GNode *gnode = evaluateGNode(arg, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The first argument to extractdate must be a event or DATE node.");
+		scriptError(pnode, "The first argument to extractdate must be a event or DATE node.");
 		return nullPValue;
 	}
     *errflg = true;
@@ -505,7 +505,7 @@ PValue __extractdate (PNode *pnode, Context *context, bool* errflg)
 	if (yvar->type != PNIdent) error = true;
 	if (error) {
 		*errflg = true;
-		prog_error(pnode, "The day, month and year arguments must be identifiers.");
+		scriptError(pnode, "The day, month and year arguments must be identifiers.");
 		return nullPValue;
 	}
 	// gnode should be either a DATE node or an event node.
@@ -535,14 +535,14 @@ PValue __extractnames (PNode *pnode, Context *context, bool *errflg)
 	GNode *name = evaluateGNode(nexp, context, errflg);
 	if (*errflg || nestr(name->tag, "NAME")) {
 		*errflg = true;
-		prog_error(pnode, "The first argument to extractnames must be a NAME node.");
+		scriptError(pnode, "The first argument to extractnames must be a NAME node.");
 		return nullPValue;
 	}
 	// Get the list to put the names in.
 	PValue pvalue = evaluate(lexp, context, errflg);
 	if (*errflg || pvalue.type != PVList) {
 		*errflg = true;
-		prog_error(pnode, "The second argument to extractnames must be a list.");
+		scriptError(pnode, "The second argument to extractnames must be a list.");
 		return nullPValue;
 	}
 	List *list = pvalue.value.uList;
@@ -551,7 +551,7 @@ PValue __extractnames (PNode *pnode, Context *context, bool *errflg)
 	if (!iistype(svar, PNIdent)) error = true;
 	if (error) {
 		*errflg = true;
-		prog_error(pnode, "The third and fourth arguments to extract names must be identifiers.");
+		scriptError(pnode, "The third and fourth arguments to extract names must be identifiers.");
 		return nullPValue;
 	}
 	String str = name->value;
@@ -578,27 +578,27 @@ PValue __extractplaces (PNode *pnode, Context *context, bool *errflg)
 	PNode *nexp = pnode->arguments;
 	GNode *place = evaluateGNode(nexp, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The first argument to extractplaces must be a PLAC or event node.");
+		scriptError(pnode, "The first argument to extractplaces must be a PLAC or event node.");
 		return nullPValue;
 	}
 	if (nestr(place->tag, "PLAC")) place = PLAC(place);
 	if (!place) {
 		*errflg = true;
-		prog_error(pnode, "The first argument to extractplaces must be a PLAC or event node.");
+		scriptError(pnode, "The first argument to extractplaces must be a PLAC or event node.");
 		return nullPValue;
 	}
 	// Get the List to put the places in.
 	PNode *lexp = nexp->next;
 	PValue pvalue = evaluate(lexp, context, errflg);
 	if (*errflg || pvalue.type != PVList) {
-		prog_error(pnode, "The second argument to extractplaces must be a List.");
+		scriptError(pnode, "The second argument to extractplaces must be a List.");
 		return nullPValue;
 	}
 	List *list = pvalue.value.uList;
 	// Get the variable to put the number of places in.
 	PNode *varb = lexp->next;
 	if (varb->type != PNIdent) {
-		prog_error(pnode, "The third argument to extractplaces must be an identifier.");
+		scriptError(pnode, "The third argument to extractplaces must be an identifier.");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -617,12 +617,12 @@ PValue __copyfile (PNode *node, Context *context, bool *eflg)
 	String fileName = evaluateString(node->arguments, context, eflg);
 	if (*eflg || fileName == null || strlen(fileName) == 0) {
 		*eflg = true;
-		prog_error(node, "The argument to copyfile must be a string.");
+		scriptError(node, "The argument to copyfile must be a string.");
 		return nullPValue;
 	}
 	FILE *cfp = fopenPath(fileName, "r", ".:$HOME");
 	if (cfp == null) {
-		prog_error(node, "Could not open file for copying.");
+		scriptError(node, "Could not open file for copying.");
 		*eflg = true;
 		return nullPValue;
 	}
@@ -689,14 +689,14 @@ PValue __createnode (PNode *node, Context *context, bool *eflg)
 	PNode *tagNode = node->arguments, *valNode = node->arguments->next;
 	PValue tagValue = evaluate(tagNode, context, eflg);
 	if (tagValue.type != PVString) {
-		prog_error(node, "first argument to createnode must be a key string");
+		scriptError(node, "first argument to createnode must be a key string");
 		*eflg = true;
 		return nullPValue;
 	}
 	String tag = tagValue.value.uString;
 	PValue valValue = evaluate(valNode, context, eflg);
 	if (valValue.type != PVNull && valValue.type != PVString) {
-		prog_error(node, "the second argument to create node must be an optional string");
+		scriptError(node, "the second argument to create node must be an optional string");
 		*eflg = true;
 		return nullPValue;
 	}
@@ -713,21 +713,21 @@ PValue __addnode (PNode *node, Context *context, bool *eflg)
 	PValue this = evaluate(arg1, context, eflg);
 	if (*eflg || !isGNodeType(this.type)) {
 		*eflg = true;
-		prog_error(node, "the first argument to addnode must be an existing node");
+		scriptError(node, "the first argument to addnode must be an existing node");
 		return nullPValue;
 	}
 	GNode *thisNode = this.value.uGNode;
 	PValue parent = evaluate(arg2, context, eflg);
 	if (*eflg || !isGNodeType(parent.type)) {
 		*eflg = true;
-		prog_error(node, "the second argument to addnode must be an existing node");
+		scriptError(node, "the second argument to addnode must be an existing node");
 		return nullPValue;
 	}
 	GNode *parentNode = parent.value.uGNode;
 	PValue prev = evaluate(arg3, context, eflg);
 	if (*eflg || !isGNodeType(prev.type)) {
 		*eflg = true;
-		prog_error(node, "the third argument to addnode must be an existing node");
+		scriptError(node, "the third argument to addnode must be an existing node");
 		return nullPValue;
 	}
 	GNode *prevNode = prev.value.uGNode;
@@ -753,14 +753,14 @@ PValue __deletenode (PNode *node, Context *context, bool *eflg)
 	PValue pvalue = evaluate(node->arguments, context, eflg);
 	if (*eflg || !isGNodeType(pvalue.type)) {
 		*eflg = true;
-		prog_error(node, "the argument to deletenode must be an existing node");
+		scriptError(node, "the argument to deletenode must be an existing node");
 		return nullPValue;
 	}
 	GNode *this = pvalue.value.uGNode;
 	// If this node has no parent, it is a root node, and they cannot be deleted.
 	if (!this->parent) {
 		*eflg = true;
-		prog_error(node, "the argument node is a root and cannot be deleted.");
+		scriptError(node, "the argument node is a root and cannot be deleted.");
 		return nullPValue;
 	}
 	GNode *parent = this->parent;
@@ -787,7 +787,7 @@ PValue __getrecord (PNode *pnode, Context *context, bool *errflg)
 {
 	String key = evaluateString(pnode->arguments, context, errflg);
 	if (*errflg || !key || *key == 0) {
-		prog_error(pnode, "The first parameter to getrecord (dereference) must be a record key.");
+		scriptError(pnode, "The first parameter to getrecord (dereference) must be a record key.");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -811,7 +811,7 @@ PValue __reference (PNode *pnode, Context *context, bool *errflg)
 {
 	String key = evaluateString(pnode->arguments, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The argument to reference must be formatted as a record key.");
+		scriptError(pnode, "The argument to reference must be formatted as a record key.");
 		return nullPValue;
 	}
 	bool rvalue = (*key && (strlen(key)) > 2 && (*key == '@') &&
@@ -828,14 +828,14 @@ PValue __extracttokens (PNode *pnode, Context *context, bool *errflg)
 	PNode *sexp = pnode->arguments;
 	String str = evaluateString(sexp, context, errflg);
 	if (*errflg) {
-		prog_error(pnode, "The first argument to extracttokens must be a string.");
+		scriptError(pnode, "The first argument to extracttokens must be a string.");
 		return nullPValue;
 	}
 	// Get the List to hold the tokens.
 	PNode *lexp = sexp->next;
 	PValue pvalue = evaluate(lexp, context, errflg);
 	if (*errflg || pvalue.type != PVList) {
-		prog_error(pnode, "The second argument to extracttokens must be a list.");
+		scriptError(pnode, "The second argument to extracttokens must be a list.");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -843,14 +843,14 @@ PValue __extracttokens (PNode *pnode, Context *context, bool *errflg)
 	// Get the identifier to hold the number of tokens returned.
 	PNode *lvar = lexp->next;
 	if (lvar->type != PNIdent) {
-		prog_error(pnode, "The third argument to extracttokens must be an identifier.");
+		scriptError(pnode, "The third argument to extracttokens must be an identifier.");
 		*errflg = true;
 		return nullPValue;
 	}
 	// Get the delimiter between tokens.
 	String dlm = evaluateString(lvar->next, context, errflg);
 	if (*errflg || !dlm || *dlm == 0) {
-		prog_error(pnode, "The fourth argument to extracttokens must be a string delimiter");
+		scriptError(pnode, "The fourth argument to extracttokens must be a string delimiter");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -867,7 +867,7 @@ PValue __savenode (PNode *pnode, Context *context, bool *errflg)
 {
 	GNode *node = evaluateGNode(pnode->arguments, context, errflg);
 	if (*errflg || !node) {
-		prog_error(pnode, "The argument to savenode must be a Gedcom node.");
+		scriptError(pnode, "The argument to savenode must be a Gedcom node.");
 		*errflg = true;
 		return nullPValue;
 	}
