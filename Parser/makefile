@@ -1,4 +1,4 @@
-.PRECIOUS: grammar.c
+#.PRECIOUS: grammar.c
 
 CC=clang
 CFLAGS=-c -g -Wall
@@ -14,6 +14,6 @@ lib$(LIBNAME).a: $(OFILES)
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) $<
 
-%.c: %.y
-	oyacc -d $<
-	cp -f y.tab.c $@
+#%.c: %.y
+#	oyacc -d $<
+#	cp -f y.tab.c $@
