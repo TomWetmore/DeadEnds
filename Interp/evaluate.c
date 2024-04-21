@@ -13,7 +13,7 @@
 //    identifiers to program value pointers.
 
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 31 May 2023.
+//  Last changed on 22 February 2024.
 //
 
 #include "evaluate.h"
@@ -23,8 +23,10 @@
 #include "interp.h"
 #include "pvalue.h"
 #include "pnode.h"
+#include "utils.h"
 
 static bool debugging = false;
+static bool builtInDebugging = false;
 
 extern SymbolTable *globalTable;
 extern FunctionTable *functionTable;
@@ -140,14 +142,9 @@ bool evaluateConditional(PNode *pnode, Context *context, bool *errflg)
     return pvalueToBoolean(value);
 }
 
-//  evaluateBuiltin -- Evaluate a built-in function by calling its C code.
-//--------------------------------------------------------------------------------------------------
-PValue evaluateBuiltin(PNode *pnode, Context *context, bool* errflg)
-//  pnode -- Program node holding a built-in function call with its arguments.
-//  symtab -- Local symbol table.
-//  errflg -- Error flag.
-{
-    // Call the C function that implements the built-in.
+// evaluateBuiltin evaluates a built-in function call by calling its C code function.
+PValue evaluateBuiltin(PNode *pnode, Context *context, bool* errflg) {
+	if (builtInDebugging) printf("%s %2.3f\n", pnode->stringOne, getMilliseconds());
     return (*(BIFunc)pnode->builtinFunc)(pnode, context, errflg);
 }
 

@@ -72,20 +72,20 @@ static void yyerror(String str);
     }
     |	IDEN '(' SCONS ')' {  // Only interested in "include".
         if (eqstr("include", $1))
-        prependListElement(pendingFileList, $3);
+        prependToList(pendingFileList, $3);
     }
     ;
 
     // A proc is "proc", name, params, and body. They are added to the proc table.
     proc	:	PROC IDEN '(' idenso ')' '{' states '}' {
     	printf("Added procedure %s to the procedure table.\n", $2);
-        insertInFunctionTable(procedureTable, $2, (Word)procDefPNode($2, $4, $7));
+        addToFunctionTable(procedureTable, $2, (Word)procDefPNode($2, $4, $7));
     }
     ;
 
     // A func is "func", name, parms, and a body with a return expr. They are added to the func table.
     func	:	FUNC_TOK IDEN '(' idenso ')' '{' states '}' {
-        insertInFunctionTable(functionTable, $2, (Word)funcDefPNode($2, $4, $7));
+        addToFunctionTable(functionTable, $2, (Word)funcDefPNode($2, $4, $7));
     }
     ;
     // idenso -- null if empty, or it is a list of IIDEN PNodes if not.

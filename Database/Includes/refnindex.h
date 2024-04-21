@@ -4,24 +4,29 @@
 //  refnindex.h -- Header file for the reference (REFN) index features.
 //
 //  Created on 17 December 2023.
-//  Last changed on 1 January 2024.
+//  Last changed on 3 April 2024.
 //
 
 #ifndef refnindex_h
 #define refnindex_h
+
 #include "hashtable.h"
 
+// RefnIndexEl is the type for elements in RefnIndexes. refn is the value of a 1 REFN Gedcom line
+// and key is the tag of the record it is in. Each refn key must be unique.
 typedef struct RefnIndexEl {
-	String refn;  // Value of the REFN node.
-	String key;  // Key of the record with the REFN node.
+	String refn;
+	String key;
 } RefnIndexEl;
 
+// RefnIndex is a HashTable holding RefnIndexEls.
 typedef HashTable RefnIndex;
 
+// Interface to RefnIndexes.
 RefnIndexEl *createRefnIndexEl(String refn, String key);
 RefnIndex *createRefnIndex(void);
 void deleteRefnIndex(RefnIndex*);
-bool insertInRefnIndex(RefnIndex*, String refn, String key);
+bool addToRefnIndex(RefnIndex*, String refn, String key);
 String searchRefnIndex(RefnIndex*, String refn);
 void showRefnIndex(RefnIndex*);
 

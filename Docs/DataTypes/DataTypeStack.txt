@@ -1,0 +1,27 @@
+LIST       : void *findInList(List *list, void *element, int *index)
+BLOCK      : bool isInSortedBlock(Block*, void*, int(*cmp)(void*, void*))
+SORTSEARCH : void* binarySearch(void**, int, void*,  int(*cmp)(void*, void*), int*)
+
+
+
+
+
+
+
+
+
+
+------void* binarySearchByKey(void**, int, String, String(*get)(void*), int*)----------
+
+
+BLOCK      : bool isKeyInSortedBlock(Block* block, String key, String(*get)(void*))
+SORTSEARCH : void* binarySearchByKey(void**, int, String, String(*get)(void*), int*)
+
+
+
+HASHTABLE: void removeFromHashTable(HashTable*, String)
+SORTSEARCH : void* binarySearchByKey(void**, int, String, String(*get)(void*), int*)
+
+
+HASHTABLE : void* binarySearchBucket(Bucket* bucket, String key, int(*cmp)(void*, void*), int*)
+SORTSEARCH : void* binarySearchByKey(void**, int, String, String(*get)(void*), int*)

@@ -1,11 +1,11 @@
 //
-//  DeadEnds
+// DeadEnds
 //
-//  pvalue.c -- Functions that handle program expression values (PValues) when interpreting
-//    DeadEnds programs.
+// pvalue.c holds the functions that handle program expression values (PValues) when interpreting
+// DeadEnds scripts.
 //
-//  Created by Thomas Wetmore on 15 December 22.
-//  Last changed on 17 October 2023.
+// Created by Thomas Wetmore on 15 December 22.
+// Last changed on 27 March 2024.
 //
 
 #include "pvalue.h"
@@ -14,10 +14,8 @@
 
 extern const PValue nullPValue;  // Defined in builtin.c
 
-//  isPVGNodeType -- Return true if a type is one of the PGNode types.
-//--------------------------------------------------------------------------------------------------
-bool isGNodeType(PVType type)
-{
+// isPVGNodeType -- Return true if a type is one of the PGNode types.
+bool isGNodeType(PVType type) {
 	return type >= PVGNode && type <= PVOther;
 }
 
@@ -55,7 +53,7 @@ void freePValue(PValue* ppvalue)
 			if (ppvalue->value.uString) stdfree(ppvalue->value.uString);
 			break;
 		case PVSequence:
-			deleteSequence(ppvalue->value.uSequence, false);
+			deleteSequence(ppvalue->value.uSequence);
 			break;
 		default:
 			break;

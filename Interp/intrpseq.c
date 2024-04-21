@@ -1,12 +1,10 @@
+// DeadEnds
 //
-//  DeadEnds
+// intrpseq.c has the built-in script functions that access the Sequence functions. In the script
+// language this datatype is called an indiset.
 //
-//  intrpseq.c -- Builit-in functions that give program access the sequence functions. In the
-//    programming language this datatype is called an indiset.
-//
-//  Created by Thomas Wetmore on 4 March 2023.
-//  Last changed on 16 November 2023.
-//
+// Created by Thomas Wetmore on 4 March 2023.
+// Last changed on 20 April 2024.
 
 #include <stdio.h>
 #include "standard.h"
@@ -18,15 +16,11 @@
 #include "pvalue.h"
 #include "evaluate.h"  // evaluatePerson
 
-//  __indiset -- Declare and create a sequence and assign it to an identifier in a symbol table.
-//    usage: indiset(IDEN) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __indiset(PNode *programNode, Context *context, bool* errorFlag)
-{
+// __indiset create a sequence and assigns it to an identifier in a symbol table.
+// usage: indiset(IDEN) -> VOID
+PValue __indiset(PNode *programNode, Context *context, bool* errorFlag) {
     ASSERT(programNode && programNode->arguments && context);
-
-    //  The argument must be an identifier that is assigned to the sequence value.
-    PNode *argument = programNode->arguments;
+    PNode *argument = programNode->arguments; // Arg must be an identifier.
     if (argument->type != PNIdent) {
         *errorFlag = true;
         scriptError(programNode, "The argument to indiset must be an identifier.");
@@ -40,15 +34,11 @@ PValue __indiset(PNode *programNode, Context *context, bool* errorFlag)
     return nullPValue;
 }
 
-//  __addtoset -- Add a person to a sequence.
-//    usage: addtoset(SET, INDI, ANY) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __addtoset(PNode *programNode, Context *context, bool *errflg)
-{
+// __addtoset adds a person to a sequence.
+// usage: addtoset(SET, INDI, ANY) -> VOID
+PValue __addtoset(PNode *programNode, Context *context, bool *errflg) {
     ASSERT(programNode && programNode->arguments && programNode->arguments->next && context);
-
-    // Get the first argument which must be a sequence.
-    PNode *setarg = programNode->arguments;
+    PNode *setarg = programNode->arguments; // Arg 1 should be a Sequence.
     PValue pvalue = evaluate(setarg, context, errflg);
     if (*errflg || pvalue.type != PVSequence) {
         *errflg = true;
@@ -57,33 +47,26 @@ PValue __addtoset(PNode *programNode, Context *context, bool *errflg)
     }
     Sequence *sequence = pvalue.value.uSequence;
 
-    // Get the second argument which must be a person.
-    PNode *indiarg = setarg->next;
+    PNode *indiarg = setarg->next; // Arg 2 should be a person GNode.
     GNode *indi = evaluatePerson(indiarg, context, errflg);
     if (*errflg || !indi) {
         *errflg = true;
         scriptError(programNode, "The second argument to addtoset must be a person.");
         return nullPValue;
     }
-
-    // Get the person's key.
-    String key = indi->key;
+    String key = indi->key; // Get person's key.
     if (!key || *key == 0) {
         *errflg = true;
         scriptError(programNode, "could not get the key of the person.");
         return nullPValue;
     }
-
-    // Get the third argument which can be any program value.
-    PNode *anyarg = indiarg->next;
+    PNode *anyarg = indiarg->next; // Arg 3 can be any PValue.
     PValue value = evaluate(anyarg, context, errflg);
     if (*errflg) {
         scriptError(programNode, "the third argument to addtoset has an error.");
         return nullPValue;
     }
-
-    //  Program values in sequences must be kept in the heap.
-    PValue *ppvalue = allocPValue(value.type, value.value);
+    PValue *ppvalue = allocPValue(value.type, value.value); // Sequence PValues are in the heap.
     if (ppvalue->type == PVString) ppvalue->value.uString = strsave(value.value.uString);
     //  MNOTE: No need to save key--appendToSequence does.
     appendToSequence(sequence, key, null, ppvalue);
@@ -178,16 +161,14 @@ PValue __deletefromset (PNode *node, Context *context, bool *eflg)
     bool all = value3.value.uBool;
     bool rc;
     do {
-        rc = removeFromSequence(seq, key, null, 0);
+        rc = removeFromSequence(seq, key);
     } while (rc && all);
     return nullPValue;
 }
 
 //  __namesort -- Sort a sequence by name.
 //    usage: namesort(SET) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __namesort(PNode *pnode, Context *context, bool *errflg)
-{
+PValue __namesort(PNode *pnode, Context *context, bool *errflg) {
     PValue value = evaluate(pnode->arguments, context, errflg);
     if (*errflg || value.type != PVSequence) {
         scriptError(pnode, "the argument to namesort must be a set.");
@@ -218,13 +199,14 @@ PValue __keysort (PNode *node, Context *context, bool *eflg)
 //--------------------------------------------------------------------------------------------------
 PValue __valuesort (PNode *node, Context *context, bool *eflg)
 {
-    PValue value = evaluate(node->arguments, context, eflg);
-    if (*eflg || value.type != PVSequence) {
-        scriptError(node, "the arg to valuesort must be a set.");
-        return nullPValue;
-    }
-    Sequence *sequence = value.value.uSequence;
-    valueSortSequence(sequence);
+	scriptError(node, "valuesort has been removed from the script language");
+    //PValue value = evaluate(node->arguments, context, eflg);
+    //if (*eflg || value.type != PVSequence) {
+        //scriptError(node, "the arg to valuesort must be a set.");
+        //return nullPValue;
+    //}
+    //Sequence *sequence = value.value.uSequence;
+    //valueSortSequence(sequence);
     return nullPValue;
 }
 
@@ -373,11 +355,9 @@ PValue __spouseset (PNode *node, Context *context, bool *eflg)
     return PVALUE(PVSequence, uSequence, spouseSequence(seq));
 }
 
-//  __ancestorset -- Create the ancestor sequence of a sequence.
-//    usage: ancestorset(SET) -> SET
-//--------------------------------------------------------------------------------------------------
-PValue __ancestorset (PNode *programNode, Context *context, bool *errorFlag)
-{
+// __ancestorset creates the ancestor sequence of a sequence.
+// usage: ancestorset(SET) -> SET
+PValue __ancestorset (PNode *programNode, Context *context, bool *errorFlag) {
     PValue programValue = evaluate(programNode->arguments, context, errorFlag);
     if (*errorFlag || programValue.type != PVSequence) {
         *errorFlag = true;

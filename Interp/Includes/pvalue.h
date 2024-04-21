@@ -8,7 +8,7 @@
 //    spaces.
 //
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 13 October 2023.
+//  Last changed on 3 April 2024.
 //
 
 #ifndef pvalue_h
@@ -40,18 +40,17 @@ typedef enum {
 
 bool isGNodeType(PVType type);
 
-// VUnion -- Union that holds PValue values.
-//--------------------------------------------------------------------------------------------------
+// VUnion is the C union that holds PValue values.
 typedef union VUnion {
-	bool uBool;           // Value if PVBool.
-	GNode* uGNode;        // Value if PVGNode, PVPerson, PVFamily, PVSource, PVEvent, PVOther.
-	long uInt;            // Value if PVInt.
-	double uFloat;        // Value if PVFloat.
-	String uString;       // Value if PVString.
-	List *uList;          // Value if PVList.
-	PValueTable *uTable;  // Value if PVTable.
-	Sequence *uSequence;  // Value if PVSequence.
-	Word uWord;           // Value is anything else?
+	bool uBool;
+	GNode* uGNode;
+	long uInt;
+	double uFloat;
+	String uString;
+	List *uList;
+	PValueTable *uTable;
+	Sequence *uSequence;
+	void* uWord;
 } VUnion;
 
 //  PValue -- Values of the programming language expressions. This used to be a pointer type. It

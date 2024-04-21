@@ -1,14 +1,11 @@
+// DeadEnds
 //
-//  DeadEnds
+// database.c holds the functions that provide an in-RAM database for Gedcom records. Each record
+// is a GNode tree. The backing store is a Gedcom file. When DeadEnds starts the Gedcom file is
+// read and used to build an internal database.
 //
-//  database.c -- Functions that provide an in-RAM database for Gedcom records. Each record is a
-//    node tree. The backing store is a Gedcom file. When DeadEnds starts the Gedcom file is read
-//    and used to build an internal database of persons, families, and others. Indexing of the
-//    records is also done.
-//
-//  Created by Thomas Wetmore on 10 November 2022.
-//  Last changed 13 February 2024.
-//
+// Created by Thomas Wetmore on 10 November 2022.
+// Last changed 18 April 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -18,15 +15,15 @@
 #include "nameindex.h"
 #include "path.h"
 #include "errors.h"
-#include "keylist.h"
+#include "rootlist.h"
 
-static bool debugging = false;
+extern FILE* debugFile;
+extern bool importDebugging;
+bool indexNameDebugging = true;
 static int keyLineNumber(Database*, String key);
 
-//  createDatabase -- Create a database.
-//--------------------------------------------------------------------------------------------------
-Database *createDatabase(String filePath)
-{
+// createDatabase creates and returns a database.
+Database *createDatabase(String filePath) {
 	Database *database = (Database*) stdalloc(sizeof(Database));
 	database->filePath = strsave(filePath);
 	database->lastSegment = strsave(lastPathSegment(filePath));
@@ -37,8 +34,8 @@ Database *createDatabase(String filePath)
 	database->otherIndex = createRecordIndex();
 	database->nameIndex = createNameIndex();
 	database->refnIndex = createRefnIndex();
-	database->personKeys = createKeyList(database);
-	database->familyKeys = createKeyList(database);
+	database->personRoots = createRootList();
+	database->familyRoots = createRootList();
 	return database;
 }
 
@@ -150,19 +147,13 @@ GNode *keyToOther(String key, Database *database)
 
 static int count = 0;  // Debugging.
 
-//  storeRecord -- Store a Gedcom node tree in the database by adding it to the record index of
-//    its type. Return true if the record was added successfully.
-//--------------------------------------------------------------------------------------------------
-bool storeRecord(Database *database, GNode* root, int lineNumber, ErrorLog *errorLog)
-//  database -- Database to add the record to
-//  root -- Root of a record tree to store in the database.
-//  lineNumber -- Line number in the Gedcom file where the record began.
-{
-	if (debugging) printf("storeRecord called\n");
-	ASSERT(root);
+// storeRecord stores a GNode tree in a database by adding it to a RecordIndex.
+// lineNumber is the location of the root node in the Gedcom file.
+bool storeRecord(Database *database, GNode* root, int lineNumber, ErrorLog *errorLog) {
+	//if (importDebugging) fprintf(debugFile, "storeRecord called\n");
 	RecordType type = recordType(root);
-	if (debugging) printf("type of record is %d\n", type);
-	if (type == GRHeader || type == GRTrailer) return true;  // Ignore HEAD and TRLR records.
+	//if (importDebugging) fprintf(debugFile, "type of record is %d\n", type);
+	if (type == GRHeader || type == GRTrailer) return true;  // Ignore HEAD and TRLR.
 	if (!root->key) {
 		Error *error = createError(syntaxError, database->lastSegment, lineNumber, "This record has no key.");
 		addErrorToLog(errorLog, error);
@@ -181,21 +172,21 @@ bool storeRecord(Database *database, GNode* root, int lineNumber, ErrorLog *erro
 	}
 	switch (type) {
 		case GRPerson:
-			insertInRecordIndex(database->personIndex, key, root, lineNumber);
-			insertInKeyList(database->personKeys, key);
+			addToRecordIndex(database->personIndex, key, root, lineNumber);
+			insertInRootList(database->personRoots, root);
 			return true;
 		case GRFamily:
-			insertInRecordIndex(database->familyIndex, key, root, lineNumber);
-			insertInKeyList(database->familyKeys, key);
+			addToRecordIndex(database->familyIndex, key, root, lineNumber);
+			insertInRootList(database->familyRoots, root);
 			return true;
 		case GRSource:
-			insertInRecordIndex(database->sourceIndex, key, root, lineNumber);
+			addToRecordIndex(database->sourceIndex, key, root, lineNumber);
 			return true;
 		case GREvent:
-			insertInRecordIndex(database->eventIndex, key, root, lineNumber);
+			addToRecordIndex(database->eventIndex, key, root, lineNumber);
 			return true;
 		case GROther:
-			insertInRecordIndex(database->otherIndex, key, root, lineNumber);
+			addToRecordIndex(database->otherIndex, key, root, lineNumber);
 			return true;
 		default:
 			ASSERT(false);
@@ -214,30 +205,25 @@ void showTableSizes(Database *database)
 	printf("Size of otherIndex:  %d\n", sizeHashTable(database->otherIndex));
 }
 
-//  indexNames -- Index all person names in the database. This uses the hash table traverse
-//    functions on the person index. For each person all NAME node values are indexed.
-//--------------------------------------------------------------------------------------------------
-void indexNames(Database* database)
-{
-	int i, j;  //  State variables.
+// indexNames indexes all person names in a database.
+void indexNames(Database* database) {
 	static int count = 0;
 
-	if (debugging) printf("Start indexNames\n");
+	if (indexNameDebugging) fprintf(debugFile, "Start indexNames\n");
 
-	//  Get the first entry in the person index.
+	// Iterate the person index.
+	int i, j;
 	RecordIndexEl* entry = firstInHashTable(database->personIndex, &i, &j);
 	while (entry) {
 		GNode* root = entry->root;
-		//  MNOTE: The key is heapified in insertInNameIndex.
 		String recordKey = root->key;
-		//  DEBUG
-		if (debugging) printf("indexNames: recordKey: %s\n", recordKey);
+		if (indexNameDebugging) fprintf(debugFile, "indexNames: recordKey: %s\n", recordKey);
 		for (GNode* name = NAME(root); name && eqstr(name->tag, "NAME"); name = name->sibling) {
 			if (name->value) {
-				if (debugging) printf("indexNames: name->value: %s\n", name->value);
+				if (indexNameDebugging) fprintf(debugFile, "indexNames: name->value: %s\n", name->value);
 				//  MNOTE: nameKey is in data space. It is heapified in insertInNameIndex.
 				String nameKey = nameToNameKey(name->value);
-				if (debugging) printf("indexNames: nameKey: %s\n", nameKey);
+				if (indexNameDebugging) fprintf(debugFile, "indexNames: nameKey: %s\n", nameKey);
 				insertInNameIndex(database->nameIndex, nameKey, recordKey);
 				count++;
 			}
@@ -246,21 +232,19 @@ void indexNames(Database* database)
 		//  Get the next entry in the person index.
 		entry = nextInHashTable(database->personIndex, &i, &j);
 	}
-	showNameIndex(database->nameIndex);
-	/*if (debugging) */ printf("The number of names indexed was %d\n", count);
+	if (indexNameDebugging) showNameIndex(database->nameIndex);
+	if (indexNameDebugging) printf("The number of names indexed was %d\n", count);
 }
 
-//  keyLineNumber -- See if a record with the key is in the database. If so return the line number
-//    in the original Gedcom file where the record began. Check all five indexes.
-//-------------------------------------------------------------------------------------------------
-static int keyLineNumber (Database *database, String key)
-{
+// keyLineNumber checks if a record with a key is in the database; if so it returns the line
+// number where the record began in its Gedcom file.
+static int keyLineNumber (Database *database, String key) {
 	RecordIndexEl* element = (RecordIndexEl*)searchHashTable(database->personIndex, key);
 	if (!element) element = searchHashTable(database->familyIndex, key);
 	if (!element) element = searchHashTable(database->sourceIndex, key);
 	if (!element) element = searchHashTable(database->eventIndex, key);
 	if (!element) element = searchHashTable(database->otherIndex, key);
-	if (!element) return 0; // Hasn't been seen before.
+	if (!element) return 0; // Record doesn't exist.
 	return element->lineNumber;
 }
 

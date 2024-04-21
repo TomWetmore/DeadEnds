@@ -1,98 +1,79 @@
+// DeadEnds
 //
-//  DeadEnds
+// list.h defines the types and interface that implement a Block-based list. Lists grow
+// automatically. Lists can be sorted or unsorted. Sorted lists require a compare function.
 //
-//  list.h -- List type. By providing an optional compare function, lists can be sorted and
-//    searched. They grow when necessary. The data part of a list is a contiguous block of
-//    pointers. They can point to anything. The compare function, if needed, deals with the
-//    details. Provide a delete function if the list's elements need to be removed or otherwise
-//    disposed of when the they are removed from the list or the list is removed.
-//
-//    MNOTE: Lists don't know what their elements are. Memory management must be done by the
-//    caller. This leads to two cases. First, the user allocates the element and the list's
-//    delete function frees them. Or the list's delete function does not delete them and the
-//    caller is responsible.
-//
-//  Created by Thomas Wetmore on 22 November 2022.
-//  Last changed on 22 November 2023.
-//
+// Created by Thomas Wetmore on 22 November 2022.
+// Last changed on 20 April 2024.
 
 #ifndef list_h
 #define list_h
 
-#include "standard.h"
+#include "block.h"
 
-// The initial size of a List's data block.
-#define INITIAL_SIZE_LIST_DATA_BLOCK 32
-//#define INITIAL_SIZE_LIST_DATA_BLOCK 4  // For testing.
+#define enqueueList prependToList
+#define dequeueList getAndRemoveLastListElement
+#define pushList prependToList
+#define popList getAndRemoveFirstListElement
 
-//  Macros for stack and queue operations.
-#define enqueueList prependListElement
-#define dequeueList removeLastListElement
-#define pushList prependListElement
-#define popList removeFirstListElement
-
-//  List -- Data structure for an automatically growing list. Can be sorted, and uniqued if a
-//    compare function is available. The keepSorted field specifies that the list is a sorted
-//    list. Some functions are lazy so sorted lists are not always sorted. Sorted lists may not
-//    be sorted until a size threshold is met.
-//--------------------------------------------------------------------------------------------------
 typedef struct List {
-    bool keepSorted;    // True if the list is a sorted list.
-    bool isSorted;      // True when the list is actually sorted.
-    int sortThreshold;  // A sorted list need not be sorted until this threshold.
-    int length;         // Current length of the list.
-    int maxLength;      // Maximum length the list can be before reallocation.
-    Word *data;         // The data making up the list.
-    int (*compare)(const Word, const Word);  // Function to compare elements, if needed.
-    void (*delete)(Word);    // Function to delete elements, if needed.
-    String (*getKey)(Word);  // Function to get the keys of elements, if needed.
+	Block block; // Block of elements.
+	bool sorted; // This is a sorted list.
+	bool isSorted; // This sorted list is currently sorted.
+	void (*delete)(void*); // Function to delete an element.
+	String (*getKey)(void*); // Function to retrieve a string key from an element.
+	int (*compare)(String, String); // Compare function needed by sorted lists.
 } List;
 
-// User interface to the List type.
-//--------------------------------------------------------------------------------------------------
-List *createList(int(*comp)(Word, Word), void(*del)(Word), String(*getKey)(Word));  // Create and
-                                                                        // return a list.
-void setSortThreshold(int);  // Set the sort threshold property for the list.
-void setKeepSorted(bool);  // Set the keep sorted property for the list.
-void deleteList(List*);  // Delete the list.
-void emptyList(List*);  // Make the List empty.
-void appendListElement(List*, Word);  // Append an element to the list.
-void prependListElement(List*, Word);  // Prepends an element to the list.
-bool insertListElement(List*, int, Word);  // Insert an element at a fixed location in the list.
-Word getListElement(List*, int index);        //  Get an element from a fixed location in a list.
-void setListElement(List*, int index, Word);  //  Set an element in a list.
-bool insertSortedListElement(List*, Word);  // Insert an element in a sorted List.
+List* createList(String(*g)(void*), int(*c)(String, String), void (*d)(void*), bool sorted);
+void initList(List*, String(*g)(void*), int(*c)(String, String), void(*d)(void*), bool sorted);
+void deleteList(List*);
+int lengthList(List*);
+void emptyList(List*);
+bool isEmptyList(List*);
+List* copyList(List*, void*(*c)(void*));
+bool isInList(List*, String, int*);
+void* findInList(List*, String, int* index);
+// Array access.
+void setListElement(List*, void*, int);
+void *getListElement(List *list, int index);
 
-bool removeListElementWithKey(List*, String);  // Remove the first list element with the given key.
-Word removeListElement(List*, int);  // Remove the ith element from the list.
-Word removeFirstListElement(List*);  // Remove the first element from the list.
-Word removeLastListElement(List*);  // Remove the last element from the list.
+void appendToList(List*, void*);
+void prependToList(List*, void*);
+void insertInList(List*, void*, int);
+bool isSortedList(List*); // Uses sorted flag.
+bool isListSorted(List*); // Really checks.
+void sortList(List*);
+void uniqueList(List*);
+bool removeFromList(List*, int);
+bool removeFirstListElement(List*);
+bool removeLastListElement(List*);
+void iterateList(List*, void(*perform)(void*));
 
-void sortList(List*, bool force);  // Sort a list. Force the sort if below threshold.
-void uniqueList(List*);  // Remove duplicate elements (have the same key) from a list.
-Word isInList(List*, Word);  // Check if an element is in the list; only check key.
-void showList(List*, String(*describe)(Word));  // Show the contents of a list.
-void iterateList(List*, void(*iterate)(Word));  // Iterate the list elements running a function.
-int lengthList(List*);  // Return the length of the list.
-bool isEmptyList(List*);  // Check if a list is empty.
+void* getFromList(List*, int);
+void* getFirstListElement(List*);
+void* getLastListElement(List*);
 
-Word searchList(List*, Word element, int *index);
-// TODO: These four functions should be static.
-Word linearSearchList(List*, Word element, int *index);
-Word binarySearchList(List*, Word element, int *index);
-Word linearSearchListWithKey(List*, String key, int *index);
-Word binarySearchListWithKey(List*, String key, int *index);
+void* getAndRemoveLastListElement(List*);
+void* getAndRemoveFirstListElement(List*);
+
+
+
+Block* blockOfList(List*);
+
+void showList(List *list, String(*describe)(void*));
 
 #define FORLIST(list, value)\
 {\
-    Word value;\
-    Word *_values = (Word*) list->data;\
-    for (int _i = 0; _i < list->length; _i++) {\
-        value = _values[_i];\
-        {
+	void *value;\
+	Block *block = &(list->block);\
+	void **_values = (void**) block->elements;\
+	for (int _i = 0; _i < block->length; _i++) {\
+		value = _values[_i];\
+		{
 #define ENDLIST\
-        }\
-    }\
+		}\
+	}\
 }
 
-#endif // list_h
+#endif

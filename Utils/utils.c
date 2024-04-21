@@ -1,24 +1,21 @@
-//
 //  DeadEnds
 //
-//  utils.c
+// utils.c
 //
-//  Created by Thomas Wetmore on 13 November 2022.
-//  Last changed on 6 November 2022.
-//
+// Created by Thomas Wetmore on 13 November 2022.
+// Last changed on 21 April 2024.
 
 #include <sys/time.h>
 #include <string.h>
 #include "standard.h"
 #include "utils.h"
 
-// Get current time in milliseconds modulo 10 seconds.
-//--------------------------------------------------------------------------------------------------
-double getmilliseconds(void) {
+// getMilliseconds gets the current time in milliseconds modulo 10 seconds.
+double getMilliseconds(void) {
     struct timeval time;
     void* tz;
     (void) gettimeofday(&time, &tz);
-    int seconds = time.tv_sec % 10;  // Seconds now an int between 0 and 9.
+    int seconds = time.tv_sec % 10;  // Seconds between 0 and 9.
     int milliseconds = (int) (time.tv_usec/1000);
     return seconds + milliseconds / 1000.;
 }
@@ -34,7 +31,7 @@ String substring (String s, int i, int j)
 	return strsave(scratch);
 }
 
-//  rightjustify -- Right justify string value
+// rightjustify right justifies a String value.
 //--------------------------------------------------------------------------------------------------
 String rightjustify (String string, int len)
 {
@@ -45,7 +42,7 @@ String rightjustify (String string, int len)
 	int nsp = len - lstr;
 	if (nsp < 0) nsp = 0;
 	char *s = scratch;
-	int i, j;
+	int i;
 	for (i = 0; i < nsp; i++)
 		s[i] = ' ';
 	for (int i = nsp, j = 0; i < len; i++, j++)

@@ -1,37 +1,49 @@
 //
-//  DeadEnds
+// DeadEnds
 //
-//  set.h -- Header file for the Set type.
+// set.h is the header file for the Set type.
 //
-//  Created by Thomas Wetmore on 22 November 2022.
-//  Last changed on 3 November 2023.
+// Created by Thomas Wetmore on 22 November 2022.
+// Last changed on 10 April 2024.
 //
 
 #ifndef set_h
 #define set_h
 
-#include "standard.h"
 #include "list.h"
 
-//  Set -- The set type. It uses a sortable list as its elements. Elements are pointers to objects
-//    the user defines. The user must provide a compare function to keep the elements sorted.
-//    The user can provide a delete function to dispose of the elements when the set is removed.
-//    Duplicate elements, as detected by the compare function, are not added.
-//--------------------------------------------------------------------------------------------------
+// Set implements a set using a sorted List. Its elements are structures with String keys.
+// The getkey and compare functions are used to extract and compare keys.
 typedef struct Set {
-    List *list;  // Sortable list holding the set's elements.
+	List list;
 } Set;
 
-// User interface.
-// TODO: REMOVE FROM SET NOT YET WRITTEN.
-//--------------------------------------------------------------------------------------------------
-int lengthSet(Set*);  // Return the number of elements in the Set.
-Set *createSet(int(*compare)(Word, Word), void(*delete)(Word), String(*getKey)(Word));  // Create a new Set.
-void deleteSet(Set*);  // Remove a Set, calling the delete function, if any, on each element.
-void addToSet(Set*, Word);  // Add an element (if new) to the Set.
-bool isInSet(Set*, Word);  // Check if an element is in the Set.
-void iterateSet(Set*, void(*iterate)(Word));  // Iterate over the Set doing something.
-void showSet(Set*, String(*describe)(Word));  // Show the contents of the Set.
-void removeFromSet(Set*, Word);  //  Remove an element from the set.
+// Public interface.
+Set* createSet(String(*get)(void*), int(*cmp)(String, String), void(*del)(void*));
+void deleteSet(Set*);
+int lengthSet(Set*);
+bool isInSet(Set*, String);
+void addToSet(Set*, void*);
+void removeFromSet(Set*, String);
+void iterateSet(Set*, void(*iter)(void*));
+void showSet(Set*, String(*show)(void*));
+
+List* listOfSet(Set*); // Underlying sorted List.
+
+// FORSET/ENDSET are macros that allow general Set iteration.
+#define FORSET(set, element)\
+{\
+	void* element;\
+	List* _list = &(set->list);\
+	Block* _block = &(_list->block);\
+	void** _elements = (void**) _block->elements;\
+	for (int _i = 0; _i < _block->length; _i++) {\
+		element = _elements[_i];\
+		{
+
+#define ENDSET\
+		}\
+	}\
+}
 
 #endif // set_h

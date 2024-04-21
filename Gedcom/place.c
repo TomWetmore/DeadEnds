@@ -1,10 +1,9 @@
+// DeadEnds
 //
-//  place.c
-//  CloneOne
+// place.c has the functions that handle place values.
 //
-//  Created by Thomas Wetmore on 12 February 2024.
-//  Last changed on 13 February 2024.
-//
+// Created by Thomas Wetmore on 12 February 2024.
+// Last changed on 21 April 2024.
 
 #include <stdio.h>
 #include "standard.h"
@@ -20,10 +19,8 @@ bool placeToList(String place, List *list, int *plen)
 	return valueToList(place, list, plen, ",");
 }
 
-//  valueToList -- Convert string to phrase list.
-//--------------------------------------------------------------------------------------------------
-bool valueToList (String str, List *list, int *plen, String dlm)
-{
+// valueToList converts a String to phrase list.
+bool valueToList(String str, List* list, int* plen, String dlm) {
 	static String buf = null;
 	static int len0 = 0;
 	String p, q, n;
@@ -54,7 +51,7 @@ bool valueToList (String str, List *list, int *plen, String dlm)
 		q = p + strlen(p) - 1;
 		while (q > p && chartype(*q) == WHITE)
 			*q-- = 0;
-		setListElement(list, i, strsave(p));
+		setListElement(list, strsave(p), i);
 		p = n;
 	}
 	*plen = j;

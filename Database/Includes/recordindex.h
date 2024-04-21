@@ -1,11 +1,10 @@
 //
-//  DeadEnds Project
+// DeadEnds Project
 //
-//  recordindex.h -- Defines the RecordIndex as a HashTable.
+// recordindex.h defines RecordIndex as a HashTable.
 //
-//  Created by Thomas Wetmore on 29 November 2022.
-//  Last changed on 27 November 2023.
-//
+// Created by Thomas Wetmore on 29 November 2022.
+// Last changed on 4 April 2024.
 
 #ifndef recordindex_h
 #define recordindex_h
@@ -13,23 +12,21 @@
 #include "gnode.h"
 #include "hashtable.h"
 
-//  RecordIndexEl -- An element of a RecordIndex Bucket.
-//--------------------------------------------------------------------------------------------------
+// A RecordIndexEl in an element in a RecordIndex. It holds the root node of a Gedcom record and
+// the line numbers where the record was defined. The element's key is the key of the root node.
 typedef struct RecordIndexEl {
-	GNode *root;     // Root node of the record.
-	int lineNumber;  // Line number in the original Gedcom file where the record begins.
+	GNode *root;
+	int lineNumber;
 }  RecordIndexEl;
 
-//  RecordIndex -- A RecordIndex is a HashTable.
-//--------------------------------------------------------------------------------------------------
+// A RecordIndex is a HashTable of RecordIndexEls.
 typedef HashTable RecordIndex;
 
-// User interface to RecordIndex.
-//--------------------------------------------------------------------------------------------------
-RecordIndex *createRecordIndex(void);                   //  Create a RecordIndex.
-void deleteRecordIndex(RecordIndex*);                   //  Delete a RecordIndex.
-void insertInRecordIndex(RecordIndex*, String, GNode*, int lineNo); //  Add record to RecordIndex.
-GNode* searchRecordIndex(RecordIndex*, String);         //  Search for a record in a RecordIndex.
-void showRecordIndex(RecordIndex*);                     //  Show the contents of RecordIndex.
+// Interface to RecordIndex.
+RecordIndex *createRecordIndex(void);
+void deleteRecordIndex(RecordIndex*);
+void addToRecordIndex(RecordIndex*, String, GNode*, int lineNo);
+GNode* searchRecordIndex(RecordIndex*, String);
+void showRecordIndex(RecordIndex*);
 
 #endif // recordindex_h

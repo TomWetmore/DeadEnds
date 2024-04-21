@@ -1,90 +1,71 @@
 //
-//  DeadEnds
+// DeadEnds
 //
-//  set.c -- Functions that implement Set objects. A Set consists of sortable List. The elements
-//  can be anything that can be referred to as a Word. When a set is created there must be a
-//  compare function that knows the structure of the Set's elements. The elements in the Set are
-//  kept unique via the compare function.
+// set.c contains functions that implement Sets. A Set is a sortable List. The elements are
+// void* pointers.  Each Set has a getKey function that returns a String that represents
+// each Set element.
 //
-//  Created by Thomas Wetmore on 22 November 2022.
-//  Last changed 4 November 2023.
+// Created by Thomas Wetmore on 22 November 2022.
+// Last changed 10 April 2024.
 //
 
 #include "set.h"
-#include "list.h"
-#include "sort.h"
 
-// createSet -- Create a set.
-//--------------------------------------------------------------------------------------------------
-Set *createSet(int (*compare)(Word, Word), void (*delete)(Word), String(*getKey)(Word))
-//  compare -- Function that compares pairs of elements; manadatory.
-//  delete -- Function to call on elements when they are removed; optional.
-{
-	ASSERT(compare);
-	Set *set = (Set*) stdalloc(sizeof(Set));
-	set->list = createList(compare, delete, getKey);
+// createSet creates a Set; the getKey and compare functions are required; delete is optional.
+Set* createSet(String(*getKey)(void*), int(*compare)(String, String), void(*delete)(void*)) {
+	Set* set = (Set*) malloc(sizeof(Set));
+	initList(&(set->list), getKey, compare, delete, true);
 	return set;
 }
 
-// deleteSet -- Remove a set.
-//--------------------------------------------------------------------------------------------------
-void deleteSet(Set *set)
-//  set -- Set to remove.
-{
-	deleteList(set->list);
-	stdfree(set);
+// deleteSet frees a set.
+void deleteSet(Set *set) {
+	deleteList(&(set->list));
+	//free(set);
 }
 
-//  addToSet -- Add an element to a set if it is not already there.
-//    TODO: SHOULD NAME BE CHANGED TO INSERTSET TO BE CONSISTENT WITH OTHER TYPES?
-//--------------------------------------------------------------------------------------------------
-void addToSet(Set *set, Word element)
-//  set -- Set to add the element to.
-//  element -- Element to add to the set if it is not already there.
-{
+// addToSet adds an element to a Set. If an element with the same key is in the Set it is removed.
+void addToSet(Set* set, void* element) {
 	int index;
-	Word entry = searchList(set->list, element, &index);
-	if (!entry) insertListElement(set->list, index, element);
+	List* list = &(set->list);
+	String key = list->getKey(element);
+	void* oldElement = findInList(list, key, &index);
+	if (oldElement)
+		removeFromList(list, index);
+	insertInList(list, element, index);
 }
 
-// Check if an element is in a set. Delegate to the list. Delegate to the list.
-//--------------------------------------------------------------------------------------------------
-bool isInSet(Set *set, Word element)
-{
-	return isInList(set->list, element);
+// isInSet checks whether an element with given key is in a Set.
+bool isInSet(Set* set, String key) {
+	return isInList(&(set->list), key, null);
 }
 
-//  removeFromSet -- Remove an element from a set.
-//    NOTE: Shouldn't this use removeFromList?
-//--------------------------------------------------------------------------------------------------
-void removeFromSet(Set *set, Word element)
-{
+// removeFromSet removes the element with given key from a Set; if no such element does nothing.
+void removeFromSet(Set* set, String key) {
+	if (!set || !key) return;
+	List* list = &(set->list);
 	int index;
-	Word entry = searchList(set->list, element, &index);
-	if (!entry) return;
-	for (int i = index; i < set->list->length - 1; i++) {
-		set->list[i] = set->list[i + 1];
-	}
-	set->list->length--;
+	void* element = findInList(list, key, &index);
+	if (!element) return;
+	removeFromList(list, index);
 }
 
-// iterateSet -- Iterate the elements of a set, calling a function on each. Delegate to the list.
-//--------------------------------------------------------------------------------------------------
-void iterateSet(Set *set, void (*iterate)(Word))
-{
-	iterateList(set->list, iterate);
+// iterateSet iterates the elements of a set, calling a function on each.
+void iterateSet(Set* set, void (*action)(void*)) {
+	iterateList(&(set->list), action);
 }
 
-// lengthSet -- Return the number of elements in a set. Delegate to the list.
-//--------------------------------------------------------------------------------------------------
-int lengthSet(Set *set)
-{
-	return lengthList(set->list);
+// lengthSet returns the number of elements in a Set.
+int lengthSet(Set *set) {
+	return lengthList(&(set->list));
 }
 
-// showSet -- Show the contents of a set using a describe function. Delegate to the list.
-//--------------------------------------------------------------------------------------------------
-void showSet(Set *set, String (*describe)(Word))
-{
-	showList(set->list, describe);
+// showSet show the contents of a set using a describe function. Delegate to the list.
+void showSet(Set *set, String (*toString)(void*)) {
+	showList(&(set->list), toString);
+}
+
+// listOfSet returns the List that holds the Set's elements.
+List* listOfSet(Set* set) {
+	return &(set->list);
 }

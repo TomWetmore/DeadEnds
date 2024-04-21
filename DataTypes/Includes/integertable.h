@@ -4,7 +4,7 @@
 //  integertable.h
 //
 //  Created by Thomas Wetmore on 23 April 2023.
-//  Last changed on 29 May 2023.
+//  Last changed on 17 April 2024.
 //
 
 #ifndef integertable_h
@@ -27,7 +27,7 @@ typedef struct {
 
 //  User interface.
 //--------------------------------------------------------------------------------------------------
-IntegerTable *createIntegerTable(void);
+IntegerTable *createIntegerTable(int numBuckets);
 int searchIntegerTable(IntegerTable *table, String key);
 void insertInIntegerTable(IntegerTable *table, String key, int value);
 

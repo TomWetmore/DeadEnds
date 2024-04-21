@@ -1,11 +1,11 @@
 //
-//  DeadEnds
+// DeadEnds
 //
-//  readnode.c -- Functions that read GNodes (Gedcom nodes) and GNode trees from files
-//    and strings.
+// readnode.c has the functions that read GNodes (Gedcom nodes) and GNode trees from files
+// and strings.
 //
-//  Created by Thomas Wetmore on 17 December 2022.
-//  Last changed on 27 December 2023.
+// Created by Thomas Wetmore on 17 December 2022.
+// Last changed on 31 March 2024.
 //
 
 #include "readnode.h"
@@ -14,16 +14,17 @@
 #include "errors.h"
 
 static bool debugging = true;
+extern bool importDebugging;
+extern FILE* debugFile;
 
-//  Static variables that maintain state between functions in this file.
-//--------------------------------------------------------------------------------------------------
-static String fileName;   // Name of the file being read.
-static int fileLine = 0;  // Current line number in the file.
-static int level;     // Level of the last line read.
-static String key;    // Key, if any, on the last line read.
-static String tag;    // Tag on the last line read.
-static String value;  // Value, if any, on the last line read.
-static bool ateof = false;  //  Whether the Gedcom file has reached end of file.
+// Static variables that maintain state between functions.
+static String fileName;    // Name of file.
+static int fileLine = 0;   // Current line number.
+static int level;          // Level of last line read.
+static String key;         // Key of last line read.
+static String tag;         // Tag of last line read.
+static String value;       // Value of last line read.
+static bool ateof = false; // File is at end of file.
 
 //  extractFields -- Process a String holding a single Gedcom line by extracting the level, key
 //    (if any), tag, and value (if any). The line may have a newline at the end. This function is
@@ -237,21 +238,21 @@ NodeListElement *createNodeListElement(GNode *node, int level, int lineNo, Error
 	return element;
 }
 
-//  createNodeList -- Create a NodeList. Two NodeLists are used by the code. One that holds the
-//    list of all indidicual GNodes extracted from a Gedcom file, and one that holds the final
-//    GNode tree records.
-//-------------------------------------------------------------------------------------------------
-NodeList *createNodeList(void)
-{
-	NodeList *nodeList = createList(null, null, null);
+// getKey is the getKey function or NodeLists that returns the tag of the GNode in the element.
+static String getKey(void* element) {
+	return ((NodeListElement*) element)->node->tag;
+}
+
+// createNodeList creates a NodeList; one type holds all GNodes from a file, the other holds the
+// list of root GNodes.
+NodeList *createNodeList(void) {
+	NodeList *nodeList = createList(getKey, null, null, false);
 	return nodeList;
 }
 
-//  getNodeListFromFile -- Use fileToLine and extractFields to create a GNode for each line in a
-//    Gedcom file. Lines with errors store Errors in the list rather than GNodes.
-//-------------------------------------------------------------------------------------------------
-NodeList *getNodeListFromFile(FILE *fp, int *numErrors)
-{
+// getNodeListFromFile uses fileToLine and extractFields to create a GNode for each line in a
+// Gedcom file. Lines with errors store Errors in the list rather than GNodes.
+NodeList *getNodeListFromFile(FILE *fp, int *numErrors) {
 	NodeList *nodeList = createNodeList();
 	Error *error;
 
@@ -260,17 +261,18 @@ NodeList *getNodeListFromFile(FILE *fp, int *numErrors)
 	while (rc != ReadEOF) {
 		if (rc == ReadOkay) {
 			// Create the GNode from the extracted fields and add it to the list.
-			appendListElement(nodeList, createNodeListElement(createGNode(key, tag, value, null), level, fileLine, null));
+			appendToList(nodeList, createNodeListElement(
+							createGNode(key, tag, value, null), level, fileLine, null));
 		} else {
 			// Add an error entry to the node list.
-			appendListElement(nodeList, createNodeListElement(null, level, fileLine, error));
+			appendToList(nodeList, createNodeListElement(null, level, fileLine, error));
 			(*numErrors)++;
 		}
 		rc = fileToLine(fp, &error);
 	}
-	if (debugging) {
-		printf("Length of the node and error list is %d\n", lengthList(nodeList));
-		printf("  Number of errors is %d\n", *numErrors);
+	if (importDebugging) {
+		fprintf(debugFile, "Length of the node and error list is %d\n", lengthList(nodeList));
+		fprintf(debugFile, "Number of errors is %d\n", *numErrors);
 	}
 	if (lengthList(nodeList) > 0) return nodeList;
 	deleteList(nodeList);
@@ -298,11 +300,9 @@ void showNodeList(NodeList *nodeList)
 #define isErrorElement(element) ((element)->error)
 #define elementFields(element) element->node->key, element->node->tag, element->node->value, null
 
-//  getNodeTreesFromNodeList -- Scans a NodeList of GNodes and creates NodeList of GNode trees.
-//    Uses a three state state machine to keep track of levels and errors.
-//-------------------------------------------------------------------------------------------------
-NodeList *getNodeTreesFromNodeList(NodeList *lowerList, ErrorLog *errorLog)
-{
+// getNodeTreesFromNodeList scans a NodeList of GNodes and creates a NodeList of GNode trees;
+//  uses a three state state machine to track levels and errors.
+NodeList *getNodeTreesFromNodeList(NodeList *lowerList, ErrorLog *errorLog) {
 	enum ExState { InitialState, MainState, ErrorState };
 	enum ExState state = InitialState;
 	int prevLevel = 0;
@@ -341,13 +341,13 @@ NodeList *getNodeTreesFromNodeList(NodeList *lowerList, ErrorLog *errorLog)
 			// On error enter ErrorState but return the possibly partial current node tree.
 			if (isErrorElement(element)) {
 				addErrorToLog(errorLog, element->error);
-				appendListElement(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
+				appendToList(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
 				state = ErrorState;
 				continue;
 			}
 			// A 0-level node is the first node of the next record. Return current node tree.
 			if (isZeroLevelNode(element)) {
-				appendListElement(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
+				appendToList(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
 				curRoot = curNode = createGNode(elementFields(element));
 				prevLevel = curLevel = 0;
 				line0Number = element->lineNo;
@@ -383,7 +383,7 @@ NodeList *getNodeTreesFromNodeList(NodeList *lowerList, ErrorLog *errorLog)
 			}
 			// Anything else is an error.
 			addErrorToLog(errorLog, createError(syntaxError, fileName, element->lineNo, "Illegal level number."));
-			appendListElement(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
+			appendToList(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
 			state = ErrorState;
 			continue;
 		case ErrorState:
@@ -400,7 +400,7 @@ NodeList *getNodeTreesFromNodeList(NodeList *lowerList, ErrorLog *errorLog)
 	}
 	//  If in MainState at the end there is a a tree to add to the list.
 	if (state == MainState) {
-		appendListElement(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
+		appendToList(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
 	}
 	return rootNodeList;
 }

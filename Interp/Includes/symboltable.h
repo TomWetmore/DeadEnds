@@ -1,38 +1,36 @@
 //
-//  DeadEnds
+// DeadEnds
 //
-//  symboltable.h -- Header file for the symbol tables that hold the values of variables in
+// symboltable.h -- Header file for the symbol tables that hold the values of variables in
 //    DeadEnds programs. Symbol tables are implented with hash tables.
 //
-//  Created by Thomas Wetmore on 23 March 2023.
-//  Last changed on 15 May 2023.
+// Created by Thomas Wetmore on 23 March 2023.
+// Last changed on 2 April 2024.
 //
 
 #ifndef symboltable_h
 #define symboltable_h
 
+typedef struct PValue PValue; // Forward reference.
+
 #include "standard.h"
 #include "hashtable.h"
 #include "pvalue.h"
 
-//  SymbolTable -- Symbol tables hold program variables and their values. These are used by
-//    the interpreter. They are an implementation of hash table.
-//--------------------------------------------------------------------------------------------------
+// A SymbolTable holds DeadEnds script variables and their values.
 typedef HashTable SymbolTable;
 
-//  Symbol -- Symbols are the elements in symbol tables.
-//--------------------------------------------------------------------------------------------------
+// A Symbol is an element of a SymbolTable. ident is the name of a variable/identifier, and
+// value is its value.
 typedef struct {
-    String ident;   //  The variable (or identifier); this is the element's the key value.
-    PValue *value;  //  The variable's value; a pointer to a program value.
+	String ident;
+	PValue *value;
 } Symbol;
 
 //  User interface to symbol tables.
-//--------------------------------------------------------------------------------------------------
-SymbolTable *createSymbolTable(void);  //  Create a symbol table.
-void assignValueToSymbol(SymbolTable*, String ident, PValue value);  //  Assign a value to an ident.
-PValue getValueOfSymbol(SymbolTable*, String ident);  //  Get the value of an ident from a symbol table.
-
-void showSymbolTable(SymbolTable*);  //  Show the contents of a symbol table. For debugging.
+SymbolTable *createSymbolTable(void);
+void assignValueToSymbol(SymbolTable*, String, PValue);
+PValue getValueOfSymbol(SymbolTable*, String);
+void showSymbolTable(SymbolTable*);
 
 #endif // symboltable_h

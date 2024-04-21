@@ -1,96 +1,78 @@
 //
-//  DeadEnds
+// DeadEnds
 //
-//  hashtable.h -- Implements a HashTable. A HashTable is an array of MAX_HASH buckets. A bucket
-//    is a list of elements with the same hash value. Elements are defined by the user. The user
-//    must provide a compare function used to keep the elements in the buckets sorted.
+// hashtable.h -- Implements a HashTable. A HashTable is an array of MAX_HASH buckets. A bucket
+// is a list of elements with the same hash value. Elements are defined by the user. The user
+// must provide a compare function used to keep the elements in the buckets sorted.
 //
 //  Created by Thomas Wetmore 29 November 2022.
-//  Last changed on 20 October 2023.
+//  Last changed on 13 April 2024.
 //
 
 #ifndef hashtable_h
 #define hashtable_h
 
 #include "standard.h"
+#include "block.h"
 
-#define MAX_HASH 1024
-//#define MAX_HASH 16  // DBUG: Make MAXHASH small for debugging.
-#define INITIAL_BUCKET_LENGTH 30
-//#define INITIAL_BUCKET_LENGTH 4  // DBUG: Make the initial bucket length small for debugging.
-#define SORT_THRESHOLD 30
-//#define SORT_THRESHOLD 4  //  DBUG: Make the sort threshold small to debug the quick sort.
+//#define INITIAL_BUCKET_LENGTH 30
+#define INITIAL_BUCKET_LENGTH 4  // DBUG: Make the initial bucket length small for debugging.
+//#define SORT_THRESHOLD 30
+#define SORT_THRESHOLD 5  //  DBUG: Make the sort threshold small to debug the quick sort.
 
-//  Bucket -- Hash tables consist of MAXHASH buckets. Each bucket holds an array of elements.
-//    The elements are treated as void* pointers. When a bucket's size reaches the sort
-//    threshold, the elements are sorted using the hash table's compare function.
-//--------------------------------------------------------------------------------------------------
+// Bucket is the type of HashTable buckets.
 typedef struct Bucket {
-	int length;      //  Current size of this bucket.
-	int maxLength;   //  Maximum size this bucket can be before reallocation.
-	bool sorted;     //  True when this bucket is sorted.
-	Word *elements;  //  The elements in this bucket.
+	Block block;
 } Bucket;
 
-//  HashTable -- Hash table.
-//--------------------------------------------------------------------------------------------------
+// HashTable is the type that implements a hash table. The getKey, compare and delete functions
+// customize the elements used in a specific HashTables. getKey gets the key of an element;
+// compare compares to keys; and delete deletes an element.
 typedef struct HashTable {
-	int (*compare)(Word, Word);  //  Compare two elements in a bucket.
-	void (*delete)(Word);        //  Function to delete an element.
-	String(*getKey)(Word);       //  Function to get the key from an element.
-	Bucket *buckets[MAX_HASH];   //  Buckets of the hash table.
-	int count;                   //  The number of elements in the table.
+	int numBuckets; // Should be a prime number.
+	String (*getKey)(void*);
+	int (*compare)(String, String);
+	void (*delete)(void*);
+	Bucket** buckets;
 } HashTable;
 
-// User interface to hash table.
-//--------------------------------------------------------------------------------------------------
-HashTable *createHashTable(int (*compare)(Word, Word), void(*delete)(Word), String(*getKey)(Word));
-void deleteHashTable(HashTable*);  // Delete a HashTable; use the element delete function if exists.
-bool isInHashTable(HashTable*, String key);  //  Return whether an element with key is in.
-Word searchHashTable(HashTable*, String key);  // Return the element that matches the key.
+// User interface to HashTable.
+HashTable* createHashTable(String(*g)(void*), int(*c)(String, String), void(*d)(void*), int numBuckets);
+void deleteHashTable(HashTable*);
+bool isInHashTable(HashTable*, String key);
+void* searchHashTable(HashTable*, String key);
 
-void insertInHashTable(HashTable*, Word element);  // Add a new element to the table.
-Word firstInHashTable(HashTable*, int*, int*);  // Return first element in a new iteration.
-Word nextInHashTable(HashTable*, int*, int*);  // Return next table element in iteration.
-int sizeHashTable(HashTable*);  // Return the number of elements in a table.
-void showHashTable(HashTable*, void (*show)(Word));  // Show the contents of a table; for debugging.
-/*static*/ int getHash(String);  // Return the hashed value of a String.
+void addToHashTable(HashTable*, void*, bool);
+bool addToHashTableIfNew(HashTable*, void*);
+void *firstInHashTable(HashTable*, int*, int*);
+void* nextInHashTable(HashTable*, int*, int*);
+
+int sizeHashTable(HashTable*);
+void showHashTable(HashTable*, void(*show)(void*));
+/*static*/ int getHash(String, int);
 void removeFromHashTable(HashTable*, String key);
-int iterateHashTableWithPredicate(HashTable*, bool (*function)(Word element));
+int iterateHashTableWithPredicate(HashTable*, bool(*)(void*));
 
 //  SHOULDN'T THE BUCKET FUNCTIONS BE STATIC, SO NOT DECLARED IN HERE AT ALL??
-Bucket *createBucket(void);  // Create a bucket.
-void deleteBucket(Bucket*, void(*)(Word));  // Delete a bucket.
-Word searchBucket(Bucket*, String key, int(*compare)(Word, Word), String (*getKey)(Word), int* index);  // Search a bucket.
+Bucket *createBucket(void);
+int lengthBucket(Bucket*);
+void deleteBucket(Bucket*, void(*d)(void*));
+//void* searchBucket(Bucket*, String key, int(*c)(void*, void*), int* index);  // Search a bucket.
 
-void appendToBucket(Bucket*, Word element);  // Append an element to a bucket.
-void removeElement(HashTable*, Word element);  // Remove an element from the hash table.
+void appendToBucket(Bucket*, void* element);
+void removeElement(HashTable*, void* element);
 
-//  The rest of this file defines the interfaces to hash tables with specific element types.
-#define IntegerTable HashTable      //  Hash table whose element values are integers.
-//#define FunctionTable HashTable     //  Hash table whose element values are function definitions.
-#define WordTable HashTable         //  Hash table whose element values are arbitrary void*'s.
-
-//  WordElement -- Elements for wholly generic hash tables. Casts needed throughout.
-//--------------------------------------------------------------------------------------------------
-typedef struct WordElement {
-	String key;
-	Word value;
-} WordElement;
-
-//  Macros for iterating over all elements in a hash table. Meanings of the brackets: outside
-//    pair of brackets enclose the full macro expansion; the middle pair of brackets enclose the
-//    internal while loop; and the inner pair of brackets enclose what the user provides as the
-//    loop body.
-//-------------------------------------------------------------------------------------------------
+// FORHASHTABLE and ENDHASHTABLE are macros that iterate over the elements in a HashTable.
 #define FORHASHTABLE(table, element) {\
 			int __i = 0, __j = 0;\
 			HashTable *__table = table;\
-			Word element = firstInHashTable(__table, &__i, &__j);\
-			while (element) {{\
-			
+			void *element = null;\
+			void *__element = firstInHashTable(__table, &__i, &__j);\
+			while (__element) {{\
+				element = __element;
+
 #define ENDHASHTABLE }\
-			element = nextInHashTable(__table, &__i, &__j);\
+			__element = nextInHashTable(__table, &__i, &__j);\
 		}}\
 
 #endif // hashtable_h

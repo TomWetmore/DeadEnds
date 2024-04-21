@@ -4,23 +4,17 @@
 //  errors.c -- Code for handling DeadEnds errors.
 //
 //  Created by Thomas Wetmore on 4 July 2023.
-//  Last changed on 29 December 2023.
+//  Last changed on 26 March 2024.
 //
 
 #include "errors.h"
 #include "list.h"
 
+#define NUMKEYS 64
 static bool debugging = false;
 
-//  getErrKey -- Get the comparison key of an error. Required list function.
-//
-//    This needs a little thought. We need to sort the errors by a key made up of the file name
-//    and the line number. But The sorting has to be done numerically with the line numbers and
-//    not lexicographably.
-//--------------------------------------------------------------------------------------------------
-#define NUMKEYS 64
-static String getErrKey(Word error)
-{
+// getKey returns the comparison key of an error.
+static String getKey(void* error) {
 	static char buffer[NUMKEYS][128];
 	static int dex = 0;
 	if (++dex > NUMKEYS - 1) dex = 0;
@@ -28,37 +22,29 @@ static String getErrKey(Word error)
 	String fileName = ((Error*) error)->fileName;
 	if (!fileName) fileName = "";
 	int lineNumber = ((Error*) error)->lineNumber;
-	//  MNOTE: The key is returned out of static memory. The caller must make a copy if it needs
-	//  to persist beyond NUMKEYs calls of this function.
 	sprintf(scratch, "%s%09d", fileName, lineNumber);
-	return scratch;
+	return scratch; // Static memory!
 }
 
-//  cmpError -- Compare two errors for their placement in an error log. Required list function.
-//--------------------------------------------------------------------------------------------------
-static int cmpError(Word errorOne, Word errorTwo)
-{
-	String key1 = getErrKey(errorOne);
-	String key2 = getErrKey(errorTwo);
-	return strcmp(key1, key2);
+// compare compares two errors for their placement in an error log.
+static int compare(String a, String b) {
+	return strcmp(a, b);
 }
 
-//  delError -- Free up the memory for an error when an error log is freed. Required list function.
-//--------------------------------------------------------------------------------------------------
-static void delError(Word error)
-{
+// delete frees an Error from an ErrorLog.
+static void delete(Word error) {
 	String message = ((Error*) error)->message;
 	if (message) stdfree(message);
 	stdfree(error);
 	return;
 }
 
-//  createErrorLog -- Create an error log. An ErrorLog is a specialized List.
+//  createErrorLog creates an error log. An ErrorLog is a specialized List.
 //--------------------------------------------------------------------------------------------------
 ErrorLog *createErrorLog(void)
 {
-	ErrorLog *errorLog = createList(cmpError, delError,  getErrKey);
-	errorLog->keepSorted = true;
+	ErrorLog *errorLog = createList(getKey, compare, delete, false);
+	errorLog->sorted = true;
 	return errorLog;
 }
 
@@ -97,7 +83,7 @@ void deleteError (Error *error)
 void addErrorToLog (ErrorLog *errorLog, Error *error)
 {
 	if (!error) return;
-	appendListElement(errorLog, error);
+	appendToList(errorLog, error);
 }
 
 //  addErrorToLog -- Add an Error to an ErrorLog.
@@ -105,7 +91,7 @@ void addErrorToLog (ErrorLog *errorLog, Error *error)
 void oldAddErrorToLog(ErrorLog *errorLog, ErrorType errorType, String fileName, int lineNumber,
 	String message)
 {
-	appendListElement(errorLog, createError(errorType, fileName, lineNumber, message));
+	appendToList(errorLog, createError(errorType, fileName, lineNumber, message));
 }
 
 //  showError -- Show an Error on standard output.

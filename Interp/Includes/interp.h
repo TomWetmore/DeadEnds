@@ -1,11 +1,9 @@
+// DeadEnds
 //
-//  DeadEnds
+// interp.h -- Header for the DeadEnds language interpreter.
 //
-//  interp.h -- Header for the DeadEnds language interpreter.
-//
-//  Created by Thomas Wetmore on 8 December 2022.
-//  Last changed on 15 November 2023.
-//
+// Created by Thomas Wetmore on 8 December 2022.
+// Last changed on 18 April 2024.
 
 #ifndef interp_h
 #define interp_h
@@ -19,18 +17,16 @@ typedef struct HashTable SymbolTable;
 #include "symboltable.h"
 #include "database.h"
 
-// InterpType -- Enumeration of the interpreter return types.
-//--------------------------------------------------------------------------------------------------
+// InterpType is the enumeration of interpreter return types.
 typedef enum InterpType {
     InterpError = 0, InterpOkay, InterpBreak, InterpContinue, InterpReturn
 } InterpType;
 
+// Context is the data type that holds the context in which interpretation takes place.
 typedef struct Context {
     SymbolTable *symbolTable;
     Database *database;
 } Context;
-
-//extern Table testTable;
 
 // Report Interpreter.
 void initializeInterpreter(Database*);
@@ -58,11 +54,11 @@ InterpType interp_forsour(PNode*, Context*, PValue*);
 InterpType interp_foreven(PNode*, Context*, PValue*);
 InterpType interp_forothr(PNode*, Context*, PValue*);
 InterpType interpForFam(PNode*, Context*, PValue*);
-InterpType interp_indisetloop(PNode*, Context*, PValue*);
+InterpType interpretSequenceLoop(PNode*, Context*, PValue*);
 InterpType interpForList(PNode*, Context*, PValue*);
-InterpType interpIfStatement(PNode*, Context*, PValue*);           // Interpret if statements.
-InterpType interpWhileStatement(PNode*, Context*, PValue*);         // Interpret while loops.
-InterpType interpProcCall(PNode*, Context*, PValue*);         // Interpret user-defined procedure calls.
+InterpType interpIfStatement(PNode*, Context*, PValue*);
+InterpType interpWhileStatement(PNode*, Context*, PValue*);
+InterpType interpProcCall(PNode*, Context*, PValue*);  // User-defined procedure calls.
 InterpType interpTraverse(PNode*, Context*, PValue*);
 
 // Prototypes.

@@ -17,7 +17,6 @@
 
 bool validateDatabase(Database*, ErrorLog*);
 
-
 //static bool debugging = true;
 
 static void validateSource(GNode*, Database*, ErrorLog*);
@@ -91,7 +90,7 @@ static void validateReferences(Database *database, ErrorLog* errorLog)
 				Error *error = createError(gedcomError, segment, LN(person, database, refn),
 										   "Missing REFN value");
 				addErrorToLog(errorLog, error);
-			} else if (!insertInRefnIndex (refnIndex, refString, person->key)) {
+			} else if (!addToRefnIndex (refnIndex, refString, person->key)) {
 				Error *error = createError(gedcomError, segment, LN(person, database, refn),
 										   "REFN value already in index");
 				addErrorToLog(errorLog, error);
@@ -111,7 +110,7 @@ static void validateReferences(Database *database, ErrorLog* errorLog)
 				Error *error = createError(gedcomError, segment, LN(family, database, refn),
 										   "Missing REFN value");
 				addErrorToLog(errorLog, error);
-			} else if (!insertInRefnIndex (refnIndex, refString, family->key)) {
+			} else if (!addToRefnIndex (refnIndex, refString, family->key)) {
 				Error *error = createError(gedcomError, segment, LN(family, database, refn),
 										   "REFN value already in index");
 				addErrorToLog(errorLog, error);

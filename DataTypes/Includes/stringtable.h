@@ -3,7 +3,7 @@
 //  JustParsing
 //
 //  Created by Thomas Wetmore on 23 April 2023.
-//  Last changed on 25 September 2023.
+//  Last changed on 17 April 2024.
 //
 
 #ifndef stringtable_h
@@ -18,15 +18,15 @@ typedef HashTable StringTable;
 //  StringElement -- Elements for String to String mappings.
 //--------------------------------------------------------------------------------------------------
 typedef struct StringElement {
-    String key;
-    String value;
+	String key;
+	String value;
 } StringElement;
 
 //  User interface to string tables.
 //--------------------------------------------------------------------------------------------------
-HashTable *createStringTable(void);
+HashTable *createStringTable(int numBuckets);
 String searchStringTable(StringTable*, String key);
-void insertInStringTable(StringTable*, String key, String value);
+void addToStringTable(StringTable*, String key, String value);
 String fixString(StringTable *table, String string);
 void showStringTable(StringTable*);  //  For debugging.
 

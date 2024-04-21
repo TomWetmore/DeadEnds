@@ -1,11 +1,9 @@
-//
 //  DeadEnds
 //
-//  date.c
+//  date.c has most of the functions that deal with Gedcom-based dates.
 //
 //  Created by Thomas Wetmore on 22 February 2023.
-//  Last changed on 11 February 2024.
-//
+//  Last changed on 18 April 2024.
 
 #include <time.h>
 #include "standard.h"
@@ -527,7 +525,7 @@ static int getDateToken (int *pival, String *psval)
 static void init_monthtbl (void)
 {
     int i, j;
-    monthtbl = createIntegerTable();
+    monthtbl = createIntegerTable(5);
     for (i = 0; i < 19; i++) {
         j = i + 1;
         insertInIntegerTable(monthtbl, monthstrs[i].su, j);

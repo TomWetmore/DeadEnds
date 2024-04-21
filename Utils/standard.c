@@ -4,7 +4,7 @@
 //  standard.c -- Standard routines.
 //
 //  Create by Thomas Wetmore on 7 November 2022.
-//  Last changed on 25 November 2023.
+//  Last changed on 5 April 2024.
 
 #include <stdlib.h>
 #include "standard.h"
@@ -93,8 +93,7 @@ void alloc_out(String str)
 	fprintf(allocLogFile, "%s\n", str);
 }
 
-// strsave -- Save a copy of a String on the heap. Return the pointer to the copy.
-//--------------------------------------------------------------------------------------------------
+// strsave saves a copy of a String on the heap and returns a pointer to it.
 String strsave(String string) {
 	if (string == null || *string == 0) return null;
 	return strcpy(stdalloc(strlen(string) + 1), string);
@@ -119,11 +118,8 @@ String strconcat(String s1, String s2)
 	return s3;
 }
 
-// chartype -- Return character type
-//--------------------------------------------------------------------------------------------------
-CharType characterType(int c)
-// int c -- Returns the type of this character. Work required later to support Unicode.
-{
+// characterType returns the type of a character; not Unicode ready.
+CharType characterType(int c) {
     if (c == ' ' || c == '\t' || c == '\n' || c == '\r') return White;
     if (c >= 'a' && c <= 'z') return Letter;
     if (c >= 'A' && c <= 'Z') return Letter;
@@ -131,11 +127,8 @@ CharType characterType(int c)
     return c;
 }
 
-// chartype -- Return character type
-//--------------------------------------------------------------------------------------------------
-int chartype(int c)
-// int c -- Returns the type of this character. Work required later to support Unicode.
-{
+// chartype returns the type of a character. DEPRECATED.
+int chartype(int c) {
 	if (c == ' ' || c == '\t' || c == '\n' || c == '\r') return WHITE;
 	if (c >= 'a' && c <= 'z') return LETTER;
 	if (c >= 'A' && c <= 'Z') return LETTER;

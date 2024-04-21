@@ -1,55 +1,39 @@
+// DeadEnds
 //
-//  DeadEnds
+// pvaluetable.c holds the functions that operate on PValueTables.
 //
-//  pvaluetable.c -- Hash table for holding program values. Used to implement the TABLE type
-//    in the DeadEnds programming language.
-//
-//  Created by Thomas Wetmore on 21 April 2023.
-//  Last changed on 21 April 2023.
-//
+// Created by Thomas Wetmore on 21 April 2023.
+//  Last changed on 18 April 2024.
+
+// IS THIS DATA TYPE USED ANYMORE???
 
 #include "standard.h"
 #include "pvaluetable.h"
 
-//  getPValueTableKey -- Get the key from a program value element.
-//--------------------------------------------------------------------------------------------------
-static String getPValueTableKey(Word element)
-{
-    return ((PValueElement*) element)->key;
-}
+// getKey gets the key from a program value element.
+static String getKey(void* element) { return ((PValueElement*) element)->key; }
 
-//  comparePValueElements -- Compare two program value elements.
-//--------------------------------------------------------------------------------------------------
-static int comparePValueElements(Word a, Word b)
-{
-    String left = ((PValueElement*) a)->key;
-    String right = ((PValueElement*) b)->key;
-    return strcmp(left, right);
-}
+// compare compares two program value elements.
+static int compare(String a, String b) { return strcmp(a, b); }
 
-//  deletePValueElement -- Delete a program value element when it is removed from a table.
+//  delete deletes a program value element when it is removed from a table.
 //  MNOTE: This has to be done carefully.
-//--------------------------------------------------------------------------------------------------
-static void deletePValueElement(Word a)
-{
+static void delete(void* a) {
     PValueElement *element = (PValueElement*) a;
-    stdfree(element->key);
+    free(element->key);
     PValue* pvalue = element->value;
-    if (pvalue->type == PVString) stdfree(pvalue->value.uString);
-    stdfree(pvalue);
+    if (pvalue->type == PVString) free(pvalue->value.uString);
+    free(pvalue);
 }
 
-//  createPValueTable -- Create a program value table.
-//--------------------------------------------------------------------------------------------------
-PValueTable *createPValueTable(void)
-{
-    return createHashTable(comparePValueElements, deletePValueElement, getPValueTableKey);
+//  createPValueTable creates and returns a PValueTable.
+static int numBucketsInPValueTable = 13;
+PValueTable *createPValueTable(void) {
+    return createHashTable(getKey, compare, delete, numBucketsInPValueTable);
 }
 
-//  createPValueElement -- Create a PVaue element.
-//--------------------------------------------------------------------------------------------------
-static PValueElement *createPValueElement(String key, PValue *ppvalue)
-{
+//  createPValueElement creates a PVaueTable element.
+static PValueElement *createPValueElement(String key, PValue *ppvalue) {
     PValueElement *element = (PValueElement*) stdalloc(sizeof(PValueElement));
     element->key = key;
     element->value = ppvalue;
@@ -73,7 +57,7 @@ void insertInPValueTable(PValueTable *table, String key, PValue pvalue)
     }
 
     // Otherwise add a new element to the table.
-    insertInHashTable(table, createPValueElement(key, ppvalue));
+    addToHashTable(table, createPValueElement(key, ppvalue), true);
 }
 
 //  getValueOfPValueElement -- Get the program value mapped to by the key from a table of

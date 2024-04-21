@@ -180,16 +180,17 @@ int compareRecordKeys(String, String);  // gedcom.c
 #define FORTRAVERSE(root, node)\
 {\
     GNode* node = root;\
-    List *stack = createList(null, null, null);\
-    prependListElement(stack, node);\
+    List *stack = createList(null, null, null, false);\
+    prependToList(stack, node);\
     while (!isEmptyList(stack)) {\
-        node = removeFirstListElement(stack);\
+        node = getFirstListElement(stack);\
         {\
 
 #define ENDTRAVERSE\
         }\
-        if (node->sibling) prependListElement(stack, node->sibling);\
-        if (node->child) prependListElement(stack, node->child);\
+        if (node->sibling) prependToList(stack, node->sibling);\
+        if (node->child) prependToList(stack, node->child);\
+		removeFirstListElement(stack);\
     }\
     deleteList(stack);\
 }\

@@ -25,6 +25,6 @@ typedef struct {
 
 FunctionTable *createFunctionTable(void);
 PNode *searchFunctionTable(FunctionTable *table, String name);
-void insertInFunctionTable(FunctionTable *table, String name, PNode *pnode);
+void addToFunctionTable(FunctionTable *table, String name, PNode *pnode);
 
 #endif // functiontable_h

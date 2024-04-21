@@ -1,35 +1,29 @@
+// DeadEnds
 //
-//  DeadEnds
+// writenode.c has the functions that write GNodes and GNode trees and forests to Strings and
+// FILEs.
 //
-//  writenode.c -- Functions that deal with writing gedcom nodes or node trees to strings and
-//    files.
-//
-//  Created by Thomas Wetmore on 2 May 2023.
-//  Last changed on 2 May 2023
+// Created by Thomas Wetmore on 2 May 2023.
+// Last changed on 19 April 2024.
 //
 
 #include "standard.h"
 #include "gnode.h"
 #include "writenode.h"
 
-// Static functions defined in this file.
-//--------------------------------------------------------------------------------------------------
 void writeGNodes(FILE*, int level, GNode*, bool indent, bool kids, bool sibs);
 void writeGNode(FILE*, int level, GNode*, bool indent);
+
+// Static functions defined in this file.
 static String swriteGNodes(int level, GNode*, String);
 static String swriteGNode(int level, GNode*, String);
 static int nodeStringLength(int, GNode*);
 
-//  gnodesToFile -- Write a gedcom tree to a gedcom file. Opens the file, calls writeGNodes to
-//    write the nodes, and closes the file. Returns whether the write occurred.
-//    TODO: SHOULD WE GET RID OF THE LEVEL PARAMETER AND PASS 0 TO WRITEGNODES?
-//--------------------------------------------------------------------------------------------------
-bool gnodesToFile(int level, GNode* gnode, String fileName, bool indent)
-// level -- Level of node; always zero?
-// node -- GNode at root of tree to write.
-// fname -- Output file name.
-// indent -- True if lines are indented.
-{
+// gnodesToFile writes a GNode tree or forest to a file. Opens the file, calls writeGNodes to
+// write the nodes, and closes the file. Returns whether the write occurred. Level is level of
+// the top GNode (always zero?); gnode is the root, fileName is the file name and indent
+// indicates whether the first should be indented.
+bool gnodesToFile(int level, GNode* gnode, String fileName, bool indent) {
     FILE *fp;
     if (!(fp = fopen(fileName, "w"))) {
         printf("Could not open file: `%s'\n", fileName);
@@ -40,14 +34,9 @@ bool gnodesToFile(int level, GNode* gnode, String fileName, bool indent)
     return true;
 }
 
-//  writeGNode -- Write a single gedcom node to a file. Called by writeGNodes.
-//--------------------------------------------------------------------------------------------------
-void writeGNode(FILE *fp, int level, GNode* gnode, bool indent)
-//  fp -- Output file.
-//  level -- Level of the node.
-//  gnode -- Node to write.
-//  indent -- True if lines are indented.
-{
+// writeGNode writes a single GNode to a file. Level is the level of the node; indent specifies
+// whether the node is indented.
+void writeGNode(FILE *fp, int level, GNode* gnode, bool indent) {
     if (indent) for (int i = 1; i < level; i++) fprintf(fp, "  ");
     fprintf(fp, "%d", level);
     if (gnode->key) fprintf(fp, " %s", gnode->key);
@@ -56,122 +45,71 @@ void writeGNode(FILE *fp, int level, GNode* gnode, bool indent)
     fprintf(fp, "\n");
 }
 
-//  writeGNodes -- Write a node tree or forest to a Gedcom file. Recurse to children and siblings.
-//--------------------------------------------------------------------------------------------------
-void writeGNodes(FILE *fp, int level, GNode* gnode, bool indent, bool kids, bool sibs)
-// fp -- Output file.
-// level -- Level of the GNode of this call.
-// gnode -- GNode of this call.
-// indent -- True if lines are indented.
-// kids -- True if children are included.
-// sibs -- True if siblings are included.
-{
+// writeGNodes recursively writes a GNode tree or forest to a file. Level is the current level;
+// indent specifies indenting; kids and sibs indicate recursing to children and siblings.
+void writeGNodes(FILE *fp, int level, GNode* gnode, bool indent, bool kids, bool sibs) {
     if (!gnode) return;
-
-    // Write the specfied node to the file.
     writeGNode(fp, level, gnode, indent);
-
-    //  Recurse to children and siblings if so indicated.
     if (kids) writeGNodes(fp, level + 1, gnode->child, indent, true, true);
     if (sibs) writeGNodes(fp, level, gnode->sibling, indent, kids, true);
 }
 
-//  gnodesToString -- Return a gedcom record tree converted to a string. Two steps. First find
-//    the length of String needed and allocate it. Second fill the string with the output.
-//    Return the string.
-//--------------------------------------------------------------------------------------------------
-String gnodesToString(GNode* gnode)
-// gnode -- Root gedcom node of a record to be put into string form.
-{
-    // Find the length of a string to hold the record.
-    int length = treeStringLength(0, gnode) + 1;  //  + 1 for the final \0.
+// gnodesToString returns a GNode tree converted to a String. First finds the length of the String
+// and allocates it. Then fills the String with the Gedcom text.
+String gnodesToString(GNode* gnode) {
+    int length = treeStringLength(0, gnode) + 1; // + 1 for final \0.
     if (length <= 0) return null;
-
-    // Allocate the needed memory.
     String string = (String) stdalloc(length);
-
-    // Call swriteGNodes to write the String.
     (void) swriteGNodes(0, gnode, string);
     return string;
 }
 
-//  gnodeToString -- Return a single gedcom node as a string. This does not add a newline at
-//    the end. Calls nodeStringLength to find the length of string needed, then calls swriteGNode
-//    to write the node to a string, and overwrites the final newline with a \0.
-//--------------------------------------------------------------------------------------------------
-String gnodeToString(GNode* gnode, int level)
-{
-    // Get the length of String needed and allocate space.
+// gnodeToString returns a GNode as a String without a newline.
+String gnodeToString(GNode* gnode, int level) {
     int length = nodeStringLength(level, gnode);
-    String string = (String) stdalloc(length);
-    // Use swriteGNode to convert to String and then write a zero on the newline.
+    String string = (String) malloc(length);
     swriteGNode(level, gnode, string);
     string[strlen(string) - 1] = 0;
     return string;
 }
 
-//  swriteGNode -- Write a Node to a string. Returns the next location in the String p to add the
-//    next GNode.
-//--------------------------------------------------------------------------------------------------
-static String swriteGNode(int level, GNode* node, String p)
-// level -- Level of this GNode.
-// node -- GNode to render as a String.
-// p -- Location to copy the String to before returning.
-{
-    // Buffer use only to compose the line.
-    char scratch[600];
+// swriteGNode writes a GNode to a string. Returns position in string of next GNode.
+static String swriteGNode(int level, GNode* node, String p) {
+    char scratch[600]; // Used to compose line.
     String q = scratch;
-    // Write the level to the buffer.
-    sprintf(q, "%d ", level);
+    sprintf(q, "%d ", level); // Level
     q += strlen(q);
-    // If the GNode has a key write it to buffer.
-    if (node->key) {
+    if (node->key) { // Key
         strcpy(q, node->key);
         q += strlen(q);
         *q++ = ' ';
     }
-    // Write the tag to the buffer.
-    strcpy(q, node->tag);
+    strcpy(q, node->tag); // Tag
     q += strlen(q);
-    // If the GNode has a value write it to the buffer.
-    if (node->value) {
+    if (node->value) { // Value
         *q++ = ' ';
         strcpy(q, node->value);
         q += strlen(q);
     }
-    // Add a newline to the buffer, and then copy the buffer to the end of the input String.
-    *q++ = '\n';
+    *q++ = '\n'; // Newline.
     *q = 0;
     strcpy(p, scratch);
-    // Return the position in the input String where the next GNode line will go.
-    return p + strlen(p);
+    return p + strlen(p); // Position of next GNode.
 }
 
-//  swriteGNodes -- Write GNode tree to String. Recurses to children and siblings.
-//--------------------------------------------------------------------------------------------------
-static String swriteGNodes (int level, GNode* gnode, String p)
-// level -- Level of the GNode being written on this call.
-// node -- GNode being written on this call.
-// p -- Location in String where the representation of this GNode goes.
-{
-    // Iterate through this GNode and its siblings.
+// swriteGNodes write GNode tree or forest to a String. Recurses to children and siblings.
+static String swriteGNodes (int level, GNode* gnode, String p) {
     while (gnode) {
-        // Output this GNode.
         p = swriteGNode(level, gnode, p);
-        // If this GNode has children recurse.
         if (gnode->child) p = swriteGNodes(level + 1, gnode->child, p);
         gnode = gnode->sibling;
     }
     return p;
 }
 
-//  treeStringLength -- Recursively compute string length of a gedcom tree. This is used for the
-//    pre-allocation of the memory needed to hold the full string.
-//--------------------------------------------------------------------------------------------------
-int treeStringLength(int level, GNode* gnode)
-//  level -- Level of this GNode.
-//  gnode -- Current GNode.
-{
+// treeStringLength recursively computes the string length of a GNode forest. It is used to
+// find the memory size to hold the string.
+int treeStringLength(int level, GNode* gnode) {
     int length = 0;
     while (gnode) {
         length += nodeStringLength(level, gnode);
@@ -182,17 +120,14 @@ int treeStringLength(int level, GNode* gnode)
     return length;
 }
 
-//  nodeStringLength -- Compute a gedcom node's string length; counts the \n but not the final 0.
-//    TODO: UNICODE IMPACT.
-//--------------------------------------------------------------------------------------------------
-static int nodeStringLength(int level, GNode* gnode)
-{
+// nodeStringLength returns the a GNode's string length; it counts the \n but not the final 0.
+static int nodeStringLength(int level, GNode* gnode) {
     size_t len;
     char scratch[10];  // To hold the level.
     sprintf(scratch, "%d", level);
     len = strlen(scratch) + 1;
-    if (gnode->key) len += strlen(gnode->key) + 3; // + 3 for space and 2 @-signs.
+    if (gnode->key) len += strlen(gnode->key) + 1;
     len += strlen(gnode->tag);
-    if (gnode->value) len += strlen(gnode->value) + 1;  // + 1 for the space after the tag.
-    return (int) len + 1;  // + 1 for the newline.
+    if (gnode->value) len += strlen(gnode->value) + 1;
+    return (int) len + 1;
 }

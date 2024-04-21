@@ -266,7 +266,7 @@ BuiltIn builtIns[] = {
     "key",          1,    2,    __key,
     "keysort",      1,    1,    __keysort,
     "lastchild",    1,    1,    __lastchild,
-	"lastindi",     1,    1,    __lastindi,
+	"lastindi",     0,    0,    __lastindi,
     "le",           2,    2,    __le,
     "length",       1,    1,    __length,
     "lengthset",    1,    1,    __lengthset,

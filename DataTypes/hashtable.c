@@ -1,391 +1,254 @@
+// DeadEnds
 //
-//  DeadEnds
+// hashtable.c implements a general hash table. Specialized hash tables are created through
+// customization.
 //
-//  hashtable.c -- Implements a generic hash table. More specialized hash tables are created by
-//    specializing this hash table.
-//
-//  Created by Thomas Wetmore on 29 November 2022.
-//  Last changed on 21 November 2023.
-//
+// Created by Thomas Wetmore on 29 November 2022.
+// Last changed on 19 April 2024.
 
+#include "standard.h"
 #include "hashtable.h"
 #include "sort.h"
 
-Word searchBucket(Bucket*, String key, int(*compare)(Word, Word), String(*getKey)(Word), int* index);
-static Word linearSearchBucket(Bucket*, String key, String(*)(Word), int *index);
-static Word binarySearchBucket(Bucket*, String key, String(*)(Word), int *index);
-static void sortBucket(Bucket*, int(*)(Word, Word), String(*)(Word), bool force);
-static void growBucket(Bucket *bucket);
-static void removeFromBucketByIndex(Bucket *bucket, int index, void (*delete)(Word));
+bool debugging = true;
+bool debuggingHash = false;
+bool sortChecking = false;
+extern FILE* debugFile;
 
-static bool debugging = false;  //  Debugging flag.
+static void* searchBucket(Bucket*, String key, String(*g)(void*), int(*c)(String, String), int* index);
+static void* linearSearchBucket(Bucket*, String key, String(*g)(void*), int* index);
+static void* binarySearchBucket(Bucket*, String key, String(*g)(void*), int(*c)(String, String), int* index);
+static void sortBucket(Bucket*, String(*g)(void*), int(*c)(String, String));
+static void removeFromBucketByIndex(Bucket* bucket, int index, void (*delete)(void*));
 
-//  These three items are a tunnel to sort.c.
-//  TODO: Can we make the tunnel dissapear?
-extern Word* ldata;
-extern int(*lcmp)(Word, Word);
-extern void quickSort(int left, int right);
-
-//  createHashTable -- Create a hash table.
-//--------------------------------------------------------------------------------------------------
-HashTable *createHashTable(int(*compare)(Word, Word), void(*delete)(Word), String(*getKey)(Word))
-//  compare -- Compare function used when sorting.
-//  delete -- Delete function used when deleting elements.
-//  getKey -- Key function used to get the key of an element.
-{
-	ASSERT(getKey);  //  getKey is the only required function; the other two can be null.
-	// Allocate space for the hash table.
-	HashTable *table = (HashTable*) stdalloc(sizeof(HashTable));
-
-	// Initialize the the table with its functions and buckets.
+// createHashTable creates and returns a HashTable. getKey is a function that returns the key of
+// an element, and delete is an optional function that frees an element.
+HashTable* createHashTable(String(*getKey)(void*), int(*compare)(String, String),
+						   void(*delete)(void*), int numBuckets) { PH;
+	HashTable *table = (HashTable*) malloc(sizeof(HashTable));
 	table->compare = compare;
 	table->delete = delete;
 	table->getKey = getKey;
-	for (int i = 0; i < MAX_HASH; i++) table->buckets[i] = null;
+	table->numBuckets = numBuckets;
+	table->buckets = (Bucket**) malloc(numBuckets*sizeof(Bucket));
+	for (int i = 0; i < table->numBuckets; i++) table->buckets[i] = null;
 	return table;
 }
 
-//  compareElements -- Generic compare function that uses strcmp on the keys of two elements.
-//--------------------------------------------------------------------------------------------------
-//  TODO: This function is not called anywhere.
-int compareElements(Word a, Word b, String(*getKey)(Word))
-{
-	return strcmp(getKey(a), getKey(b));
-}
-
-//  deleteHashTable -- Delete a hash table. Call the table's delete function on the elements.
-//--------------------------------------------------------------------------------------------------
-void deleteHashTable(HashTable *table)
-//  table -- Hash table to delete. When this function returns the table is gone.
-{
-	ASSERT(table);
-	for (int i = 0; i < MAX_HASH; i++) {
-		if (table->buckets[i] == null) continue;  //  Nothing to delete.
-		Bucket *bucket = table->buckets[i];  // ith bucket is not empty.
-		if (table->delete) {
-			for (int j = 0; j < bucket->length; j++) {
-				table->delete(bucket->elements[j]);
-			}
-		}
-		stdfree(bucket);
+// deleteHashTable deletes a HashTable. If there is a delete function it is called on the elements.
+void deleteHashTable(HashTable *table) { //PH;
+	for (int i = 0; i < table->numBuckets; i++) {
+		if (table->buckets[i] == null) continue;
+		deleteBucket(table->buckets[i], table->delete);
 	}
-	stdfree(table);
+	free(table);
 }
 
-//  createBucket -- Create an empty bucket for a hash table.
-//--------------------------------------------------------------------------------------------------
-Bucket *createBucket(void)
-{
-	// Create a bucket to hold a list of elements.
-	Bucket *bucket = (Bucket*) stdalloc(sizeof(Bucket));
-	bucket->length = 0;
-	bucket->maxLength = INITIAL_BUCKET_LENGTH;
-	bucket->sorted = true;
-	bucket->elements = (Word*) stdalloc(INITIAL_BUCKET_LENGTH*sizeof(Word));
+// createBucket creates and returns an empty Bucket.
+Bucket *createBucket(void) { //PH;
+	Bucket *bucket = (Bucket*) malloc(sizeof(Bucket));
+	initBlock(&(bucket->block));
 	return bucket;
 }
 
-//  getHash -- Hash function. This function was found on the internet.
-//--------------------------------------------------------------------------------------------------
-int getHash(String key)
-{
+// lengthBucket returns the length of a Bucket.
+int lengthBucket(Bucket* bucket) {
+	return lengthBlock(&(bucket->block));
+
+}
+
+// deleteBucket deletes a Bucket. If there is a delete function the elements are deleted.
+void deleteBucket(Bucket* bucket, void(*delete)(void*)) { //PH;
+	if (delete) {
+		Block* block = &(bucket->block);
+		for (int j = 0; j < block->length; j++) {
+			delete(block->elements[j]);
+		}
+	}
+	free(bucket);
+}
+
+// getHash returns the hash code of a Strings; found on the internet.
+int getHash(String key, int maxHash) { //PH;
 	unsigned long hash = 5381;
 	int c;
-	while ((c = *key++)) hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+	String p = key;
+	while ((c = *p++)) {
+		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+	}
 	hash = hash & 0x0000efff;
-	return (int) (hash % MAX_HASH);
+	hash = hash % maxHash;
+	return (int) hash;
 }
 
-//  searchHashTable -- Search a hash table for an element with a key. Return the element if it
-//    exists or null otherwise.
-//--------------------------------------------------------------------------------------------------
-Word searchHashTable(HashTable *table, String key)
-{
-	ASSERT(table && key);
-	// Get the Bucket that does or would contain the key's element.
-	Bucket *bucket = table->buckets[getHash(key)];
-	if (!bucket) return null;
-	
-	//  Search that bucket for an element with the given key.
-	return searchBucket(bucket, key, table->compare, table->getKey, null);
-}
-
-//  searchBucket -- Search for an element in a bucket. The element's key hashes to the bucket.
-//    If the bucket has few elements a linear search is used. If the bucket has more than
-//    SORT_THRESHOLD elements a binary search is used. This function is not static because
-//    specialized hash tables may choose to use it.
-//--------------------------------------------------------------------------------------------------
-Word searchBucket(Bucket *bucket, String key, int (*compare)(Word, Word),
-				  String (*getKey)(Word), int* index)
-//  bucket -- Bucket of elements to search.
-//  key -- Key to search for.
-//  compare -- Key compare function.
-//  getKey -- Function that gers the key from an element.
-//  index --  If not null, is set to the index of the found element.
-{
-	ASSERT(bucket && key && compare && getKey);
-	// Check whether to use linear search.
-	if (bucket->length < SORT_THRESHOLD) {
-		return linearSearchBucket(bucket, key, getKey, index);
+// detailSearch is a static function at the bottom of HashTable's search stack.
+// NOTE: It may be better to return the Bucket rather than the hash.
+static void* detailSearch(HashTable* table, String key, int* phash, int* pindex) { //PH;
+	int hash = getHash(key, table->numBuckets);
+	if (phash) *phash = hash;
+	Bucket* bucket = table->buckets[hash];
+	if (!bucket) { // Bucket doesn't exist.
+		if (pindex) *pindex = 0;
+		return null;
 	}
-	// Otherwise sort the list and use binary search.
-	if (!bucket->sorted) sortBucket(bucket, compare, getKey, true);
-	return binarySearchBucket(bucket, key, getKey, index);
+	//printf("detailSearch calling searchBucket: hash %d; length %d, key: %s\n", hash, lengthBucket(bucket), key); // DEBUG
+	return searchBucket(bucket, key, table->getKey, table->compare, pindex); // Bucket exists.
 }
 
-// linearSearchList -- Use linear search to look for for an element in a bucket.
-//--------------------------------------------------------------------------------------------------
-Word linearSearchBucket(Bucket *bucket, String key, String (*getKey)(Word), int *index)
-//  bucket -- Bucket of elements to search.
-//  key    -- Key to search for.
-//  getKey -- Function that gets the key from an element.
-//  index  -- If not null, is set to the index of the found element.
-{
-	ASSERT(bucket && key && getKey);
-	if (index) *index = 0;
-	Word *elements = bucket->elements;
-	for (int i = 0; i < bucket->length; i++) {
-		if (eqstr(key, getKey(elements[i]))) {
-			if (index) *index = i;
-			return elements[i];
-		}
-	}
-	return null;  // The key was not found in the bucket.
+// searchHashTable searches a HashTable for the element with given key. It returns the element
+// if found or null otherwise.
+void* searchHashTable(HashTable* table, String key) { //PH;
+	return detailSearch(table, key, null, null);
 }
 
-//  binarySearchBucket -- Use binary search to look for an element in a bucket.
-//--------------------------------------------------------------------------------------------------
-Word binarySearchBucket(Bucket *bucket, String key, String(*getKey)(Word), int *index)
-//  bucket -- Bucket of elements to search.
-//  key    -- Key to search for.
-//  getKey -- Function that gets the key from an element.
-//  index  -- If not null, set to the index of the found element.
-{
-	int lo = 0;
-	int hi = bucket->length - 1;
-	while (lo <= hi) {
-		int md = (lo + hi)/2;
-		int rel = strcmp(key, getKey(bucket->elements[md]));
-		if (rel < 0) hi = --md;
-		else if (rel > 0) lo = ++md;
-		else {
-			if (index) *index = md;
-			return bucket->elements[md];
-		}
-	}
-	// If the element isn't in the list, set index to where it would be.
-	if (index) *index = lo;
-	return null;
+// searchHashTableWithElement searches a HashTable for the element with the same key as the given
+// element.
+void* searchHashTableWithElement(HashTable* table, void* element) {
+	return detailSearch(table, table->getKey(element), null, null);
 }
 
-//  sortBucket -- Sort a bucket. If force is true sort the bucket regardless of its length.
-//    If force is false, sort the bucket only if its length is above the sort threshold.
-//--------------------------------------------------------------------------------------------------
-void sortBucket(Bucket *bucket, int(*compare)(Word, Word), String(*getKey)(Word), bool force)
-//  bucket -- Bucket to sort.
-//  force  -- If true always sort; else sort if at or above threshold.
-{
-	ASSERT(bucket && getKey);
-	if (debugging) {
-		printf("sortBucket: start: bucket of length %d\n", bucket->length);
-		printf("  and the elements being sorted are:\n");
-		for (int i = 0; i < bucket->length; i++) {
-			printf("    %s\n", getKey(bucket->elements[i]));
-		}
-	}
-	if (bucket->sorted) return;
-	if (!force && bucket->length < SORT_THRESHOLD) return;
-	if (debugging) printf("sortBucket: bucket is being sorted.\n");
-	ldata = bucket->elements;
-	lcmp = compare;
-	quickSort(0, bucket->length - 1);
-	bucket->sorted = true;
-	if (debugging) {
-		printf("sortBucket: end: bucket of length %d\n", bucket->length);
-		printf("  and the elements are now:\n");
-		for (int i = 0; i < bucket->length; i++) {
-			printf("    %s\n", getKey(bucket->elements[i]));
-		}
-	}
+// searchBucket searches a Bucket for an element by key. Depending on Bucket size either linear or
+// binary search is used.
+void* searchBucket(Bucket* bucket, String key, String(*getKey)(void*),
+				   int(*compare)(String, String), int* index) { //PH;
+	return searchBlock(&(bucket->block), key, getKey, index);
 }
 
-//  isInHashTable -- Check whether an element with a given key is in the hash table.
-//    The key is extracted from the element argument.
-//--------------------------------------------------------------------------------------------------
-bool isInHashTable(HashTable *table, String key)
-{
-	ASSERT(table && key);
-	return searchHashTable(table, key) != null;
+// linearSearchBucket uses linear search to look for an element in a Bucket.
+void* linearSearchBucket(Bucket* bucket, String key, String(*getKey)(void*), int* index) { PH;
+	Block* block = &(bucket->block);
+	return linearSearch(block->elements, block->length, key, getKey, index);
 }
 
-//  insertInHashTable -- Insert a new element into a HashTable. There is no string key argument
-//    because the key is encoded within the element.
-//--------------------------------------------------------------------------------------------------
-void insertInHashTable(HashTable *table, Word element)
-//  table -- Hash table to all the element to.
-//  element -- Element to add to the hash table.
-{
-	ASSERT(table && element);
+// isInHashTable returns whether an element with the given key is in the HashTable.
+bool isInHashTable(HashTable* table, String key) {
+	return detailSearch(table, key, null, null) != null;
+}
+
+// addToHashTable adds a new element to a HashTable.
+void addToHashTable(HashTable* table, void* element, bool replace) { //PH;
+	//printf("addToHashTable called element with key %s\n", table->getKey(element)); // DEBUG
 	String key = table->getKey(element);
-	int hash = getHash(key);
-	Bucket *bucket = table->buckets[hash];
+	int hash, index;
+	Bucket* bucket = null;
+	bool found = detailSearch(table, key, &hash, &index);
+	if (found && replace) { // Replace existing element.
+		bucket = table->buckets[hash];
+		setBlockElement(&(bucket->block), element, table->delete, index);
+		return;
+	}
+	if (found) return; // Element exists, but don't replace.
+	bucket = table->buckets[hash]; // Add it; be sure Bucket exists.
 	if (!bucket) {
 		bucket = createBucket();
 		table->buckets[hash] = bucket;
 	}
-
-	//  Append the element to the end of the bucket.
-	//  NOTE: Not checking for duplicates.
-	appendToBucket(bucket, element);
-	table->count += 1;
-
-	// If the length of the bucket is less than the sort threshold return.
-	if (bucket->length < SORT_THRESHOLD) return;
-
-	// The bucket has reached the sort threshold. Sort it.
-	sortBucket(bucket, table->compare, table->getKey, false);
+	appendToBlock(&(bucket->block), element);
 }
 
-//  removeFromHashTable -- Remove an element with a specific key from a hash table.
-//--------------------------------------------------------------------------------------------------
-void removeFromHashTable(HashTable *table, String key)
-{
-	// Hash the key to find the bucket with the element.
-	int hash = getHash(key);
+bool addToHashTableIfNew(HashTable* table, void* element) { //PH;
+	// See if it is there and if not where it should go if the bucket is sorted.
+	// If there return false, meaning didn't add it.
+	// Put the element into the right place.
+	return true;
+}
+
+// removeFromHashTable removes the element with given key from a HashTable.
+void removeFromHashTable(HashTable *table, String key) { //PH;
+	int hash = getHash(key, table->numBuckets);
 	Bucket *bucket = table->buckets[hash];
-
-	//  Find the element to be removed and remove it.
-	//  NOTE: IF THE SIZE OF THE BUCKET IS GREATER THAN SORT_THRESHOLD AND IS SORTED WE
-	//    SHOULD BE USING A BINARY SEARCH HERE.
-	for (int i = 0; i < bucket->length; i++) {
-		if (eqstr(key, table->getKey(bucket->elements[i]))) {
-			removeFromBucketByIndex(bucket, i, table->delete);
-			break;
-		}
+	if (!bucket) return /*false*/;
+	Block *block = &(bucket->block);
+	int index = 0;
+	void *element = linearSearch(block->elements, block->length, key, table->getKey, &index);
+	if (element) {
+		ASSERT(index != -1);
+		removeFromBlock(block, index, table->delete);
 	}
 }
 
-//  Remove an element at a specific index from a bucket.
-//--------------------------------------------------------------------------------------------------
-static void removeFromBucketByIndex(Bucket *bucket, int index, void (*delete)(Word))
-{
-	ASSERT(bucket && index >= 0 && index < bucket->length);
-	if (delete) (*delete)(bucket->elements[index]);
-	for (int i = index; i < bucket->length - 1; i++) {
-		bucket->elements[i] = bucket->elements[i + 1];
-	}
-	bucket->length = bucket->length - 1;
-}
-
-//  appendToBucket -- Add a new element to the end of a bucket.
-//--------------------------------------------------------------------------------------------------
-void appendToBucket(Bucket *bucket, Word element)
-{
-	ASSERT(bucket && element);
-	bucket->sorted = false;
-	if (bucket->length >= bucket->maxLength) growBucket(bucket);
-	bucket->elements[(bucket->length)++] = element;
+// appendToBucket adds a new element to the end of a bucket.
+void appendToBucket(Bucket* bucket, void* element) { //PH;
+	appendToBlock(&(bucket->block), element);
 }
 
 //  removeElement -- remove an element from a hash table. This does not use binary search
 //    in cases where it could be used.
 //    TODO: GET BINARY SEARCH WORKING IF LENGTH IS OVER THRESHHOLD.
 //--------------------------------------------------------------------------------------------------
-void removeElement(HashTable* table, Word element)
-{
+void removeElement(HashTable* table, void *element) { //PH;
 	String key = table->getKey(element);
-	Bucket *bucket = table->buckets[getHash(key)];
-	Word *elements = bucket->elements;
+	Bucket *bucket = table->buckets[getHash(key, table->numBuckets)];
+	Block *block = &(bucket->block);
+	void **elements = block->elements;
+	int length = block->length;
 	int i = 0;
-	for (; i < bucket->length; i++) {
+	for (; i < length; i++) {
 		String check = table->getKey(elements[i]);
 		if (eqstr(key, check)) break;
 	}
+	if (i >= length) return; // without doing anything.
 	if (table->delete) table->delete(elements[i]);
-	for (; i < bucket->length - 1; i++)
+	for (; i < length - 1; i++)
 		elements[i] = elements[i+1];
-	bucket->length--;
+	block->length--;
 }
 
-//  growBucket -- Private function that grows the elements block of a Bucket when required.
-//--------------------------------------------------------------------------------------------------
-static void growBucket(Bucket *bucket)
-{
-	int newLength = bucket->maxLength = (3*bucket->maxLength)/2;
-	Word newElements = stdalloc(newLength*sizeof(Word));
-	memcpy(newElements, bucket->elements, (bucket->length)*sizeof(Word));
-	stdfree(bucket->elements);
-	bucket->elements = newElements;
-}
-
-//  sizeHashTable -- Return the size (number of elements) in a hash table.
-//--------------------------------------------------------------------------------------------------
-int sizeHashTable(HashTable *table)
-//  table -- Hash table to return the size of.
-{
-	ASSERT(table);
+//  sizeHashTable returns the size (number of elements) in a hash table.
+int sizeHashTable(HashTable *table) { //PH;
 	int length = 0;
-	for (int i = 0; i < MAX_HASH; i++)
-		if (table->buckets[i]) length += table->buckets[i]->length;
+	for (int i = 0; i < table->numBuckets; i++) {
+		if (table->buckets[i]) {
+			Block *block = &((table->buckets[i])->block);
+			length += block->length;
+		}
+	}
 	return length;
 }
 
-//  firstInHashTable -- Returns the first element in a hash table. Works with nextInHashTable
-//    to iterate the table, returning each element in turn. The (in, out) variables keep track
-//    of the iteration state. The user must provide two stack variables to hold the state.
-//--------------------------------------------------------------------------------------------------
-Word firstInHashTable(HashTable *table, int *bucketIndex, int *elementIndex)
-//  table -- Hash table to iterate over.
-//  bucketIndex -- (in, out) Index of the current bucket.
-//  elementIndex -- (in, out) Index of the current element in current bucket.
-{
-	for (int i = 0; i < MAX_HASH; i++) {
-		Bucket *bucket = table->buckets[i];  // Bucket is a list of elements.
-		if (bucket == null) continue;  //  Bucket has nothing in it.
-		//  Found the first bucket with contents.
+// firstInHashTable returns the first element in a hash table; it works with nextInHashTable to
+// iterate the table, returning each element in turn. The (in, out) variables keep track of the
+// iteration state. The user provides two stack variables to hold the state.
+void* firstInHashTable(HashTable *table, int *bucketIndex, int *elementIndex) { //PH;
+	for (int i = 0; i < table->numBuckets; i++) {
+		Bucket *bucket = table->buckets[i];
+		if (bucket == null) continue;
 		*bucketIndex = i;
 		*elementIndex = 0;
-		return bucket->elements[0];  // Returns first element in first bucket with contents.
+		Block *block = &(bucket->block);
+		return block->elements[0];
 	}
-	return null;  //  Returns null because the table is empty.
+	return null;
 }
 
-//  nextInHashTable -- Returns the next element in the hash table, using the (in,out) state
-//    variables to keep track of the state of the iteration.
-//-------------------------------------------------------------------------------------------------
-Word nextInHashTable(HashTable *table, int *bucketIndex, int *elementIndex)
-//  table -- Hash table being iterated.
-//  bucketIndex -- (in,out) Index of the current bucket.
-//  elementIndex -- (in,out) Index of the current element in current bucket.
-{
-	ASSERT(table);
-	// See if there is another element in the current bucket.
+// nextInHashTable returns the next element in the hash table, using the (in,out) state
+// variables to keep track of the state of the iteration.
+void* nextInHashTable(HashTable *table, int *bucketIndex, int *elementIndex) { //PH;
 	Bucket *bucket = table->buckets[*bucketIndex];
-	if (*elementIndex < bucket->length - 1) {
+	Block *block = &(bucket->block);
+	if (*elementIndex < block->length - 1) {
 		*elementIndex += 1;
-		return bucket->elements[*elementIndex];
+		return block->elements[*elementIndex];
 	}
 	// Reached the end of the current Bucket. Find the next Bucket with elements.
-	for (int i = *bucketIndex + 1; i < MAX_HASH; i++) {
+	for (int i = *bucketIndex + 1; i < table->numBuckets; i++) {
 		bucket = table->buckets[i];
 		if (bucket == null) continue;  // Bucket has nothing in it.
 		// Found another Bucket with elements.
 		*bucketIndex = i;
 		*elementIndex = 0;
-		return bucket->elements[0];  // Returns first element in next bucket with elements.
+		block = &(bucket->block);
+		return block->elements[0];  // Returns first element in next bucket with elements.
 	}
 	return null;  // Reached the end of the table; no more elements to return.
 }
 
-//  iterateHashTable -- Iterate a hash table and perform a function on each element.  The
-//    elements are visited in hash key order. Returns the number of elements that match the
-//    predicates.
-//--------------------------------------------------------------------------------------------------
-int iterateHashTableWithPredicate(HashTable *table, bool (*predicate)(Word))
-{
+// iterateHashTable iterates a hash table and perform a function on each element; elements are
+// visited in hash key order; returns the number of elements that match the predicate.
+int iterateHashTableWithPredicate(HashTable *table, bool (*predicate)(void*)) { //PH;
 	int bucketIndex, elementIndex;
 	int count = 0;
-	Word element = firstInHashTable(table, &bucketIndex, &elementIndex);
+	void* element = firstInHashTable(table, &bucketIndex, &elementIndex);
 	while (element) {
 		if ((*predicate)(element)) count++;
 		element = nextInHashTable(table, &bucketIndex, &elementIndex);
@@ -393,19 +256,14 @@ int iterateHashTableWithPredicate(HashTable *table, bool (*predicate)(Word))
 	return count;
 }
 
-//  showHashTable -- Show the contents of a hash table. Intended for debugging.
-//--------------------------------------------------------------------------------------------------
-void showHashTable (HashTable *table, void (*show)(Word))
-{
+//  showHashTable is a debugging function that shows the contents of a hash table.
+void showHashTable (HashTable *table, void (*show)(void*)) { //PH;
 	int count = 0;
 	FORHASHTABLE(table, element)
+		printf("%d %d ", __i, __j);
 		(*show)(element);
 		count++;
-		printf("\n");
+		//printf("\n");
 	ENDHASHTABLE
 	printf("showHashTable showed %d elements\n", count);
 }
-
-//  This file also implements some more specific hash tables;
-
-String wordGetKey(Word element) { return ((WordElement*) element)->key; }

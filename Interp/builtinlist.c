@@ -29,7 +29,7 @@ PValue __list(PNode *pnode, Context *context, bool *eflg)
     ASSERT(ident);
 
     //  Create the list the identifier will refer to.
-    List *list = createList(null, null, null);  //  compare, delete, getkey
+    List *list = createList(null, null, null, false);  //  compare, delete, getkey
     //  MNOTE: Shouldn't there be a delete function?
     assignValueToSymbol(context->symbolTable, ident, PVALUE(PVList, uList, list));
     return nullPValue;
@@ -62,7 +62,7 @@ PValue __push(PNode *node, Context *context, bool *eflg)
     //  Program values in a list are put in the heap.
     PValue *ppvalue = (PValue*) stdalloc(sizeof(PValue));
     memcpy(ppvalue, &pvalue, sizeof(PValue));
-    prependListElement(list, ppvalue);
+    prependToList(list, ppvalue);
     return nullPValue;
 }
 
@@ -91,15 +91,13 @@ PValue __requeue (PNode *node, Context *context, bool *eflg)
     //  Program values in a list must be stored in the heap.
     PValue *ppvalue = (PValue*) sizeof(PValue);
     memcpy(ppvalue, &pvalue, sizeof(PValue));
-    appendListElement(list, ppvalue);
+    appendToList(list, ppvalue);
     return nullPValue;
 }
 
-//  __pop -- Pop an element from the front of a list.
-//    usage: pop(LIST) -> ANY
-//--------------------------------------------------------------------------------------------------
-PValue __pop(PNode *node, Context *context, bool *eflg)
-{
+// __pop pops an element from the front of a List.
+// usage: pop(LIST) -> ANY
+PValue __pop(PNode *node, Context *context, bool *eflg) {
     //  The first argument must be a list.
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVList) {
@@ -108,10 +106,10 @@ PValue __pop(PNode *node, Context *context, bool *eflg)
         return nullPValue;
     }
     List *list = pvalue.value.uList;
-    ASSERT(list && list->length >= 0);
+    ASSERT(list && lengthList(list) >= 0);
 
     //  Remove and return the first element of the list.
-    PValue *ppvalue = removeFirstListElement(list);
+    PValue *ppvalue = (PValue*) popList(list);
     if (!ppvalue) return nullPValue;
     memcpy(&pvalue, ppvalue, sizeof(PValue));
     stdfree(ppvalue);  //  MNOTE: Free the popped heap version of the program value.
@@ -131,10 +129,10 @@ PValue __dequeue(PNode *node, Context *context, bool *eflg)
         return nullPValue;
     }
     List *list = pvalue.value.uList;
-    ASSERT(list && list->length >= 0);
+    ASSERT(list && lengthList(list) >= 0);
 
     //  Remove and return the last element of the list.
-    PValue *ppvalue = removeLastListElement(list);
+    PValue *ppvalue = (PValue*) dequeueList(list);
     if (!ppvalue) return nullPValue;
     memcpy(&pvalue, ppvalue, sizeof(PValue));
     stdfree(ppvalue);  //  MNOTE: Free the dequeued heap version of the program value.
@@ -194,13 +192,10 @@ PValue __getel (PNode *node, Context *context, bool *eflg)
     return pvalue;
 }
 
-//  __setel -- Set nth value in list
-//    usage: setel(LIST, INT, ANY) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __setel (PNode *node, Context *context, bool *eflg)
-{
-    //  Get the list.
-    PNode *arg = node->arguments;
+// __setel sets the nth value in list
+// usage: setel(LIST, INT, ANY) -> VOID
+PValue __setel (PNode *node, Context *context, bool *eflg) {
+    PNode *arg = node->arguments; // Arg 1 must be a List.
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVList) {
         scriptError(node, "the first argument to setel must be a list");
@@ -209,8 +204,7 @@ PValue __setel (PNode *node, Context *context, bool *eflg)
     }
     List *list = pvalue.value.uList;
 
-    //  Get the index.
-    arg = arg->next;
+    arg = arg->next; // Arg 2 must be the index.
     pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVInt) {
         scriptError(node, "the second argument to setel must be a integer");
@@ -218,16 +212,12 @@ PValue __setel (PNode *node, Context *context, bool *eflg)
         return nullPValue;
     }
     int index = (int) pvalue.value.uInt;
-
-    // Be sure the index is within range.
     if (index < 0 || index >= lengthList(list)) {
         scriptError(node, "the index to setel is out of range");
         *eflg = true;
         return nullPValue;
     }
-
-    //  Get the value.
-    arg = arg->next;
+    arg = arg->next; // Arg 3 must be the value.
     pvalue = evaluate(arg, context, eflg);
     if (*eflg) {
         scriptError(node, "the third argument to setel is in error");
@@ -235,7 +225,7 @@ PValue __setel (PNode *node, Context *context, bool *eflg)
     }
     PValue *ppvalue = (PValue*) stdalloc(sizeof(PValue));
     memcpy(ppvalue, &pvalue, sizeof(PValue));
-    setListElement(list, index, ppvalue);
+    setListElement(list, ppvalue, index);
     return nullPValue;
 }
 
@@ -276,8 +266,9 @@ InterpType interpForList(PNode *node, Context *context, PValue *pval)
     int count = 0;
     InterpType irc;
 
-    for (int i = 0; i < list->length; i++) {
-        memcpy(&pvalue, (PValue*) list->data[i], sizeof(PValue));
+	Block* block = &(list->block);
+    for (int i = 0; i < block->length; i++) {
+        memcpy(&pvalue, (PValue*) block->elements[i], sizeof(PValue));
         assignValueToSymbol(context->symbolTable, node->elementIden, pvalue);
         assignValueToSymbol(context->symbolTable, node->countIden, PVALUE(PVInt, uInt, count++));
         switch (irc = interpret(node->loopState, context, pval)) {

@@ -11,7 +11,7 @@ A Sequence is a data type defined in the Interp library that provides the sequen
 |void appendToSequence (Sequence\*, String key, String name, PValue *val)|Create and append a new element to a Sequence.|
 |void rename_indiseq (Sequence\*, String key)|Update element name with standard name. *I don't know what this is for, and the word indiseq is old*.|
 |bool isInSequence (Sequence\*, String key)|See if an element with the given key is in the Sequence.|
-|bool removeFromSequence (Sequence\*, String key, String name, int index)|Remove an element from the Sequence. If key is not null use it to find the element. Othewise use the index. The element must be a person.|
+|bool  (Sequence\*, String key, String name, int index)|Remove an element from the Sequence. If key is not null use it to find the element. Othewise use the index. The element must be a person.|
 |bool element_indiseq (Sequence\*, int index, String* pkey, String* pname)|Return an element (via output arguments) from a sequence.|
 |static int nameCompare (SequenceEl el1, SequenceEl el2)|Compare two Sequence elments by name.|
 |static int keyCompare(SequenceEl el1, SequenceEl el2)|Compare two Sequence elements by integer key.|

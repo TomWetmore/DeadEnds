@@ -1,10 +1,9 @@
-//
 //  DeadEnds Project
 //
-//  gnode.c -- Functions involving the GNode type.
+//  gnode.c has the functions for the GNode data type.
 //
 //  Created by Thomas Wetmore on 12 November 2022.
-//  Last changed on 9 February 2024.
+//  Last changed on 19 April 2024.
 
 #include "standard.h"
 #include "gnode.h"
@@ -19,60 +18,43 @@
 
 typedef struct HashTable StringTable;
 
-//  tagTable -- Table that ensures there is one persistent copy of each tag used in all GNodes.
-//--------------------------------------------------------------------------------------------------
+// tagTable is a StringTable that ensures there is only one copy of the tags used in GNodes.
 static StringTable *tagTable = null;
 
-//  numNodeAllocs -- Return the number of nodes that have been allocated in the heap. Debugging.
-//--------------------------------------------------------------------------------------------------
+// numNodeAllocs returns the number of nodes that have been allocated in the heap. Debugging.
 static int nodeAllocs = 0;
-int numNodeAllocs(void)
-{
+int numNodeAllocs(void) {
 	return nodeAllocs;
 }
 
-//  numNodeFrees -- Return the number of nodes that have been freed to the heap. Debugging.
-//--------------------------------------------------------------------------------------------------
+// numNodeFrees returns the number of nodes that have been freed to the heap. Debugging.
 static int nodeFrees = 0;
-int numNodeFrees(void)
-{
+int numNodeFrees(void) {
 	return nodeFrees;
 }
 
-//  getFromTagTable -- Return the persistent copy of a tag from the tag table.
-//--------------------------------------------------------------------------------------------------
-static String getFromTagTable(String tag)
-//  tag -- Return the copy of this tag from the tag table.
-{
+// getFromTagTable returns the persistent copy of a tag from the tag table.
+static int numBucketsInTagTable = 67;
+static String getFromTagTable(String tag) {
 	if (tagTable) return fixString(tagTable, tag);
-	tagTable = createStringTable();
+	tagTable = createStringTable(numBucketsInTagTable);
 	return fixString(tagTable, tag);
 }
 
-//  freeGNode -- Free a GNode.
-//--------------------------------------------------------------------------------------------------
-void freeGNode(GNode* node)
-// node -- GNode to be freed.
-{
-	ASSERT(node);
+// freeGNode frees a GNode.
+void freeGNode(GNode* node) {
 	if (node->key) stdfree(node->key);
 	if (node->value) stdfree(node->value);
 	nodeFrees++;
 	stdfree(node);
 }
 
-//  createGNode -- Create, initialize and return a GNode.
-//--------------------------------------------------------------------------------------------------
-GNode* createGNode(String key, String tag, String value, GNode* parent)
-//  key -- Cross reference key; only level 0 nodes have them.
-//  tag -- Tag; all nodes have them.
-//  value -- Value; optional.
-//  parent -- Parent node; root nodes don't have them.
-{
+// createGNode creates a GNode from a key, tag, value, and pointer to its parent.
+GNode* createGNode(String key, String tag, String value, GNode* parent) {
 	nodeAllocs++;
-	GNode* node = (GNode*) stdalloc(sizeof(GNode));;
+	GNode* node = (GNode*) malloc(sizeof(GNode));;
 	node->key = strsave(key);
-	node->tag = getFromTagTable(tag);  // Get persistent copy.
+	node->tag = getFromTagTable(tag); // Get persistent copy.
 	node->value = strsave(value);
 	node->parent = parent;
 	node->child = null;
@@ -80,26 +62,19 @@ GNode* createGNode(String key, String tag, String value, GNode* parent)
 	return node;
 }
 
-//  freeGNodes -- Free all GNodes in a tree or forest of GNodes. This function recurses through
-//    all the GNodes in the tree or forest and calls freeGNode on each.
-//--------------------------------------------------------------------------------------------------
-void freeGNodes(GNode* node)
-// node -- Root GNode to free.
-{
+// freeGNodes frees all GNodes in a tree or forest of GNodes.
+void freeGNodes(GNode* node) {
 	while (node) {
-		if (node->child) freeGNodes(node->child);  // Recurse to children.
-		GNode* sibling = node->sibling;  // Tail recurse to siblings.
+		if (node->child) freeGNodes(node->child); // Recurse to children.
+		GNode* sibling = node->sibling; // Tail recurse to siblings.
 		freeGNode(node);
 		node = sibling;
 	}
 }
 
-//  gnodeLevel -- Return the level of a node in its tree. Works by counting parent links, so the
-//    node and tree must be structurally sound.
-//--------------------------------------------------------------------------------------------------
-int gnodeLevel(GNode* node)
-//  node -- The node to have its level determined.
-{
+// gnodeLevel returns the level of a GNode in its tree. Works by counting parent links, so the
+// node must be in its proper location in a tree.
+int gnodeLevel(GNode* node) {
 	int level = 0;
 	while (node->parent) {
 		level++;
@@ -173,20 +148,16 @@ String eventToString (GNode* node, bool shorten)
 	return scratch;
 }
 
-// eventToDate -- Return the date of an event as a string.
-//--------------------------------------------------------------------------------------------------
-String eventToDate (GNode* node, bool shorten)
-{
+// eventToDate returns the date of an event as a string.
+String eventToDate (GNode* node, bool shorten) {
 	if (!node) return null;
 	if (!(node = DATE(node))) return null;
 	if (shorten) return shorten_date(node->value);
 	return node->value;
 }
 
-//  eventToPlace -- Convert event to place
-//--------------------------------------------------------------------------------------------------
-String eventToPlace (GNode* node, bool shorten)
-{
+//  eventToPlace returns the place of an event as a string.
+String eventToPlace (GNode* node, bool shorten) {
 	if (!node) return null;
 	node = PLAC(node);
 	if (!node) return null;
@@ -194,22 +165,16 @@ String eventToPlace (GNode* node, bool shorten)
 	return node->value;
 }
 
-//  showGNode -- Show a tree of GNodes; for debugging.
-//--------------------------------------------------------------------------------------------------
- void showGNode(GNode* node)
-{
+// showGNode shows a tree of GNodes; for debugging.
+void showGNode(GNode* node) {
 	if (!node) return;
 	showGNodeRecursive(0, node);
 }
 
-// showGNodeRecursive -- Recursive version of show_node.
-//--------------------------------------------------------------------------------------------------
-void showGNodeRecursive(int levl, GNode* node)
-{
+// showGNodeRecursive is the recursive version of showGNode.
+void showGNodeRecursive(int levl, GNode* node) {
 	if (!node) return;
-	for (int i = 1;  i < levl;  i++)
-		printf("  ");
-
+	for (int i = 1;  i < levl;  i++) printf("  ");
 	printf("%d", levl);
 	if (node->key) printf(" %s", node->key);
 	printf(" %s", node->tag);

@@ -1,190 +1,121 @@
 //
-//  DeadEnds
+// DeadEnds
 //
-//  sort.c -- Implements quick sort on an array of pointers to any kind of elements. A function
-//    that compares pairs of elements must be provided.
+// sort.c has the functions that implement the low level sort and search operations on arrays
+// of elements.
 //
-//  Created by Thomas Wetmore on 21 November 2022.
-//  Last changed on 4 November 2023.
+// Created by Thomas Wetmore on 21 November 2022.
+// Last changed on 12 April 2024.
 //
 
 #include "standard.h"
 #include "sort.h"
 
-static bool debugging = false;
+static bool sortDebugging = false;
 
-#define LNULL -1
+//  Internal quick sort functions.
+static void quickSort(int, int);
+static int getPivot(int left, int right);
+static int partition(int left, int right, void *pivot);
 
-// ldata and lcmp -- State variables that simplify the interfaces to the sort functions.
-//--------------------------------------------------------------------------------------------------
-Word *ldata;              // The data to be sorted.
-int (*lcmp)(Word, Word);  // The compare function.
+// State variables used by the sort functions.
+static void** lelements;  // lelements is the array of elements.
+static String (*lgetKey)(void*); // static getKey function.
+static int (*lcompare)(String, String); // static compare function.
 
-//  Prototypes for the quick sort functions.
-//--------------------------------------------------------------------------------------------------
-void quickSort(int left, int right);   // External interface (after ldata and lcmp are set).
-static int getPivot(int left, int right);  //  Internal sort support function.
-static int partition(int left, int right, Word pivot);  // Internal sort support function.
-
-//  quickSort -- Recursive core of quick sort.
-//--------------------------------------------------------------------------------------------------
-void quickSort(int leftIndex, int rightIndex)
-// int leftIndex -- Index of left element in current partition.
-// int rightIndex -- Index of right element in currnet partition.
+// sortElements is the external interface for sorting an array of elements.
+void sortElements(void** elements, int length, String(*getKey)(void*), int(*compare)(String, String))
 {
-	int pivotIndex = getPivot(leftIndex, rightIndex);
-	if (debugging)
-		printf("quickSort: left=%d, right=%d, pivot=%d\n", leftIndex, rightIndex, pivotIndex);
+	lelements = elements;
+	lcompare = compare;
+	lgetKey = getKey;
+	quickSort(0, length - 1);
+}
+
+static int magicCompare(void* a, void* b) {
+	return lcompare(lgetKey(a), lgetKey(b));
+}
+#define LNULL -1
+// quickSort is the recursive function that sorts a partition.
+void quickSort(int left, int right) {
+	int pivotIndex = getPivot(left, right);
+	if (sortDebugging) printf("quickSort: left=%d, right=%d, pivot=%d\n", left, right, pivotIndex);
 	if (pivotIndex != LNULL) {
-		Word pivot = ldata[pivotIndex];
-		int midIndex = partition(leftIndex, rightIndex, pivot);
-		quickSort(leftIndex, midIndex-1);
-		quickSort(midIndex, rightIndex);
+		void *pivot = lelements[pivotIndex];
+		int midIndex = partition(left, right, pivot);
+		quickSort(left, midIndex-1);
+		quickSort(midIndex, right);
 	}
 }
 
-//  partition -- Partition around pivot.
-//--------------------------------------------------------------------------------------------------
-static int partition(int left, int right, Word pivot)
-{
+// partition partitions around a pivot.
+static int partition(int left, int right, void* pivot) {
 	int i = left, j = right;
 	do {
-		Word tmp = ldata[i];
-		ldata[i] = ldata[j];
-		ldata[j] = tmp;
-		while ((*lcmp)(ldata[i], pivot) < 0) i++;
-		while ((*lcmp)(ldata[j], pivot) >= 0) j--;
+		void* tmp = lelements[i];
+		lelements[i] = lelements[j];
+		lelements[j] = tmp;
+		while (magicCompare(lelements[i], pivot) < 0) i++;
+		while (magicCompare(lelements[j], pivot) >= 0) j--;
 	} while (i <= j);
 	return i;
 }
 
-//  getPivot -- Choose the pivot element.
-//--------------------------------------------------------------------------------------------------
-static int getPivot(int left, int right)
-{
-	Word pivot = ldata[left];
+// getPivot chooses the pivot element.
+static int getPivot(int left, int right) {
+	void* pivot = lelements[left];
 	int left0 = left, rel;
 	for (++left; left <= right; left++) {
-		Word next = ldata[left];
+		void* next = lelements[left];
 
-		if ((rel = (*lcmp)(next, pivot)) > 0) return left;
+		if ((rel = magicCompare(next, pivot)) > 0) return left;
 		if (rel < 0) return left0;
 	}
-	return LNULL;  // All elements between left and right are the same so no sorting needed.
+	return LNULL;  // Elements between left and right are equal.
 }
 
-//  searchList -- Search a list for a value. The List must have a compare function. If the list
-//    is not yet sorted and its size is less than the sort threshold linear search is used.
-//    If the the list is a sorted list beyond the threshold, it is sorted if need be, and
-//    binary search is used.
-//
-//    If the output index argument is non-null it is set to the index of the found element if
-//    there. Otherwise the index will be the location where the element would have been if there.
-//--------------------------------------------------------------------------------------------------
-Word searchList(List *list, Word element, int* index)
-//  list -- List to search.
-//  value -- Value to search for.
-//  index -- (out) Index of entry, if found; where it would be, if not. Optional.
-{
-	if (list == null) return null;
-	//return linearSearchList(list, element, index);
-	// Check whether to use linear search.
-	if (!list->keepSorted || (!list->isSorted && list->length < list->sortThreshold)) {
-		return linearSearchList(list, element, index);
-	}
-
-	// Otherwise sort the list and use binary search..
-	sortList(list, true);
-	return binarySearchList(list, element, index);
-}
-
-Word searchListWithKey(List *list, String key, int* index)
-//  list -- List to search.
-//  key -- Key of the element to find.
-//  index -- Optional index of entry, if found; where it would be, if not.
-{
-	if (list == null) return null;
-	// Check whether to use linear search.
-	if (!list->keepSorted || (!list->isSorted && list->length < list->sortThreshold)) {
-		return linearSearchListWithKey(list, key, index);
-	}
-	// Otherwise sort the list and use binary search..
-	sortList(list, true);
-	return binarySearchListWithKey(list, key, index);
-}
-
-// linearSearchList -- Use linear search to search for a value in a list.
-//--------------------------------------------------------------------------------------------------
-Word linearSearchList(List *list, Word element, int *index)
-{
-	ASSERT(list && list->getKey);
+// linearSearch searches a list of elements for the one with a matching key.
+void* linearSearch(void** elements, int length, String key, String(*getKey)(void*), int* index) {
+	ASSERT(elements && key && getKey);
 	if (index) *index = 0;
-	String key = list->getKey(element);
-	Word *data = list->data;
-	for (int i = 0; i < list->length; i++) {
-		if (eqstr(key, list->getKey(data[i]))) {
-			if (index) *index = i;  // The key was found in the list.
-			return data[i];        }
-
-	}
-	return null;  // The key was not found in the list.
-}
-
-// linearSearchListWithKey -- Use linear search to search for a value in a list.
-//--------------------------------------------------------------------------------------------------
-Word linearSearchListWithKey(List *list, String key, int *index)
-{
-	if (index) *index = 0;
-	if (!list || !list->getKey) return null;  // TODO: Is it okay for the list to be null?
-	//String key = list->getKey(element);
-	Word *data = list->data;
-	for (int i = 0; i < list->length; i++) {
-		if (eqstr(key, list->getKey(data[i]))) {
-			if (index) *index = i;  // The key was found in the list.
-			return data[i];
-
+	if (!elements || !key || !getKey) return null;
+	for (int i = 0; i < length; i++) {
+		if (eqstr(key, getKey(elements[i]))) {
+			if (index) *index = i;
+			return elements[i];
 		}
 	}
-	return null;  // The key was not found in the list.
+	return null;
 }
 
-// binarySearchList -- Use binary search to search for a value in a list.
-//--------------------------------------------------------------------------------------------------
-Word binarySearchList(List *list, Word value, int *index)
-{
+// binarySearch search a sorted list of elements for an element with given key.
+void* binarySearch(void** elements, int length, String key, String(*getKey)(void*),
+				   int(*compare)(String, String), int* index) {
+	ASSERT(elements && key && getKey && compare);
+	if (index) *index = -1;
 	int lo = 0;
-	int hi = list->length - 1;
+	int hi = length - 1;
 	while (lo <= hi) {
 		int md = (lo + hi)/2;
-		int rel = list->compare(value, list->data[md]);
-		if (rel < 0) hi = --md;
-		else if (rel > 0) lo = ++md;
-		else {
+		int rel = compare(key, getKey(elements[md]));
+		if (rel < 0) {
+			hi = --md;
+		} else if (rel > 0) {
+			lo = ++md;
+		} else {
 			if (index) *index = md;
-			return list->data[md];
+			return elements[md];
 		}
 	}
-	// If the element isn't in the list, set index to where it would have been.
 	if (index) *index = lo;
 	return null;
 }
 
-Word binarySearchListWithKey(List *list, String key, int *index)
-{
-	int lo = 0;
-	int hi = list->length - 1;
-	while (lo <= hi) {
-		int md = (lo + hi)/2;
-		int rel = strcmp(key, list->getKey(list->data[md]));
-		if (rel < 0) hi = --md;
-		else if (rel > 0) lo = ++md;
-		else {
-			if (index) *index = md;
-			return list->data[md];
-		}
+// insertAtIndex inserts a new element at a specified index. The array must have enough room.
+void insertAtIndex(void** elements, int length, void* element, int index) {
+	for (int i = length; i > index; i--) {
+		elements[i] = elements[i - 1];
 	}
-	// If the element isn't in the list, set index to where it would have been.
-	if (index) *index = lo;
-	return null;
+	elements[index] = element;
 }
 
