@@ -3,6 +3,7 @@
     "editor.fontSize": 10,
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
-        "__node_handle": "c"
+        "__node_handle": "c",
+        "bitset": "c"
     }
 }

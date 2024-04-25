@@ -16,7 +16,7 @@ static String getKey(void* element) { return ((PValueElement*) element)->key; }
 // compare compares two program value elements.
 static int compare(String a, String b) { return strcmp(a, b); }
 
-//  delete deletes a program value element when it is removed from a table.
+// delete deletes a program value element when it is removed from a table.
 //  MNOTE: This has to be done carefully.
 static void delete(void* a) {
     PValueElement *element = (PValueElement*) a;
@@ -26,7 +26,7 @@ static void delete(void* a) {
     free(pvalue);
 }
 
-//  createPValueTable creates and returns a PValueTable.
+// createPValueTable creates and returns a PValueTable.
 static int numBucketsInPValueTable = 13;
 PValueTable *createPValueTable(void) {
     return createHashTable(getKey, compare, delete, numBucketsInPValueTable);

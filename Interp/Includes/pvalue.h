@@ -1,15 +1,10 @@
+// DeadEnds
 //
-//  DeadEnds
+// pvalue.h is the header file for the program value (PValue) type. PValues are the values of
+// expressions in the DeadEnds script language. They are the values stored in symbol tables.
 //
-//  pvalue.h -- PValues are the values of expressions in the DeadEnds programming language.
-//    They are also the values stored in symbol tables and may be stored in the value fields
-//    of sequences. Only the values in symbol tables or other structures are allowed to be
-//    allocated on the heap. All values used during evaluation must be in the stack or data
-//    spaces.
-//
-//  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 3 April 2024.
-//
+// Created by Thomas Wetmore on 15 December 2022.
+// Last changed on 25 April 2024.
 
 #ifndef pvalue_h
 #define pvalue_h
@@ -26,13 +21,11 @@ typedef struct GNode GNode;
 #include "list.h"
 #include "symboltable.h"
 
-//  Macros that simplify creating union value and program value constants.
-//--------------------------------------------------------------------------------------------------
+// Macros to simplify creating union value and program value constants.
 #define PV(x) ((VUnion) { x })
 #define PVALUE(type, ufield, uvalue) (PValue){type, PV(.ufield = uvalue)}
 
-//  PVType -- Enumeration of the types of PValues.
-//--------------------------------------------------------------------------------------------------
+// PVType enumerates the types of PValues.
 typedef enum {
 	PVNull = 0, PVAny, PVInt, PVFloat, PVBool, PVString, PVGNode, PVPerson,
 	PVFamily, PVSource, PVEvent, PVOther, PVList, PVTable, PVSequence
@@ -40,49 +33,42 @@ typedef enum {
 
 bool isGNodeType(PVType type);
 
-// VUnion is the C union that holds PValue values.
+// VUnion is the union that holds PValue values.
 typedef union VUnion {
 	bool uBool;
 	GNode* uGNode;
 	long uInt;
 	double uFloat;
 	String uString;
-	List *uList;
-	PValueTable *uTable;
-	Sequence *uSequence;
+	List* uList;
+	PValueTable* uTable;
+	Sequence* uSequence;
 	void* uWord;
 } VUnion;
 
-//  PValue -- Values of the programming language expressions. This used to be a pointer type. It
-//   has been changed to a value type. However some of the fields in a PValue's VUnion value are
-//   pointers whose memory must be paid attention to.
-//--------------------------------------------------------------------------------------------------
+// PValue is the type of the script language expressions. It is a value type whenever possible.
 typedef struct PValue {
-	PVType type;    // Type of this PValue.
-	VUnion value;   // Value of this PValue.
+	PVType type;
+	VUnion value;
 } PValue;
 
 // User Interface to PValues.
-//--------------------------------------------------------------------------------------------------
-//PValue createPValue(PVType type, VUnion value);
 void showPValue(PValue value);
 bool isPValue(PValue value);
-bool isRecordType(PVType type);  // Return whether a PValue type is a Gedcom record type.
-bool isGNodeType(PVType type);  // Return whether a PValue is any kind of Gedcom line.
+bool isRecordType(PVType type); // Is PValue a Gedcom record.
+bool isGNodeType(PVType type);  // Is PValue any kind of Gedcom line.
 
-//extern bool prog_debug;
-
-//extern int Plineno;
-//extern FILE *Pinfp;
 extern FILE *Poutfp;
 extern int Perrors;
 extern int nobuiltins;
 
+// Useful PValue constants.
 extern const PValue nullPValue;
 extern const PValue truePValue;
 extern const PValue falsePValue;
 
-//  Input and output modes.
+// Input and output modes.
+// DEPRECATED.
 #define FILEMODE   0    //  Input from a file.
 #define STRINGMODE 1    //  Input or output from or to a string.
 #define UNBUFFERED 2    //  Output unbuffered to a file.
@@ -96,15 +82,14 @@ return NULL;\
 }
 
 // PValue Arithmetic and Logic Functions.
-//--------------------------------------------------------------------------------------------------
-PValue addPValues(PValue, PValue, bool* eflag);  //  Add two program values.
-PValue subPValues(PValue, PValue, bool* eflag);  //  Subtract two program values.
-PValue mulPValues(PValue, PValue, bool* eflag);  //  Multiply two program values.
-PValue divPValues(PValue, PValue, bool* eflag);  //  Divide two program values.
-PValue modPValues(PValue, PValue, bool* eflag);  //  Modulus operation on two program values.
-PValue negPValue(PValue, bool* eflag);           //  Negate a program value.
-PValue decrPValue(PValue, bool* eflag);          //  Decrement the value of an identifier.
-PValue incrPValue(PValue, bool* eflag);          //  Increment the value of an identifier.
+PValue addPValues(PValue, PValue, bool* eflag);
+PValue subPValues(PValue, PValue, bool* eflag);
+PValue mulPValues(PValue, PValue, bool* eflag);
+PValue divPValues(PValue, PValue, bool* eflag);
+PValue modPValues(PValue, PValue, bool* eflag);
+PValue negPValue(PValue, bool* eflag);
+PValue decrPValue(PValue, bool* eflag);
+PValue incrPValue(PValue, bool* eflag);
 PValue expPValues(PValue, PValue, bool* eflag);
 PValue gtPValues(PValue, PValue, bool* eflag);
 PValue gePValues(PValue, PValue, bool* eflag);
@@ -117,7 +102,6 @@ PValue eqPValues(PValue, PValue, bool* eflag);
 void coercePValue(PValue* pvalue, int newType, bool* errorFlag);
 //PValue copyPValue(PValue);
 //void deletePValue(PValue);
-//void eq_conform_pvalues(PValue, PValue, bool*);
 //bool eqv_pvalues(PValue, PValue);
 
 //bool is_record_pvalue(PValue);
@@ -133,9 +117,7 @@ void setPValue(PValue, int, VUnion);
 
 String pvalueToString(PValue pvalue, bool showType);
 
-//  Functions that allocate and free PValues in the heap. These are intended only for use for
-//   symbol table values and possibly sequences.
-//--------------------------------------------------------------------------------------------------
+// Functions that allocate and free PValues.
 PValue* allocPValue(PVType type, VUnion value);
 void freePValue(PValue* pvalue);
 

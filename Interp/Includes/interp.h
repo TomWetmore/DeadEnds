@@ -71,7 +71,6 @@ bool evaluateConditional(PNode*, Context*, bool*);
 PValue evaluateBuiltin(PNode*, Context*, bool*);
 PValue evaluateIdent(PNode*, Context*, bool*);
 PValue evaluateUserFunc(PNode*, Context*, bool*);
-PValue eval_and_coerce(int, PNode*, Context*, bool*);
 //GNode* evaluateFamily(PNode*, Context*, bool*);
 GNode* evaluateGNode(PNode*, Context*, bool*);
 //void extract_date(String, int*, int*, int*, int*, String*);

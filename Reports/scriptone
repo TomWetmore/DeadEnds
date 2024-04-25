@@ -1,0 +1,55 @@
+/* scriptone -- assigment and math */
+
+proc main () {
+	set(i, 0)
+	set(j, 1)
+	call checktest("set", i, 0)
+	call checktest("set", j, 1)
+	set(i, add(j, 100))
+	call checktest("add", i, 101)
+	set(i, sub(i, 53))
+	call checktest("sub", i, 48)
+	set(j, mul(i, 2))
+	call checktest("mul", j, 96)
+	set(j, div(j, 3))
+	call checktest("div", j, 32)
+	set(j, mod(26, 14))
+	call checktest("mod", j, 12)
+	set(j, exp(2, 5))
+	call checktest("exp", j, 32)
+	set(j, neg(2))
+	call checktest("neg1", j, -2)
+	set(j, neg(-2))
+	call checktest("neg2", j, 2)
+	set(j, -4)
+	incr(j)
+	call checktest("incr1", j, -3)
+	decr(j)
+	call checktest("incr2", j, -4)
+	set(j,0)
+	incr(j)
+	call checktest("incr3", j, 1)
+	decr(j)
+	decr(j)
+	decr(j)
+	call checktest("decr", j, -2)
+	if (eq(1,1)) { set(j, 1)} else { set(j, 0) }
+	call checktest("eq", j, 1)
+	if (ne(1,1)) { set(j, 1)} else { set(j, 0) }
+	call checktest("ne", j, 0)
+	if (lt(1,1)) { set(j, 1)} else { set(j, 0) }
+	call checktest("lt", j, 0)
+	if (le(1,1)) { set(j, 1)} else { set(j, 0) }
+	call checktest("le", j, 1)
+	if (gt(1,1)) { set(j, 1)} else { set(j, 0) }
+	call checktest("gt", j, 0)
+}
+
+proc checktest(s, a, b) {
+	if (eq(a, b)) {
+		"TEST " s " PASSED: " d(a) " == " d(b) nl()
+	} else {
+		"TEST " s " FAILED: " d(a) " == " d(b) nl()
+	}
+}
+

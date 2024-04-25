@@ -356,15 +356,7 @@ PValue __strtoint (PNode *node, Context *context, bool *eflg)
 	return PVALUE(PVInt, uInt, atoi(value.value.uString));
 }
 
-//  __not -- Not operation
-//    usage: not(INT) -> INT
-//--------------------------------------------------------------------------------------------------
-PValue __not (PNode *node, Context *context, bool *errflg)
-{
-	PValue value = evaluateBoolean(node->arguments, context, errflg);
-	if (*errflg || value.type != PVBool) return nullPValue;
-	return value.value.uBool ? falsePValue : truePValue;
-}
+
 
 //  __save -- Copy string
 //--------------------------------------------------------------------------------------------------

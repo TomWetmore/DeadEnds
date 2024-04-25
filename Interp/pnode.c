@@ -5,7 +5,7 @@
 //    different types.
 //
 //  Created by Thomas Wetmore on 14 December 2022.
-//  Last changed on 3 April 2024.
+//  Last changed on 23 April 2024.
 //
 
 #include "pnode.h"
@@ -17,8 +17,7 @@
 
 static bool debugging = false;
 
-//  String names for the program node types. For debugging.
-//--------------------------------------------------------------------------------------------------
+// pnodeTypes are String names for the program node types. Useful in debugging.
 String pnodeTypes[] = {
     "", "ICons", "FCons", "SCons", "Ident", "If", "While", "Break", "Continue", "Return",
     "ProcDef", "ProcCall", "FuncDef", "FuncCall", "BltinCall", "Traverse", "Nodes", "Families",
@@ -120,13 +119,8 @@ PNode *sconsPNode(String string)
     return pnode;
 }
 
-// ifPNode -- Create an if statement PNode.
-//--------------------------------------------------------------------------------------------------
-PNode *ifPNode (PNode *cond, PNode *tnode, PNode *enode)
-// cond -- Conditional PNode expression.
-// tnode -- First PNode in then then clause.
-// enode -- First PNode in the else clause.
-{
+// ifPNode creates an if statement PNode.
+PNode* ifPNode (PNode* cond, PNode* tnode, PNode* enode) {
     PNode *pnode = allocPNode(PNIf);
     pnode->condExpr = cond;
     pnode->thenState = tnode;
@@ -136,12 +130,8 @@ PNode *ifPNode (PNode *cond, PNode *tnode, PNode *enode)
     return pnode;
 }
 
-// whilePNode -- Create a while loop PNode.
-//--------------------------------------------------------------------------------------------------
-PNode *whilePNode(PNode *cond, PNode *body)
-// cond -- Conditional PNode expression.
-// body -- First PNode in the loop body.
-{
+// whilePNode creates a while loop PNode.
+PNode *whilePNode(PNode* cond, PNode* body) {
     PNode *node = allocPNode(PNWhile);
     node->condExpr = cond;
     node->loopState = body;
@@ -149,32 +139,21 @@ PNode *whilePNode(PNode *cond, PNode *body)
     return node;
 }
 
-// breakPNode -- Create a break PNode.  Break nodes have no non-common fields.
-//--------------------------------------------------------------------------------------------------
+// breakPNode -- Create a break PNode.
 PNode *breakPNode(void) { return allocPNode(PNBreak); }
 
-// continuePNode -- Create a continue PNode. Continue nodes have no non-common fields.
-//--------------------------------------------------------------------------------------------------
+// continuePNode creates a continue PNode.
 PNode *continuePNode(void) { return allocPNode(PNContinue); }
 
-// returnPNode -- Create a return PNode with an optional return expression.
-//--------------------------------------------------------------------------------------------------
-PNode *returnPNode(PNode *args)
-// args -- return Pnode expression.
-{
+// returnPNode create a return PNode with an optional return expression.
+PNode *returnPNode(PNode *args) {
     PNode *node = allocPNode(PNReturn);
     if (args) { node->returnExpr = args; }
     return node;
 }
 
-//  procDefPNode -- Create a user-defined procedure definition node. This is called by the parser
-//    when a procedure definition is recognized.
-//--------------------------------------------------------------------------------------------------
-PNode *procDefPNode(String name, PNode *parms, PNode *body)
-// name -- Name of the procedure.
-// parms -- List of parameters (identifiers) to the procedure.
-// body -- Root PNode of the procedure's PNode syntax tree.
-{
+// procDefPNode creates a user-defined procedure definition node.
+PNode *procDefPNode(String name, PNode* parms, PNode* body) {
     PNode *node = allocPNode(PNProcDef);
     node->procName = name;
     node->parameters = parms;
@@ -183,27 +162,16 @@ PNode *procDefPNode(String name, PNode *parms, PNode *body)
     return node;
 }
 
-//  procCallPNode -- Create a procedure call node. This is called by the parser when a procedure
-//    call is recognized.
-//--------------------------------------------------------------------------------------------------
-PNode *procCallPNode(String name, PNode *args)
-//  name -- Name of the procedure.
-//  args -- List of argument expressions to pass to the procedure.
-{
+// procCallPNode create a procedure call node.
+PNode *procCallPNode(String name, PNode *args) {
     PNode *node = allocPNode(PNProcCall);
     node->procName = strsave(name);
     node->arguments = args;
     return node;
 }
 
-//  funcDefPNode -- Create user function definition node. This is called by the parser when a
-//    function definition is recognized.
-//--------------------------------------------------------------------------------------------------
-PNode *funcDefPNode(String name, PNode *parms, PNode *body)
-//  name -- Name of the function.
-//  parms -- List of parameters to the function.
-//  body -- Root PNode of the function's PNode syntax tree.
-{
+// funcDefPNode creates a user-defined function definition node.
+PNode *funcDefPNode(String name, PNode* parms, PNode* body) {
     PNode *node = allocPNode(PNFuncDef);
     node->funcName = name;
     node->parameters = parms;
@@ -212,29 +180,18 @@ PNode *funcDefPNode(String name, PNode *parms, PNode *body)
     return node;
 }
 
-//  funcCallPNode -- Create a builtin or user-defined function call program node. We find which
-//    one by looking the name up in the user-defined function table.
-//--------------------------------------------------------------------------------------------------
-PNode *funcCallPNode(String name, PNode *alist)
-// name -- Name of the function.
-// alist -- List of the function's argument program node expressions.
-{
-    //  See if the function is built-in or user-defined. Check the function table first. If it
-    //    is there it is user-defined. It is possible for a user-defined function to override a
-    //    built-in function.
-    if (isInHashTable(functionTable, name)) {
-
-        //  The function is user-definded so create a user-defined function call node.
+// funcCallPNode creates a builtin or user-defined function call program node. We find which
+// by looking the name up in the user-defined function table.
+PNode *funcCallPNode(String name, PNode* alist) {
+    if (isInHashTable(functionTable, name)) { // User-defined.
         PNode *node = allocPNode(PNFuncCall);
         node->funcName = name;
         node->arguments = alist;
-
-        // Get the function's body from the function table.
         node->funcBody = searchFunctionTable(functionTable, name);
         return node;
     }
 
-    //  The function is not user-defined. Look for it in the built-in function table.
+    // Not user-defined; should be a builtin.
     int lo = 0;
     int hi = nobuiltins - 1;
     bool found = false;
@@ -251,28 +208,21 @@ PNode *funcCallPNode(String name, PNode *alist)
             break;
         }
     }
-
-    //  If a built-in function with the name is found.
-    if (found) {
-        // Check that there is the right number of arguments.
+    if (found) { // Is a builtin
         int n;
         if ((n = num_params(alist)) < builtIns[md].minParams || n > builtIns[md].maxParams) {
             printf("%s: must have %d to %d parameters.\n", name,
                    builtIns[md].minParams, builtIns[md].maxParams);
             Perrors++;
         }
-
-        //  Create and return a built-in call program node.
         PNode *node = allocPNode(PNBltinCall);
         node->funcName = name;
         node->arguments = alist;
         node->builtinFunc = builtIns[md].func;
         return node;
     }
-
-    // If the name was in neither table, create a user-defined function with null body.
     printf("%s: undefined function.\n", name);
-    Perrors++;
+    Perrors++; // Is undefined.
     PNode *node = allocPNode(PNFuncCall);
     node->funcName = name;
     node->parameters = alist;

@@ -14,6 +14,6 @@ lib$(LIBNAME).a: $(OFILES)
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) $<
 
-#%.c: %.y
+%.c: %.y
 #	oyacc -d $<
 #	cp -f y.tab.c $@

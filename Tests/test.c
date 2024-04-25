@@ -75,13 +75,13 @@ int main(void) {
 
 // createDatabaseTest creates a test database from a Gedcom file.
 Database *createDatabaseTest(String gedcomFile, int testNumber, ErrorLog *errorLog) {
-	printf("%d: START OF CREATE DATABASE TEST -- Create database from %s\n", testNumber, gedcomFile);
+	printf("%d: START OF CREATE DATABASE TEST: %s %2.3f\n", testNumber, gedcomFile, getMilliseconds());
 	String lastSegment = lastPathSegment(gedcomFile);
 	printf("lastPathSegment: %s\n", lastSegment);
 	Database *database = importFromFile(gedcomFile, errorLog);
 	printf("The number of persons in the database is %d.\n", numberPersons(database));
 	printf("The number of families in the database is %d.\n", numberFamilies(database));
-	printf("END OF CREATE DATABASE TEST\n");
+	printf("END OF CREATE DATABASE TEST: %2.3f\n", getMilliseconds());
 	return database;
 }
 
@@ -146,7 +146,8 @@ void parseAndRunProgramTest(Database *database, int testNumber)
 {
 	printf("\n%d: START OF PARSE AND RUN PROGRAM TEST: %2.3f\n", testNumber, getMilliseconds());
 	double milli = getMilliseconds();
-	parseProgram("llprogram", "/Users/ttw4/Desktop/DeadEnds/Reports/");
+	//parseProgram("llprogram", "/Users/ttw4/Desktop/DeadEnds/Reports/");
+	parseProgram("scriptone", "/Users/ttw4/Desktop/DeadEnds/Reports/");
 	printf("Finished parsing: %2.3f\n", getMilliseconds());
 
 //  Create a PNProcCall node to call the main procedure.

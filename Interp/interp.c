@@ -1,11 +1,11 @@
 // DeadEnds
 //
-// interp.c holds the functions that interpret DeadEnds scripts. The top function is interpret,
-// which is called on a sequence of PNodes. Depending on the type of PNode, interpret may handle
-// the node directly, or it may call a specific function.
+// interp.c holds functions that interpret DeadEnds scripts. The main function is interpret,
+// which is called on a PNode. Depending on the PNode's type, interpret may handle it directly,
+// or it may call a specific function.
 //
 // Created by Thomas Wetmore on 9 December 2022.
-// Last changed on 18 April 2024.
+// Last changed on 23 April 2024.
 
 #include <stdarg.h>
 #include "symboltable.h"
@@ -25,7 +25,6 @@ static bool debugging = false;
 extern FunctionTable *procedureTable;  // User-defined procedures.
 extern FunctionTable *functionTable;   // User-defined functions.
 extern SymbolTable *globalTable;       // Global symbol table.
-
 extern String pnodeTypes[];
 
 bool programParsing = false;
@@ -39,19 +38,19 @@ int Perrors = 0;      // Number of errors.
 //String ierror = (String) "Error: file \"%s\": line %d: ";
 
 // initializeInterpreter initializes the interpreter.
-void initializeInterpreter(Database *database) {
+void initializeInterpreter(Database* database) {
 	Perrors = 0;
 }
 
 // createContext creates a Context from a SymbolTable and Database.
-Context *createContext(SymbolTable *symbolTable, Database *database) {
-	Context *context = (Context*) malloc(sizeof(Context));
+Context* createContext(SymbolTable *symbolTable, Database *database) {
+	Context* context = (Context*) malloc(sizeof(Context));
 	context->symbolTable = symbolTable;
 	context->database = database;
 	return context;
 }
 
-// deleteContext deletes a Context.
+// deleteContext deletes a Context; deletes the Symboltable but not the Database.
 void deleteContext(Context *context) {
 	deleteHashTable(context->symbolTable);
 	free(context);
@@ -72,12 +71,11 @@ void finishInterpreter(void) { }
 //    deleteHashTable(functionTable);
 //}
 
-// interpret interprets a list of program nodes. If a return statement is encountered function
-// returns with the return value as last parameter. The language allows expressions at the
-// statement level, so top level expressions are interpreted. Output goes to the output file when
-// any statement or top level expression evaluates to a String. Recurses. programNode is the first
-// PNode in the list of nodes to interpret.
-InterpType interpret(PNode *programNode, Context *context, PValue *returnValue) {
+// interpret interprets a list of PNodes. If a return statement is found it returns the return
+// value though the last parameter. The language allows expressions at the statement level, so top
+// level expressions are also interpreted. Output is written when any statement or top level
+// expression evaluates to a String.
+InterpType interpret(PNode* programNode, Context* context, PValue* returnValue) {
 	ASSERT(programNode && context);
 	bool errorFlag = false;
 	InterpType returnCode;
@@ -89,13 +87,13 @@ InterpType interpret(PNode *programNode, Context *context, PValue *returnValue) 
 			showPNode(programNode);
 		}
 		switch (programNode->type) {
-			case PNSCons: // Strings are written to output.
+			case PNSCons: // Strings are written.
 				printf("%s", (String) programNode->stringCons);
 				break;
-			case PNICons: // Numeric constants are ignored.
+			case PNICons: // Numbers are ignored.
 			case PNFCons:
 				break;
-			case PNIdent: // Idents with String values are written to output.
+			case PNIdent: // Idents with String values are written.
 				pvalue = evaluateIdent(programNode, context, &errorFlag);
 				if (errorFlag) {
 					scriptError(programNode, "error evaluating an identifier");
@@ -104,7 +102,7 @@ InterpType interpret(PNode *programNode, Context *context, PValue *returnValue) 
 				if (pvalue.type == PVString && pvalue.value.uString)
 					printf("%s", pvalue.value.uString);
 				break;
-			case PNBltinCall: // Call builtins and print return value if it is a String.
+			case PNBltinCall: // Call builtin and write return value if a String.
 				pvalue = evaluateBuiltin(programNode, context, &errorFlag);
 				if (errorFlag) {
 					scriptError(programNode, "error calling built-in function: %s", programNode->funcName);
@@ -120,7 +118,7 @@ InterpType interpret(PNode *programNode, Context *context, PValue *returnValue) 
 					default: return returnCode;
 				}
 				break;
-			case PNFuncCall: // Call a user-defined function at the statement level.
+			case PNFuncCall: // Call a user-defined function at statement level.
 				pvalue = evaluateUserFunc(programNode, context, &errorFlag);
 				if (errorFlag) return InterpError;
 				if (pvalue.type == PVString && pvalue.value.uString) {
@@ -128,40 +126,40 @@ InterpType interpret(PNode *programNode, Context *context, PValue *returnValue) 
 					stdfree(pvalue.value.uString);  // The pvalue's string is in the heap.
 				}
 				break;
-			case PNFuncDef: // These types are illegal during interpretation.
+			case PNFuncDef: // Illegal during interpretation.
 			case PNProcDef:
 			case PNTable:
-			case PNNotes:  //  Maybe this is legitimate?
+			case PNNotes: // Maybe this is legit?
 				FATAL();
-			case PNChildren: // Interpret a children loop.
+			case PNChildren: // Interpret children loop.
 				switch (returnCode = interpChildren(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
 					default: return returnCode;
 				}
 				break;
-			case PNSpouses: // Interpret a spouses loop.
+			case PNSpouses: // Interpret spouse loop.
 				switch (returnCode = interpSpouses(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
 					default: return returnCode;
 				}
 				break;
-			case PNFamilies: // Interpret a families loop.
+			case PNFamilies: // Interpret a family loop.
 				switch (returnCode = interpFamilies(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
 					default: return returnCode;
 				}
 				break;
-			case PNFathers: // Interpret a fathers loop.
+			case PNFathers: // Interpret fathers loop.
 				switch (returnCode = interpFathers(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
 					default: return returnCode;
 				}
 				break;
-			case PNMothers: // Interpret a mothers loop.
+			case PNMothers: // Interpret mothers loop.
 				switch (returnCode = interpMothers(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
@@ -182,14 +180,14 @@ InterpType interpret(PNode *programNode, Context *context, PValue *returnValue) 
 					default: return returnCode;
 				}
 				break;
-			case PNIndis: // Interpret an all persons loop.
+			case PNIndis: // All persons loop.
 				switch (returnCode = interpForindi(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
 					default: return returnCode;
 				}
 				break;
-			case PNFams: // Interpret an all families loop.
+			case PNFams: // All families loop.
 				switch (returnCode = interpForFam(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
@@ -197,34 +195,28 @@ InterpType interpret(PNode *programNode, Context *context, PValue *returnValue) 
 						return returnCode;
 				}
 				break;
-
-			//  Iterate through all sources in the database.
-			case PNSources:
+			case PNSources: // Source loop.
 				switch (returnCode = interp_forsour(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
 					default: return returnCode;
 				}
 				break;
-
-			//  Iterate through all events in the database.
-			case PNEvents:
+			case PNEvents: // Event loop.
 				switch (returnCode = interp_foreven(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
 					default: return returnCode;
 				}
 				break;
-			case PNOthers: // Iterate through all sources in the database.
+			case PNOthers: // All other records loop.
 				switch (returnCode = interp_forothr(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
 					default: return returnCode;
 				}
 				break;
-
-			//  Loop through all elements of a list. All elements will be PValue*'s.
-			case PNList:
+			case PNList: // All list elements.
 				switch (returnCode = interpForList(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
@@ -256,30 +248,30 @@ InterpType interpret(PNode *programNode, Context *context, PValue *returnValue) 
 					default: return returnCode;
 				}
 				break;
-			case PNIf: // Interpret an if statement.
+			case PNIf: // If statement.
 				switch (returnCode = interpIfStatement(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
 					default: return returnCode;
 				}
 				break;
-			case PNWhile: // Interpret a while loop.
+			case PNWhile: // Wwhile loop.
 				switch (returnCode = interpWhileStatement(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;
 					default: return returnCode;
 				}
 				break;
-			case PNBreak: // Interpret a break statement.
+			case PNBreak: // Break statement.
 				return InterpBreak;
-			case PNContinue: // Interpret a continue statement.
+			case PNContinue: // Continue statement.
 				return InterpContinue;
-			case PNReturn: // Interpret a return statement.
+			case PNReturn: // Return statement.
 				if (programNode->returnExpr)
 					*returnValue = evaluate(programNode->returnExpr, context, &errorFlag);
 				return InterpReturn;
 		}
-		programNode = programNode->next; // Loop to next statement.
+		programNode = programNode->next; // Move to next statement.
 	}
 	return InterpOkay;
 }
@@ -783,36 +775,31 @@ InterpType interpWhileStatement (PNode *node, Context *context, PValue *pval) {
 	}
 }
 
-// interpProcCall interpret a procedure call.
-// Usage: CALL PROC(ARG,...)/ Fields: procName, arguments, parameters, procbody.
-InterpType interpProcCall(PNode *programNode, Context *context, PValue *pval) {
+// interpProcCall interprets a user-defined procedure call.
+InterpType interpProcCall(PNode* programNode, Context* context, PValue* pval) {
 	ASSERT(programNode && programNode->type == PNProcCall && context);
-	//if (programDebugging) {
-	if (true) {
+	if (programDebugging) {
 		printf("interpProcCall: %d: %s: %2.3f\n", programNode->lineNumber, programNode->procName,
 			   getMilliseconds());
 	}
-	PNode *procedure = searchFunctionTable(procedureTable, programNode->procName); // Get procedure.
+	PNode* procedure = searchFunctionTable(procedureTable, programNode->procName);
 	if (!procedure) {
 		printf("``%s'': undefined procedure\n", programNode->procName);
 		return InterpError;
 	}
-	SymbolTable *newSymbolTable = createSymbolTable(); // Create context to run procedure in.
-	Context *newContext = createContext(newSymbolTable, context->database);
-	if (debugging)
-		printf("interpProcCall: creating symbol table %p for %s\n", newSymbolTable,
-			   programNode->procName);
-	PNode *argument = programNode->arguments;  // First argument to the procedure.
-	PNode *parameter = procedure->parameters;  // First parameter of the procedure.
-	while (argument && parameter) { // Bind arguments to parameters.
+	SymbolTable* newSymbolTable = createSymbolTable(); // Context to run proc in.
+	Context* newContext = createContext(newSymbolTable, context->database);
+	PNode* argument = programNode->arguments; // First arg.
+	PNode* parameter = procedure->parameters; // First param.
+	while (argument && parameter) { // Bind args and params.
 		bool eflg = false;
-		PValue value = evaluate(argument, context, &eflg); // Evaluate an argument.
+		PValue value = evaluate(argument, context, &eflg); // Eval arg.
 		if (eflg) return InterpError;
 		assignValueToSymbol(newSymbolTable, parameter->identifier, value); // Assign arg to param.
 		argument = argument->next;
 		parameter = parameter->next;
 	}
-	if (argument || parameter) { // Check for argument parameter mismatch.
+	if (argument || parameter) { // Check for arg/param mismatch.
 		printf("``%s'': mismatched args and params\n", programNode->procName);
 		deleteHashTable(newSymbolTable);
 		return InterpError;
@@ -839,10 +826,10 @@ InterpType interpProcCall(PNode *programNode, Context *context, PValue *pval) {
 // Usage: traverse(GNode expr, GNode ident, int ident) {...}.
 // Fields: gnodeExpr, levelIden, gNodeIden.
 #define MAXTRAVERSEDEPTH 100
-InterpType interpTraverse(PNode *traverseNode, Context *context, PValue *returnValue) {
+InterpType interpTraverse(PNode* traverseNode, Context* context, PValue* returnValue) {
 	ASSERT(traverseNode && context);
 	bool errorFlag = false;
-	GNode *root = evaluateGNode(traverseNode->gnodeExpr, context, &errorFlag); // Root of traverse.
+	GNode* root = evaluateGNode(traverseNode->gnodeExpr, context, &errorFlag); // Root of traverse.
 	if (errorFlag || !root) {
 		scriptError(traverseNode, "the first argument to traverse must be a Gedcom line");
 		return InterpError;
@@ -854,8 +841,8 @@ InterpType interpTraverse(PNode *traverseNode, Context *context, PValue *returnV
 	// direct access to the PValues, because each iteration updates the values of two idents. The
 	// 'proper' way to do this is with assignments, but keeping pointers to the PValues allow them
 	// to be changed directly. So searchHashTable is used instead of getValueOfIden.
-	PValue *level = ((Symbol*) searchHashTable(context->symbolTable, traverseNode->levelIden))->value;
-	PValue *node = ((Symbol*) searchHashTable(context->symbolTable, traverseNode->gnodeIden))->value;
+	PValue* level = ((Symbol*) searchHashTable(context->symbolTable, traverseNode->levelIden))->value;
+	PValue* node = ((Symbol*) searchHashTable(context->symbolTable, traverseNode->gnodeIden))->value;
 	ASSERT(node && level);
 
 	GNode *snode, *nodeStack[MAXTRAVERSEDEPTH]; // Stack of GNodes.
@@ -900,7 +887,7 @@ a:  removeFromHashTable(context->symbolTable, traverseNode->levelIden);
 	return returnIrc;
 }
 
-//  scriptError reports a run time script error.
+// scriptError reports a run time script error.
 void scriptError(PNode *gnode, String fmt, ...) {
 	va_list args;
 	printf("\nError in \"%s\" at line %d: ", gnode->fileName, gnode->lineNumber);

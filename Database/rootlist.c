@@ -4,13 +4,10 @@
 // the root GNodes of Gedcom records.
 //
 // Created by Thomas Wetmore on 2 March 2024.
-// Last changed on 18 April 2024.
+// Last changed on 22 April 2024.
 
-#include <stdio.h>
 #include "rootlist.h"
 #include "gnode.h"
-
-static bool compareDebugging = true;
 
 // getKey is the get key function for RootLists.
 static String getKey(void* element) {
@@ -26,7 +23,7 @@ static int compare(String a, String b) {
 	return 0;
 }
 
-//  createRootList creates and returns a RootList; a RootList is a sorted List.
+// createRootList creates and returns a RootList; a RootList is a sorted List.
 RootList *createRootList(void) {
 	return createList(getKey, compare, null, true);
 }

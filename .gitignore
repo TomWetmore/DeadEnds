@@ -4,8 +4,6 @@
 *test
 output.txt
 y.tab.c
-y.tab.h
-grammar.c
 testset.c
 teststringtable.c
 testoutput
