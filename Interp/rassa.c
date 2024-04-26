@@ -253,7 +253,7 @@ void adjust_cols (String str)
 //--------------------------------------------------------------------------------------------------
 void poutput (String str)
 {
-	String p, name;
+	String p; //, name;
 	int c, len;
 	if (!str || *str == 0 || (len = (int) strlen(str)) <= 0) return;
 //	if (!Poutfp) {

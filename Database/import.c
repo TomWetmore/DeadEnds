@@ -28,10 +28,10 @@
 extern FILE* debugFile;
 
 // toString returns the GNode in a NodeListElement as a string; for debugging.
-static String toString(void* element) {
-	GNode* gnode = ((NodeListElement*) element)->node;
-	return gnodeToString(gnode, 0);
-}
+//static String toString(void* element) {
+	//GNode* gnode = ((NodeListElement*) element)->node;
+	//return gnodeToString(gnode, 0);
+//}
 
 // Error messages defined elsewhere.
 extern String idgedf, gdcker, gdnadd, dboldk, dbnewk, dbodel, cfoldk, dbdelk, dbrdon;

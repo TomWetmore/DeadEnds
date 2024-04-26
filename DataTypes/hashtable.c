@@ -4,7 +4,7 @@
 // customization.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 19 April 2024.
+// Last changed on 25 April 2024.
 
 #include "standard.h"
 #include "hashtable.h"
@@ -16,10 +16,10 @@ bool sortChecking = false;
 extern FILE* debugFile;
 
 static void* searchBucket(Bucket*, String key, String(*g)(void*), int(*c)(String, String), int* index);
-static void* linearSearchBucket(Bucket*, String key, String(*g)(void*), int* index);
-static void* binarySearchBucket(Bucket*, String key, String(*g)(void*), int(*c)(String, String), int* index);
-static void sortBucket(Bucket*, String(*g)(void*), int(*c)(String, String));
-static void removeFromBucketByIndex(Bucket* bucket, int index, void (*delete)(void*));
+//static void* linearSearchBucket(Bucket*, String key, String(*g)(void*), int* index);
+//static void* binarySearchBucket(Bucket*, String key, String(*g)(void*), int(*c)(String, String), int* index);
+//static void sortBucket(Bucket*, String(*g)(void*), int(*c)(String, String));
+//static void removeFromBucketByIndex(Bucket* bucket, int index, void (*delete)(void*));
 
 // createHashTable creates and returns a HashTable. getKey is a function that returns the key of
 // an element, and delete is an optional function that frees an element.
@@ -115,10 +115,10 @@ void* searchBucket(Bucket* bucket, String key, String(*getKey)(void*),
 }
 
 // linearSearchBucket uses linear search to look for an element in a Bucket.
-void* linearSearchBucket(Bucket* bucket, String key, String(*getKey)(void*), int* index) { PH;
-	Block* block = &(bucket->block);
-	return linearSearch(block->elements, block->length, key, getKey, index);
-}
+//void* linearSearchBucket(Bucket* bucket, String key, String(*getKey)(void*), int* index) { PH;
+	//Block* block = &(bucket->block);
+	//return linearSearch(block->elements, block->length, key, getKey, index);
+//}
 
 // isInHashTable returns whether an element with the given key is in the HashTable.
 bool isInHashTable(HashTable* table, String key) {

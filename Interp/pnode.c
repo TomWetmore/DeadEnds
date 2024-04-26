@@ -1,12 +1,9 @@
+// DeadEnds
 //
-//  DeadEnds
+// pnode.c holds functions that create PNodes (program nodes).
 //
-//  pnode.c -- Most of the functions in this file create PNode (program nodes) of the many
-//    different types.
-//
-//  Created by Thomas Wetmore on 14 December 2022.
-//  Last changed on 23 April 2024.
-//
+// Created by Thomas Wetmore on 14 December 2022.
+// Last changed on 25 April 2024.
 
 #include "pnode.h"
 #include "standard.h"
@@ -17,7 +14,7 @@
 
 static bool debugging = false;
 
-// pnodeTypes are String names for the program node types. Useful in debugging.
+// pnodeTypes are String names for the program node types useful for debugging.
 String pnodeTypes[] = {
     "", "ICons", "FCons", "SCons", "Ident", "If", "While", "Break", "Continue", "Return",
     "ProcDef", "ProcCall", "FuncDef", "FuncCall", "BltinCall", "Traverse", "Nodes", "Families",
@@ -25,16 +22,12 @@ String pnodeTypes[] = {
     "Fathers", "Mothers", "FamsAsChild", "Notes"
 };
 
-// External global variable not declared in header files.
-//--------------------------------------------------------------------------------------------------
 extern FunctionTable *functionTable;  // parse.c
 extern String currentProgramFileName;  // parse.c; used to set the file name of PNodes.
 extern int currentProgramLineNumber;;   // parse.c; used to set the line numbers of PNodes.
 
-// showPNode -- Show a PNode. For debugging.
-//--------------------------------------------------------------------------------------------------
-void showPNode(PNode *pnode)
-{
+// showPNode shows a PNode useful for debugging.
+void showPNode(PNode* pnode) {
     printf("%s ", pnodeTypes[pnode->type]);
     switch (pnode->type) {
         case PNICons:     printf("%ld\n", pnode->intCons); break;
@@ -71,49 +64,36 @@ void showPNode(PNode *pnode)
     }
 }
 
-static void setParents(PNode *list, PNode *parent);  // Set the parent to a list of PNodes.
+static void setParents(PNode* list, PNode* parent); // Set the parents of a PNode list.
 
-//  allocPNode -- Allocate a program node. The node create functions use this function. This
-//    function sets the pType, pFileName and pLineNum fields.
-//--------------------------------------------------------------------------------------------------
-static PNode *allocPNode(int type)
-// type -- Type of the node.
-{
-    // Allocate the node.
-    PNode *node = (PNode*) stdalloc(sizeof(*node));
+// allocPNode allocates a PNode and sets the pType, pFileName and pLineNum fields.
+static PNode* allocPNode(int type) {
+    PNode* node = (PNode*) stdalloc(sizeof(*node));
     if (debugging) {
         printf("allocPNode(%d) %s, %d\n", type, currentProgramFileName, currentProgramLineNumber);
     }
-    // Initialize the type, filename, and linenumber fields.
     node->type = type;
-    node->fileName = strsave(currentProgramFileName);  // TODO: MEMORY!!!!!!!!!
-    node->lineNumber = currentProgramLineNumber;  //  May be overwritten by the yacc m production.
+    node->fileName = strsave(currentProgramFileName); // TODO: MEMORY!!!!!!!!!
+    node->lineNumber = currentProgramLineNumber; // Overwritten by the yacc m production?
     return node;
 }
 
-// icons_node -- Create an integer PNode. Using a C long integer as the underlying type.
-//--------------------------------------------------------------------------------------------------
-PNode *iconsPNode(long intConstant)
-// ival -- Integer (a C long) to embed in a PNode.
-{
+// iconsPNode creates an integer PNode with a C long.
+PNode* iconsPNode(long intConstant) {
     PNode *node = allocPNode(PNICons);
     node->intCons = intConstant;
     return node;
 }
 
-// fcons_node -- Create a floating point PNode. Using a C double as the underlying type.
-//--------------------------------------------------------------------------------------------------
-PNode *fconsPNode(double floatConstant)
-{
+// fconsPNode creates a float PNode with a C double.
+PNode* fconsPNode(double floatConstant) {
     PNode *pnode = allocPNode(PNFCons);
     pnode->floatCons = floatConstant;
     return pnode;
 }
 
-// scons_node -- Create a String PNode.
-//--------------------------------------------------------------------------------------------------
-PNode *sconsPNode(String string)
-{
+// sconsPNode creates a String PNode.
+PNode* sconsPNode(String string) {
     PNode *pnode = allocPNode(PNSCons);
     pnode->stringCons = string;
     return pnode;
@@ -131,7 +111,7 @@ PNode* ifPNode (PNode* cond, PNode* tnode, PNode* enode) {
 }
 
 // whilePNode creates a while loop PNode.
-PNode *whilePNode(PNode* cond, PNode* body) {
+PNode* whilePNode(PNode* cond, PNode* body) {
     PNode *node = allocPNode(PNWhile);
     node->condExpr = cond;
     node->loopState = body;
@@ -140,20 +120,20 @@ PNode *whilePNode(PNode* cond, PNode* body) {
 }
 
 // breakPNode -- Create a break PNode.
-PNode *breakPNode(void) { return allocPNode(PNBreak); }
+PNode* breakPNode(void) { return allocPNode(PNBreak); }
 
 // continuePNode creates a continue PNode.
 PNode *continuePNode(void) { return allocPNode(PNContinue); }
 
-// returnPNode create a return PNode with an optional return expression.
-PNode *returnPNode(PNode *args) {
+// returnPNode create a return PNode with optional return expression.
+PNode* returnPNode(PNode *args) {
     PNode *node = allocPNode(PNReturn);
     if (args) { node->returnExpr = args; }
     return node;
 }
 
-// procDefPNode creates a user-defined procedure definition node.
-PNode *procDefPNode(String name, PNode* parms, PNode* body) {
+// procDefPNode creates a user-defined proc definition node.
+PNode* procDefPNode(String name, PNode* parms, PNode* body) {
     PNode *node = allocPNode(PNProcDef);
     node->procName = name;
     node->parameters = parms;
@@ -162,8 +142,8 @@ PNode *procDefPNode(String name, PNode* parms, PNode* body) {
     return node;
 }
 
-// procCallPNode create a procedure call node.
-PNode *procCallPNode(String name, PNode *args) {
+// procCallPNode create a proc call node.
+PNode* procCallPNode(String name, PNode *args) {
     PNode *node = allocPNode(PNProcCall);
     node->procName = strsave(name);
     node->arguments = args;
@@ -171,7 +151,7 @@ PNode *procCallPNode(String name, PNode *args) {
 }
 
 // funcDefPNode creates a user-defined function definition node.
-PNode *funcDefPNode(String name, PNode* parms, PNode* body) {
+PNode* funcDefPNode(String name, PNode* parms, PNode* body) {
     PNode *node = allocPNode(PNFuncDef);
     node->funcName = name;
     node->parameters = parms;
@@ -180,9 +160,8 @@ PNode *funcDefPNode(String name, PNode* parms, PNode* body) {
     return node;
 }
 
-// funcCallPNode creates a builtin or user-defined function call program node. We find which
-// by looking the name up in the user-defined function table.
-PNode *funcCallPNode(String name, PNode* alist) {
+// funcCallPNode creates a builtin or user-defined function call program node.
+PNode* funcCallPNode(String name, PNode* alist) {
     if (isInHashTable(functionTable, name)) { // User-defined.
         PNode *node = allocPNode(PNFuncCall);
         node->funcName = name;
@@ -230,14 +209,9 @@ PNode *funcCallPNode(String name, PNode* alist) {
     return node;
 }
 
-//  traversePNode -- Create traverse loop PNode to traverse a tree of Gedcom Nodes.
-//--------------------------------------------------------------------------------------------------
-PNode *traversePNode (PNode *nexpr, String snode, String levv, PNode *body)
-//  nexpr -- Expression that evaluates to a gedcom node to traverse.
-//  snode -- Variable name of the current sub-node.
-//  levv -- Variable name of the current level.
-//  body -- Root of the loop's program node tree.
-{
+// traversePNode creates a traverse loop PNode to traverses a tree of GNodes. snode and levv are
+// the names of the idents holding the current node's name and the current level.
+PNode* traversePNode (PNode* nexpr, String snode, String levv, PNode* body) {
     PNode *node = allocPNode(PNTraverse);
     node->gnodeExpr = nexpr;
     node->gnodeIden = snode;
@@ -247,13 +221,9 @@ PNode *traversePNode (PNode *nexpr, String snode, String levv, PNode *body)
     return node;
 }
 
-//  fornodesPNode -- Create fornodes loop PNode to iterate through the children of a Gedcom Node.
-//--------------------------------------------------------------------------------------------------
-PNode *fornodesPNode (PNode *nexpr, String nvar, PNode *body)
-//  nexpr -- Expression that evaluates to a gedcom node.
-//  nvar -- Name of variable that iterates through the children of the node.
-//  body -- Root of the loop's program node tree.
-{
+// fornodesPNode creates a fornodes loop PNode to iterate the children of a GNode. nvar is the
+// name of the ident holding the current child's name.
+PNode* fornodesPNode (PNode* nexpr, String nvar, PNode* body) {
     PNode *node = allocPNode(PNNodes);
     node->gnodeExpr = nexpr;
     node->gnodeIden = nvar;
@@ -262,16 +232,9 @@ PNode *fornodesPNode (PNode *nexpr, String nvar, PNode *body)
     return node;
 }
 
-//  familiesPNode -- Create a family loop program node that loops through all families that
-//    a person is a spouse in. Called by yyparse() on rule reduction.
-//--------------------------------------------------------------------------------------------------
-PNode *familiesPNode(PNode *pexpr, String fvar, String svar, String count, PNode *body)
-//  pexpr -- Program node expression that evaluates to a person gedcom node.
-//  fvar -- Name of the family identifier.
-//  svar -- Name of the spouse identifier.
-//  nvar -- Name of the counter variable.
-//  body -- First program node of the loop body..
-{
+// familiesPNode creates a family loop PNode to loop through the families a person is a spouse in.
+// fvar is the family ident; svar is the spouse ident; nvar is the counter ident.
+PNode* familiesPNode(PNode* pexpr, String fvar, String svar, String count, PNode* body) {
     PNode *node = allocPNode(PNFamilies);
     node->personExpr = pexpr;
     node->familyIden = fvar;
@@ -282,22 +245,15 @@ PNode *familiesPNode(PNode *pexpr, String fvar, String svar, String count, PNode
     return node;
 }
 
-//  spousesPNode -- Create a spouse loop program node that loops through all spouses that the
-//    given person is a spouse of. Called by yyparse() on rule reduction.
-//--------------------------------------------------------------------------------------------------
-PNode *spousesPNode (PNode *pexpr, String svar, String fvar, String count, PNode *body)
-//  pexpr -- Program node expression that evaluate to a person gedcom node.
-//  svar -- Name of the spouse loop variable.
-//  fvar -- Name of the family loop variable.
-//  nvar -- Name of the loop counter variable.
-//  body -- First program node of the loop body.
-{
+// spousesPNode create a spouse loop PNode that loops through the spouses of a person. svar is
+// spouse ident; fvar is the family ident; nvar is the counter ident.
+PNode* spousesPNode (PNode* pexpr, String svar, String fvar, String count, PNode* body) {
     PNode *node = allocPNode(PNSpouses);
     node->personExpr = pexpr;
     node->spouseIden = svar;
     node->familyIden = fvar;
     node->countIden = count;
-    node->loopState = body;  // Body of the loop.
+    node->loopState = body;
     setParents(body, node);
     return node;
 }
@@ -527,13 +483,6 @@ static void setParents (PNode *list, PNode *parent)
         list = list->next;
     }
 }
-
-//typedef enum {
-//    PNICons = 1, PNFCons, PNSCons, PNIdent, PNIf, PNWhile, PNBreak, PNContinue, PNReturn,
-//    PNProcDef, PNProcCall, PNFuncDef, PNFuncCall, PNBltinCall, PNTraverse, PNNodes, PNFamilies,
-//    PNSpouses, PNChildren, PNIndis, PNFams, PNSources, PNEvents, PNOthers, PNList, PNSequence,
-//    PNTable, PNFathers, PNMothers, PNFamsAsChild, PNNotes
-//} PNType;
 
 //  freePNodes -- Free the program nodes rooted at the given program node.
 //    TODO: Write me.

@@ -4,7 +4,7 @@
 // persons and sometimes families. It underlies the indiseq data type of DeadEnds Script.
 //
 // Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 20 April 2024.
+// Last changed on 25 April 2024.
 
 #include "standard.h"
 #include "sequence.h"
@@ -19,7 +19,7 @@
 #include "sort.h"
 #include "writenode.h"
 
-static bool debugging = false;
+//static bool debugging = false;
 static int numBucketsInSequenceTables = 359;
 
 // The structure functions needed by Sequence.

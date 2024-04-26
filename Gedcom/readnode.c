@@ -5,7 +5,7 @@
 // and strings.
 //
 // Created by Thomas Wetmore on 17 December 2022.
-// Last changed on 31 March 2024.
+// Last changed on 25 April 2024.
 //
 
 #include "readnode.h"
@@ -13,7 +13,7 @@
 #include "list.h"
 #include "errors.h"
 
-static bool debugging = true;
+//static bool debugging = true;
 extern bool importDebugging;
 extern FILE* debugFile;
 

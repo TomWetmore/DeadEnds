@@ -1,7 +1,7 @@
 //  test.c -- Test program.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 19 April 2024.
+//  Last changed on 25 April 2024.
 
 #include <stdio.h>
 #include "standard.h"
@@ -96,7 +96,7 @@ static int compare(String a, String b) {
 
 // listTest creates a list of all the persons in the database; sort the list by tags, and then
 // prints the record tags in sorted order.
-void listTest(Database *database, int testNumber) {
+/*void listTest(Database *database, int testNumber) {
 	printf("\n%d: START OF LIST TEST\n", testNumber);
 	int i, j;  //  State variables used to iterate the person index hash table.
 	int count = 0;
@@ -122,7 +122,7 @@ void listTest(Database *database, int testNumber) {
 	ENDLIST
 	printf("%d persons are in the list\n", count);
 	printf("END OF LIST TEST\n");
-}
+}*/
 
 // forHashTableTest tests FORHASHTABLE macro by showing all persons in the database's person index.
 void forHashTableTest(Database* database, int testNumber) {
