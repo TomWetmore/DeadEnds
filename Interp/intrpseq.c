@@ -163,7 +163,7 @@ PValue __deletefromset (PNode *node, Context *context, bool *eflg)
     do {
         rc = removeFromSequence(seq, key);
     } while (rc && all);
-    return nullPValue;
+    return value1;
 }
 
 //  __namesort -- Sort a sequence by name.

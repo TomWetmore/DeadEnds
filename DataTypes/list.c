@@ -109,7 +109,7 @@ bool removeLastListElement(List* list) {
 // getAndRemoveFirstListElement removes and returns the first element from a List; caller must free.
 void* getAndRemoveFirstListElement(List* list) {
 	void* element = getFirstListElement(list);
-	removeFirstBlockElement(&(list->block), null);
+	removeFirstBlockElement(&(list->block), null); // null == don't delete
 	return element;
 }
 

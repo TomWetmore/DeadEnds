@@ -24,44 +24,44 @@ typedef enum {
 
 // SequenceEl is the data type of Sequence elements. Keys and names belong to the element.
 typedef struct SequenceEl {
-	String key;  // Person or family key.
+	String key;
 	String name; // Name of person.
-	void* value;   // Caller defined.
+	void* value; // Caller defined.
 } SequenceEl;
 
 // Sequence is a data type that holds sequences/sets/arrays of persons (families?).
 typedef struct Sequence {
-	Block block;         // Block holding the SequenceEls.
-	SortType sortType;   // State of sortedness.
-	bool unique;         // Sequence has been uniqued.
-	Database *database;  // Database the sequence comes from.
+	Block block;
+	SortType sortType;
+	bool unique;
+	Database *database;
 } Sequence;
 
 SequenceEl *createSequenceEl(String key, String name, void* value);
 
-Sequence *createSequence(Database*);  // Create a sequence.
-void deleteSequence(Sequence*);  //  Delete a sequence.
-Sequence *copySequence(Sequence*);  //  Copy a sequence.
-int lengthSequence(Sequence*);  //  Return the length of a sequence.
+Sequence *createSequence(Database*);
+void deleteSequence(Sequence*);
+Sequence *copySequence(Sequence*);
+int lengthSequence(Sequence*);
 void emptySequence(Sequence*);
 
 void appendToSequence(Sequence*, String key, String name, void*);
 bool isInSequence(Sequence*, String key);
 bool removeFromSequence(Sequence*, String key);
-void nameSortSequence(Sequence*);  //  Sort a sequence by name.
-void keySortSequence(Sequence*);  //  Sort a sequence by key.
-void valueSortSequence(Sequence*); //  Sort a sequence by value (not properly implemented).
-Sequence *uniqueSequence(Sequence*);  //  Return sequence uniqueued from another.
+void nameSortSequence(Sequence*); // Sort by name.
+void keySortSequence(Sequence*); // Sort by key.
+//void valueSortSequence(Sequence*); //  Sort a sequence by value (not properly implemented).
+Sequence *uniqueSequence(Sequence*); //Return sequence uniqueued from another.
 
-Sequence *personToChildren(GNode *person, Database*);  //  Return sequence of a person's children.
-Sequence *personToFathers(GNode *person, Database*);   //  Return sequence of a person's fathers.
-Sequence *personToMothers(GNode *person, Database*);   //  Return sequence of a person's mothers.
-Sequence *familyToChildren(GNode *family, Database*);  //  Return sequence of a family's children.
-Sequence *familyToFathers(GNode *family, Database*);  //  Return sequence of a family's fathers.
-Sequence *familyToMothers(GNode *family, Database*);  //  Return sequence of a family's mothers.
-Sequence *personToSpouses(GNode *person, Database*);  //  Return sequence of a person's spouses.
-Sequence *personToFamilies(GNode *person, bool, Database*);  //  Return sequence of a person's families.
-Sequence *nameToSequence(String, Database*);  //  Return sequence of persons who match a name.
+Sequence *personToChildren(GNode *person, Database*);
+Sequence *personToFathers(GNode *person, Database*);
+Sequence *personToMothers(GNode *person, Database*);
+Sequence *familyToChildren(GNode *family, Database*);
+Sequence *familyToFathers(GNode *family, Database*);
+Sequence *familyToMothers(GNode *family, Database*);
+Sequence *personToSpouses(GNode *person, Database*);
+Sequence *personToFamilies(GNode *person, bool, Database*);
+Sequence *nameToSequence(String, Database*);
 Sequence *refn_to_indiseq(String refn);
 
 Sequence *unionSequence(Sequence*, Sequence*);
@@ -76,10 +76,9 @@ Sequence *siblingSequence(Sequence*, bool);
 
 void sequenceToGedcom(Sequence*, FILE*);
 
-// Kind of for debugging.
 void showSequence(Sequence*);
 
-//  FORSEQUENCE and ENDSEQUENCE are macros that iterate over a Sequence.
+// FORSEQUENCE and ENDSEQUENCE iterate a Sequence.
 #define FORSEQUENCE(sequence, element, count)\
 {\
 	SequenceEl *element;\

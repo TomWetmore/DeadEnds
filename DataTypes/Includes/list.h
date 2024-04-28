@@ -1,10 +1,10 @@
 // DeadEnds
 //
-// list.h defines the types and interface that implement a Block-based list. Lists grow
-// automatically. Lists can be sorted or unsorted. Sorted lists require a compare function.
+// list.h defines the types and interfaces that implement a Block-based list. Lists grow
+// automatically and can be sorted or unsorted. Sorted lists require a compare function.
 //
 // Created by Thomas Wetmore on 22 November 2022.
-// Last changed on 20 April 2024.
+// Last changed on 27 April 2024.
 
 #ifndef list_h
 #define list_h
@@ -16,13 +16,14 @@
 #define pushList prependToList
 #define popList getAndRemoveFirstListElement
 
+// List defines the stucture and typedef for Lists.
 typedef struct List {
 	Block block; // Block of elements.
-	bool sorted; // This is a sorted list.
-	bool isSorted; // This sorted list is currently sorted.
-	void (*delete)(void*); // Function to delete an element.
-	String (*getKey)(void*); // Function to retrieve a string key from an element.
-	int (*compare)(String, String); // Compare function needed by sorted lists.
+	bool sorted; // Is a sorted list.
+	bool isSorted; // Is currently sorted.
+	void (*delete)(void*);
+	String (*getKey)(void*);
+	int (*compare)(String, String);
 } List;
 
 List* createList(String(*g)(void*), int(*c)(String, String), void (*d)(void*), bool sorted);
@@ -57,10 +58,7 @@ void* getLastListElement(List*);
 void* getAndRemoveLastListElement(List*);
 void* getAndRemoveFirstListElement(List*);
 
-
-
 Block* blockOfList(List*);
-
 void showList(List *list, String(*describe)(void*));
 
 #define FORLIST(list, value)\

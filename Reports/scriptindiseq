@@ -1,0 +1,57 @@
+proc main()
+{
+	set(i, indi("@I1@"))
+	indiset(a)
+	addtoset(a, i, 0)
+	"Set a with just me has length " d(lengthset(a)) nl()
+	indiset(d)
+	set(d, descendentset(a))
+	"Set d with my descendents has length " d(lengthset(d)) nl()
+	set(a, union(a, d))
+	"Set d with me and my descendents has length " d(lengthset(a)) nl()
+
+
+	indiset(l)
+	set(i, indi("@I2@"))
+	addtoset(l, i, 0)
+	set(l, union(l, ancestorset(l)))
+	"Luann and her ancestors total " d(lengthset(l)) " persons." nl()
+
+	indiset(m)
+	addtoset(m, i, 0)
+	set(m, ancestorset(m))
+	"Luann has " d(lengthset(m)) " ancestors." nl()
+
+	/*See if we can delete Luann from the set*/
+	
+	"About to call deletefromset." nl()
+	/*deletefromset(l, i, 1)*/
+	set(l, deletefromset(l, i, 1))
+	"The set that had Luann now has " d(lengthset(l)) " persons." nl()
+
+	/*gengedcom(a)*/
+	/*call ahnen(indi("@I1@"))*/
+}
+
+proc ahnen(indi)
+{
+"HELLO PROC AHNEN" nl()
+	list(ilist)
+	list(alist)
+	enqueue(ilist, indi)
+	enqueue(alist, 1)
+	while(indi, dequeue(ilist)) {
+		set(ahnen, dequeue(alist))
+		d(ahnen) ". " name(indi) nl()
+		if (e, birth(indi)) { " b. " long(e) nl() }
+		if (e, death(indi)) { " d. " long(e) nl() }
+		if (par, father(indi)) {
+			enqueue(ilist, par)
+			enqueue(alist, mul(2,ahnen))
+		}
+		if (par,mother(indi)) {
+			enqueue(ilist, par)
+			enqueue(alist, add(1,mul(2,ahnen)))
+		}
+	}
+}

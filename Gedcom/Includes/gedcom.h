@@ -1,10 +1,9 @@
+// DeadEnds
 //
-//  DeadEnds
+// gedcom.h
 //
-//  gedcom.h
-//
-//  Created by Thomas Wetmore on 7 November 2022.
-//  Last changed on 2 January 2024.
+// Created by Thomas Wetmore on 7 November 2022.
+// Last changed on 27 April 2024.
 //
 
 #ifndef gedcom_h
@@ -15,8 +14,7 @@ typedef struct GNode GNode;  //  Forward reference.
 #include "gnode.h"
 #include "list.h"
 
-//  SexType -- Enumeration for sex types.
-//--------------------------------------------------------------------------------------------------
+// SexType is an enumeration of sex types.
 typedef enum SexType {
     sexMale = 1, sexFemale, sexUnknown
 } SexType;
@@ -24,8 +22,7 @@ typedef enum SexType {
 #define personToKey(indi) (indi->key)
 #define familyToKey(fam)  (fam->key)
 
-//  RecordType -- Enumeration of supported DeadEnds record types.
-//--------------------------------------------------------------------------------------------------
+// RecordType is an enumeration of DeadEnds record types.
 typedef enum RecordType {
     GRUnknown = 0, GRPerson, GRFamily, GRSource, GREvent, GROther, GRHeader, GRTrailer
 } RecordType;
@@ -34,8 +31,7 @@ RecordType recordType(GNode *root);  // Return the type of a Gedcom record tree.
 
 int compareRecordKeys(String, String);  // gedcom.c
 
-// FORCHILDREN / ENDCHILDREN -- Iterator for the children of a family.
-//--------------------------------------------------------------------------------------------------
+// FORCHILDREN / ENDCHILDREN is a macro pair that iterates the children in a family.
 #define FORCHILDREN(fam, childd, key, num, database) \
     {\
     GNode* __node = findTag(fam->child, "CHIL");\
@@ -48,15 +44,13 @@ int compareRecordKeys(String, String);  // gedcom.c
         ASSERT(childd);\
         num++;\
         {
-
 #define ENDCHILDREN \
         }\
         __node = __node->sibling;\
         if (__node && nestr(__node->tag, "CHIL")) __node = null;\
     }}
 
-//  FORFAMCS / ENDFAMCS -- Iterator for the family as child nodes in a record.
-//-------------------------------------------------------------------------------------------------
+// FORFAMCS / ENDFAMCS -- Iterator for the family as child nodes in a record.
 #define FORFAMCS(person, family, key, database)\
 {\
     GNode *__node = FAMC(person);\
@@ -66,7 +60,6 @@ int compareRecordKeys(String, String);  // gedcom.c
         key = __node->value;\
         family = keyToFamily(key, database);\
         {
-
 #define ENDFAMCS\
         }\
         __node = __node->sibling;\
@@ -75,7 +68,6 @@ int compareRecordKeys(String, String);  // gedcom.c
 }
 
 //  FORFAMSS / ENDFAMS -- Iterator for the family as spouse nodes in a record.
-//--------------------------------------------------------------------------------------------------
 #define FORFAMSS(person, family, key, database)\
 {\
     GNode *__node = FAMS(person);\
@@ -85,7 +77,6 @@ int compareRecordKeys(String, String);  // gedcom.c
         key = __node->value;\
         family = keyToFamily(key, database);\
         {
-
 #define ENDFAMSS\
         }\
         __node = __node->sibling;\
@@ -177,20 +168,23 @@ int compareRecordKeys(String, String);  // gedcom.c
     }\
 }
 
+// FORTRAVERSE/ENDTRAVERSE is a macro pair that traverses the GNodes in a tree rooted at root.
 #define FORTRAVERSE(root, node)\
 {\
     GNode* node = root;\
+	int protection = 0;\
     List *stack = createList(null, null, null, false);\
     prependToList(stack, node);\
     while (!isEmptyList(stack)) {\
-        node = getFirstListElement(stack);\
+		protection++;\
+		if (protection > 50000) break;\
+        node = getAndRemoveFirstListElement(stack);\
         {\
 
 #define ENDTRAVERSE\
         }\
         if (node->sibling) prependToList(stack, node->sibling);\
         if (node->child) prependToList(stack, node->child);\
-		removeFirstListElement(stack);\
     }\
     deleteList(stack);\
 }\

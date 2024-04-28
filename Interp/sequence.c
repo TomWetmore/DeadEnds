@@ -4,7 +4,7 @@
 // persons and sometimes families. It underlies the indiseq data type of DeadEnds Script.
 //
 // Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 25 April 2024.
+// Last changed on 2725 April 2024.
 
 #include "standard.h"
 #include "sequence.h"
@@ -22,32 +22,25 @@
 //static bool debugging = false;
 static int numBucketsInSequenceTables = 359;
 
-// The structure functions needed by Sequence.
-static int keyCompareFunc(String, String);
-static String keyGetFunc(void*);
-static int nameCompareFunc(String, String);
-static String nameGetFunc(void*);
-static void delete(void*);
-
-// keyGetFunc is the getKey function that returns the key of a SequenceEl.
-static String keyGetFunc(void *e) {
+// keyGetKey is the getKey function that returns the key of a SequenceEl.
+static String keyGetKey(void *e) {
 	SequenceEl *el = (SequenceEl*) e;
 	return el->key;
 }
 
-// nameGetFunc is the getKey function that returns the name of a SequenceEl.
-static String nameGetFunc(void *e) {
+// nameGetKey is the getKey function that returns the name of a SequenceEl.
+static String nameGetKey(void *e) {
 	SequenceEl *el = (SequenceEl*) e;
 	return el->name;
 }
 
 // compareKeyFunc is the compare function that compares SequenceEl's by key.
-static int keyCompareFunc(String a, String b) {
+static int keyCompare(String a, String b) {
 	return compareRecordKeys(a, b);
 }
 
 // compareNameFunc is the compare function that compares SequenceEl's by name.
-static int nameCompareFunc(String a, String b) {
+static int nameCompare(String a, String b) {
 	return compareNames(a, b);
 }
 
@@ -63,23 +56,23 @@ void baseFree(void *word) { free(word); }
 
 #define key_to_name(key, database)  (NAME(keyToPerson(key, database))->value)
 
-// sequenceElements returns the array of elments in a given Sequence.
-static SequenceEl **sequenceElements(Sequence *sequence) {
+// sequenceElements returns the array of elments in a Sequence.
+static SequenceEl** sequenceElements(Sequence *sequence) {
 	return (SequenceEl**) (&(sequence->block))->elements;
 }
 
-// createSequenceEl creates and returns a SequenceEl.
-SequenceEl *createSequenceEl(String key, String name, void* value) {
-	SequenceEl *el = (SequenceEl*) malloc(sizeof(SequenceEl));
+// createSequenceEl creates a SequenceEl.
+SequenceEl* createSequenceEl(String key, String name, void* value) {
+	SequenceEl* el = (SequenceEl*) malloc(sizeof(SequenceEl));
 	el->key = key ? strsave(key) : null;
 	el->name = name ? strsave(name) : null;
 	el->value = value;
 	return el;
 }
 
-// createSequence creates and returns a Sequence.
-Sequence *createSequence(Database *database) {
-	Sequence *sequence = (Sequence*) malloc(sizeof(Sequence));
+// createSequence creates a Sequence.
+Sequence* createSequence(Database* database) {
+	Sequence* sequence = (Sequence*) malloc(sizeof(Sequence));
 	initBlock(&(sequence->block));
 	sequence->database  = database;
 	sequence->unique = false;
@@ -88,12 +81,12 @@ Sequence *createSequence(Database *database) {
 }
 
 // lengthSequence returns the length of a Sequence.
-int lengthSequence(Sequence *sequence) {
+int lengthSequence(Sequence* sequence) {
 	return (&(sequence->block))->length;
 }
 
 // deleteSequence deletes a Sequence.
-void deleteSequence(Sequence *sequence) {
+void deleteSequence(Sequence* sequence) {
 	Block *block = &(sequence->block);
 	SequenceEl **elements = (SequenceEl**) block->elements;
 	for (int i = 0; i < block->length; i++) {
@@ -106,17 +99,17 @@ void deleteSequence(Sequence *sequence) {
 	//free(sequence); // HELP HELP HELP
 }
 
-// emptySequence removes the elements of a Sequence.
+// emptySequence removes the elements from a Sequence.
 void emptySequence(Sequence *sequence) {
 	Block *b = &(sequence->block);
 	emptyBlock(b, delete);
 }
 
 // appendToSequence creates and appends a new SequenceEl to a Sequence.
-void appendToSequence(Sequence *sequence, String key, String name, void* value) {
+void appendToSequence(Sequence* sequence, String key, String name, void* value) {
 	if (!sequence || !key) return;
 	SequenceEl *element = (SequenceEl*) malloc(sizeof(SequenceEl));
-	element->key = strsave(key);  // SequenceEls own their keys...
+	element->key = strsave(key); // SequenceEls own their keys...
 	element->name = null;
 	//if (*key == 'I') { // THIS MUST BE CHANGED AND GOT TO WORK.
 		//if (name) el->name = strsave(name);  // ...and their names.
@@ -126,14 +119,9 @@ void appendToSequence(Sequence *sequence, String key, String name, void* value) 
 }
 
 // rename_indiseq -- Update element name with standard name
-//--------------------------------------------------------------------------------------------------
-void rename_indiseq(Sequence *seq, String key)
-// seq -- Sequence with the element to change.
-// key -- Key of the element to change.
-{
+void rename_indiseq(Sequence *seq, String key) {
 	if (!seq || !key || *key != 'I') return;
 	Block *block = &(seq->block);
-	//n = block->length;
 	SequenceEl **elements = (SequenceEl**) block->elements;
 	// Look through all the elements for the element with the given key.
 	for (int i = 0; i < block->length; i++) {
@@ -146,7 +134,7 @@ void rename_indiseq(Sequence *seq, String key)
 	}
 }
 
-// isInSequence checks if a SequenceEl with a given record key is in a Sequence. NOTE: Consider
+// isInSequence checks if a SequenceEl with given key is in a Sequence. NOTE: Consider
 // what could be done if the sequence were sorted.
 bool isInSequence(Sequence *seq, String key) {
 	if (!seq || !key) return false;
@@ -159,46 +147,43 @@ bool isInSequence(Sequence *seq, String key) {
 }
 
 // removeFromSequence removes the SequenceEl with the given key from the Sequence.
-bool removeFromSequence(Sequence *sequence, String key)
-{
+bool removeFromSequence(Sequence* sequence, String key) {
 	ASSERT(sequence && key);
 	if (!sequence || !key) return false;
 	Block *block = &(sequence->block);
-
 	if (sequence->sortType == SequenceNotSorted) {
-		removeFromUnsortedBlock(block, key, keyGetFunc, delete);
+		return removeFromUnsortedBlock(block, key, keyGetKey, delete);
 	} else if (sequence->sortType == SequenceKeySorted) {
-		removeFromSortedBlock(block, key, keyGetFunc, keyCompareFunc, delete);
+		return removeFromSortedBlock(block, key, keyGetKey, keyCompare, delete);
 	} else if (sequence->sortType == SequenceNameSorted) {
-		removeFromSortedBlock(block, key, nameGetFunc, nameCompareFunc, delete);
+		return removeFromSortedBlock(block, key, nameGetKey, nameCompare, delete);
 	} else {
 		printf("NO OTHER SORT TYPE SUPPORTED YET\n");
 	}
-	return true;
+	return false;
 }
 
 // element_indiseq returns an indexed Sequence element by setting key and name return values.
-bool element_indiseq (Sequence *sequence, int index, String* pkey, String* pname)
-{
+bool element_indiseq (Sequence* sequence, int index, String* pkey, String* pname) {
 	ASSERT(sequence);
 	Block *block = &(sequence->block);
 	if (index < 0 || index >= block->length) return false;
-	if (pkey) *pkey = keyGetFunc((block->elements)[index]);
-	if (pname) *pname = nameGetFunc((block->elements)[index]);
+	if (pkey) *pkey = keyGetKey((block->elements)[index]);
+	if (pname) *pname = nameGetKey((block->elements)[index]);
 	return true;
 }
 
-// nameCompare compares two person sequence elements by their name fields.
-static int nameCompare(SequenceEl *el1, SequenceEl *el2) {
-	int rel = compareNames(el1->name, el2->name);
-	if (rel) return rel;  // If names are not equal return their relationship.
-	return compareRecordKeys(el1->key, el2->key);
-}
+//// nameCompare compares two person sequence elements by their name fields.
+//static int nameCompare(SequenceEl *el1, SequenceEl *el2) {
+//	int rel = compareNames(el1->name, el2->name);
+//	if (rel) return rel;  // If names are not equal return their relationship.
+//	return compareRecordKeys(el1->key, el2->key);
+//}
 
-//  keyCompare compares two sequence elements by their record key fields.
-static int keyCompare(SequenceEl *el1, SequenceEl *el2) {
-	return compareRecordKeys(el1->key, el2->key);
-}
+////  keyCompare compares two sequence elements by their record key fields.
+//static int keyCompare(SequenceEl *el1, SequenceEl *el2) {
+//	return compareRecordKeys(el1->key, el2->key);
+//}
 
 // valueCompare compares two sequence elements by their values. TODO: This is incomplete.
 static int valueCompare (SequenceEl *el1, SequenceEl *el2) {
@@ -210,7 +195,7 @@ static int valueCompare (SequenceEl *el1, SequenceEl *el2) {
 void nameSortSequence(Sequence *sequence)
 {
 	if (sequence->sortType == SequenceNameSorted) return;
-	sortBlock(&(sequence->block), nameGetFunc, nameCompareFunc);
+	sortBlock(&(sequence->block), nameGetKey, nameCompare);
 	sequence->sortType = SequenceNameSorted;
 }
 
@@ -218,7 +203,7 @@ void nameSortSequence(Sequence *sequence)
 void keySortSequence(Sequence *sequence)
 {
 	if (sequence->sortType == SequenceKeySorted) return;
-	sortBlock(&(sequence->block), keyGetFunc, keyCompareFunc);
+	sortBlock(&(sequence->block), keyGetKey, keyCompare);
 	sequence->sortType = SequenceKeySorted;
 }
 
@@ -292,7 +277,7 @@ Sequence *unionSequence(Sequence *one, Sequence *two)
 	SequenceEl **v = sequenceElements(two);
 	int i = 0, j = 0, rel;
 	while (i < n && j < m) {
-		if ((rel = keyCompareFunc(u[i]->key, v[j]->key)) < 0) {
+		if ((rel = keyCompare(u[i]->key, v[j]->key)) < 0) {
 			appendToSequence(three, u[i]->key, u[i]->name, u[i]->value);
 			i++;
 		} else if (rel > 0) {

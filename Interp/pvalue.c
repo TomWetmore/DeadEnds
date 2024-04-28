@@ -1,12 +1,10 @@
-//
 // DeadEnds
 //
 // pvalue.c holds the functions that handle program expression values (PValues) when interpreting
 // DeadEnds scripts.
 //
-// Created by Thomas Wetmore on 15 December 22.
-// Last changed on 22 April 2024.
-//
+// Created by Thomas Wetmore on 15 December 2022.
+// Last changed on 27 April 2024.
 
 #include "pvalue.h"
 #include "standard.h"
@@ -14,7 +12,7 @@
 
 extern const PValue nullPValue;  // Defined in builtin.c
 
-// isPVGNodeType return true if a PVType is one of the PGNode types.
+// isPVGNodeType return true if a PVType is one of the GNode types.
 bool isGNodeType(PVType type) {
 	return type >= PVGNode && type <= PVOther;
 }
@@ -27,8 +25,8 @@ static char *ptypes[] = {
 static bool isZero(PValue);
 bool isZeroVUnion(PVType, VUnion);
 
-// allocPValue allocate a PValue in the heap. PValues are usually value types, but when they are
-// stored in tables or lists they are kept in the heap.
+// allocPValue allocates a PValue. PValues are usually value types, but when stored in tables or
+// lists they in the heap.
 PValue *allocPValue(PVType type, VUnion value) {
 	PValue* ppvalue = (PValue*) stdalloc(sizeof(ppvalue));
 	ppvalue->type = type;
@@ -36,18 +34,15 @@ PValue *allocPValue(PVType type, VUnion value) {
 	return ppvalue;
 }
 
-//  freePValue -- Free a PValue that has been allocated. Only PValues in symbol tables and
-//    sequences are allocated on the heap.
-//  TODO: Must handle other value types!!! Importantly, PVSequence and later others.
-//--------------------------------------------------------------------------------------------------
-void freePValue(PValue* ppvalue)
-{
+// freePValue frees an allocated PValue.
+void freePValue(PValue* ppvalue) {
 	switch (ppvalue->type) {
 		case PVString:
 			if (ppvalue->value.uString) stdfree(ppvalue->value.uString);
 			break;
 		case PVSequence:
-			deleteSequence(ppvalue->value.uSequence);
+			//deleteSequence(ppvalue->value.uSequence);
+			// MNOTE: Possible memory leak, but fixes subtle bug.
 			break;
 		default:
 			break;
@@ -55,133 +50,56 @@ void freePValue(PValue* ppvalue)
 	stdfree(ppvalue);
 }
 
-// copyPValue copies a PValue and returns a pointer to it.
+// copyPValue copies a PValue.
 PValue *copyPValue(PValue pvalue) {
 	PValue *ppvalue = (PValue*) stdalloc(sizeof(ppvalue));
 	memcpy(ppvalue, &pvalue, sizeof(PValue));
 	return ppvalue;
 }
 
-//  setPValue -- Set a program value.
-//  TODO: THIS ISN'T GOING TO WORK ANYMORE.
-//--------------------------------------------------------------------------------------------------
-void setPValue(PValue pvalue, int type, VUnion value)
-{
+// setPValue -- Set a program value.
+// TODO: THIS ISN'T GOING TO WORK ANYMORE.
+void setPValue(PValue pvalue, int type, VUnion value) {
 	if (pvalue.type == PVString && pvalue.value.uString) stdfree(pvalue.value.uString);
 	pvalue.type = type;
 	if (type == PVString && value.uString) value.uString = strsave(value.uString);
 	pvalue.value = value;
 }
 
-//  numericPValue checks if a PValue has numeric type.
+// numericPValue checks if a PValue has numeric type.
 bool numericPValue(PValue value) {
 	return value.type == PVInt || value.type == PVFloat;
 }
 
-// coercePValue -- Convert program expression PValue from one type to another.
-//--------------------------------------------------------------------------------------------------
-void coercePValue(PValue* pvalue, int newType, bool* eflg)
-{
+// coercePValue converts a PValue from one type to another.
+// THIS FUNCTION IS NOT CALLED.
+void coercePValue(PValue* pvalue, int newType, bool* eflg) {
 	int curType = pvalue->type;
-	if (curType == newType) return;  //  Nothing to do.
-
-	// Handle PVInt to PVFloat.
-	if (newType == PVFloat && curType == PVInt) {
+	if (curType == newType) return; // Nothing to do.
+	if (newType == PVFloat && curType == PVInt) { // PVInt to PVFloat.
 		pvalue->type = newType;
 		pvalue->value.uFloat = (float) pvalue->value.uInt;
 	}
+	if (newType == PVBool) { // Any to PVBool.
+		pvalue->type = newType;
+		pvalue->value.uBool = ((void*) pvalue->value.uGNode) != null;
+	}
 	printf("DID NOT COERCE FROM %d to %d\n", curType, newType);
 	return;
-//    if (*eflg) return;
-//    if (!is_pvalue(pvalue)) { *eflg = true; return; }
-//    // If the types are the same there is nothing to do.
-//    if (type == pvalue->type) return;
-//    VUnion u;
-//    u.wvalue = pvalue->newValue.wvalue;
-//    // Handle PVBool -- anything can be coerced to boolean.
-//    if (type == PBOOL) {
-//        set_pvalue(pvalue, PBOOL, (Word)(long)(u.wvalue != null));
-//        return;
-//    }
-//    if (type == PANY) {    // Handle PANY as a special case.
-//        pvalue->type = PANY;
-//        return;
-//    }
-//    if ((pvalue->type == PVAny || pvalue->type == PVInt) && pvalue->newValue.wvalue == null) {
-//        switch (type) {
-//            case PVInt:
-//            case PVBool:
-//            case PVString:        // TODO: RECONSIDER THIS.
-//                pvalue->type = type;
-//                return;
-//            case PVFloating:
-//                ptype(pvalue) = type;
-//                u.fvalue = 0.0;
-//                pvalue->newValue.wvalue = u.wvalue;
-//                return;
-//            default:
-//                *eflg = true;
-//                return;
-//        }
-//    }
-//
-//    switch (ptype(pvalue)) {
-//        case PINT:
-//            switch (type) {
-//                case PINT: return;
-//                case PFLOAT: u.fvalue = u.ivalue; break;
-//                default: goto bad;
-//            }
-//            break;
-//        case PFLOAT:
-//            switch (type) {
-//                case PINT: u.ivalue = u.fvalue; break;
-//                case PFLOAT: return;
-//                default: goto bad;
-//            }
-//            break;
-//        case PBOOL:
-//            switch (type) {
-//                case PINT: u.ivalue = bool_to_int(u.wvalue); break;
-//                case PFLOAT: u.fvalue = bool_to_float(u.wvalue); break;
-//                default: goto bad;
-//            }
-//            break;
-//        case PINDI:
-//            goto bad;
-//        case PANY:
-//            goto bad;
-//        case PGNODE:
-//            goto bad;
-//        default:
-//            goto bad;
-//    }
-//    ptype(pvalue) = type;
-//    pvalue->newValue.wvalue = u.wvalue;
-//    return;
-//bad:
-//    *eflg = true;
-//    return;
 }
 
-//  isPValue -- Check a program value for validity -- only checks the type.
-//--------------------------------------------------------------------------------------------------
-bool isPValue(PValue pvalue)
-{
+//  isPValue checks a PValue for validity by checking its type.
+bool isPValue(PValue pvalue) {
 	return pvalue.type >= PVNull && pvalue.type <= PVSequence;
 }
 
-//  isRecordType -- Check if a program value type is a Gedcom node type.
-//--------------------------------------------------------------------------------------------------
-bool isRecordType(PVType type)
-{
+// isRecordType checks if a PValue is a Gedcom node type.
+bool isRecordType(PVType type) {
 	return type >= PVPerson && type <= PVOther;
 }
 
-//  addPValues -- Add two program values and return their sum.
-//--------------------------------------------------------------------------------------------------
-PValue addPValues (PValue val1, PValue val2, bool* eflg)
-{
+// addPValues adds two PValues and returns their sum.
+PValue addPValues(PValue val1, PValue val2, bool* eflg) {
 	PVType type1 = val1.type, type2 = val2.type;
 	if (type1 != type2 || (type1 != PVInt && type1 != PVFloat)) {
 		*eflg = true;
@@ -193,10 +111,8 @@ PValue addPValues (PValue val1, PValue val2, bool* eflg)
 		return PVALUE(PVFloat, uFloat, val1.value.uFloat+val2.value.uFloat);
 }
 
-//  subPValues -- Subtract two program values and return their difference.
-//--------------------------------------------------------------------------------------------------
-PValue subPValues (PValue val1, PValue val2, bool* eflg)
-{
+// subPValues subtract two PValues and returns their difference.
+PValue subPValues(PValue val1, PValue val2, bool* eflg) {
 	PVType type1 = val1.type, type2 = val2.type;
 	if (type1 != type2 || (type1 != PVInt && type1 != PVFloat)) {
 		*eflg = true;
@@ -208,10 +124,8 @@ PValue subPValues (PValue val1, PValue val2, bool* eflg)
 		return PVALUE(PVFloat, uFloat, val1.value.uFloat-val2.value.uFloat);
 }
 
-// mulPValues -- Multiply two program values and return their product.
-//--------------------------------------------------------------------------------------------------
-PValue mulPValues (PValue val1, PValue val2, bool* eflg)
-{
+// mulPValues multiplies two PValues and returns their product.
+PValue mulPValues(PValue val1, PValue val2, bool* eflg) {
 	PVType type1 = val1.type, type2 = val2.type;
 	if (type1 != type2 || (type1 != PVInt && type1 != PVFloat)) {
 		*eflg = true;
@@ -223,10 +137,8 @@ PValue mulPValues (PValue val1, PValue val2, bool* eflg)
 		return PVALUE(PVFloat, uFloat, val1.value.uFloat*val2.value.uFloat);
 }
 
-// divPValues -- Divide two PValues and return the quotient.
-//--------------------------------------------------------------------------------------------------
-PValue divPValues(PValue val1, PValue val2, bool* eflg)
-{
+// divPValues divides two PValues and returns their quotient.
+PValue divPValues(PValue val1, PValue val2, bool* eflg) {
 	PVType type1 = val1.type, type2 = val2.type;
 	if (type1 != type2 || (type1 != PVInt && type1 != PVFloat) || isZero(val2)) {
 		*eflg = true;
@@ -238,10 +150,8 @@ PValue divPValues(PValue val1, PValue val2, bool* eflg)
 		return PVALUE(PVFloat, uFloat, val1.value.uFloat/val2.value.uFloat);
 }
 
-//  modPValues -- Take the modulus of two PValues. Both values must be integers.
-//--------------------------------------------------------------------------------------------------
-PValue modPValues (PValue val1, PValue val2, bool* eflg)
-{
+// modPValues takes the modulus of two PValues. Both values must be integers.
+PValue modPValues(PValue val1, PValue val2, bool* eflg) {
 	PVType type1 = val1.type, type2 = val2.type;
 	if (type1 != type2 || type2 != PVInt || isZero(val2)) {
 		*eflg = true;
@@ -250,11 +160,8 @@ PValue modPValues (PValue val1, PValue val2, bool* eflg)
 	return PVALUE(PVInt, uInt, val1.value.uInt%val2.value.uInt);
 }
 
-//  exp_pvalues -- Exponentiation. Raise the first number to the power of the second. They must
-//    both be integers.
-//--------------------------------------------------------------------------------------------------
-PValue expPValues (PValue val1, PValue val2, bool* eflg)
-{
+// expPValues raises the first number to the power of the second. They must be integers.
+PValue expPValues(PValue val1, PValue val2, bool* eflg) {
 	PVType type1 = val1.type, type2 = val2.type;
 	if (type1 != type2 || type2 != PVInt) {
 		*eflg = true;
@@ -269,10 +176,8 @@ PValue expPValues (PValue val1, PValue val2, bool* eflg)
 	return PVALUE(PVInt, uInt, prod);
 }
 
-// iszero -- Return true if a numeric PValue is zero. Otherwise return false.
-//--------------------------------------------------------------------------------------------------
-static bool isZero(PValue value)
-{
+// iszero returns whether a PValue is zero.
+static bool isZero(PValue value) {
 	switch (value.type) {
 		case PVInt: return value.value.uInt == 0;
 		case PVFloat: return value.value.uFloat == 0.0;
@@ -280,13 +185,8 @@ static bool isZero(PValue value)
 	}
 }
 
-// eqPValues -- See if two PValue are equal.
-//--------------------------------------------------------------------------------------------------
-PValue eqPValues (PValue val1, PValue val2, bool* eflg)
-// val1 -- Left operand.
-// val2 -- Right operand.
-// eflg -- Returned error flag.
-{
+// eqPValues returns whether two PValue are equal.
+PValue eqPValues(PValue val1, PValue val2, bool* eflg) {
 	//num_conform_pvalues(val1, val2, eflg);  // TODO: GET THIS CHECK OR SOMETHING SIMILAR INCORPORATED
 	if (*eflg) return nullPValue;
 	bool b = false;  // False until proven true.
@@ -472,8 +372,7 @@ void showPValue(PValue pvalue)
 }
 
 // pvalueToString returns a String representation of a PValue. Caller must free the String.
-String pvalueToString(PValue pvalue, bool showType)
-{
+String pvalueToString(PValue pvalue, bool showType) {
 	PVType type = pvalue.type;
 	VUnion value = pvalue.value;
 	static char scratch[1024];
