@@ -1,11 +1,11 @@
 //
 // DeadEnds
 //
-// recordindex.c holds the data type that implements RecordIndex, a table that maps Gedcom record
+// recordindex.c holds the functions that implement RecordIndex, a table that maps Gedcom record
 // keys to the roots of the GNode trees of those records. RecordIndex is built on HashTable.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 4 April 2024.
+// Last changed on 29 April 2024.
 
 #include "recordindex.h"
 #include "list.h"
@@ -57,8 +57,7 @@ GNode* searchRecordIndex(RecordIndex *index, String key) {
 }
 
 // showRecordIndex show the contents of a RecordIndex.
-void showRecordIndex(RecordIndex *index)
-{
+void showRecordIndex(RecordIndex *index) {
 	for (int i = 0; i < numRecordIndexBuckets; i++) {
 		if (!index->buckets[i]) continue;
 		Bucket *bucket = index->buckets[i];

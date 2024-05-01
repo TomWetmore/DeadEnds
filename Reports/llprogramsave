@@ -23,14 +23,17 @@ proc main()
 	"Luann has " d(lengthset(m)) " ancestors." nl()
 
 	/*See if we can delete Luann from the set*/
-	
-	"About to call deletefromset." nl()
-	/*deletefromset(l, i, 1)*/
-	set(l, deletefromset(l, i, 1))
+	deletefromset(l, i, 0)
 	"The set that had Luann now has " d(lengthset(l)) " persons." nl()
 
 	/*gengedcom(a)*/
 	call ahnen(indi("@I1@"))
+
+	/*See if date(EVENT) works*/
+	set(i, indi("@I1@"))
+	date(birth(i)) nl()
+	place(birth(i)) nl()
+	
 }
 
 proc ahnen(indi)

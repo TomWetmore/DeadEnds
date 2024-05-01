@@ -1,11 +1,9 @@
+// DeadEnds Project
 //
-//  DeadEnds Project
+// gnode.h -- GNode datatype. GNodes represent lines in a Gedcom file. GNodes are heap objects.
 //
-//  gnode.h -- GNode datatype. GNodes represent lines in a Gedcom file. GNodes are heap objects.
-//
-//  Created by Thomas Wetmore on 4 November 2022.
-//  Last changed on 9 February 2024.
-//
+// Created by Thomas Wetmore on 4 November 2022.
+// Last changed on 30 April 2024.
 
 #ifndef gnode_h
 #define gnode_h
@@ -19,10 +17,7 @@ typedef enum SexType SexType;
 #include "hashtable.h"
 #include "database.h"
 
-//  GNode -- Data object that holds a Gedcom line in its tree node form. Only root nodes have
-//    keys. It would be useful to have fields for the nodes level and its line number from its
-//    Gedcom file. Less convenient means of finding these values exist.
-//--------------------------------------------------------------------------------------------------
+// GNode is the structure that holds a Gedcom line in its tree node form. Root nodes have keys.
 typedef struct GNode GNode;
 struct GNode {
 	String key;     // Record key; only root nodes use this field.
@@ -44,11 +39,10 @@ struct GNode {
 //String rerwlv = (String) "The record begins at wrong level.";
 
 // Application programming interface to this type.
-//--------------------------------------------------------------------------------------------------
-GNode* createGNode(String key, String tag, String value, GNode* parent);  // Create a Node.
-void freeGNode(GNode*);  // Free a GNode.
-void freeGNodes(GNode*);  // Free a GNode forest.
-int gnodeLevel(GNode* node);  // Return the level of a GNode in its tree.
+GNode* createGNode(String key, String tag, String value, GNode* parent);
+void freeGNode(GNode*);
+void freeGNodes(GNode*);
+int gnodeLevel(GNode* node);
 
 String gnodeToString(GNode*, int level);
 String gnodesToString(GNode*);
@@ -76,16 +70,16 @@ GNode* mother_nodes(Database*, GNode*);
 GNode* children_nodes(Database*, GNode*);
 GNode* parents_nodes(Database*, GNode*);
 
-int countNodes(GNode* node); // Count GNodes in a tree.
-int countNodesBefore(GNode*);  // Count the GNodes before a node in a tree.
+int countNodes(GNode* node);
+int countNodesBefore(GNode*);
 
 bool isKey(String);
 GNode* findTag(GNode*, String);
 SexType valueToSex(GNode*);
 String full_value(GNode*);
-String recordKey(GNode* node);  // Return the key of the record that contains the node.
+String recordKey(GNode* node);
 
-int numNodeAllocs(void);  // Return the numbmer of GNodes that have been allocated.
-int numNodeFrees(void);  // Return the number of GNodes that have been freed.
+int numNodeAllocs(void);
+int numNodeFrees(void);
 
 #endif // node_h

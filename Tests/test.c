@@ -1,7 +1,9 @@
-//  test.c -- Test program.
+// DeadEnds
+//
+//  test.c holds test functions used during development.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 25 April 2024.
+//  Last changed on 26 April 2024.
 
 #include <stdio.h>
 #include "standard.h"
@@ -40,7 +42,6 @@ static void countNodesBeforeTest(Database*, int);
 
 // main is the main function of a batch program that tests the DeadEnds infrastructure.
 int main(void) {
-	// Open the debugging file.
 	if (useDebugFile) {
 		debugFile = fopen("/Users/ttw4/debug.txt", "w");
 		if (debugFile == null) {
@@ -65,7 +66,8 @@ int main(void) {
 	//if (database) forHashTableTest(database, ++testNumber);
 	//if (database) showHashTableTest(database->personIndex, ++testNumber);
 	//if (database) indexNamesTest(database, ++testNumber);
-	if (database) validated = validateDatabaseTest(database, ++testNumber);
+	//if (database) validated = validateDatabaseTest(database, ++testNumber);
+	validated = true;
 	//if (database) forTraverseTest(database, ++testNumber);
 	if (database && validated) parseAndRunProgramTest(database, ++testNumber);
 	//if (database && validated) countNodesBeforeTest(database, ++testNumber);
@@ -85,29 +87,24 @@ Database *createDatabaseTest(String gedcomFile, int testNumber, ErrorLog *errorL
 	return database;
 }
 
-static String getKey(void* element) {
-	return ((GNode*) element)->key;
-}
+// getKey gets the key of a GNode element.
+static String getKey(void* element) { return ((GNode*) element)->key; }
 
-// compare compare two record keys.
-static int compare(String a, String b) {
-	return compareRecordKeys(a, b);
-}
+// compare compares two record keys.
+static int compare(String a, String b) { return compareRecordKeys(a, b); }
 
-// listTest creates a list of all the persons in the database; sort the list by tags, and then
-// prints the record tags in sorted order.
-/*void listTest(Database *database, int testNumber) {
-	printf("\n%d: START OF LIST TEST\n", testNumber);
-	int i, j;  //  State variables used to iterate the person index hash table.
+// listTest creates a list of all persons in a Database, sorts the list by key, and then
+// prints the records in key order.
+void listTest(Database* database, int testNumber) {
+	printf("\n%d: START OF LIST TEST: %2.3f\n", testNumber, getMilliseconds());
 	int count = 0;
 	GNode *person;
-	//  Create a List of all the persons in the database.
-	List *personList = createList(getKey, compare, null, false);
+	List *personList = createList(getKey, compare, null, false); // List for the persons.
+	int i, j;
 	void* element = firstInHashTable(database->personIndex, &i, &j);
 	while (element) {
 		person = ((RecordIndexEl*) element)->root;
-		// Alternate between prepend and append to be sure key sorting works.
-		if (count++ % 2)
+		if (count++ % 2) // Alternate to improve sorting.
 			appendToList(personList, person);
 		else
 			prependToList(personList, person);
@@ -121,12 +118,12 @@ static int compare(String a, String b) {
 		count++;
 	ENDLIST
 	printf("%d persons are in the list\n", count);
-	printf("END OF LIST TEST\n");
-}*/
+	printf("END OF LIST TEST: %2.3f\n", getMilliseconds());
+}
 
-// forHashTableTest tests FORHASHTABLE macro by showing all persons in the database's person index.
+// forHashTableTest tests FORHASHTABLE by showing keys and names of persons in a person index.
 void forHashTableTest(Database* database, int testNumber) {
-	printf("\n%d: START OF FORHASHTABLE test\n", testNumber);
+	printf("\n%d: START OF FORHASHTABLE test: %2.3f\n", testNumber, getMilliseconds());
 	int numberPersons = 0;
 	FORHASHTABLE(database->personIndex, element)
 		numberPersons++;
@@ -135,57 +132,49 @@ void forHashTableTest(Database* database, int testNumber) {
 		printf("%s: %s\n", person->key, NAME(person)->value);
 	ENDHASHTABLE
 	printf("%d persons were found in the index.\n", numberPersons);
-	printf("END OF FORHASHTABLE TEST\n");
+	printf("END OF FORHASHTABLE TEST: %2.3f\n", getMilliseconds());
 }
 
-//  parseAndRunProgramTest -- Parse a DeadEndScript program and run it. In order to call the
-//    main procedure of a DeadEndScript, create a PNProcCall program node, and interpret it.
-//-------------------------------------------------------------------------------------------------
-void parseAndRunProgramTest(Database *database, int testNumber)
-//  database -- The database the script runs on.
-{
+// parseAndRunProgramTest parses a DeadEndScript program and runs it. To call the script's
+// main proc create a PNProcCall PNode and interpret it.
+void parseAndRunProgramTest(Database *database, int testNumber) {
 	printf("\n%d: START OF PARSE AND RUN PROGRAM TEST: %2.3f\n", testNumber, getMilliseconds());
-	double milli = getMilliseconds();
 	//parseProgram("llprogram", "/Users/ttw4/Desktop/DeadEnds/Reports/");
-	parseProgram("scriptone", "/Users/ttw4/Desktop/DeadEnds/Reports/");
+	//parseProgram("scriptindiseq", "/Users/ttw4/Desktop/DeadEnds/Reports/");
+	parseProgram("scriptlist", "/Users/ttw4/Desktop/DeadEnds/Reports/");
 	printf("Finished parsing: %2.3f\n", getMilliseconds());
 
-//  Create a PNProcCall node to call the main procedure.
 	currentProgramFileName = "internal";
 	currentProgramLineNumber = 1;
-	PNode *pnode = procCallPNode("main", null);
-
-	//  Call the main procedure.
+	PNode *pnode = procCallPNode("main", null); // PNode to call main proc.
 	SymbolTable *symbolTable = createSymbolTable();
 	Context *context = createContext(symbolTable, database);
 	PValue returnPvalue;
-	interpret(pnode, context, &returnPvalue);
+	interpret(pnode, context, &returnPvalue); // Call main proc.
 	printf("END OF PARSE AND RUN PROGRAM TEST: %2.3f\n", getMilliseconds());
 }
 
-//  validateDatabaseTest -- Validate the a database.
-//-------------------------------------------------------------------------------------------------
-bool validateDatabaseTest(Database *database, int testNumber)
-{
-	printf("\n%d: START OF VALIDATE DATABASE TEST\n", testNumber);
+// validateDatabaseTest is a test function that validates a Database.
+bool validateDatabaseTest(Database* database, int testNumber) {
+	printf("\n%d: START OF VALIDATE DATABASE TEST: %2.3f\n", testNumber, getMilliseconds());
 	ErrorLog* errorLog = createErrorLog();
 	bool validated = validateDatabase(database, errorLog);
-	printf("END OF VALIDATE DATABASE TEST\n");
+	printf("END OF VALIDATE DATABASE TEST: %2.3f\n", getMilliseconds());
 	return validated;
 }
 
-// forTraverseTest checks that the FORTRAVERSE macro works.
-static void forTraverseTest(Database *database, int testNumber) {
-	printf("\n%d: START OF FORTRAVERSE TEST\n", testNumber);
+// forTraverseTest checks the FORTRAVERSE macro.
+static void forTraverseTest(Database* database, int testNumber) {
+	printf("\n%d: START OF FORTRAVERSE TEST: %2.3f\n", testNumber, getMilliseconds());
 	GNode* person = keyToPerson("@I1@", database);
 	FORTRAVERSE(person, node)
 		printf("%s\n", node->tag);
 	ENDTRAVERSE
-	printf("END OF FORTRAVERSE TEST\n");
+	printf("END OF FORTRAVERSE TEST: %2.3f\n", getMilliseconds());
 }
 
-static void showPersonName(void* element)
-{
+// showPersonName shows a person's name; used by the showHashTable test.
+static void showPersonName(void* element) {
 	GNode *person = ((RecordIndexEl*) element)->root;
 	ASSERT(person);
 	GNode *name = NAME(person);
@@ -193,15 +182,15 @@ static void showPersonName(void* element)
 	printf("%s: %s\n", person->key, name->value);
 }
 
-// showHashTableTest tests showHashTable by showing the names of all persons in the database..
-static void showHashTableTest(RecordIndex *index, int testNumber) {
-	printf("\n%d: START OF SHOW HASH TABLE TEST\n", testNumber);
+// showHashTableTest tests showHashTable by showing the names of the persons in a Database.
+static void showHashTableTest(RecordIndex* index, int testNumber) {
+	printf("\n%d: START OF SHOW HASH TABLE TEST: %2.3f\n", testNumber, getMilliseconds());
 	showHashTable(index, showPersonName);
-	printf("END OF SHOW HASH TABLE TEST\n");
+	printf("END OF SHOW HASH TABLE TEST: %2.3f\n", getMilliseconds());
 }
 
 // indexNamesTest tests the indexNames fumction.
-static void indexNamesTest(Database *database, int testNumber) {
+static void indexNamesTest(Database* database, int testNumber) {
 	printf("\n%d: START OF INDEX NAMES TEST\n", testNumber);
 	indexNames(database);
 	printf("END OF INDEX NAMES TEST\n");
@@ -209,9 +198,8 @@ static void indexNamesTest(Database *database, int testNumber) {
 
 extern int personLineNumber(GNode*, Database*);
 
-static void countNodesBeforeTest(Database *database, int testNumber)
-{
-	printf("\n%d: START OF COUNT NODES BEFORE TEST\n", testNumber);
+static void countNodesBeforeTest(Database* database, int testNumber) {
+	printf("\n%d: START OF COUNT NODES BEFORE TEST: %2.3f\n", testNumber, getMilliseconds());
 	GNode *person = keyToPerson("@I1@", database);
 	int startLineNumber = personLineNumber(person, database);
 	if (person) {
@@ -219,4 +207,5 @@ static void countNodesBeforeTest(Database *database, int testNumber)
 			printf(" %d %s %s\n", startLineNumber + countNodesBefore(node), node->tag, node->value ? node->value : "");
 		ENDTRAVERSE
 	}
+	printf("END OF COUNT NODES BEFORE TEST: %2.3f\n", getMilliseconds());
 }

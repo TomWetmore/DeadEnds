@@ -1,0 +1,66 @@
+/* TEST OF THE LIST DATA STRUCTURE */
+
+proc main() {
+    "LIST TEST" nl()
+
+    call arraytest()
+
+    call stacktest()
+
+    call queuetest()
+}
+
+proc arraytest() {
+    "ARRAY TEST" nl()
+    list(a)
+    set(i1, indi("@I1@"))
+    set(i2, indi("@I2@"))
+    set(i3, indi("@I3@"))
+    requeue(a, i1)
+    requeue(a, i2)
+    requeue(a, i3)
+    call showlist(a)
+    "GET EL 1" nl()
+    set(i9, getel(a, 1))
+    name(i9) nl()
+    set(i4, indi("@I4@"))
+    "SET EL 1" nl()
+    setel(a, 1, i4)
+    call showlist(a)
+
+}
+
+proc stacktest() {
+    "STACK TEST" nl()
+    list(s)
+    set(i1, indi("@I1@"))
+    set(i2, indi("@I2@"))
+    set(i3, indi("@I3@"))
+    push(s, i1)
+    "push " name(i1) nl()
+    push(s, i2)
+    "push " name(i2) nl()
+    push(s, i3)
+    "push " name(i3) nl()
+    call showlist(s)
+    set(j1, pop(s))
+    "POPPED" nl()
+    name(j1) nl()
+    call showlist(s)
+    name(pop(s)) nl()
+    call showlist(s)
+    name(pop(s)) nl()
+    call showlist(s)
+}
+
+proc queuetest() {
+    "QUEUE TEST" nl()
+    list(q)
+}
+
+proc showlist(l) {
+    "SHOW LIST" nl()
+    forlist(l, e, n) {
+        d(n) " " name(e) " " nl()
+    }
+}

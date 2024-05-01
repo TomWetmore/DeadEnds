@@ -1,24 +1,18 @@
+// DeadEnds
 //
-//  DeadEnds
+// builtinlist.c has the functions that implement the list datatype built-ins. They use the List
+// datatype. The elements of the lists are program values.
+// MNOTE: Memory management is an issue to be dealt with carefully.
 //
-//  builtinlist.c -- Functions that implement the list datatype built-ins. They use the list
-//    structure as the underlying C type. The elements of the lists are program values.
-//
-//  MNOTE: Memory management is an issue to be dealt with carefully.
-//
-//  Created by Thomas Wetmore on 16 April 2023.
-//  Last changed on 16 November 2023.
-//
+// Created by Thomas Wetmore on 16 April 2023.
+// Last changed on 29 April 2024.
 
 #include "interp.h"
 #include "list.h"
 
-//  __list -- Create a list.
-//    usage: list(IDENT) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __list(PNode *pnode, Context *context, bool *eflg)
-{
-    // Get the identifier.
+// __list creates a list.
+// usage: list(IDENT) -> VOID
+PValue __list(PNode* pnode, Context* context, bool* eflg) {
     PNode *var = pnode->arguments;
     if (var->type != PNIdent) {
         scriptError(pnode, "the argument to list must be an identifier");
@@ -27,22 +21,15 @@ PValue __list(PNode *pnode, Context *context, bool *eflg)
     }
     String ident = var->identifier;
     ASSERT(ident);
-
-    //  Create the list the identifier will refer to.
-    List *list = createList(null, null, null, false);  //  compare, delete, getkey
-    //  MNOTE: Shouldn't there be a delete function?
+    List *list = createList(null, null, null, false);
     assignValueToSymbol(context->symbolTable, ident, PVALUE(PVList, uList, list));
     return nullPValue;
 }
 
-//  __push -- Push an element onto the front of a list.
-//    usage: push(LIST, ANY) -> VOID
-//    usage: enqueue(LIST, ANY) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __push(PNode *node, Context *context, bool *eflg)
-{
-    //  The first argument must be a list.
-    PNode *arg = node->arguments;
+// __push treats the list as a stack and pushes an element onto the front.
+// usage: push(LIST, ANY) -> VOID or enqueue(LIST, ANY) -> VOID
+PValue __push(PNode* node, Context* context, bool* eflg) {
+    PNode *arg = node->arguments; // First arg is a list.
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVList) {
         *eflg = true;
@@ -51,54 +38,41 @@ PValue __push(PNode *node, Context *context, bool *eflg)
     }
     List *list = pvalue.value.uList;
     ASSERT(list);
-
-    //  The second argument must be a program value.
-    pvalue = evaluate(arg->next, context, eflg);
+    pvalue = evaluate(arg->next, context, eflg); // Second arg is a PValue.
     if (*eflg) {
         scriptError(node, "the second argument to push/enqueue must have a program value");
         return nullPValue;
     }
-
-    //  Program values in a list are put in the heap.
     PValue *ppvalue = (PValue*) stdalloc(sizeof(PValue));
     memcpy(ppvalue, &pvalue, sizeof(PValue));
     prependToList(list, ppvalue);
     return nullPValue;
 }
 
-
-//  __requeue -- Add an element to back of a list.
-//    usage: requeue(LIST, ANY) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __requeue (PNode *node, Context *context, bool *eflg)
-{
-    //  The first argument must be a list.
-    PValue pvalue = evaluate(node->arguments, context, eflg);
+// __requeue adds an element to the back of a list.
+// usage: requeue(LIST, ANY) -> VOID
+PValue __requeue (PNode* node, Context* context, bool* eflg) {
+    PValue pvalue = evaluate(node->arguments, context, eflg); // First arg is a list.
     if (*eflg || pvalue.type != PVList) {
         scriptError(node, "the first argument to requeue must be a list");
         *eflg = true;
         return nullPValue;
     }
     List *list = pvalue.value.uList;
-
-    //  The second argument must be a program value.
-    pvalue = evaluate(node->arguments->next, context, eflg);
+    pvalue = evaluate(node->arguments->next, context, eflg); // Second arg is a PValue.
     if (*eflg) {
         scriptError(node, "the second argument to requeue must be a program value");
         return nullPValue;
     }
-
-    //  Program values in a list must be stored in the heap.
-    PValue *ppvalue = (PValue*) sizeof(PValue);
+    PValue *ppvalue = (PValue*) malloc(sizeof(PValue));
     memcpy(ppvalue, &pvalue, sizeof(PValue));
     appendToList(list, ppvalue);
     return nullPValue;
 }
 
-// __pop pops an element from the front of a List.
+// __pop treats the list as a stack and pops an element from the front.
 // usage: pop(LIST) -> ANY
-PValue __pop(PNode *node, Context *context, bool *eflg) {
-    //  The first argument must be a list.
+PValue __pop(PNode* node, Context* context, bool* eflg) {
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVList) {
         scriptError(node, "the argument to pop must be a list");
@@ -107,21 +81,16 @@ PValue __pop(PNode *node, Context *context, bool *eflg) {
     }
     List *list = pvalue.value.uList;
     ASSERT(list && lengthList(list) >= 0);
-
-    //  Remove and return the first element of the list.
     PValue *ppvalue = (PValue*) popList(list);
     if (!ppvalue) return nullPValue;
     memcpy(&pvalue, ppvalue, sizeof(PValue));
-    stdfree(ppvalue);  //  MNOTE: Free the popped heap version of the program value.
-    return pvalue;     //  MNOTE: Return the stack version of the program value.
+    stdfree(ppvalue);
+    return pvalue;
 }
 
-//  __dequeue -- Remove an element from the back of a list.
-//    usage dequeue(LIST) -> ANY
-//--------------------------------------------------------------------------------------------------
-PValue __dequeue(PNode *node, Context *context, bool *eflg)
-{
-    //  The argument must be a list.
+// __dequeue treats the list as a queue and dequeues an element from the back.
+// usage dequeue(LIST) -> ANY
+PValue __dequeue(PNode* node, Context* context, bool* eflg) {
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVList) {
         scriptError(node, "the argument to pop must be a list");
@@ -130,21 +99,16 @@ PValue __dequeue(PNode *node, Context *context, bool *eflg)
     }
     List *list = pvalue.value.uList;
     ASSERT(list && lengthList(list) >= 0);
-
-    //  Remove and return the last element of the list.
     PValue *ppvalue = (PValue*) dequeueList(list);
     if (!ppvalue) return nullPValue;
     memcpy(&pvalue, ppvalue, sizeof(PValue));
-    stdfree(ppvalue);  //  MNOTE: Free the dequeued heap version of the program value.
-    return pvalue;     //  MNOTE: Return the stack version of the program value.
+    stdfree(ppvalue);
+    return pvalue;
 }
 
-//  __empty -- Check if a list is empty.
-//    usage: empty(LIST) -> BOOL
-//--------------------------------------------------------------------------------------------------
-PValue __empty (PNode *pnode, Context *context, bool *eflg)
-{
-    //  The argument must be a list.
+// __empty  checks if a list is empty.
+// usage: empty(LIST) -> BOOL
+PValue __empty (PNode* pnode, Context* context, bool* eflg) {
     PValue pvalue = evaluate(pnode->arguments, context, eflg);
     if (*eflg || pvalue.type != PVList) {
         scriptError(pnode, "the argument to empty is not a list");
@@ -155,13 +119,10 @@ PValue __empty (PNode *pnode, Context *context, bool *eflg)
     return PVALUE(PVBool, uBool, isEmptyList(pvalue.value.uList));
 }
 
-//  __getel -- Get the nth value from a list.
-//    usage: getel(LIST, INT) -> ANY
-//--------------------------------------------------------------------------------------------------
-PValue __getel (PNode *node, Context *context, bool *eflg)
-{
-    //  Get the list.
-    PNode *arg = node->arguments;
+// __getel treats the list as an array and returns the nth element.
+// usage: getel(LIST, INT) -> ANY
+PValue __getel (PNode *node, Context *context, bool *eflg) {
+    PNode *arg = node->arguments; // First arg is a list.
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVList) {
         scriptError(node, "the first argument to getel must be a list");
@@ -169,33 +130,27 @@ PValue __getel (PNode *node, Context *context, bool *eflg)
         return nullPValue;
     }
     List *list = pvalue.value.uList;
-
-    //  Get the index.
-    pvalue = evaluate(arg->next, context, eflg);
+    pvalue = evaluate(arg->next, context, eflg); // Second argument is an index.
     if (*eflg || pvalue.type != PVInt) {
         scriptError(node, "the second argument to getel must be an integer index");
         *eflg = true;
         return nullPValue;
     }
     int index = (int) pvalue.value.uInt;
-
-    // Be sure the index is within range.
     if (index < 0 || index >= lengthList(list)) {
         scriptError(node, "the index to getel is out of range");
         *eflg = true;
         return nullPValue;
     }
-
-    //  Return the indexed element which will be a pointer to a program value.
     PValue *ppvalue = (PValue*) getListElement(list, index);
     memcpy(&pvalue, ppvalue, sizeof(PValue));
     return pvalue;
 }
 
-// __setel sets the nth value in list
+// __setel treats the list as an array and sets the nth value.
 // usage: setel(LIST, INT, ANY) -> VOID
-PValue __setel (PNode *node, Context *context, bool *eflg) {
-    PNode *arg = node->arguments; // Arg 1 must be a List.
+PValue __setel (PNode* node, Context* context, bool* eflg) {
+    PNode *arg = node->arguments; // First arg is a list.
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVList) {
         scriptError(node, "the first argument to setel must be a list");
@@ -203,8 +158,7 @@ PValue __setel (PNode *node, Context *context, bool *eflg) {
         return nullPValue;
     }
     List *list = pvalue.value.uList;
-
-    arg = arg->next; // Arg 2 must be the index.
+    arg = arg->next; // Second arg is an index.
     pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVInt) {
         scriptError(node, "the second argument to setel must be a integer");
@@ -217,8 +171,7 @@ PValue __setel (PNode *node, Context *context, bool *eflg) {
         *eflg = true;
         return nullPValue;
     }
-    arg = arg->next; // Arg 3 must be the value.
-    pvalue = evaluate(arg, context, eflg);
+    pvalue = evaluate(arg->next, context, eflg); // Third arg is a PValue.
     if (*eflg) {
         scriptError(node, "the third argument to setel is in error");
         return nullPValue;
@@ -229,13 +182,10 @@ PValue __setel (PNode *node, Context *context, bool *eflg) {
     return nullPValue;
 }
 
-//  __length -- Find the length of a list.
-//    usage: length(LIST) -> INT
-//--------------------------------------------------------------------------------------------------
-PValue __length (PNode *node, Context *context, bool *eflg)
-{
-    //  Get the list.
-    PNode *arg = node->arguments;
+// __length returns the length of a list.
+// usage: length(LIST) -> INT
+PValue __length(PNode* node, Context* context, bool* eflg) {
+    PNode *arg = node->arguments; // Arg is the list.
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVList) {
         scriptError(node, "the first argument to setel must be a list");
@@ -246,14 +196,11 @@ PValue __length (PNode *node, Context *context, bool *eflg)
     return PVALUE(PVInt, uInt, lengthList(list));
 }
 
-//  interpForList -- Interpret list loop
-//    usage: forlist(LIST, ANY, INT) {BODY}
-//--------------------------------------------------------------------------------------------------
-InterpType interpForList(PNode *node, Context *context, PValue *pval)
-{
-    //  Get the list.
+// interpForList interprets the list loop.
+// usage: forlist(LIST, ANY, INT) { BODY }
+InterpType interpForList(PNode* node, Context* context, PValue* pval) {
     bool eflg = false;
-    PValue pvalue = evaluate(node->listExpr, context, &eflg);
+    PValue pvalue = evaluate(node->listExpr, context, &eflg); // First arg is the list.
     if (eflg) {
         scriptError(node, "The first argument to forlist must be a list");
         return InterpError;
@@ -265,7 +212,6 @@ InterpType interpForList(PNode *node, Context *context, PValue *pval)
     }
     int count = 0;
     InterpType irc;
-
 	Block* block = &(list->block);
     for (int i = 0; i < block->length; i++) {
         memcpy(&pvalue, (PValue*) block->elements[i], sizeof(PValue));
