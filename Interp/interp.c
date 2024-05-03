@@ -5,7 +5,7 @@
 // or it may call a specific function.
 //
 // Created by Thomas Wetmore on 9 December 2022.
-// Last changed on 23 April 2024.
+// Last changed on 3 May 2024.
 
 #include <stdarg.h>
 #include "symboltable.h"
@@ -689,7 +689,7 @@ InterpType interpretSequenceLoop(PNode* pnode, Context* context, PValue* pval) {
 	}
 	Sequence *seq = val.value.uSequence;
 	FORSEQUENCE(seq, el, ncount) {
-		GNode *indi = keyToPerson(el->key, context->database); // Update person in symbol table.
+		GNode *indi = keyToPerson(el->root->key, context->database); // Update person in symbol table.
 		assignValueToSymbol(context->symbolTable, pnode->elementIden, PVALUE(PVPerson, uGNode, indi));
 		PValue pvalue = (PValue) {PVInt, el->value}; // Update person's value in symbol table.
 		assignValueToSymbol(context->symbolTable, pnode->valueIden, pvalue);

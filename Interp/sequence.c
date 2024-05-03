@@ -4,7 +4,7 @@
 // persons and sometimes families. It underlies the indiseq data type of DeadEnds Script.
 //
 // Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 1 May 2024.
+// Last changed on 3 May 2024.
 
 #include "standard.h"
 #include "sequence.h"
@@ -25,7 +25,7 @@ static int numBucketsInSequenceTables = 359;
 // keyGetKey is the getKey function that returns the key of a SequenceEl.
 static String keyGetKey(void* element) {
 	SequenceEl* el = (SequenceEl*) element;
-	return el->key;
+	return el->root->key;
 }
 
 // nameGetKey is the getKey function that returns the name of a SequenceEl.
@@ -46,10 +46,7 @@ static int nameCompare(String a, String b) {
 
 // deleteFunc is the function that deletes a SequenceEl.
 static void delete(void* element) {
-	SequenceEl *el = (SequenceEl*) element;
-	free(el->key);
-	if (el->name) free(el->name);
-	free(el);
+	free(element);
 }
 
 void baseFree(void *word) { free(word); }
@@ -62,12 +59,14 @@ static SequenceEl** sequenceElements(Sequence *sequence) {
 }
 
 // createSequenceEl creates a SequenceEl.
-SequenceEl* createSequenceEl(String key, String name, void* value) {
-	SequenceEl* el = (SequenceEl*) malloc(sizeof(SequenceEl));
-	el->key = key ? strsave(key) : null;
-	el->name = name ? strsave(name) : null;
-	el->value = value;
-	return el;
+SequenceEl* createSequenceEl(Database* database, String key, void* value) {
+	SequenceEl* element = (SequenceEl*) malloc(sizeof(SequenceEl));
+	GNode* person = keyToPerson(key, database);
+	ASSERT(person);
+	element->root = person;
+	element->name = (NAME(person))->value;
+	element->value = value;
+	return element;
 }
 
 // createSequence creates a Sequence.
@@ -91,12 +90,10 @@ void deleteSequence(Sequence* sequence) {
 	SequenceEl **elements = (SequenceEl**) block->elements;
 	for (int i = 0; i < block->length; i++) {
 		SequenceEl *element = elements[i];
-		free(element->key);
-		if (element->name) free(element->name);
-		// Handle the value.
+		// Free the value.
 	}
 	free(&(sequence->block));
-	//free(sequence); // HELP HELP HELP
+	free(sequence); // HELP HELP HELP
 }
 
 // emptySequence removes the elements from a Sequence.
@@ -106,25 +103,21 @@ void emptySequence(Sequence *sequence) {
 }
 
 // appendToSequence creates and appends a SequenceEl to a Sequence.
-void appendToSequence(Sequence* sequence, String key, String name, void* value) {
+void appendToSequence(Sequence* sequence, String key, void* value) {
 	if (!sequence || !key) return;
-	SequenceEl *element = (SequenceEl*) malloc(sizeof(SequenceEl));
-	element->key = strsave(key);
-	if (name) element->name = strsave(name);
-	element->value = (void*) value;
+	SequenceEl* element = createSequenceEl(sequence->database, key, value);
 	appendToBlock(&(sequence->block), element);
 }
 
 // renameElementInSequence updates an element in a Sequence with a new name.
-// TODO: That *kep != 'I' check doesn't make sense any more.
 void renameElementInSequence(Sequence* sequence, String key) {
-	if (!sequence || !key || *key != 'I') return;
+	if (!sequence || !key) return;
 	Block *block = &(sequence->block);
 	SequenceEl** elements = (SequenceEl**) block->elements;
 	for (int i = 0; i < block->length; i++) {
-		if (eqstr(key, (elements[i])->key)) {
-			if ((elements[i])->name) free((elements[i])->name);
-			(elements[i])->name = strsave(key_to_name(key, sequence->database));
+		GNode* root = elements[i]->root;
+		if (eqstr(key, root->key)) {
+			(elements[i])->name = NAME(root)->value;
 		}
 	}
 }
@@ -136,7 +129,7 @@ bool isInSequence(Sequence *seq, String key) {
 	Block *block = &(seq->block);
 	SequenceEl **elements = (SequenceEl**) block->elements;
 	for (int i = 0; i < block->length; i++) {
-		if (eqstr(key, (elements[i])->key)) return true;
+		if (eqstr(key, (elements[i])->root->key)) return true;
 	}
 	return false;
 }
@@ -206,7 +199,7 @@ void keySortSequence(Sequence *sequence)
 Sequence *copySequence(Sequence* sequence) {
 	Sequence *copy = createSequence(sequence->database);
 	FORSEQUENCE(sequence, element, count)
-		appendToSequence(copy, element->key, element->name, element->value);
+		appendToSequence(copy, element->root->key, element->value);
 	ENDSEQUENCE
 	return copy;
 }
@@ -223,13 +216,14 @@ Sequence *uniqueSequence(Sequence *sequence) {
 	SequenceEl **els = (SequenceEl**) block->elements;
 
 	// Add a copy of the first input element into the unique list.
+	Database* database = sequence->database;
 	SequenceEl* el = els[0];
-	appendToBlock(uBlock, createSequenceEl(el->key, el->name, el->value));
+	appendToBlock(uBlock, createSequenceEl(database, el->root->key, el->value));
 
 	int i, j;
 	for (j = 0, i = 1; i < n; i++) {
-		if (nestr(els[i]->key, els[j]->key)) {
-			appendToBlock(uBlock, createSequenceEl(els[i]->key, els[i]->name, els[i]->value));
+		if (nestr(els[i]->root->key, els[j]->root->key)) {
+			appendToBlock(uBlock, createSequenceEl(database, els[i]->root->key, els[i]->value));
 			j = i;
 		}
 	}
@@ -237,19 +231,16 @@ Sequence *uniqueSequence(Sequence *sequence) {
 }
 
 // uniqueSequenceInPlace removes duplicate (have the same key) elements from a Sequence.
-// MNOTE: This has a memory leak; the elements removed are not managed properly.
-//--------------------------------------------------------------------------------------------------
 void uniqueSequenceInPlace(Sequence *sequence) {
 	if (!sequence) return;
 	Block *block = &(sequence->block);
 	int n = block->length;
 	if (n <= 1) return;
-
-	SequenceEl **els = (SequenceEl**) block->elements;
 	if (sequence->sortType != SequenceKeySorted) keySortSequence(sequence);
+	SequenceEl **els = (SequenceEl**) block->elements;
 	int i, j;
 	for (j = 0, i = 1; i < n; i++)
-		if (nestr(els[i]->key, els[j]->key)) els[++j] = els[i];
+		if (nestr(els[i]->root->key, els[j]->root->key)) els[++j] = els[i];
 	block->length = j + 1;
 }
 
@@ -267,23 +258,23 @@ Sequence* unionSequence(Sequence* one, Sequence* two) {
 	SequenceEl** v = sequenceElements(two);
 	int i = 0, j = 0, rel;
 	while (i < n && j < m) {
-		if ((rel = keyCompare(u[i]->key, v[j]->key)) < 0) {
-			appendToSequence(three, u[i]->key, u[i]->name, u[i]->value);
+		if ((rel = keyCompare(u[i]->root->key, v[j]->root->key)) < 0) {
+			appendToSequence(three, u[i]->root->key, u[i]->value);
 			i++;
 		} else if (rel > 0) {
-			appendToSequence(three, v[j]->key, v[j]->name, v[j]->value);
+			appendToSequence(three, v[j]->root->key, v[j]->value);
 			j++;
 		} else {
-			appendToSequence(three, u[i]->key, u[i]->name, u[i]->value);
+			appendToSequence(three, u[i]->root->key, u[i]->value);
 			i++; j++;
 		}
 	}
 	while (i < n) {
-		appendToSequence(three, u[i]->key, u[i]->name, u[i]->value);
+		appendToSequence(three, u[i]->root->key, u[i]->value);
 		i++;
 	}
 	while (j < m) {
-		appendToSequence(three, v[j]->key, v[j]->name, v[j]->value);
+		appendToSequence(three, v[j]->root->key, v[j]->value);
 		j++;
 	}
 	three->sortType = SequenceKeySorted;
@@ -308,12 +299,12 @@ Sequence* intersectSequence(Sequence* one, Sequence* two) {
 	SequenceEl** u = sequenceElements(one);
 	SequenceEl** v = sequenceElements(two);
 	while (i < n && j < m) {
-		if ((rel = compareRecordKeys(u[i]->key, v[j]->key)) < 0) {
+		if ((rel = compareRecordKeys(u[i]->root->key, v[j]->root->key)) < 0) {
 			i++;
 		} else if (rel > 0) {
 			j++;
 		} else {
-			appendToSequence(three, (u[i])->key, u[i]->name, u[i]->value);
+			appendToSequence(three, (u[i])->root->key, u[i]->value);
 			i++; j++;
 		}
 	}
@@ -339,8 +330,8 @@ Sequence* differenceSequence(Sequence* one, Sequence* two) {
 	SequenceEl** v = sequenceElements(two);
 	int rel;
 	while (i < n && j < m) {
-		if ((rel = compareRecordKeys(u[i]->key, v[j]->key)) < 0) {
-			appendToSequence(three, u[i]->key, u[i]->name, u[i]->value);
+		if ((rel = compareRecordKeys(u[i]->root->key, v[j]->root->key)) < 0) {
+			appendToSequence(three, u[i]->root->key, u[i]->value);
 			i++;
 		} else if (rel > 0) {
 			j++;
@@ -349,7 +340,7 @@ Sequence* differenceSequence(Sequence* one, Sequence* two) {
 		}
 	}
 	while (i < n) {
-		appendToSequence(three, u[i]->key, null, u[i]->value);
+		appendToSequence(three, u[i]->root->key, u[i]->value);
 		i++;
 	}
 	three->sortType = SequenceKeySorted;
@@ -366,15 +357,15 @@ Sequence* parentSequence(Sequence* sequence) {
 	Sequence *parents = createSequence(sequence->database);
 	String key;
 	FORSEQUENCE(sequence, el, count)
-		GNode* indi = keyToPerson(el->key, database);
+		GNode* indi = keyToPerson(el->root->key, database);
 		GNode* fath = personToFather(indi, database);
 		GNode* moth = personToMother(indi, database);
 		if (fath && !isInHashTable(table, key = personToKey(fath))) {
-			appendToSequence(parents, key, null, el->value);
+			appendToSequence(parents, key, el->value);
 			addToStringTable(table, key, null);
 		}
 		if (moth && !isInHashTable(table, key = personToKey(moth))) {
-			appendToSequence(parents, key, null, el->value);
+			appendToSequence(parents, key, el->value);
 			addToStringTable(table, key, null);
 		}
 	ENDSEQUENCE
@@ -389,12 +380,12 @@ Sequence* childSequence(Sequence* sequence) {
 	Database* database = sequence->database;
 	Sequence* children = createSequence(database);
 	FORSEQUENCE(sequence, el, num)
-		GNode *person = keyToPerson(el->key, database);
+		GNode *person = keyToPerson(el->root->key, database);
 		FORFAMSS(person, fam, key, database)
 			FORCHILDREN(fam, chil, childKey, num2, database)
 				String key = personToKey(chil);
 				if (!isInHashTable(table, key)) {
-					appendToSequence(children, key, null, 0);
+					appendToSequence(children, key, 0);
 					addToStringTable(table, key, null);
 				}
 			ENDCHILDREN
@@ -411,7 +402,7 @@ Sequence *personToChildren(GNode* person, Database *database) {
 
 	FORFAMSS(person, family, key, database)
 		FORCHILDREN(family, child, childKey, count, database)
-			appendToSequence(children, personToKey(child), null, 0);
+			appendToSequence(children, personToKey(child), 0);
 		ENDCHILDREN
 	ENDFAMSS
 	if (lengthSequence(children)) return children;
@@ -427,7 +418,7 @@ Sequence *personToSpouses(GNode *person, Database *database) {
 	Sequence *spouses = createSequence(database);
 	FORFAMSS(person, family, key, database)
 		GNode *spouse = (sex == sexMale) ? familyToWife(family, database) : familyToHusband(family, database);
-		if (spouse) appendToSequence(spouses, personToKey(spouse), null, 0);
+		if (spouse) appendToSequence(spouses, personToKey(spouse), 0);
 	ENDFAMSS
 	if (lengthSequence(spouses)) return spouses;
 	deleteSequence(spouses);
@@ -440,7 +431,7 @@ Sequence *personToFathers(GNode *person, Database *database) {
 	Sequence *fathers = createSequence(database);
 	FORFAMCS(person, family, key, database)  // For each family the person is a child in...
 		FORHUSBS(family, husb, husbKey, database)  // For each husband in that family...
-			appendToSequence(fathers, personToKey(husb), null, 0);  // Add him to the sequence.
+			appendToSequence(fathers, personToKey(husb), 0);  // Add him to the sequence.
 		ENDHUSBS
 	ENDFAMCS
 	if (lengthSequence(fathers)) return fathers;
@@ -454,7 +445,7 @@ Sequence *personToMothers (GNode* indi, Database *database) {
 	Sequence *mothers = createSequence(database);
 	FORFAMCS(indi, fam, key, database)  // For each family the person is a child in...
 		FORWIFES(fam, wife, wifeKey, database)  // For each wife in that family...
-			appendToSequence(mothers, personToKey(wife), null, 0);  // Add her to the sequence.
+			appendToSequence(mothers, personToKey(wife), 0);  // Add her to the sequence.
 		ENDWIFES
 	ENDFAMCS
 	if (lengthSequence(mothers)) return mothers;
@@ -469,11 +460,11 @@ Sequence* personToFamilies (GNode* person, bool fams, Database* database) {
 	Sequence *families = createSequence(database);
 	if (fams) {
 		FORFAMSS(person, family, key, database)
-			appendToSequence(families, key, null, 0);
+			appendToSequence(families, key, 0);
 		ENDFAMSS
 	} else {
 		FORFAMCS(person, family, key, database)
-			appendToSequence(families, key, null, 0);
+			appendToSequence(families, key, 0);
 		ENDFAMCS
 	}
 	if (lengthSequence(families) > 0) return families;
@@ -486,7 +477,7 @@ Sequence* familyToChildren(GNode* family, Database* database) {
 	if (!family) return null;
 	Sequence* children = createSequence(database);
 	FORCHILDREN(family, chil, key, num, database) {
-		appendToSequence(children, personToKey(chil), null, 0);
+		appendToSequence(children, personToKey(chil), 0);
 	} ENDCHILDREN
 	if (lengthSequence(children) > 0) return children;
 	deleteSequence(children);
@@ -498,7 +489,7 @@ Sequence* familyToFathers(GNode* fam, Database* database) {
 	if (!fam) return null;
 	Sequence* seq = createSequence(database);
 	FORHUSBS(fam, husb, key, database)
-		appendToSequence(seq, personToKey(husb), null, 0);
+		appendToSequence(seq, personToKey(husb), 0);
 	ENDHUSBS
 	if (lengthSequence(seq)) return seq;
 	deleteSequence(seq);
@@ -510,7 +501,7 @@ Sequence* familyToMothers(GNode *fam, Database* database) {
 	if (!fam) return null;
 	Sequence* seq = createSequence(database);
 	FORWIFES(fam, wife, key, database)
-		appendToSequence(seq, personToKey(wife), null, 0);
+		appendToSequence(seq, personToKey(wife), 0);
 	ENDWIFES
 	if (lengthSequence(seq)) return seq;
 	deleteSequence(seq);
@@ -530,19 +521,19 @@ Sequence* siblingSequence(Sequence* sequence, bool close) {
 		//  TODO: THIS ONLY USES THE FIRST FAMC FAMILY, WHICH IN 99.9% OF THE CASES IS OKAY.
 		//  BUT TO BE CONSISTENT WITH OTHER SITUATIONS WHERE THERE ARE MULTIPLE FAMC NODES,
 		//  IT MIGHT BE BETTER TO GO THROUGH THEM ALL.
-		GNode *person = keyToPerson(element->key, database);
+		GNode *person = keyToPerson(element->root->key, database);
 		if ((fam = personToFamilyAsChild(person, database)) == NULL) {
-			appendToSequence(familySequence, familyToKey(fam), null, 0);
+			appendToSequence(familySequence, familyToKey(fam), 0);
 		}
-		if (!close) addToStringTable(tab, element->key, null);
+		if (!close) addToStringTable(tab, element->root->key, null);
 	}
 	ENDSEQUENCE
 	FORSEQUENCE(familySequence, el, num)
-		fam = keyToFamily(el->key, database);
+		fam = keyToFamily(el->root->key, database);
 		FORCHILDREN(fam, chil, chilKey, num2, database)
 			key = personToKey(chil);
 			if (!isInHashTable(tab, key)) {
-				appendToSequence(siblingSequence, key, null, 0);
+				appendToSequence(siblingSequence, key, 0);
 				addToStringTable(tab, key, null);
 			}
 		ENDCHILDREN
@@ -565,7 +556,7 @@ Sequence *ancestorSequence(Sequence *startSequence) {
 
 	//  Initialize the ancestor queue with the keys of persons in the start sequence.
 	FORSEQUENCE(startSequence, el, num)
-		enqueueList(ancestorQueue, (void*) el->key);
+		enqueueList(ancestorQueue, (void*) el->root->key);
 	ENDSEQUENCE
 
 	// Iterate the ancestor queue; it grows when ancestors are found.
@@ -581,14 +572,14 @@ Sequence *ancestorSequence(Sequence *startSequence) {
 
 		// If the father has not been seen, add him to the table and sequence.
 		if (father && !isInHashTable(ancestorKeys, parentKey = father->key)) {
-			appendToSequence(ancestorSequence, parentKey, null, 0);
+			appendToSequence(ancestorSequence, parentKey, 0);
 			//  MNOTE: Lists don'e save their elements.
 			enqueueList(ancestorQueue, strsave(parentKey));
 			addToStringTable(ancestorKeys, parentKey, null);
 		}
 		// If the mother has not been seen before, add her to the table and sequence.
 		if (mother && !isInHashTable(ancestorKeys, parentKey = mother->key)) {
-			appendToSequence(ancestorSequence, parentKey, null, 0);
+			appendToSequence(ancestorSequence, parentKey, 0);
 			//  MNOTE: Lists don't save their elements.
 			enqueueList(ancestorQueue, strsave(parentKey));
 			addToStringTable(ancestorKeys, parentKey, null);
@@ -616,7 +607,7 @@ Sequence *descendentSequence(Sequence *startSequence)
 
 	//  Initialize the descendent queue with the keys of the persons in the start sequence.
 	FORSEQUENCE(startSequence, element, count)
-		enqueueList(descendentQueue, /*(Word)*/ element->key);
+		enqueueList(descendentQueue, /*(Word)*/ element->root->key);
 	ENDSEQUENCE
 
 	//  Dequeue the next person in the descendent queue.
@@ -630,8 +621,7 @@ Sequence *descendentSequence(Sequence *startSequence)
 			addToStringTable(familyKeys, strsave(key), null);
 			FORCHILDREN(family, child, chilKey, num, database)
 				if (!isInHashTable(descendentKeys, descendentKey = personToKey(child))) {
-					appendToSequence(descendentSequence, descendentKey, null, 0);
-					//  MNOTE: strsave required -- lists don't save their elements.
+					appendToSequence(descendentSequence, descendentKey, 0);
 					enqueueList(descendentQueue, strsave(descendentKey));
 					addToStringTable(descendentKeys, descendentKey, null);
 				}
@@ -655,11 +645,11 @@ Sequence *spouseSequence(Sequence *sequence)
 	StringTable *table = createStringTable(numBucketsInSequenceTables);
 	Sequence *spouses = createSequence(database);
 	FORSEQUENCE(sequence, el, num)   //  For each person in the original sequence
-		GNode *person = keyToPerson(el->key, database);
+		GNode *person = keyToPerson(el->root->key, database);
 		FORSPOUSES(person, spouse, fam, num1, database)   // For each spouse that that person has
 			String key = personToKey(spouse);   // Get the key of the spouse
 			if (!isInHashTable(table, key)) {   // If the spouse's key isn't in the table.
-				appendToSequence(spouses, key, null, el->value);  // Add the spouse.
+				appendToSequence(spouses, key, el->value);  // Add the spouse.
 				addToStringTable(table, key, null);
 			}
 		ENDSPOUSES
@@ -691,12 +681,12 @@ void sequenceToGedcom(Sequence *sequence, FILE *fp)
 
 	//  Add all person keys to the person key hash table.
 	FORSEQUENCE(sequence, element, num)
-		addToStringTable(personTable, element->key, null);
+		addToStringTable(personTable, element->root->key, null);
 	ENDSEQUENCE
 
 	//  Loop through each person in the sequence.
 	FORSEQUENCE(sequence, element, num)
-		GNode *person = keyToPerson(element->key, database);  // Get the person.
+		GNode *person = keyToPerson(element->root->key, database);  // Get the person.
 		SexType sex = SEXV(person);  //  And the person's sex.
 
 		//  Check the person's parent families to see if any FAMC families should be output.
@@ -705,13 +695,13 @@ void sequenceToGedcom(Sequence *sequence, FILE *fp)
 			normalizeFamily(family);
 			GNode *husband = HUSB(family);
 			if (husband && isInHashTable(personTable, husband->value)) {
-				appendToSequence(familySequence, familyToKey(family), null, 0);
+				appendToSequence(familySequence, familyToKey(family), 0);
 				addToStringTable(familyTable, familyToKey(family), null);
 				goto a;
 			}
 			GNode *wife = WIFE(family);
 			if (wife && isInHashTable(personTable, wife->value)) {
-				appendToSequence(familySequence, familyToKey(family), null, 0);
+				appendToSequence(familySequence, familyToKey(family), 0);
 				addToStringTable(familyTable, familyToKey(family), null);
 				goto a;
 			}
@@ -719,7 +709,7 @@ void sequenceToGedcom(Sequence *sequence, FILE *fp)
 			FORCHILDREN(family, child, chilKey, count, database)
 				String childKey = personToKey(child);
 				if (isInHashTable(personTable, childKey)) {
-					appendToSequence(familySequence, familyToKey(family), null, 0);
+					appendToSequence(familySequence, familyToKey(family), 0);
 					addToStringTable(familyTable, familyToKey(family), null);
 					goto a;
 				}
@@ -731,18 +721,18 @@ void sequenceToGedcom(Sequence *sequence, FILE *fp)
 			if (isInHashTable(familyTable, familyToKey(family))) goto b;
 			GNode *spouse = familyToSpouse(family, oppositeSex(sex), database);
 			if (spouse && isInHashTable(personTable, personToKey(spouse))) {
-				appendToSequence(familySequence, familyToKey(family), null, 0);
+				appendToSequence(familySequence, familyToKey(family), 0);
 				addToStringTable(familyTable, familyToKey(family), null);
 			}
 	b:;	ENDFAMSS
 	ENDSEQUENCE
 
 	FORSEQUENCE(personSequence, element, count)
-		writeLimitedPerson(keyToPerson(element->key, database));
+		writeLimitedPerson(keyToPerson(element->root->key, database));
 	ENDSEQUENCE
 
 	FORSEQUENCE(familySequence, element, count)
-		writeLimitedFamily(keyToFamily(element->key, database));
+		writeLimitedFamily(keyToFamily(element->root->key, database));
 	ENDSEQUENCE
 	deleteSequence(familySequence);
 	deleteHashTable(personTable);
@@ -782,7 +772,7 @@ Sequence* nameToSequence(String name, Database* database) {
 		if (num == 0) return null;
 		seq = createSequence(database);
 		for (int i = 0; i < num; i++)
-			appendToSequence(seq, keys[i], null, 0);
+			appendToSequence(seq, keys[i], 0);
 		nameSortSequence(seq);
 		return seq;
 	}
@@ -796,7 +786,7 @@ Sequence* nameToSequence(String name, Database* database) {
 		if (num == 0) continue;
 		if (!seq) seq = createSequence(database);
 		for (int i = 0; i < num; i++) {
-			appendToSequence(seq, keys[i], null, 0);
+			appendToSequence(seq, keys[i], 0);
 		}
 	}
 	scratch[0] = '$';
@@ -804,7 +794,7 @@ Sequence* nameToSequence(String name, Database* database) {
 	if (num) {
 		if (!seq) seq = createSequence(database);
 		for (int i = 0; i < num; i++) {
-			appendToSequence(seq, keys[i], null, 0);
+			appendToSequence(seq, keys[i], 0);
 		}
 	}
 	if (seq) {
@@ -817,7 +807,7 @@ Sequence* nameToSequence(String name, Database* database) {
 // showSequence is a debug function that shows the contents of a Sequence.
 void showSequence(Sequence* sequence) {
 	FORSEQUENCE(sequence, element, count)
-		printf("%d: %s: %s\n", count, element->key, element->name ? element->name : "no name");
+		printf("%d: %s: %s\n", count, element->root->key, element->name ? element->name : "no name");
 	ENDSEQUENCE
 
 }

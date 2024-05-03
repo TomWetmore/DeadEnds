@@ -4,7 +4,7 @@
 // language this datatype is called an indiset.
 //
 // Created by Thomas Wetmore on 4 March 2023.
-// Last changed on 20 April 2024.
+// Last changed on 3 May 2024.
 
 #include <stdio.h>
 #include "standard.h"
@@ -69,7 +69,7 @@ PValue __addtoset(PNode *programNode, Context *context, bool *errflg) {
     PValue *ppvalue = allocPValue(value.type, value.value); // Sequence PValues are in the heap.
     if (ppvalue->type == PVString) ppvalue->value.uString = strsave(value.value.uString);
     //  MNOTE: No need to save key--appendToSequence does.
-    appendToSequence(sequence, key, null, ppvalue);
+    appendToSequence(sequence, key, ppvalue);
     return nullPValue;
 }
 

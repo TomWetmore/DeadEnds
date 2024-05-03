@@ -3,7 +3,7 @@
 // sequence.h is the header file for the Sequence datatype.
 //
 // Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 2 May 2024.
+// Last changed on 3 May 2024.
 
 #ifndef sequence_h
 #define sequence_h
@@ -21,14 +21,16 @@ typedef enum {
 	SequenceValueSorted
 } SortType;
 
-// SequenceEl is the type of Sequence elements. Keys and names belong to the element.
+// SequenceEl is the type of Sequence elements.
 typedef struct SequenceEl {
-	String key;
+	//String key;
+	//String name;
+	GNode* root;
 	String name;
 	void* value;
 } SequenceEl;
 
-// Sequence is a data type that holds sequences/sets/arrays of persons (families?).
+// Sequence is a data type that holds sequences/sets/arrays of persons.
 typedef struct Sequence {
 	Block block;
 	SortType sortType;
@@ -36,7 +38,7 @@ typedef struct Sequence {
 	Database *database;
 } Sequence;
 
-SequenceEl *createSequenceEl(String key, String name, void* value);
+SequenceEl *createSequenceEl(Database*, String key, void* value);
 
 Sequence *createSequence(Database*);
 void deleteSequence(Sequence*);
@@ -44,7 +46,7 @@ Sequence *copySequence(Sequence*);
 int lengthSequence(Sequence*);
 void emptySequence(Sequence*);
 
-void appendToSequence(Sequence*, String key, String name, void*);
+void appendToSequence(Sequence*, String key, void*);
 bool isInSequence(Sequence*, String key);
 bool removeFromSequence(Sequence*, String key);
 void nameSortSequence(Sequence*); // Sort by name.

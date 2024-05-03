@@ -20,7 +20,7 @@ void testSequence(Database* database, int testNumber) {
 	checkTest("Sequence should be empty", 0, length);
 
 	// Add an element to a Sequence.
-	appendToSequence(sequence, "@I1@", "", null);
+	appendToSequence(sequence, "@I1@", null);
 	length = lengthSequence(sequence);
 	checkTest("Sequence should have one element", 1, length);
 	showSequence(sequence);
@@ -31,7 +31,7 @@ void testSequence(Database* database, int testNumber) {
 	checkTest("Empty sequence", 0, length);
 
 	// Test copySequence.
-	appendToSequence(sequence, "@I1@", "", null);
+	appendToSequence(sequence, "@I1@", null);
 	length = lengthSequence(sequence);
 	checkTest("Added element to emptied sequence", 1, length);
 	Sequence* copied = copySequence(sequence);
@@ -41,7 +41,7 @@ void testSequence(Database* database, int testNumber) {
 	showSequence(copied);
 
 	// Test isInSequence.
-	appendToSequence(sequence, "@I2@", "Luann Frances /Grenda/", null);
+	appendToSequence(sequence, "@I2@", null);
 	showSequence(sequence);
 	bool isIn = isInSequence(sequence, "@I1@");
 	checkTest("I1 should be in", isIn ? 1 : 0, 1);
@@ -56,11 +56,11 @@ void testSequence(Database* database, int testNumber) {
 	showSequence(sequence);
 
 	// Test keySortSequence.
-	appendToSequence(sequence, "@I1@", "Thomas Trask /Wetmore/ IV", null);
-	appendToSequence(sequence, "@I6@", "Joan Marie /Hancock/", null);
-	appendToSequence(sequence, "@I3@", "Anna Vivian /Wetmore/", null);
-	appendToSequence(sequence, "@I5@", "Thomas Trask /Wetmore/ V", null);
-	appendToSequence(sequence, "@I4@", "Marie Margaret /Wetmore/", null);
+	appendToSequence(sequence, "@I1@", null);
+	appendToSequence(sequence, "@I6@", null);
+	appendToSequence(sequence, "@I3@", null);
+	appendToSequence(sequence, "@I5@", null);
+	appendToSequence(sequence, "@I4@", null);
 	showSequence(sequence);
 	printf("Calling keySortSequence\n");
 	keySortSequence(sequence);
@@ -74,11 +74,9 @@ void testSequence(Database* database, int testNumber) {
 	// Test ancestorSequence.
 	printf("Testing ancestorSequence");
 	emptySequence(sequence);
-	appendToSequence(sequence, "@I1@", "Thomas Trask /Wetmore/ IV", null);
+	appendToSequence(sequence, "@I1@", null);
 	Sequence* ancestors = ancestorSequence(sequence);
 	showSequence(ancestors);
-
-
 
 	printf("END TEST SEQUENCE: %2.3f\n", getMilliseconds());
 //	void deleteSequence(Sequence*);
