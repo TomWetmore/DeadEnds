@@ -28,6 +28,7 @@ extern int currentProgramLineNumber;
 extern FunctionTable *procedureTable;
 
 extern Database *importFromFile(String, ErrorLog*);
+extern void testSequence(Database*, int);
 static Database *createDatabaseTest(String, int, ErrorLog*);
 static void listTest(Database*, int);
 static void forHashTableTest(Database*, int);
@@ -67,6 +68,7 @@ int main(void) {
 	//if (database) showHashTableTest(database->personIndex, ++testNumber);
 	//if (database) indexNamesTest(database, ++testNumber);
 	//if (database) validated = validateDatabaseTest(database, ++testNumber);
+	if (database) testSequence(database, ++testNumber);
 	validated = true;
 	//if (database) forTraverseTest(database, ++testNumber);
 	if (database && validated) parseAndRunProgramTest(database, ++testNumber);

@@ -5,7 +5,7 @@
 // read and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 18 April 2024.
+// Last changed 2 Msy 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -39,11 +39,8 @@ Database *createDatabase(String filePath) {
 	return database;
 }
 
-//  deleteDatabase -- Delete a database.
-//--------------------------------------------------------------------------------------------------
-void deleteDatabase(Database *database)
-{
-	ASSERT(database);
+//  deleteDatabase deletes a database.
+void deleteDatabase(Database* database) {
 	deleteRecordIndex(database->personIndex);
 	deleteRecordIndex(database->familyIndex);
 	deleteRecordIndex(database->sourceIndex);
@@ -52,95 +49,62 @@ void deleteDatabase(Database *database)
 	deleteNameIndex(database->nameIndex);
 }
 
-//  keyMap -- Table that maps original keys to mapped keys. It is created the first time
-//    upateKeyMap is called.
-//--------------------------------------------------------------------------------------------------
-StringTable *keyMap;
-
-// numberPersons -- Return the number of persons in a database.
-//--------------------------------------------------------------------------------------------------
-int numberPersons(Database *database)
-{
+// numberPersons returns the number of persons in a database.
+int numberPersons(Database* database) {
 	return database ? sizeHashTable(database->personIndex) : 0;
 }
 
-// numberFamilies -- Return the number of families in a database.
-//--------------------------------------------------------------------------------------------------
-int numberFamilies(Database *database)
-{
+// numberFamilies returns the number of families in a database.
+int numberFamilies(Database* database) {
 	return database ? sizeHashTable(database->familyIndex) : 0;
 }
 
-// numberSources -- Return the number of sources in a database.
-//--------------------------------------------------------------------------------------------------
-int numberSources(Database *database)
-{
+// numberSources returns the number of sources in a database.
+int numberSources(Database* database) {
 	return database ? sizeHashTable(database->sourceIndex) : 0;
 }
 
-//  numberEvents -- Return the number of (top level) events in the database.
-//--------------------------------------------------------------------------------------------------
-int numberEvents(Database *database)
-{
+// numberEvents returnw the number of (top level) events in the database.
+int numberEvents(Database* database) {
 	return database ? sizeHashTable(database->eventIndex) : 0;
 }
 
-//  numberOthers -- Return the number of other records in the database.
-//--------------------------------------------------------------------------------------------------
-int numberOthers(Database *database)
-{
+// numberOthers return the number of other records in the database.
+int numberOthers(Database* database) {
 	return database ? sizeHashTable(database->otherIndex) : 0;
 }
 
-
-//  isEmptyDatabase -- Return true if the database contains no persons or families.
-//-------------------------------------------------------------------------------------------------
-bool isEmptyDatabase (Database *database)
-{
+// isEmptyDatabase returns true if the database has no persons or families.
+bool isEmptyDatabase(Database* database) {
 	return numberPersons(database) + numberFamilies(database) == 0;
 }
 
-//  keyToPerson -- Get a person record from a database.
-//--------------------------------------------------------------------------------------------------
-GNode* keyToPerson(String key, Database *database)
-//  key -- Key of person record.
-//  index -- Record index to search for the person.
-{
+//  keyToPerson gets a person record from a database.
+GNode* keyToPerson(String key, Database* database) {
 	RecordIndexEl* element = (RecordIndexEl*) searchHashTable(database->personIndex, key);
 	return element ? element->root : null;
 }
 
-//  keyToFamily -- Get a family record from a record index.
-//--------------------------------------------------------------------------------------------------
-GNode* keyToFamily(String key, Database *database)
-//  key -- Key of family record.
-//  database -- Database to find family in.
-{
-	//if (debugging) printf("keyToFamily called with key: %s\n", key);
+// keyToFamily gets a family record from a database.
+GNode* keyToFamily(String key, Database* database) {
 	RecordIndexEl *element = (RecordIndexEl*) searchHashTable(database->familyIndex, key);
 	return element == null ? null : element->root;
 }
 
-//  keyToSource -- Get a source record from the database.
-//--------------------------------------------------------------------------------------------------
-GNode *keyToSource(String key, Database *database)
-{
+// keyToSource gets a source record from a database.
+GNode* keyToSource(String key, Database* database) {
 	RecordIndexEl* element = (RecordIndexEl*) searchHashTable(database->sourceIndex, key);
 	return element ? element->root : null;
 }
 
-//  keyToEvent -- Get an event record from a database.
-//--------------------------------------------------------------------------------------------------
-GNode *keyToEvent(String key, Database *database)
-{
+// keyToEvent gets an event record from a database.
+GNode* keyToEvent(String key, Database* database) {
 	RecordIndexEl *element = (RecordIndexEl*) searchHashTable(database->eventIndex, key);
 	return element ? element->root : null;
 }
 
-//  keyToOther -- Get an other record from a database.
-//--------------------------------------------------------------------------------------------------
-GNode *keyToOther(String key, Database *database)
-{
+// keyToOther gets an other record from a database.
+GNode* keyToOther(String key, Database* database) {
 	RecordIndexEl *element = (RecordIndexEl*) searchHashTable(database->otherIndex, key);
 	return element ? element->root : null;
 }
@@ -149,11 +113,11 @@ static int count = 0;  // Debugging.
 
 // storeRecord stores a GNode tree in a database by adding it to a RecordIndex.
 // lineNumber is the location of the root node in the Gedcom file.
-bool storeRecord(Database *database, GNode* root, int lineNumber, ErrorLog *errorLog) {
+bool storeRecord(Database* database, GNode* root, int lineNumber, ErrorLog* errorLog) {
 	//if (importDebugging) fprintf(debugFile, "storeRecord called\n");
 	RecordType type = recordType(root);
 	//if (importDebugging) fprintf(debugFile, "type of record is %d\n", type);
-	if (type == GRHeader || type == GRTrailer) return true;  // Ignore HEAD and TRLR.
+	if (type == GRHeader || type == GRTrailer) return true;
 	if (!root->key) {
 		Error *error = createError(syntaxError, database->lastSegment, lineNumber, "This record has no key.");
 		addErrorToLog(errorLog, error);
@@ -161,7 +125,7 @@ bool storeRecord(Database *database, GNode* root, int lineNumber, ErrorLog *erro
 	}
 	count++;
 	String key = root->key;  // MNOTE: insertInRecord copies the key.
-	
+
 	// Duplicate key check done here.
 	int previousLine = keyLineNumber(database, key);
 	if (previousLine) {
@@ -194,10 +158,8 @@ bool storeRecord(Database *database, GNode* root, int lineNumber, ErrorLog *erro
 	}
 }
 
-// tableReport -- Debug function that reports on the sizes of the database tables.
-//--------------------------------------------------------------------------------------------------
-void showTableSizes(Database *database)
-{
+// showTableSizes is a debug function that shows the sizes of the database tables.
+void showTableSizes(Database *database) {
 	printf("Size of personIndex: %d\n", sizeHashTable(database->personIndex));
 	printf("Size of familyIndex: %d\n", sizeHashTable(database->familyIndex));
 	printf("Size of sourceIndex: %d\n", sizeHashTable(database->sourceIndex));
@@ -228,8 +190,6 @@ void indexNames(Database* database) {
 				count++;
 			}
 		}
-
-		//  Get the next entry in the person index.
 		entry = nextInHashTable(database->personIndex, &i, &j);
 	}
 	if (indexNameDebugging) showNameIndex(database->nameIndex);
@@ -248,8 +208,8 @@ static int keyLineNumber (Database *database, String key) {
 	return element->lineNumber;
 }
 
-GNode *getRecord(Database *database, String key)
-{
+// getRecord gets a record from the database given a ket.
+GNode* getRecord(Database* database, String key) {
 	GNode *root;
 	if ((root = keyToPerson(key, database))) return root;
 	if ((root = keyToFamily(key, database))) return root;

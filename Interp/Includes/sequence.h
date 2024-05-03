@@ -3,7 +3,7 @@
 // sequence.h is the header file for the Sequence datatype.
 //
 // Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 20 April 2024.
+// Last changed on 2 May 2024.
 
 #ifndef sequence_h
 #define sequence_h
@@ -11,7 +11,6 @@
 #include "standard.h"
 #include "block.h"
 #include "gnode.h"
-//#include "pnode.h"
 #include "pvalue.h"
 
 // SortType holds the possible sorted states of the elements in a Sequence.
@@ -22,11 +21,11 @@ typedef enum {
 	SequenceValueSorted
 } SortType;
 
-// SequenceEl is the data type of Sequence elements. Keys and names belong to the element.
+// SequenceEl is the type of Sequence elements. Keys and names belong to the element.
 typedef struct SequenceEl {
 	String key;
-	String name; // Name of person.
-	void* value; // Caller defined.
+	String name;
+	void* value;
 } SequenceEl;
 
 // Sequence is a data type that holds sequences/sets/arrays of persons (families?).
@@ -73,9 +72,10 @@ Sequence *spouseSequence(Sequence*);
 Sequence *ancestorSequence(Sequence*);
 Sequence *descendentSequence(Sequence*);
 Sequence *siblingSequence(Sequence*, bool);
+bool elementFromSequence(Sequence*, int index, String* key, String* name);
+void renameElementInSequence(Sequence* sequence, String key);
 
 void sequenceToGedcom(Sequence*, FILE*);
-
 void showSequence(Sequence*);
 
 // FORSEQUENCE and ENDSEQUENCE iterate a Sequence.

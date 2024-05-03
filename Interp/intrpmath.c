@@ -3,7 +3,7 @@
 // intrpmath.c has the built-in script functions for math and logic.
 //
 // Created by Thomas Wetmore on 17 March 2023.
-// Last changed on 23 April 2024.
+// Last changed on 2 May 2024.
 
 #include "standard.h"
 #include "pnode.h"
@@ -12,12 +12,12 @@
 #include "interp.h"
 
 // evalBinary is a local function that ...
-static void evalBinary(PNode *pnode, Context *context, PValue* val1, PValue* val2, bool* eflag);
+static void evalBinary(PNode* pnode, Context* context, PValue* val1, PValue* val2, bool* eflag);
 
-// __add is the script builtin add operation, taking up to 32 arguments. Supports integer and
-// and float operands. The result is an integer only if all operands are integers.
+// __add is the builtin add operation, taking up to 32 arguments. It supports integer and floats.
+// The result is an integer only if all operands are integers.
 // usage: add((INT|FLOAT) [,(INT|FLOAT)]+) -> (INT|FLOAT)
-PValue __add(PNode *pnode, Context *context, bool* eflg) {
+PValue __add(PNode* pnode, Context* context, bool* eflg) {
     PVType currentType = PVInt;
     long intSum = 0;
     double floatSum = 0;
@@ -43,7 +43,7 @@ PValue __add(PNode *pnode, Context *context, bool* eflg) {
     return value;
 }
 
-// __sub is the builtin subtract function; operands must be either int or float.
+// __sub is the builtin subtract function; operands must be both int or both float.
 // usage: sub(INT, INT) -> INT or sub(FLOAT, FLOAT) -> FLOAT
 PValue __sub(PNode* node, Context* context, bool* eflg) {
     PValue val1, val2;
