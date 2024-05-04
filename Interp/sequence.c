@@ -34,17 +34,17 @@ static String nameGetKey(void* element) {
 	return el->name;
 }
 
-// compareKeyFunc is the compare function that compares SequenceEl's by key.
+// keyCompare is the compare function that compares SequenceEl's by key.
 static int keyCompare(String a, String b) {
 	return compareRecordKeys(a, b);
 }
 
-// compareNameFunc is the compare function that compares SequenceEl's by name.
+// nameCompare is the compare function that compares SequenceEl's by name.
 static int nameCompare(String a, String b) {
 	return compareNames(a, b);
 }
 
-// deleteFunc is the function that deletes a SequenceEl.
+// delete is the function that deletes a SequenceEl.
 static void delete(void* element) {
 	free(element);
 }
@@ -61,10 +61,10 @@ static SequenceEl** sequenceElements(Sequence *sequence) {
 // createSequenceEl creates a SequenceEl.
 SequenceEl* createSequenceEl(Database* database, String key, void* value) {
 	SequenceEl* element = (SequenceEl*) malloc(sizeof(SequenceEl));
-	GNode* person = keyToPerson(key, database);
-	ASSERT(person);
-	element->root = person;
-	element->name = (NAME(person))->value;
+	GNode* root = getRecord(key, database);
+	ASSERT(root);
+	element->root = root;
+	element->name = (NAME(root))->value;
 	element->value = value;
 	return element;
 }
@@ -87,13 +87,8 @@ int lengthSequence(Sequence* sequence) {
 // deleteSequence deletes a Sequence.
 void deleteSequence(Sequence* sequence) {
 	Block *block = &(sequence->block);
-	SequenceEl **elements = (SequenceEl**) block->elements;
-	for (int i = 0; i < block->length; i++) {
-		SequenceEl *element = elements[i];
-		// Free the value.
-	}
-	free(&(sequence->block));
-	free(sequence); // HELP HELP HELP
+	deleteBlock(block, delete);
+	free(sequence);
 }
 
 // emptySequence removes the elements from a Sequence.
@@ -107,6 +102,14 @@ void appendToSequence(Sequence* sequence, String key, void* value) {
 	if (!sequence || !key) return;
 	SequenceEl* element = createSequenceEl(sequence->database, key, value);
 	appendToBlock(&(sequence->block), element);
+}
+
+// appendSequenceToSequence appends a Sequence to another Sequence. The Sequences must be distinct.
+// destination changes; source does not.
+void appendSequenceToSequence(Sequence* destination, Sequence* source) {
+	FORSEQUENCE(source, element, count)
+		appendToSequence(destination, element->root->key, element->value);
+	ENDSEQUENCE
 }
 
 // renameElementInSequence updates an element in a Sequence with a new name.

@@ -209,7 +209,7 @@ static int keyLineNumber (Database *database, String key) {
 }
 
 // getRecord gets a record from the database given a ket.
-GNode* getRecord(Database* database, String key) {
+GNode* getRecord(String key, Database* database) {
 	GNode *root;
 	if ((root = keyToPerson(key, database))) return root;
 	if ((root = keyToFamily(key, database))) return root;

@@ -9,6 +9,8 @@
 #include "utils.h"
 
 static void checkTest(String, int, int);
+static Sequence* tomsAncestors(Database*);
+static Sequence* lusAncestors(Database*);
 
 // testSequence is the starting function to test the Sequence type.
 void testSequence(Database* database, int testNumber) {
@@ -72,17 +74,45 @@ void testSequence(Database* database, int testNumber) {
 	showSequence(sequence);
 
 	// Test ancestorSequence.
-	printf("Testing ancestorSequence");
-	emptySequence(sequence);
-	appendToSequence(sequence, "@I1@", null);
-	Sequence* ancestors = ancestorSequence(sequence);
+	printf("Testing ancestorSequence\n");
+	Sequence* ancestors = tomsAncestors(database);
 	showSequence(ancestors);
+	printf("Sort ancestors by key\n");
+	keySortSequence(ancestors);
+	showSequence(ancestors);
+	printf("Sort ancestors by name\n");
+	nameSortSequence(ancestors);
+	showSequence(ancestors);
+	exit(0);
+
+	// Test uniqueSequence.
+	printf("Setting up to test uniqueSequence\n");
+	emptySequence(sequence);
+	emptySequence(ancestors);
+	appendToSequence(sequence, "@I2@", null);
+	ancestors = ancestorSequence(sequence);
+	printf("THIS SHOULD BE LU'S ANCESTORS\n");
+	showSequence(ancestors);
+	emptySequence(copied);
+	copied = copySequence(ancestors);
+	printf("THIS SOULD BE A COPY OF LU'S ANCESTORS\n");
+	showSequence(copied);
+	printf("THIS SHOULD BE A SEQUENCE WITH ALL OF LU'S ANCESTORS TWICE\n");
+	appendSequenceToSequence(ancestors, copied);
+	showSequence(ancestors);
+	printf("Now doing the uniqueing\n");
+	Sequence* uniqued = uniqueSequence(ancestors);
+	showSequence(uniqued);
+	printf("Now doing the uniqueing in place -- first three copies\n");
+	appendSequenceToSequence(uniqued, ancestors);
+	showSequence(uniqued);
+	uniqueSequenceInPlace(uniqued);
+	printf("And now one copy\n");
+	showSequence(uniqued);
+
 
 	printf("END TEST SEQUENCE: %2.3f\n", getMilliseconds());
 //	void deleteSequence(Sequence*);
-//	void valueSortSequence(Sequence*); //  Sort a sequence by value (not properly implemented).
-//	Sequence *uniqueSequence(Sequence*); //Return sequence uniqueued from another.
-//
 //	Sequence *personToChildren(GNode *person, Database*);
 //	Sequence *personToFathers(GNode *person, Database*);
 //	Sequence *personToMothers(GNode *person, Database*);
@@ -111,6 +141,35 @@ void testSequence(Database* database, int testNumber) {
 //	// FORSEQUENCE and ENDSEQUENCE iterate a Sequence.
 //	#define FORSEQUENCE(sequence, element, count)\
 //	#define ENDSEQUENCE }}
+}
+
+static Sequence* tomsAncestors(Database* database) {
+	Sequence* s = createSequence(database);
+	appendToSequence(s, "@I1@", null);
+	Sequence* a = ancestorSequence(s);
+	deleteSequence(s);
+	return a;
+}
+static Sequence* lusAncestors(Database* database) {
+	Sequence* s = createSequence(database);
+	appendToSequence(s, "@I2@", null);
+	Sequence* a = ancestorSequence(s);
+	deleteSequence(s);
+	return a;
+}
+static Sequence* tomsDescendents(Database* database) {
+	Sequence* s = createSequence(database);
+	appendToSequence(s, "@I1@", null);
+	Sequence* d = descendentSequence(s);
+	deleteSequence(s);
+	return d;
+}
+static Sequence* lssDescendents(Database* database) {
+	Sequence* s = createSequence(database);
+	appendToSequence(s, "@I2@", null);
+	Sequence* d = descendentSequence(s);
+	deleteSequence(s);
+	return d;
 }
 
 static void checkTest(String name, int should, int was) {

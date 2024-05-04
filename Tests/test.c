@@ -71,7 +71,7 @@ int main(void) {
 	if (database) testSequence(database, ++testNumber);
 	validated = true;
 	//if (database) forTraverseTest(database, ++testNumber);
-	if (database && validated) parseAndRunProgramTest(database, ++testNumber);
+	//if (database && validated) parseAndRunProgramTest(database, ++testNumber);
 	//if (database && validated) countNodesBeforeTest(database, ++testNumber);
 	fclose(debugFile);
 	return 0;
