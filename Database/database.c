@@ -169,21 +169,18 @@ void showTableSizes(Database *database) {
 
 // indexNames indexes all person names in a database.
 void indexNames(Database* database) {
-	static int count = 0;
-
 	if (indexNameDebugging) fprintf(debugFile, "Start indexNames\n");
-
-	// Iterate the person index.
+	static int count = 0;
 	int i, j;
 	RecordIndexEl* entry = firstInHashTable(database->personIndex, &i, &j);
-	while (entry) {
+	while (entry) { // Loop persons.
 		GNode* root = entry->root;
 		String recordKey = root->key;
 		if (indexNameDebugging) fprintf(debugFile, "indexNames: recordKey: %s\n", recordKey);
 		for (GNode* name = NAME(root); name && eqstr(name->tag, "NAME"); name = name->sibling) {
 			if (name->value) {
 				if (indexNameDebugging) fprintf(debugFile, "indexNames: name->value: %s\n", name->value);
-				//  MNOTE: nameKey is in data space. It is heapified in insertInNameIndex.
+				// MNOTE: nameKey is in data space. It is heapified in insertInNameIndex.
 				String nameKey = nameToNameKey(name->value);
 				if (indexNameDebugging) fprintf(debugFile, "indexNames: nameKey: %s\n", nameKey);
 				insertInNameIndex(database->nameIndex, nameKey, recordKey);

@@ -3,23 +3,22 @@
 // block.c holds the functions that implement the Block data type.
 //
 // Created by Thomas Wetmore on 9 March 2024
-// Last changed on 19 April 2024.
+// Last changed on 5 May 2024.
 
 #include "block.h"
 #include "sort.h"
 
 static bool blockDebugging = false;
 
-// createBlock creates and returns an empty Block.
-Block *createBlock(void) {
-	Block *block = (Block*) malloc(sizeof(Block));
+// createBlock creates an empty Block.
+Block* createBlock(void) {
+	Block* block = (Block*) malloc(sizeof(Block));
 	initBlock(block);
 	return block;
 }
 
 // initBlock initializes an existing Block.
-void initBlock(Block *block)
-{
+void initBlock(Block* block) {
 	block->length = 0;
 	block->maxLength = INITIAL_SIZE_LIST_DATA_BLOCK;
 	block->elements = (void*) malloc(INITIAL_SIZE_LIST_DATA_BLOCK*sizeof(void*));

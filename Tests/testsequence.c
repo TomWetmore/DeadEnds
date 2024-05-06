@@ -83,7 +83,7 @@ void testSequence(Database* database, int testNumber) {
 	printf("Sort ancestors by name\n");
 	nameSortSequence(ancestors);
 	showSequence(ancestors);
-	exit(0);
+	//exit(0);
 
 	// Test uniqueSequence.
 	printf("Setting up to test uniqueSequence\n");
@@ -110,20 +110,44 @@ void testSequence(Database* database, int testNumber) {
 	printf("And now one copy\n");
 	showSequence(uniqued);
 
+	// Test personToChildren
+	printf("Testing personToChildren, personToFathers, personToMothers\n");
+	GNode* tom = getRecord("@I1@", database);
+	Sequence* kids = personToChildren(tom, database);
+	showSequence(kids);
+	deleteSequence(kids);
+	// Test personToFathers, personToMothers
+	Sequence* fathers = personToFathers(tom, database);
+	showSequence(fathers);
+	Sequence* mothers = personToMothers(tom, database);
+	showSequence(mothers);
+	deleteSequence(fathers);
+	deleteSequence(mothers);
+	// Test familyToChildren, familyToFathers, familyToMothers
+	printf("Testing familyToChildren, familyToFathers, familyToMothers\n");
+	GNode* fam = getRecord("@F1@", database);
+	kids = familyToChildren(fam, database);
+	fathers = familyToFathers(fam, database);
+	mothers = familyToMothers(fam, database);
+	showSequence(kids);
+	showSequence(fathers);
+	showSequence(mothers);
+	deleteSequence(kids);
+	deleteSequence(fathers);
+	deleteSequence(mothers);
+	// Test personToSpouses
+	printf("Testing personToSpouses\n");
+	tom = getRecord("@I25@", database);
+	Sequence* spouses = personToSpouses(tom, database);
+	showSequence(spouses);
+	// Test nameToSequence.
+	printf("Testing nameToSequence\n");
+	Sequence* tomwets = nameToSequence("Thomas/Wetmore/", database);
 
 	printf("END TEST SEQUENCE: %2.3f\n", getMilliseconds());
-//	void deleteSequence(Sequence*);
-//	Sequence *personToChildren(GNode *person, Database*);
-//	Sequence *personToFathers(GNode *person, Database*);
-//	Sequence *personToMothers(GNode *person, Database*);
-//	Sequence *familyToChildren(GNode *family, Database*);
-//	Sequence *familyToFathers(GNode *family, Database*);
-//	Sequence *familyToMothers(GNode *family, Database*);
-//	Sequence *personToSpouses(GNode *person, Database*);
 //	Sequence *personToFamilies(GNode *person, bool, Database*);
 //	Sequence *nameToSequence(String, Database*);
 //	Sequence *refn_to_indiseq(String refn);
-//
 //	Sequence *unionSequence(Sequence*, Sequence*);
 //	Sequence *intersectSequence(Sequence*, Sequence*);
 //	Sequence *differenceSequence(Sequence*, Sequence*);
@@ -135,12 +159,7 @@ void testSequence(Database* database, int testNumber) {
 //	Sequence *siblingSequence(Sequence*, bool);
 //	bool elementFromSequence(Sequence*, int index, String* key, String* name);
 //	void renameElementInSequence(Sequence* sequence, String key);
-//
 //	void sequenceToGedcom(Sequence*, FILE*);
-//
-//	// FORSEQUENCE and ENDSEQUENCE iterate a Sequence.
-//	#define FORSEQUENCE(sequence, element, count)\
-//	#define ENDSEQUENCE }}
 }
 
 static Sequence* tomsAncestors(Database* database) {

@@ -24,7 +24,7 @@ static void validateReferences(Database *database, ErrorLog*);
 
 int numValidations = 0;  //  DEBUG.
 
-//  validateDatabase validates a Database.
+// validateDatabase validates a Database.
 bool validateDatabase(Database* database, ErrorLog* errorLog) {
 	ASSERT(database);
 	validatePersonIndex(database, errorLog);
@@ -45,23 +45,17 @@ bool validateDatabase(Database* database, ErrorLog* errorLog) {
 
 
 extern String nameString(String);
-
 void validateSource(GNode* source, Database* database, ErrorLog* errorLog) {}
-
 void validateEvent(GNode* event, Database* database, ErrorLog* errorLog) {}
-
 void validateOther(GNode* other, Database* database, ErrorLog* errorLog) {}
 
-
-static GNode *getFamily(String key, RecordIndex* index)
-{
-	GNode *root = searchRecordIndex(index, key);
+static GNode* getFamily(String key, RecordIndex* index) {
+	GNode* root = searchRecordIndex(index, key);
 	return root && recordType(root) == GRFamily ? root : null;
 }
 
-static GNode *getPerson(String key, RecordIndex* index)
-{
-	GNode *root = searchRecordIndex(index, key);
+static GNode* getPerson(String key, RecordIndex* index) {
+	GNode* root = searchRecordIndex(index, key);
 	return root && recordType(root) == GRPerson ? root : null;
 }
 
