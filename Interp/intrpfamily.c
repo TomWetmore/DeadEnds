@@ -1,9 +1,9 @@
+// DeadEnds
 //
-//  intrpfamily.c
-//  JustParsing
+// intrpfamily.c
 //
-//  Created by Thomas Wetmore on 17 March 2023.
-//  Last changed on 16 November 2023.
+// Created by Thomas Wetmore on 17 March 2023.
+// Last changed on 6 May 2024.
 //
 
 #include "standard.h"
@@ -13,11 +13,9 @@
 #include "lineage.h"
 #include "database.h"
 
-//  __marriage -- Return the first marriage event of a family.
-//    usage: marriage(FAM) -> EVENT
-//--------------------------------------------------------------------------------------------------
-PValue __marriage (PNode *pnode, Context *context, bool* errflg)
-{
+// __marriage returns the first marriage event of a family.
+// usage: marriage(FAM) -> EVENT
+PValue __marriage(PNode* pnode, Context* context, bool* errflg) {
 	ASSERT(pnode && context);
 	GNode* fam = evaluateFamily(pnode->arguments, context, errflg);
 	if (*errflg || !fam) return nullPValue;
@@ -25,8 +23,8 @@ PValue __marriage (PNode *pnode, Context *context, bool* errflg)
 	return event ? PVALUE(PVEvent, uGNode, event) : nullPValue;
 }
 
-//  __husband -- Find the first husband of a family.
-//    usage: husband(FAM) -> INDI
+// __husband -- Find the first husband of a family.
+// usage: husband(FAM) -> INDI
 //--------------------------------------------------------------------------------------------------
 PValue __husband(PNode *pnode, Context *context, bool* errflg)
 {

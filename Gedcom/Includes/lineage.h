@@ -1,12 +1,10 @@
+// DeadEnds
 //
-//  DeadEnds
+// lineage.h is the header file for operations on GNodes based on genealogical relationsips
+// and properties
 //
-//  lineage.h -- Header file for operations on Gedcom nodes based on genealogical relationsips
-//    and properties
-//
-//  Created by Thomas Wetmore on 17 February 2023.
-//  Last changed on 14 November 2023.
-//
+// Created by Thomas Wetmore on 17 February 2023.
+// Last changed on 6 May 2024.
 
 #ifndef lineage_h
 #define lineage_h
@@ -24,9 +22,9 @@ GNode* familyToFirstChild(GNode*, Database*);  //  Return the first child of a f
 GNode* familyToLastChild(GNode*, Database*);  //  Return the last child of a family.
 String personToName(GNode*, int);  //  Return the first name of a person.
 String personToTitle(GNode*, int);  //  Return the first title of a person.
-int numberOfSpouses(GNode*, Database*);  //  Return the number of spouses of a person.
+int numberOfSpouses(GNode*, Database*); //  Return the number of spouses of a person.
+int numberOfFamilies(GNode*); // Return the number of families a person is a spouse in.
 SexType oppositeSex(SexType);  // Return the opposite sex of a person.
-
 
 GNode* fam_to_spouse(Database*, GNode*, GNode*);
 

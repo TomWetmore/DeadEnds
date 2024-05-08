@@ -170,10 +170,8 @@ int numberOfSpouses(GNode* person, Database *database)
 	return nspouses;
 }
 
-//  numberOfFamilies -- Return the number of families a person is a spouse in.
-//--------------------------------------------------------------------------------------------------
-int numberOfFamilies(GNode* person)
-{
+// numberOfFamilies returns the number of families a person is a spouse in.
+int numberOfFamilies(GNode* person) {
 	if (!person) return 0;
 	int nfamilies = 0;
 	GNode* fams = FAMS(person);

@@ -4,7 +4,7 @@
 // static memory. Callers beware.
 //
 // Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 21 April 2024.
+// Last changed on 8 May 2024.
 
 #include "standard.h"
 #include "name.h"
@@ -133,7 +133,6 @@ static int codeOf(int letter) {
 }
 
 // exactMatch checks if a partial name is contained within a complete name.
-//  TODO: This function is not called used.
 bool exactMatch(String partial, String complete) {
     char part[MAXNAMELEN+2], comp[MAXNAMELEN+2], *p, *q;
     bool okay;
@@ -154,7 +153,7 @@ bool exactMatch(String partial, String complete) {
 
 // pieceMatch matches a partial word with a complete word. They begin with the same letter.
 // The letters in partial must be in same order as in complete. The letters case sensitive.
-static bool pieceMatch (String partial, String complete) {
+static bool pieceMatch(String partial, String complete) {
     if (*partial++ != *complete++) return false;
     while (*partial && *complete) {
         if (*partial == *complete++) partial++;
@@ -193,7 +192,7 @@ static void squeeze(String in, String out) {
 
 // personKeysFromName finds all persons with a name that matches a given name; returns an
 // array of Strings with the record keys; pcount set to number of Strings.
-String* personKeysFromName(String name, Database *database, int* pcount)
+String* personKeysFromName(String name, Database* database, int* pcount)
 {
     static bool first = true;
 	static Block recordKeys; // Dangerous state variable.
@@ -210,7 +209,7 @@ String* personKeysFromName(String name, Database *database, int* pcount)
 	FORLIST(list, recordKey)
 		GNode* person = keyToPerson((String) recordKey, database);
 		for (GNode* node = NAME(person); node && eqstr(node->tag, "NAME"); node = node->sibling) {
-			if (!compareNames(name, node->value)) continue;
+			if (!exactMatch(name, node->value)) continue;
 			appendToBlock(&recordKeys, recordKey);
 			count++;
 			break;
@@ -220,11 +219,8 @@ String* personKeysFromName(String name, Database *database, int* pcount)
     return (String*) recordKeys.elements;
 }
 
-//  compareNames -- Compare two Gedcom names. Return their relationship.
-//--------------------------------------------------------------------------------------------------
-int compareNames(String name1, String name2)
-//  name1, name2 -- The two names to compare.
-{
+// compareNames compares two Gedcom names and returns their relationship.
+int compareNames(String name1, String name2) {
     char sqz1[MAXNAMELEN], sqz2[MAXNAMELEN];
     String p1 = sqz1,  p2 = sqz2;
     int r = strcmp(getSurname(name1), getSurname(name2));
@@ -244,11 +240,8 @@ int compareNames(String name1, String name2)
     return 0;
 }
 
-// cmpsqueeze -- Squeeze a Gedcom name to a superstring of given names.
-//--------------------------------------------------------------------------------------------------
-static void cmpsqueeze (String in, String out)
-//  in, out --
-{
+// cmpsqueeze squeezes a Gedcom name to a superstring of given names.
+static void cmpsqueeze(String in, String out) {
     int c;
     while ((in = nextPiece(in))) {
         while (true) {
@@ -264,36 +257,25 @@ static void cmpsqueeze (String in, String out)
     *out = 0;
 }
 
-//  givens -- Return the given names from a Gedcom format name.
-//    TODO: I don't see how this ignores the surname. Test this thoroughly.
-//--------------------------------------------------------------------------------------------------
-String getGivenNames (String name)
-//  name -- Name in Gedcom format.
-{
+// getGivenNames returns the given names of a Gedcom format name.
+// TODO: I don't see how this ignores the surname.
+String getGivenNames(String name) {
     int c;
-    // Buffer to hold the given names.
     static char scratch[MAXNAMELEN+1];
     String out = scratch;
-    // Scan the Gedcom name for its 'pieces'.
-    while ((name = nextPiece(name))) {  // Get the next piece of the Gedcom name.
+    while ((name = nextPiece(name))) { // Next piece.
         while (true) {
-            // If have reached the end of the Gedcom name.
-            if ((c = *name++) == 0) {
-                // If the last character in the out buffer is a space backup a character.
+            if ((c = *name++) == 0) { // At end.
                 if (*(out - 1) == ' ') --out;
-                // Add null at the end of the out buffer and return it.
                 *out = 0;
                 return scratch;
             }
-            // If found white space or a slash, add a space to the out buffer.
-            if (iswhite(c) || c == '/') {
+            if (iswhite(c) || c == '/') { // White or slash.
                 *out++ = ' ';
-                // Backup one character in the name string and break.
                 --name;
                 break;
             }
-            // Otherwise add the current character to the out buffer and continue.
-            *out++ = c;
+            *out++ = c; // Add and continue.
         }
     }
     if (*(out - 1) == ' ') --out;
@@ -301,35 +283,22 @@ String getGivenNames (String name)
     return scratch;
 }
 
-// nextPiece -- Return next word in a Gedcom name string that is not the surname.
-//--------------------------------------------------------------------------------------------------
-static String nextPiece (String in)
-// String in -- String holding a shrinking Gedcom name. Called multiple times. On each call the
-// previous part has been 'removed'.
-{
+// nextPiece returns the next word in a Gedcom name that is not the surname.
+static String nextPiece(String in) {
     int c;
-    while (true) {  // Character scanning loop.
-        // Move by white space.
-        while (iswhite(c = *in++)) ;
-        // If at the end of string scanning is done so return null.
-        if (c == 0) return null;
-        // If the character is not '/' return current location in String.
-        if (c != '/') return --in;
-        // When the first slash is found read by characters to the last slash.
-        while ((c = *in++) && c != '/') ;
-        // If at end of string before finding second slash return null.
+    while (true) {
+        while (iswhite(c = *in++)); // White.
+        if (c == 0) return null; // At end.
+        if (c != '/') return --in; // If not '/' at next piece.
+        while ((c = *in++) && c != '/') ; // Skip to next slash.
         if (c == 0) return null;
     }
 }
 
-//  trimName -- Trim a Gedcom name to be less or equal to a given length but not shorter than
-//    the first initial and surname.
-//--------------------------------------------------------------------------------------------------
+// trimName trims a Gedcom name to be less or equal to a given length but not shorter than
+// the first initial and surname.
 #define MAXPARTS 100
-String trimName(String name, int len)
-//  name -- Gedcom name string to be trimmed.
-//  len -- Desired maximum final length for the returned string.
-{
+String trimName(String name, int len) {
     String parts[MAXPARTS];
     int i, sdex = -1, nparts;
     nameToParts(name, parts);
@@ -359,12 +328,8 @@ String trimName(String name, int len)
     return name;
 }
 
-// nameToParts -- Convert Gedcom name to parts; keep slashes.
-//--------------------------------------------------------------------------------------------------
-static void nameToParts(String name, String* parts)
-//  name -- Gedcom name.
-//  parts --
-{
+// nameToParts converts a Gedcom name to its parts; keep slashes.
+static void nameToParts(String name, String* parts) {
     static char scratch[MAXNAMELEN+1];
     String p = scratch;
     int c, i = 0;
@@ -394,13 +359,9 @@ static void nameToParts(String name, String* parts)
     }
 }
 
-// nameToList convert a name to a List of Strings; List must exist; uses static memory.
-bool nameToList(String name, List *list, int *plen, int *psind)
-// name	-- Gedcom name
-// list	-- list (must exist)
-// plen	-- returned length
-// psind -- index (rel 1) of surname in list
-{
+// nameToList converts a name to a List of Strings; List must exist; uses static memory. plen
+// is the number of strings; psind is the index relative one of the surname.
+bool nameToList(String name, List* list, int* plen, int* psind) {
 	int i;
 	String str;
 	String parts[MAXPARTS];
@@ -442,12 +403,8 @@ static String partsToName(String* parts) {
     return scratch;
 }
 
-// upsurname -- Make a Gedcom name have an all uppercase surname.
-//    MNOTE: The returned string is in static memory.
-//--------------------------------------------------------------------------------------------------
-String upsurname(String name)
-//  name -- Gedcom name (with surname between slashes).
-{
+// upsurname makes a Gedcom name have an all uppercase surname. Static memory returned.
+String upsurname(String name) {
     static char scratch[MAXNAMELEN+1];
     String p = scratch;
     int c;
@@ -462,7 +419,7 @@ String upsurname(String name)
 
 // manipulateName converts a Gedcom name to various formats. caps specifies the surname to upper
 // case. If reg is false surname comes first followed by comma. len specifies the max length.
-String manipulateName (String name, bool caps, bool reg, int len) {
+String manipulateName(String name, bool caps, bool reg, int len) {
     if (!name || *name == 0) return null;
     if (caps) name = upsurname(name);
     name = trimName(name, reg ? len: len-1);
@@ -496,4 +453,3 @@ static String nameSurnameFirst(String name) {
     strcpy(p, getGivenNames(name));
     return scratch;
 }
-

@@ -750,36 +750,28 @@ PValue __deletenode (PNode *node, Context *context, bool *eflg)
 	return nullPValue;
 }
 
-//  __getrecord -- Read GEDCOM record from database.
-//    usage: getrecord(STRING) -> NODE
-//    usage: dereference(STRING) -> NODE
-//--------------------------------------------------------------------------------------------------
-PValue __getrecord (PNode *pnode, Context *context, bool *errflg)
-{
+// __getrecord reads a GNode record from a database.
+// usage: getrecord(STRING) -> NODE and dereference(STRING) -> NODE
+PValue __getrecord (PNode *pnode, Context *context, bool *errflg) {
 	String key = evaluateString(pnode->arguments, context, errflg);
 	if (*errflg || !key || *key == 0) {
 		scriptError(pnode, "The first parameter to getrecord (dereference) must be a record key.");
 		*errflg = true;
 		return nullPValue;
 	}
-	GNode* root = getRecord(context->database, key);
+	GNode* root = getRecord(key, context->database);
 	return root ? PVALUE(PVGNode, uGNode, root) : nullPValue;
 }
 
-//  __freerecord
-//    usage: freerecord(NODE) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __freerecord (PNode *pnode, Context *context, bool *errflg)
-{
-	// With an in-RAM database this function is a no-op.
+// __freerecord is now a no-op because of the in-Ram database.
+// usage: freerecord(NODE) -> VOID
+PValue __freerecord (PNode* pnode, Context* context, bool* errflg) {
 	return nullPValue;
 }
 
-//  __reference -- Check if STRING is record reference.
-//    usage: reference(STRING) -> BOOLEAN
-//--------------------------------------------------------------------------------------------------
-PValue __reference (PNode *pnode, Context *context, bool *errflg)
-{
+// __reference checks if a String is has the format of a record key.
+// usage: reference(STRING) -> BOOLEAN
+PValue __reference (PNode* pnode, Context* context, bool* errflg) {
 	String key = evaluateString(pnode->arguments, context, errflg);
 	if (*errflg) {
 		scriptError(pnode, "The argument to reference must be formatted as a record key.");
@@ -790,8 +782,8 @@ PValue __reference (PNode *pnode, Context *context, bool *errflg)
 	return PVALUE(PVBool, uBool, rvalue);
 }
 
-//  __extracttokens -- Extract tokens from a STRING value
-//    usage: extracttokens(STRING, LIST, VARB, STRING) -> VOID
+// __extracttokens -- Extract tokens from a STRING value
+// usage: extracttokens(STRING, LIST, VARB, STRING) -> VOID
 //--------------------------------------------------------------------------------------------------
 PValue __extracttokens (PNode *pnode, Context *context, bool *errflg)
 {

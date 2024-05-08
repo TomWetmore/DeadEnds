@@ -66,7 +66,7 @@ int main(void) {
 	//if (database) listTest(database, ++testNumber);
 	//if (database) forHashTableTest(database, ++testNumber);
 	//if (database) showHashTableTest(database->personIndex, ++testNumber);
-	//if (database) indexNamesTest(database, ++testNumber);
+	if (database) indexNamesTest(database, ++testNumber);
 	//if (database) validated = validateDatabaseTest(database, ++testNumber);
 	if (database) testSequence(database, ++testNumber);
 	validated = true;

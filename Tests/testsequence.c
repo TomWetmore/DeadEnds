@@ -142,7 +142,8 @@ void testSequence(Database* database, int testNumber) {
 	showSequence(spouses);
 	// Test nameToSequence.
 	printf("Testing nameToSequence\n");
-	Sequence* tomwets = nameToSequence("Thomas/Wetmore/", database);
+	Sequence* tomwets = nameToSequence("T/Wtmre/", database);
+	showSequence(tomwets);
 
 	printf("END TEST SEQUENCE: %2.3f\n", getMilliseconds());
 //	Sequence *personToFamilies(GNode *person, bool, Database*);
