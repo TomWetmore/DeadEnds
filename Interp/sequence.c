@@ -64,7 +64,7 @@ SequenceEl* createSequenceEl(Database* database, String key, void* value) {
 	GNode* root = getRecord(key, database);
 	ASSERT(root);
 	element->root = root;
-	element->name = (NAME(root))->value;
+	if (recordType(root) == GRPerson) element->name = (NAME(root))->value;
 	element->value = value;
 	return element;
 }
@@ -490,8 +490,6 @@ Sequence* familyToMothers(GNode* fam, Database* database) {
 // siblingSequence creates the Sequence of the sibllings of the persons in the given Sequence.
 // If close is true include the persons in the initial Sequence in the sibling Sequence.
 Sequence* siblingSequence(Sequence* sequence, bool close) {
-	GNode* fam;
-	String key;
 	Database* database = sequence->database;
 	StringTable* tab = createStringTable(numBucketsInSequenceTables);
 	Sequence* familySequence = createSequence(database);
@@ -501,16 +499,17 @@ Sequence* siblingSequence(Sequence* sequence, bool close) {
 		//  BUT TO BE CONSISTENT WITH OTHER SITUATIONS WHERE THERE ARE MULTIPLE FAMC NODES,
 		//  IT MIGHT BE BETTER TO GO THROUGH THEM ALL.
 		GNode* person = keyToPerson(element->root->key, database);
-		if ((fam = personToFamilyAsChild(person, database)) == NULL) {
-			appendToSequence(familySequence, familyToKey(fam), 0);
+		GNode* famc = personToFamilyAsChild(person, database);
+		if (famc) {
+			appendToSequence(familySequence, familyToKey(famc), 0);
 		}
 		if (!close) addToStringTable(tab, element->root->key, null);
 	}
 	ENDSEQUENCE
 	FORSEQUENCE(familySequence, el, num)
-		fam = keyToFamily(el->root->key, database);
+		GNode* fam = keyToFamily(el->root->key, database);
 		FORCHILDREN(fam, chil, chilKey, num2, database)
-			key = personToKey(chil);
+			String key = personToKey(chil);
 			if (!isInHashTable(tab, key)) {
 				appendToSequence(siblingSequence, key, 0);
 				addToStringTable(tab, key, null);
@@ -728,7 +727,6 @@ static void writeLimitedFamily (GNode *family) {
 
 // nameToSequence returns the Sequence of persons who match a Gedcom name. If the first letter of
 // the given names is '*', the Sequence will contain all persons who match the surname.
-// TODO: THIS DOES NOT FILTER OUT PERSONS WHO ACTUALLY MATCH THE REAL NAMES.
 Sequence* nameToSequence(String name, Database* database) {
 	ASSERT(name && *name && database);
 	if (!name || *name == 0 || !database) return null;
@@ -812,59 +810,34 @@ void showSequence(Sequence* sequence) {
 //        } ENDSEQUENCE
 //    }
 //}
-/*==============================================================
- * refn_to_indiseq -- Return indiseq whose user references match
- *============================================================*/
-//Sequence refn_to_indiseq (ukey)
-//String ukey;
-//{
-//    String *keys;
-//    int num, i;
-//    Sequence seq;
-//
-//    if (!ukey || *ukey == 0) return null;
-//    get_refns(ukey, &num, &keys, 'I');
-//    if (num == 0) return null;
-//    seq = createSequence();
-//    for (i = 0; i < num; i++) {
-//        appendToSequence(seq, keys[i], null, null, false);
-//    }
-//    if (length_indiseq(seq) == 0) {
-//        deleteSequence(seq, false);
-//        return null;
-//    }
-//    namesort_indiseq(seq);
-//    return seq;
-//}
 
-//  key_to_indiseq -- Return person sequence of the matching key
-//--------------------------------------------------------------------------------------------------
-//Sequence key_to_indiseq(String name)
-////  name
-//{
-//    if (!name) return null;
-//    String *keys;
-//    Sequence seq = null;
-//    if (!(id_by_key(name, &keys))) return null;
-//    seq = createSequence();
-//    appendToSequence(seq, keys[0], null, null, false);
-//    return seq;
-//}
-/*===========================================================
- * str_to_indiseq -- Return person sequence matching a string
- * The rules of search precedence are implemented here:
- *  1. named indiset
- *  2. key, with or without the leading "I"
- *  3. REFN
- *  4. name
- *===========================================================*/
-//Sequence str_to_indiseq (String name)
-////String name;
-//{
-//    Sequence seq;
-//    seq = find_named_seq(name);
-//    if (!seq) seq = key_to_indiseq(name);
-//    if (!seq) seq = refn_to_indiseq(name);
-//    if (!seq) seq = nameToSequence(name);
-//    return seq;
-//}
+// keyToSequence returns a single element Sequence with the record with the given key; or null.
+// THIS NEEDS TO BE MADE MORE COMPLICATED--I & F optional, @-signs optional.
+Sequence* keyToSequence(String key, Database* database) {
+	GNode* record = getRecord(key, database);
+	if (!record) return null;
+	Sequence* sequence = createSequence(database);
+	appendToSequence(sequence, key, null);
+	return sequence;
+}
+
+// refnToSequence returns a single element Sequence with the record with given refn value; or null.
+Sequence* refnToSequence(String value, Database* database) {
+	String recordKey = searchRefnIndex(database->refnIndex, value);
+	GNode* record = getRecord(recordKey, database);
+	if (!record) return null;
+	Sequence* sequence = createSequence(database);
+	appendToSequence(sequence, recordKey, null);
+	return sequence;
+}
+
+// stringToSequence returns a person sequence whose members "match" a string. Order: a) named
+// Sequence (don't exist); b) key with or without leading 'I' (if used); c) REFN value; d) name.
+Sequence* stringToSequence(String name, Database* database) {
+	Sequence* sequence = null;
+//    sequence = find_named_seq(name);
+	if (!sequence) sequence = keyToSequence(name, database);
+	if (!sequence) sequence = refnToSequence(name, database);
+	if (!sequence) sequence = nameToSequence(name, database);
+	return sequence;
+}

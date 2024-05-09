@@ -200,6 +200,7 @@ String* personKeysFromName(String name, Database* database, int* pcount)
 		initBlock(&recordKeys);
         first = false;
     }
+	if (pcount) *pcount = 0;
     Set *keySet = searchNameIndex(database->nameIndex, name); // Keys of persons who match.
     if (!keySet || lengthSet(keySet) == 0) return null;
     emptyBlock(&recordKeys, null);

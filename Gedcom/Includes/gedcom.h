@@ -1,15 +1,15 @@
 // DeadEnds
 //
-// gedcom.h
+// gedcom.h is the header file for Gedcom related data types and operations.
 //
 // Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 27 April 2024.
+// Last changed on 9 May 2024.
 //
 
 #ifndef gedcom_h
 #define gedcom_h
 
-typedef struct GNode GNode;  //  Forward reference.
+typedef struct GNode GNode; // Forward ref.
 #include "standard.h"
 #include "gnode.h"
 #include "list.h"

@@ -59,7 +59,7 @@ Sequence* familyToMothers(GNode* family, Database*);
 Sequence* personToSpouses(GNode* person, Database*);
 Sequence* personToFamilies(GNode* person, bool, Database*);
 Sequence* nameToSequence(String, Database*);
-Sequence* refn_to_indiseq(String refn);
+Sequence* refnToSequence(String refn, Database*);
 
 Sequence* unionSequence(Sequence*, Sequence*);
 Sequence* intersectSequence(Sequence*, Sequence*);

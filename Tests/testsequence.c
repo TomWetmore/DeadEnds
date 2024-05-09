@@ -142,23 +142,58 @@ void testSequence(Database* database, int testNumber) {
 	showSequence(spouses);
 	// Test nameToSequence.
 	printf("Testing nameToSequence\n");
-	Sequence* tomwets = nameToSequence("T/Wtmre/", database);
+	Sequence* tomwets = nameToSequence("Thomas Trask/Wtmre/", database);
 	showSequence(tomwets);
+	printf("Testing wild card name feature on */grenda/\n");
+	Sequence* grendas = nameToSequence("*/Grenda", database);
+	showSequence(grendas);
+	// Test childSequence.
+	printf("Testing childSequence\n");
+	Sequence* children = childSequence(tomwets);
+	showSequence(children);
+	// Test parentSequence
+	printf("Testing parentSequence\n");
+	Sequence* parents = parentSequence(tomwets);
+	showSequence(parents);
+	// Test spouseSequence.
+	printf("Testing spouseSequence\n");
+	spouses = spouseSequence(tomwets);
+	showSequence(spouses);
+	// Test descendentSequence.
+	printf("Testing descendentSequence\n");
+	Sequence* desc = descendentSequence(tomwets);
+	showSequence(desc);
+	// Test siblingSequence
+	printf("Testing siblingSequence\n");
+	Sequence* sibs = siblingSequence(tomwets, 0);
+	showSequence(sibs);
+	// Test elementFromSequence.
+	printf("Testing elementFromSequence\n");
+	for (int i = 0; i < lengthSequence(tomwets); i++) {
+		String key, name;
+		elementFromSequence(tomwets, i, &key, &name);
+		printf("%d: %s: %s\n", i, key, name);
+	}
+	// Test unionSequence.
+	printf("Testing unionSequence\n");
+	Sequence* toms = tomsAncestors(database);
+	Sequence* lus = lusAncestors(database);
+	Sequence* unionseq = unionSequence(toms, lus);
+	showSequence(unionseq);
+	// Test intersectSequence.
+	printf("Testing intersectSequence\n");
+	Sequence* intersectseq = intersectSequence(toms, lus);
+	showSequence(intersectseq);
+	// Test differenceSequence.
+	printf("Testing differenceSequence\n");
+	Sequence* tomDiffLu = differenceSequence(toms, lus);
+	Sequence* luDiffTom = differenceSequence(lus, toms);
+	showSequence(tomDiffLu);
+	showSequence(luDiffTom);
 
 	printf("END TEST SEQUENCE: %2.3f\n", getMilliseconds());
 //	Sequence *personToFamilies(GNode *person, bool, Database*);
-//	Sequence *nameToSequence(String, Database*);
 //	Sequence *refn_to_indiseq(String refn);
-//	Sequence *unionSequence(Sequence*, Sequence*);
-//	Sequence *intersectSequence(Sequence*, Sequence*);
-//	Sequence *differenceSequence(Sequence*, Sequence*);
-//	Sequence *childSequence(Sequence*);
-//	Sequence *parentSequence(Sequence*);
-//	Sequence *spouseSequence(Sequence*);
-//	Sequence *ancestorSequence(Sequence*);
-//	Sequence *descendentSequence(Sequence*);
-//	Sequence *siblingSequence(Sequence*, bool);
-//	bool elementFromSequence(Sequence*, int index, String* key, String* name);
 //	void renameElementInSequence(Sequence* sequence, String key);
 //	void sequenceToGedcom(Sequence*, FILE*);
 }
