@@ -1,11 +1,10 @@
 // DeadEnds
 //
 // splitjoin.c has the functions that split persons and families into parts and join them back
-// together. Calling split and join formats person and family node trees into standard form.
-// This makes followon operations more efficient.
+// together. Calling split and join formats GNode trees into standard form.
 //
 // Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 25 April 2024.
+// Last changed on 12 May 2024.
 
 #include "standard.h"
 #include "gnode.h"
@@ -166,27 +165,84 @@ void joinFamily (GNode* fam, GNode* refn, GNode* husb, GNode* wife, GNode* chil,
 	}
 }
 
-// normalizePerson gets person GNode tree into standard format.
-GNode* normalizePerson(GNode *indi) {
-    GNode *names, *refns, *sex, *body, *famcs, *famss;
-    splitPerson(indi , &names, &refns, &sex, &body, &famcs, &famss);
-    joinPerson(indi, names, refns, sex, body, famcs, famss);
-    return indi;
+// splitTree splits a non person or family tree into parts.
+static void splitTree(GNode* root, GNode** prefn, GNode** prest) {
+	GNode *node, *rest, *last;
+	GNode *prev, *refn, *lref;
+	String tag;
+	rest = last = null;
+	prev = refn = lref = null;
+	node = root->child;
+	root->child = root->sibling = null;
+	while (node) {
+		tag = node->tag;
+		if (eqstr("REFN", tag)) {
+			if (refn)
+				lref = lref->sibling = node;
+			else
+				refn = lref = node;
+		} else if (rest)
+			last = last->sibling = node;
+		else
+			last = rest = node;
+		prev = node;
+		node = node->sibling;
+		prev->sibling = null;
+	}
+	*prefn = refn;
+	*prest = rest;
 }
 
-// normalizeFamily gets a family GNode tree into standard format.
+// joinTree joins a non person or family GNode tree from parts.
+static void joinTree (GNode* root, GNode* refn, GNode* rest) {
+	GNode *node = null;
+	root->child = null;
+	if (refn) {
+		root->child = node = refn;
+		while (node->sibling) node = node->sibling;
+	}
+	if (rest) {
+		if (node) node = node->sibling = rest;
+		else root->child = node = rest;
+		while (node->sibling) node = node->sibling;
+	}
+}
+
+// normalizePerson puts a person GNode tree into standard format.
+GNode* normalizePerson(GNode *indi) {
+	GNode *names, *refns, *sex, *body, *famcs, *famss;
+	splitPerson(indi , &names, &refns, &sex, &body, &famcs, &famss);
+	joinPerson(indi, names, refns, sex, body, famcs, famss);
+	return indi;
+}
+
+// normalizeFamily puts a family GNode tree into standard format.
 GNode* normalizeFamily(GNode *fam) {
-    GNode *refns, *husb, *wife, *chil, *body;
-    splitFamily(fam, &refns, &husb, &wife, &chil, &body);
-    joinFamily(fam, refns, husb, wife, chil, body);
-    return fam;
+	GNode *refns, *husb, *wife, *chil, *body;
+	splitFamily(fam, &refns, &husb, &wife, &chil, &body);
+	joinFamily(fam, refns, husb, wife, chil, body);
+	return fam;
+}
+
+// normalizeTree puts a non person or family tree into standard format.
+static GNode* normalizeTree(GNode* root) {
+	GNode* refns, *body;
+	splitTree(root, &refns, &body);
+	joinTree(root, refns, body);
+	return root;
 }
 
 // normalizeEvent gets an event GNode tree into standard format; currently a no-op.
-GNode* normalizeEvent(GNode* event) { return event; }
+GNode* normalizeEvent(GNode* event) {
+	return normalizeTree(event);
+}
 
 // normalizeSource gets a source GNode tree into standard format; currently a no-op.
-GNode* normalizeSource(GNode* source) { return source; }
+GNode* normalizeSource(GNode* source) {
+	return normalizeTree(source);
+}
 
 // normalizeOther gets an other GNode tree into to standard format; currently a no-op.
-GNode* normalizeOther(GNode* other) { return other; }
+GNode* normalizeOther(GNode* other) {
+	return normalizeTree(other);
+}

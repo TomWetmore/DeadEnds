@@ -289,7 +289,7 @@ void showNodeList(NodeList *nodeList)
 		if (nodeListElement->error) {
 			printf("Error: "); showError(nodeListElement->error);
 		} else if (nodeListElement->node) {
-			printf("Node: "); showSingleGNode(nodeListElement->level, nodeListElement->node);
+			printf("Node: "); showGNode(nodeListElement->level, nodeListElement->node);
 		}
 	ENDLIST
 }

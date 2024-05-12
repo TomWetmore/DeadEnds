@@ -3,7 +3,7 @@
 //  gnode.c has the functions for the GNode data type.
 //
 //  Created by Thomas Wetmore on 12 November 2022.
-//  Last changed on 19 April 2024.
+//  Last changed on 11 May 2024.
 
 #include "standard.h"
 #include "gnode.h"
@@ -16,9 +16,7 @@
 #include "readnode.h"
 #include "database.h"
 
-typedef struct HashTable StringTable;
-
-// tagTable is a StringTable that ensures there is only one copy of the tags used in GNodes.
+// tagTable is a StringTable that holds the single copy of all keys used in the GNodes.
 static StringTable *tagTable = null;
 
 // numNodeAllocs returns the number of nodes that have been allocated in the heap. Debugging.
@@ -33,7 +31,7 @@ int numNodeFrees(void) {
 	return nodeFrees;
 }
 
-// getFromTagTable returns the persistent copy of a tag from the tag table.
+// getFromTagTable returns the persistent tag value from the tag table.
 static int numBucketsInTagTable = 67;
 static String getFromTagTable(String tag) {
 	if (tagTable) return fixString(tagTable, tag);
@@ -54,7 +52,7 @@ GNode* createGNode(String key, String tag, String value, GNode* parent) {
 	nodeAllocs++;
 	GNode* node = (GNode*) malloc(sizeof(GNode));;
 	node->key = strsave(key);
-	node->tag = getFromTagTable(tag); // Get persistent copy.
+	node->tag = getFromTagTable(tag);
 	node->value = strsave(value);
 	node->parent = parent;
 	node->child = null;
@@ -65,15 +63,14 @@ GNode* createGNode(String key, String tag, String value, GNode* parent) {
 // freeGNodes frees all GNodes in a tree or forest of GNodes.
 void freeGNodes(GNode* node) {
 	while (node) {
-		if (node->child) freeGNodes(node->child); // Recurse to children.
-		GNode* sibling = node->sibling; // Tail recurse to siblings.
+		if (node->child) freeGNodes(node->child);
+		GNode* sibling = node->sibling;
 		freeGNode(node);
 		node = sibling;
 	}
 }
 
-// gnodeLevel returns the level of a GNode in its tree. Works by counting parent links, so the
-// node must be in its proper location in a tree.
+// gnodeLevel returns the level of a GNode; counts parent links.
 int gnodeLevel(GNode* node) {
 	int level = 0;
 	while (node->parent) {
@@ -83,18 +80,14 @@ int gnodeLevel(GNode* node) {
 	return level;
 }
 
-//  personToEvent -- Convert an event tree into a string.
-//  MNOTE: The string returned is in static memory. Callers must retain a copy if necessary.
-//--------------------------------------------------------------------------------------------------
-String personToEvent(GNode* node, String tag, String head, int len, bool shorten)
-{
-	ASSERT(node);
+// personToEvent converta an event tree to a string; returns static memory.
+String personToEvent(GNode* person, String tag, String head, int len, bool shorten) {
 	static char scratch[200];
 	String event;
 	size_t n;
-	if (!node) return null;
-	if (!(node = findTag(node->child, tag))) return null;
-	event = eventToString(node, shorten);
+	if (!person) return null;
+	if (!(person = findTag(person->child, tag))) return null;
+	event = eventToString(person, shorten);
 	if (!event) return null;
 	sprintf(scratch, "%s%s", head, event);
 	n = strlen(scratch);
@@ -106,11 +99,8 @@ String personToEvent(GNode* node, String tag, String head, int len, bool shorten
 	return scratch;
 }
 
-//  eventToString -- Convert an event to a string.
-//  MNOTE: The string returned is in static memory. Callers must retain a copy if necessary.
-//--------------------------------------------------------------------------------------------------
-String eventToString (GNode* node, bool shorten)
-{
+// eventToString converts an event to a string; returns static memory.
+String eventToString(GNode* node, bool shorten) {
 	static char scratch[MAXLINELEN+1];
 	String date, plac, p;
 	date = plac = null;
@@ -123,8 +113,8 @@ String eventToString (GNode* node, bool shorten)
 	}
 	if (!date && !plac) return null;
 	if (shorten) {
-		date = shorten_date(date);
-		plac = shorten_plac(plac);
+		date = shortenDate(date);
+		plac = shortenPlace(plac);
 		if (!date && !plac) return null;
 	}
 	p = scratch;
@@ -149,30 +139,30 @@ String eventToString (GNode* node, bool shorten)
 }
 
 // eventToDate returns the date of an event as a string.
-String eventToDate (GNode* node, bool shorten) {
+String eventToDate(GNode* node, bool shorten) {
 	if (!node) return null;
 	if (!(node = DATE(node))) return null;
-	if (shorten) return shorten_date(node->value);
+	if (shorten) return shortenDate(node->value);
 	return node->value;
 }
 
-//  eventToPlace returns the place of an event as a string.
+// eventToPlace returns the place of an event as a string.
 String eventToPlace (GNode* node, bool shorten) {
 	if (!node) return null;
 	node = PLAC(node);
 	if (!node) return null;
-	if (shorten) return shorten_plac(node->value);
+	if (shorten) return shortenPlace(node->value);
 	return node->value;
 }
 
-// showGNode shows a tree of GNodes; for debugging.
-void showGNode(GNode* node) {
+// showGNodeTree shows a tree of GNodes; for debugging.
+void showGNodeTree(GNode* node) {
 	if (!node) return;
-	showGNodeRecursive(0, node);
+	showGNodes(0, node);
 }
 
-// showGNodeRecursive is the recursive version of showGNode.
-void showGNodeRecursive(int levl, GNode* node) {
+// showGNodes shows a GNode tree recursively.
+void showGNodes(int levl, GNode* node) {
 	if (!node) return;
 	for (int i = 1;  i < levl;  i++) printf("  ");
 	printf("%d", levl);
@@ -180,12 +170,12 @@ void showGNodeRecursive(int levl, GNode* node) {
 	printf(" %s", node->tag);
 	if (node->value) printf(" %s", node->value);
 	printf("\n");
-	showGNodeRecursive(levl + 1, node->child);
-	showGNodeRecursive(levl    , node->sibling);
+	showGNodes(levl + 1, node->child);
+	showGNodes(levl    , node->sibling);
 }
 
-void showSingleGNode(int level, GNode *node)
-{
+// showGNode returns the string (Gedcom line) form of a GNode.
+void showGNode(int level, GNode* node) {
 	printf("%d", level);
 	if (node->key) printf(" %s", node->key);
 	printf(" %s", node->tag);
@@ -193,11 +183,8 @@ void showSingleGNode(int level, GNode *node)
 	printf("\n");
 }
 
-// length_nodes -- Return the length of the list of Nodes starting with first.
-//--------------------------------------------------------------------------------------------------
-int length_nodes(GNode* first)
-// Node first -- first Node in the list of Nodes to count.
-{
+// length_nodes returns the length of the list of GNodes.
+int length_nodes(GNode* first) {
 	int len = 0;
 	while (first) {
 		len++;
@@ -206,10 +193,8 @@ int length_nodes(GNode* first)
 	return len;
 }
 
-// shorten_date -- Return the short form of a date value.
-//--------------------------------------------------------------------------------------------------
-String shorten_date(String date)
-{
+// shortenDate return the short form of a date value.
+String shortenDate(String date) {
 	static char buffer[3][MAXLINELEN+1];
 	static int dex = 0;
 	String p = date, q;
@@ -240,54 +225,40 @@ String shorten_date(String date)
 	}
 }
 
-// shorten_plac -- Return the short form of a place value.
-//--------------------------------------------------------------------------------------------------
-String shorten_plac(String plac)
-{
-	String plac0 = plac, comma /* , val */;
-	if (!plac) return null;
-	comma = (String) strrchr(plac, ',');
-	if (comma) plac = comma + 1;
-	while (*plac++ == ' ')
+// shortenPlace returns the short form of a place value.
+String shortenPlace(String place) {
+	String plac0 = place, comma;
+	if (!place) return null;
+	comma = (String) strrchr(place, ',');
+	if (comma) place = comma + 1;
+	while (*place++ == ' ')
 		;
-	plac--;
-	if (*plac == 0) return plac0;
+	place--;
+	if (*place == 0) return plac0;
 	//if ((val = (String) valueof(placabbvs, plac))) return val;
-	return plac;
+	return place;
 }
 
-// all_digits -- Check if a String is all digits.
-//--------------------------------------------------------------------------------------------------
-//static bool all_digits(String s)
-//{
-//	int c;
-//	while ((c = *s++)) {
-//		if (c < '0' || c > '9') return false;
-//	}
-//	return true;
-//}
+// allDigits checks if a String is all digits. (No longer called.)
+static bool allDigits(String s) {
+	int c;
+	while ((c = *s++))
+		if (c < '0' || c > '9') return false;
+	return true;
+}
 
-// copy_node -- Copy a Node.
-//--------------------------------------------------------------------------------------------------
-GNode* copy_node(GNode* node)
-{
+// copyNode copies a GNode.
+GNode* copyNode(GNode* node) {
 	return createGNode(node->key, node->tag, node->value, null);
 }
 
-// copyNodes -- Copy a tree of Nodes.
-//--------------------------------------------------------------------------------------------------
-GNode* copyNodes (GNode* node, bool kids, bool sibs)
-//  node -- Node tree to copy.
-//  kids -- If true also copy children.
-//  sibs -- if true also cope siblings.
-{
-	GNode* new;
-	GNode* kin;
+// copyNodes copies a GNode tree. If kids or sibs copy children or siblings respectively.
+GNode* copyNodes(GNode* node, bool kids, bool sibs) {
 	if (!node) return null;
-	new = copy_node(node);
+	GNode* kin;
+	GNode* new = copyNode(node);
 	if (kids && node->child) {
 		kin = copyNodes(node->child, true, true);
-		ASSERT(kin);
 		new->child = kin;
 		while (kin) {
 			kin->parent = new;
@@ -296,49 +267,35 @@ GNode* copyNodes (GNode* node, bool kids, bool sibs)
 	}
 	if (sibs && node->sibling) {
 		kin = copyNodes(node->sibling, kids, true);
-		ASSERT(kin);
 		new->sibling = kin;
 	}
 	return new;
 }
 
-// traverseNodes -- Traverse the nodes of a Gedcom record tree calling a function on each.
-//--------------------------------------------------------------------------------------------------
-void traverseNodes (GNode* node, int level, bool (*func)(GNode*, int))
-//  node -- Current node in tree.
-//  level -- Level of the node.
-//  func -- Function to call at node. If it returns false don't go deeper.
-{
-	if (func == null) return; // Nothing to do if there is no function.
+// traverseNodes traverse the GNodes of a Gedcom record calling a function on each.
+void traverseNodes(GNode* node, int level, bool (*func)(GNode*, int)) {
+	if (func == null) return;
 	for (; node; node = node->sibling) {
 		if (!(*func)(node, level)) continue;
 		if (node->child) traverseNodes(node->child, level+1, func);
 	}
 }
 
-//  countNodes -- Return the number of gedcom nodes in a record tree.
-//--------------------------------------------------------------------------------------------------
-int countNodes (GNode* node)
-{
+// countNodes return the number of GNodes in a GNode tree or forest.
+int countNodes(GNode* node) {
 	if (node == null) return 0;
 	int count = 1 + countNodes(node->child) + countNodes(node->sibling);
-	if (count > 100000) {
+	if (count > 40000) {
 		printf("Recursing forever?????\n");
 		exit(3);
 	}
 	return count;
 }
 
-//  find_node -- Find child node with specific tag and value. Either or both of tag and value
-//    must be non-null.
-//--------------------------------------------------------------------------------------------------
-GNode* find_node (GNode* parent, String tag, String value, GNode **plast)
-//  parent -- Reqested node must be a child of this node.
-//  tag -- Tag of requested node.
-//  value -- Value of requested node; if null no value check is done.
-//  plast -- (out) Previous node to the requested node if any; may be null.
-{
-	ASSERT(parent && (tag || value));
+// findNode finds the first child node with specific tag and/or value. One or both of tag and
+// value must be non-null. plast can be used to point to GNode before returned GNode.
+GNode* findNode(GNode* parent, String tag, String value, GNode** plast) {
+	if (!parent || (!tag && !value)) return null;
 	if (plast) *plast = null;
 	for (GNode *last = null, *node = parent->child; node; last = node, node = node->sibling) {
 		if (tag && nestr(tag, node->tag)) continue;
@@ -349,10 +306,8 @@ GNode* find_node (GNode* parent, String tag, String value, GNode **plast)
 	return null;
 }
 
-//  recordKey -- Return the key of the record the node is from.
-//--------------------------------------------------------------------------------------------------
-String recordKey (GNode* node)
-{
+// recordKey returns the key of the record the node is from.
+String recordKey(GNode* node) {
 	if (!node) return null;
 	int count = 0;
 	while (node->parent) {
@@ -365,144 +320,13 @@ String recordKey (GNode* node)
 	return node->key;
 }
 
-// fatherNodes -- Given a list of FAMS or FAMC nodes, return the list of HUSB nodes they contain.
-//--------------------------------------------------------------------------------------------------
-GNode* fatherNodes (Database* database, GNode* faml)
-// Node faml -- List of FAMC and/or FAMS Nodes.
-{
-	GNode *refn, *husb, *wife, *chil, *rest;
-	GNode *old = null, *new = null;
-	while (faml) {
-		ASSERT(eqstr("FAMC", faml->tag) || eqstr("FAMS", faml->tag));
-		GNode *fam = keyToFamily(faml->tag, database);
-		ASSERT(fam);
-		splitFamily(fam, &refn, &husb, &wife, &chil, &rest);
-		new = union_nodes(old, husb, false, true);
-		freeGNodes(old);
-		old = new;
-		joinFamily(fam, refn, husb, wife, chil, rest);
-		faml = faml->sibling;
-	}
-	return new;
-}
-
-// mother_nodes -- Given a list of FAMS and FAMC nodes, return the list of WIFE Nodes they contain.
-//--------------------------------------------------------------------------------------------------
-GNode* mother_nodes (Database *database, GNode *faml)
-// fam -- List of FAMC and/or FAMS nodes.
-{
-	GNode *refn, *husb, *wife, *chil, *rest;
-	GNode *old = null, *new = null;
-	while (faml) {
-		ASSERT(eqstr("FAMC", faml->tag) || eqstr("FAMS", faml->tag));
-		GNode *fam = keyToFamily(faml->tag, database);
-		ASSERT(fam);
-		splitFamily(fam, &refn, &husb, &wife, &chil, &rest);
-		new = union_nodes(old, wife, false, true);
-		freeGNodes(old);
-		old = new;
-		joinFamily(fam, refn, husb, wife, chil, rest);
-		faml = faml->sibling;
-	}
-	return new;
-}
-
-//  children_nodes -- Given a list of FAMS or FAMC nodes, return the list of CHIL Nodes their
-//    families contain.
-//--------------------------------------------------------------------------------------------------
-GNode* children_nodes(Database *database, GNode *faml)
-//  database -- Database of records.
-//  faml -- List of FAMC or FAMS node.
-{
-	GNode *refn, *husb, *wife, *chil, *rest;
-	GNode *old = null, *new = null;
-	while (faml) {
-		ASSERT(eqstr("FAMC", faml->tag) || eqstr("FAMS", faml->tag));
-		GNode *fam = keyToFamily(faml->tag, database);
-		ASSERT(fam);
-		splitFamily(fam, &refn, &husb, &wife, &chil, &rest);
-		new = union_nodes(old, chil, false, true);
-		freeGNodes(old);
-		old = new;
-		joinFamily(fam, refn, husb, wife, chil, rest);
-		faml = faml->sibling;
-	}
-	return new;
-}
-
-//  parents_nodes -- Given list of FAMS or FAMC nodes, returns list of HUSB
-//    and WIFE lines they contain
-//--------------------------------------------------------------------------------------------------
-GNode* parents_nodes(Database *database, GNode* family)
-// Node family -- List of FAMC and/or FAMS Nodes.
-{
-	GNode *refn, *husb, *wife, *chil, *rest;
-	GNode *old = null, *new = null;
-	while (family) {
-		ASSERT(eqstr("FAMC", family->tag) || eqstr("FAMS", family->tag));
-		GNode *fam = keyToFamily(family->value, database);
-		ASSERT(fam);
-		splitFamily(fam, &refn, &husb, &wife, &chil, &rest);
-		new = union_nodes(old, husb, false, true);
-		freeGNodes(old);
-		old = new;
-		new = union_nodes(old, wife, false, true);
-		freeGNodes(old);
-		old = new;
-		joinFamily(fam, refn, husb, wife, chil, rest);
-		family = family->sibling;
-	}
-	return new;
-}
-
-//  addat -- Add @'s to both ends of String.
-//    MNOTE: This function uses a cycle of three static buffers to do its work. Callers that
-//    need the string to persist must retain a copy.
-//--------------------------------------------------------------------------------------------------
-String addat (String string)
-//  string -- String to have @-signs attached to.
-{
-	String scratch;
-	static char buffer[3][20];
-	static int dex = 0;
-	if (++dex > 2) dex = 0;
-	scratch = buffer[dex];
-	sprintf(scratch, "@%s@", string);
-	return scratch;
-}
-
-//  rmvat -- Remove the @-signs from both ends of a Gedcom key.
-//    MNOTE: Uses a cycle of NUMRMVAT static buffers to return the keys. Callers that
-//    need the key to persist must make a copy.
-//--------------------------------------------------------------------------------------------------
-#define NUMRMVAT 50
-String rmvat (String string)
-//  string -- String that should start and end with an @-sign. This is not checked.
-{
-	String scratch;
-	static char buffer[NUMRMVAT][20];
-	static int dex = 0;
-	if (++dex > NUMRMVAT - 1) dex = 0;
-	scratch = buffer[dex];
-	strcpy(scratch, &string[1]);  // Remove the left @-sign.
-	scratch[strlen(scratch)-1] = 0;  // Remove the right @-sign.
-	return scratch;
-}
-
-//  isKey -- Return true is a string has a Gedcom key format (surrounded by @signs).
-//--------------------------------------------------------------------------------------------------
-bool isKey(String str)
-{
+// isKey returns true if a string has a Gedcom key format.
+bool isKey(String str) {
 	return str && str[0] == '@' && str[strlen(str) - 1] == '@' && strlen(str) >= 3;
 }
 
-//  findTag -- Search a list of nodes for the first node with a specific tag. Return that node.
-//    If a node with the tag is not found, return null.
-//--------------------------------------------------------------------------------------------------
-GNode* findTag(GNode* node, String tag)
-//  node -- First node in the list of nodes to search.
-//  tag -- Tag being searched for.
-{
+// findTag searches a list of nodes and returns the first with a specific tag.
+GNode* findTag(GNode* node, String tag) {
 	while (node) {
 		if (eqstr(tag, node->tag)) return node;
 		node = node->sibling;
@@ -510,11 +334,8 @@ GNode* findTag(GNode* node, String tag)
 	return null;
 }
 
-// valueToSex -- Convert SEX value to internal form.
-//--------------------------------------------------------------------------------------------------
-SexType valueToSex (GNode* node)
-//  node -- Node whose tag should be SEX and whose value should be M, F, or U.
-{
+// valueToSex converts a 1 SEX GNode's value to internal form.
+SexType valueToSex (GNode* node) {
 	if (!node || !node->value) return sexUnknown;
 	if (!strcmp("M", node->value)) return sexMale;
 	if (!strcmp("F", node->value)) return sexFemale;
@@ -523,10 +344,7 @@ SexType valueToSex (GNode* node)
 
 // full_value -- Return value of node, with CONT lines. This has never worked according to Gedcom
 // specifications.
-//--------------------------------------------------------------------------------------------------
-String full_value(GNode* node)
-//Node node;
-{
+String full_value(GNode* node) {
 	GNode* cont;
 	int len = 0;
 	String p, q, str;
@@ -559,31 +377,21 @@ String full_value(GNode* node)
 	return str;
 }
 
-//  countNodesInTree -- Count the nodes in the tree rooted at node. Siblings of the node are
-//    not in the tree so and not counted.
-//--------------------------------------------------------------------------------------------------
-static int countNodesInTree (GNode *node)
-{
+// countNodesInTree counts the GNodes in a single GNode tree. Siblings of node are not counted.
+static int countNodesInTree(GNode *node) {
 	if (!node) return 0;
 	return 1 + countNodes(node->child);
 }
 
-//  countNodesBefore -- Return the number of nodes that occur before this node in depth first,
-//    left-to-rignt order. This is used in generating error messages.
-//--------------------------------------------------------------------------------------------------
-int countNodesBefore (GNode *node)
-//  node -- Node in a node tree.
-{
-	if (!node) return 0;  // Should not happen.
+// countNodesBefore return the number of nodes that occur before this one in depth first,
+// left-to-rignt order; used in generating error messages. Nice algorithm.
+int countNodesBefore(GNode* node) {
+	if (!node) return 0;
 	int count = 0;
-
-	// Loop over original node and its ancestors...
-	while (node->parent) {
-		// Get the node's parent and parent's first child.
+	while (node->parent) { // Interate node and ancestors.
 		GNode *parent = node->parent;
 		GNode *child = parent->child;
-		// Count nodes in the subtrees of previous siblings.
-		while (child && child != node) {
+		while (child && child != node) { // Count trees of previous sibs.
 			count += countNodesInTree(child);
 			if (count > 100000) {
 				printf("Recursing forever?????\n");
@@ -591,8 +399,7 @@ int countNodesBefore (GNode *node)
 			}
 			child = child->sibling;
 		}
-		// Move up an ancestor and repeat.
-		node = parent;
+		node = parent; // Move up and repeat.
 		count++;
 	}
 	return count;

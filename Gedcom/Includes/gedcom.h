@@ -3,8 +3,7 @@
 // gedcom.h is the header file for Gedcom related data types and operations.
 //
 // Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 9 May 2024.
-//
+// Last changed on 10 May 2024.
 
 #ifndef gedcom_h
 #define gedcom_h
@@ -44,13 +43,14 @@ int compareRecordKeys(String, String);  // gedcom.c
         ASSERT(childd);\
         num++;\
         {
+
 #define ENDCHILDREN \
         }\
         __node = __node->sibling;\
         if (__node && nestr(__node->tag, "CHIL")) __node = null;\
     }}
 
-// FORFAMCS / ENDFAMCS -- Iterator for the family as child nodes in a record.
+// FORFAMCS / ENDFAMCS iterates the FAMC nodes in a person record.
 #define FORFAMCS(person, family, key, database)\
 {\
     GNode *__node = FAMC(person);\
@@ -60,6 +60,7 @@ int compareRecordKeys(String, String);  // gedcom.c
         key = __node->value;\
         family = keyToFamily(key, database);\
         {
+
 #define ENDFAMCS\
         }\
         __node = __node->sibling;\
@@ -67,7 +68,7 @@ int compareRecordKeys(String, String);  // gedcom.c
     }\
 }
 
-//  FORFAMSS / ENDFAMS -- Iterator for the family as spouse nodes in a record.
+// FORFAMSS / ENDFAMS iterates the FAMS nodes in a person record.
 #define FORFAMSS(person, family, key, database)\
 {\
     GNode *__node = FAMS(person);\
@@ -77,6 +78,7 @@ int compareRecordKeys(String, String);  // gedcom.c
         key = __node->value;\
         family = keyToFamily(key, database);\
         {
+
 #define ENDFAMSS\
         }\
         __node = __node->sibling;\
@@ -84,8 +86,7 @@ int compareRecordKeys(String, String);  // gedcom.c
     }\
 }
 
-//  FORTAGVALUES -- Iterate a list of nodes looking for a particular tag.
-//--------------------------------------------------------------------------------------------------
+// FORTAGVALUES / ENDTAGVALUES iterates a list of nodes looking for a specific tag.
 #define FORTAGVALUES(root, tagg, node, value)\
 {\
     GNode *node, *__node = root->child;\
@@ -97,6 +98,7 @@ int compareRecordKeys(String, String);  // gedcom.c
         __value = value = full_value(__node);\
         node = __node;\
         {
+
 #define ENDTAGVALUES\
         }\
         if (__value) stdfree(__value);\
@@ -104,8 +106,7 @@ int compareRecordKeys(String, String);  // gedcom.c
     }\
 }
 
-//  FORHUSBS -- Iterate over the husbands in one family; handles non-traditional families.
-//--------------------------------------------------------------------------------------------------
+// FORHUSBS / ENDHUSBS iterates over the HUSB nodes in a family.
 #define FORHUSBS(fam, husb, key, database)\
 {\
     GNode* __node = findTag(fam->child, "HUSB");\
@@ -115,6 +116,7 @@ int compareRecordKeys(String, String);  // gedcom.c
         key = __node->value;\
 		husb = key ? keyToPerson(key, database) : null;\
         {
+
 #define ENDHUSBS\
         }\
         __node = __node->sibling;\
@@ -122,8 +124,7 @@ int compareRecordKeys(String, String);  // gedcom.c
     }\
 }
 
-//  FORWIFES -- Iterate over the wives in one family; handles non-traditional families.
-//--------------------------------------------------------------------------------------------------
+// FORWIFES / ENDWIFES iterates over the WIFE nodes in a family.
 #define FORWIFES(fam, wife, key, database)\
 {\
     GNode* __node = findTag(fam->child, "WIFE");\
@@ -133,6 +134,7 @@ int compareRecordKeys(String, String);  // gedcom.c
         key = __node->value;\
 		wife = key ? keyToPerson(key, database) : null;\
         {
+
 #define ENDWIFES\
         }\
         __node = __node->sibling;\
@@ -140,8 +142,7 @@ int compareRecordKeys(String, String);  // gedcom.c
     }\
 }
 
-//  FORSPOUSES -- Iterate over a person's spouses.
-//--------------------------------------------------------------------------------------------------
+// FORSPOUSES / ENDSPOUSES iterates over a person's spouses.
 #define FORSPOUSES(indi, spouse, fam, num, database)\
 {\
     GNode* __fnode = FAMS(indi);\
@@ -168,7 +169,7 @@ int compareRecordKeys(String, String);  // gedcom.c
     }\
 }
 
-// FORTRAVERSE/ENDTRAVERSE is a macro pair that traverses the GNodes in a tree rooted at root.
+// FORTRAVERSE / ENDTRAVERSE is a macro pair that traverses the GNodes in a tree rooted at root.
 #define FORTRAVERSE(root, node)\
 {\
     GNode* node = root;\
@@ -179,7 +180,7 @@ int compareRecordKeys(String, String);  // gedcom.c
 		protection++;\
 		if (protection > 50000) break;\
         node = getAndRemoveFirstListElement(stack);\
-        {\
+        {
 
 #define ENDTRAVERSE\
         }\
@@ -187,10 +188,9 @@ int compareRecordKeys(String, String);  // gedcom.c
         if (node->child) prependToList(stack, node->child);\
     }\
     deleteList(stack);\
-}\
+}
 
-//  Macros that return specific gedcom nodes from a record tree.
-//--------------------------------------------------------------------------------------------------
+//  Macros that return specific Gedcom nodes from a record tree.
 #define NAME(indi)  findTag(indi->child,"NAME")
 #define SEX(indi)   findTag(indi->child,"SEX")
 #define SEXV(indi)  valueToSex(findTag(indi->child,"SEX"))

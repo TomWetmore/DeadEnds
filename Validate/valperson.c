@@ -23,13 +23,11 @@ bool validatePersonIndex(Database* database, ErrorLog* errorLog) {
 	FORHASHTABLE(database->personIndex, element)
 		GNode* person = ((RecordIndexEl*) element)->root;
 		int numErrors = lengthList(errorLog);
-		if (debugging) printf("Start validating %s %s\n", person->key, NAME(person)->value);
 		if (!validatePerson(person, database, errorLog)) valid = false;
 		if (debugging && lengthList(errorLog) > numErrors) {
 			printf("There were %d errors validating %s\n", lengthList(errorLog) - numErrors, person->key);
 			numErrors = lengthList(errorLog);
 		}
-		if (debugging) printf("Done validating %s %s\n", person->key, NAME(person)->value);
 	ENDHASHTABLE
 	return valid;
 }

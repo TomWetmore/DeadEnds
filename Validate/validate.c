@@ -3,7 +3,7 @@
 // validate.c has the functions that validate Gedcom records.
 //
 // Created by Thomas Wetmore on 12 April 2023.
-// Last changed on 29 April 2024.
+// Last changed on 9 May 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -42,8 +42,6 @@ bool validateDatabase(Database* database, ErrorLog* errorLog) {
 	return true;
 }
 
-
-
 extern String nameString(String);
 void validateSource(GNode* source, Database* database, ErrorLog* errorLog) {}
 void validateEvent(GNode* event, Database* database, ErrorLog* errorLog) {}
@@ -62,53 +60,37 @@ static GNode* getPerson(String key, RecordIndex* index) {
 #define LN(person, database, node)\
 	personLineNumber(person, database) + countNodesBefore(node)
 
-// validateReferences -- Validate the 1 REFN nodes in the records.
-//--------------------------------------------------------------------------------------------------
-static void validateReferences(Database *database, ErrorLog* errorLog)
-//  database -- Database to have its REFN values checked.
-{
+// validateReferencesInIndex validates the 1 REFN nodes in a RecordIndex.
+static void validateReferencesInIndex(Database *database, RecordIndex* recordIndex,
+									  List *errorLog) {
+	FORHASHTABLE(recordIndex, element)
+	RefnIndex* refnIndex = database->refnIndex;
+	GNode* root = ((RecordIndexEl*) element)->root;
+	GNode* refn = findTag(root->child, "REFN");
+	while (refn) {
+		String refString = refn->value;
+		if (refString == null || strlen(refString) == 0) {
+			Error *error = createError(gedcomError, database->lastSegment, LN(root, database, refn),
+									   "Missing REFN value");
+			addErrorToLog(errorLog, error);
+		} else if (!addToRefnIndex (refnIndex, refString, root->key)) {
+			Error *error = createError(gedcomError, database->lastSegment, LN(root, database, refn),
+									   "REFN value already in index");
+			addErrorToLog(errorLog, error);
+		}
+		refn = refn->sibling;
+		if (refn && nestr(refn->tag, "REFN")) refn = null;
+	}
+	ENDHASHTABLE
+}
+
+// validateReferences validates the 1 REFN nodes in a Database.
+static void validateReferences(Database *database, ErrorLog* errorLog) {
 	String segment = database->lastSegment;
 	RefnIndex *refnIndex = database->refnIndex;
-
-	// Validate the REFN values found in persons.
-	FORHASHTABLE(database->personIndex, element)
-		GNode* person = ((RecordIndexEl*) element)->root;
-		GNode* refn = findTag(person->child, "REFN");
-		while (refn) {
-			String refString = refn->value;
-			if (refString == null || strlen(refString) == 0) {
-				Error *error = createError(gedcomError, segment, LN(person, database, refn),
-										   "Missing REFN value");
-				addErrorToLog(errorLog, error);
-			} else if (!addToRefnIndex (refnIndex, refString, person->key)) {
-				Error *error = createError(gedcomError, segment, LN(person, database, refn),
-										   "REFN value already in index");
-				addErrorToLog(errorLog, error);
-			}
-			refn = refn->sibling;
-			if (refn && nestr(refn->tag, "REFN")) refn = null;
-		}
-	ENDHASHTABLE
-
-	// Validate the REFN values found in families.
-	FORHASHTABLE(database->familyIndex, element)
-		GNode* family = ((RecordIndexEl*) element)->root;
-		GNode* refn = findTag(family->child, "REFN");
-		while (refn) {
-			String refString = refn->value;
-			if (refString == null || strlen(refString) == 0) {
-				Error *error = createError(gedcomError, segment, LN(family, database, refn),
-										   "Missing REFN value");
-				addErrorToLog(errorLog, error);
-			} else if (!addToRefnIndex (refnIndex, refString, family->key)) {
-				Error *error = createError(gedcomError, segment, LN(family, database, refn),
-										   "REFN value already in index");
-				addErrorToLog(errorLog, error);
-			}
-			refn = refn->sibling;
-			if (refn && nestr(refn->tag, "REFN")) refn = null;
-		}
-	ENDHASHTABLE
-
-	// Handle the other record types.
+	validateReferencesInIndex(database, database->personIndex, errorLog);
+	validateReferencesInIndex(database, database->familyIndex, errorLog);
+	validateReferencesInIndex(database, database->sourceIndex, errorLog);
+	validateReferencesInIndex(database, database->eventIndex, errorLog);
+	validateReferencesInIndex(database, database->otherIndex, errorLog);
 }
