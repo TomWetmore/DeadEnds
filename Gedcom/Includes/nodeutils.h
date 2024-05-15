@@ -11,17 +11,17 @@
 
 // Prototypes of functions defined in nodeutils.c
 
-GNode* unique_nodes(GNode*, bool);
-GNode* union_nodes(GNode* node1, GNode* node2, bool kids, bool copy);
+GNode* uniqueNodes(GNode*, bool);
+GNode* unionNodes(GNode* node1, GNode* node2, bool kids, bool copy);
 GNode* intersect_nodes(GNode*, GNode*, bool);
-void classify_nodes(GNode**, GNode**, GNode**);
+void classifyNodes(GNode**, GNode**, GNode**);
 GNode* difference_nodes(GNode*, GNode*, bool);
 bool value_in_nodes(GNode*, String);
-bool equal_tree(GNode*, GNode*);
-bool equal_node(GNode*, GNode*);
-bool iso_list(GNode*, GNode*);
-bool equal_nodes(GNode*, GNode*, bool, bool);
-bool iso_nodes(GNode*, GNode*, bool, bool);
+bool equalTree(GNode*, GNode*);
+bool equalNode(GNode*, GNode*);
+bool isoList(GNode*, GNode*);
+bool equalNodes(GNode*, GNode*, bool, bool);
+bool isoGNodes(GNode*, GNode*, bool, bool);
 
 
 #endif /* nodeutils_h */

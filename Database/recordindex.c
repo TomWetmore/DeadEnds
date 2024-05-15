@@ -1,11 +1,10 @@
-//
 // DeadEnds
 //
 // recordindex.c holds the functions that implement RecordIndex, a table that maps Gedcom record
 // keys to the roots of the GNode trees of those records. RecordIndex is built on HashTable.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 29 April 2024.
+// Last changed on 13 May 2024.
 
 #include "recordindex.h"
 #include "list.h"
@@ -14,28 +13,28 @@
 
 static int numRecordIndexBuckets = 2048;
 
-// compare is the structure function that compares RecordIndexEl elements.
+// compare compares RecordIndexEl keys.
 static int compare(String left, String right) {
 	return compareRecordKeys(left, right);
 }
 
-// delete is the structure function that deletes RecordIndexEl elements.
+// delete deletes RecordIndexEls.
 static void delete(void *word) {
 	RecordIndexEl* element = (RecordIndexEl*) word;
 	stdfree(element);
 }
 
-// getKey returns the key of a RecordIndexEl; it is the key of the root GNode.
+// getKey returns a RecordIndexEl key which is the key of a GNode record.
 static String getKey(void* word) {
 	return ((RecordIndexEl*) word)->root->key;
 }
 
-// createRecordIndex creates and returns a RecordIndex.
+// createRecordIndex creates a RecordIndex.
 RecordIndex *createRecordIndex(void) {
 	return createHashTable(getKey, compare, delete, numRecordIndexBuckets);
 }
 
-// deleteRecordIndex delete a RecordIndex.
+// deleteRecordIndex deletes a RecordIndex.
 void deleteRecordIndex(RecordIndex *index) {
 	deleteHashTable(index);
 }
@@ -69,4 +68,11 @@ void showRecordIndex(RecordIndex *index) {
 			printf("    Key %s\n", element->root->key);
 		}
 	}
+}
+
+void newShowRecordIndex(RecordIndex* index) {
+	FORHASHTABLE(index, element)
+		RecordIndexEl* el = (RecordIndexEl*) element;
+		printf("Key %s\n", el->root->key);
+	ENDHASHTABLE
 }

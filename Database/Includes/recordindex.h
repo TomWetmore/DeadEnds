@@ -1,10 +1,9 @@
-//
 // DeadEnds Project
 //
 // recordindex.h defines RecordIndex as a HashTable.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 4 April 2024.
+// Last changed on 13 May 2024.
 
 #ifndef recordindex_h
 #define recordindex_h
@@ -13,7 +12,7 @@
 #include "hashtable.h"
 
 // A RecordIndexEl in an element in a RecordIndex. It holds the root node of a Gedcom record and
-// the line numbers where the record was defined. The element's key is the key of the root node.
+// the line number where the record was defined. The element's key is the key of the root node.
 typedef struct RecordIndexEl {
 	GNode *root;
 	int lineNumber;

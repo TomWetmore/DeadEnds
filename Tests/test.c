@@ -51,7 +51,8 @@ int main(void) {
 		}
 	}
 	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/bad.ged";
-	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/main.ged";
+	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/051224.ged";
+	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/main.ged";
 	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/test.ged";
 	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/small.ged";
 	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/notthere.ged";

@@ -1,11 +1,9 @@
+// DeadEnds
 //
-//  DeadEnds
+// valfamily.c has the functions that validate family records.
 //
-//  valfamily.c -- Functions that validate family records.
-//
-//  Created by Thomas Wetmore on 18 December 2023.
-//  Last changed on 29 December 2023.
-//
+// Created by Thomas Wetmore on 18 December 2023.
+// Last changed on 14 May 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -18,10 +16,8 @@ static bool validateFamily(GNode *family, Database*, ErrorLog*);
 
 static bool debugging = false;
 
-//  validateFamilyIndex -- Validate all family records in a database.
-//-------------------------------------------------------------------------------------------------
-bool validateFamilyIndex(Database *database, ErrorLog *errorLog)
-{
+// validateFamilyIndex validates the family records in a database.
+bool validateFamilyIndex(Database *database, ErrorLog *errorLog) {
 	bool valid = true;
 	FORHASHTABLE(database->familyIndex, element)
 		GNode* family = ((RecordIndexEl*) element)->root;
@@ -37,11 +33,9 @@ bool validateFamilyIndex(Database *database, ErrorLog *errorLog)
 	return valid;
 }
 
-//  validateFamily -- Validate a family node tree record. Check that all HUSB, WIFE and CHIL
-//    links refer to existing persons. If so, check that all return links also exist.
-//--------------------------------------------------------------------------------------------------
-static bool validateFamily(GNode *family, Database *database, ErrorLog* errorLog)
-{
+// validateFamily validates a family GNode record tree. Checks that all HUSB, WIFE and CHIL links
+// refer to existing persons, and that the return links also exist.
+static bool validateFamily(GNode *family, Database *database, ErrorLog* errorLog) {
 	String segment = database->lastSegment;
 	int errorCount = 0;
 	static char s[4096];
@@ -133,14 +127,9 @@ static bool validateFamily(GNode *family, Database *database, ErrorLog* errorLog
 	return true;  // TODO: Deal with the errors properly.
 }
 
-//  familyLineNumber -- Given a person root node, return its location (line number) in the
-//    original Gedcom file. Uses searchHashTable to get the RecordIndexEl of the record and
-//    takes the line number from there. Obviously won't work correctly for records that
-//    arrived from another source.
-//--------------------------------------------------------------------------------------------------
-int familyLineNumber (GNode *family, Database* database)
-{
-	RecordIndexEl *element = searchHashTable(database->familyIndex, family->key);
-	if (!element) return 0;  // Should not happen.
-	return element->lineNumber;  // Assume this is zero for records not from Gedcom files.
+// familyLineNumber returns the line number of a family root GNode in the original Gedcom file.
+int familyLineNumber(GNode* family, Database* database) {
+	RecordIndexEl* element = searchHashTable(database->familyIndex, family->key);
+	if (!element) return 0;
+	return element->lineNumber;
 }

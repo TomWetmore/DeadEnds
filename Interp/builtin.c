@@ -580,18 +580,16 @@ PValue __extractplaces (PNode *pnode, Context *context, bool *errflg)
 	return nullPValue;
 }
 
-//  __copyfile -- Copy the contents of a file to the output stream.
-//    usage: copyfile(STRING) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __copyfile (PNode *node, Context *context, bool *eflg)
-{
+// __copyfile copies the contents of a file to the output stream.
+// usage: copyfile(STRING) -> VOID
+PValue __copyfile (PNode *node, Context *context, bool *eflg) {
 	String fileName = evaluateString(node->arguments, context, eflg);
 	if (*eflg || fileName == null || strlen(fileName) == 0) {
 		*eflg = true;
 		scriptError(node, "The argument to copyfile must be a string.");
 		return nullPValue;
 	}
-	FILE *cfp = fopenPath(fileName, "r", ".:$HOME");
+	FILE *cfp = fopenPath(fileName, "r", null);
 	if (cfp == null) {
 		scriptError(node, "Could not open file for copying.");
 		*eflg = true;

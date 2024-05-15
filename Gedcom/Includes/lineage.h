@@ -4,7 +4,7 @@
 // and properties
 //
 // Created by Thomas Wetmore on 17 February 2023.
-// Last changed on 6 May 2024.
+// Last changed on 12 May 2024.
 
 #ifndef lineage_h
 #define lineage_h
@@ -25,7 +25,5 @@ String personToTitle(GNode*, int);  //  Return the first title of a person.
 int numberOfSpouses(GNode*, Database*); //  Return the number of spouses of a person.
 int numberOfFamilies(GNode*); // Return the number of families a person is a spouse in.
 SexType oppositeSex(SexType);  // Return the opposite sex of a person.
-
-GNode* fam_to_spouse(Database*, GNode*, GNode*);
 
 #endif // lineage_h

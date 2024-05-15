@@ -17,9 +17,9 @@ bool validateDatabase(Database*, ErrorLog*);
 
 //static bool debugging = true;
 
-static void validateSource(GNode*, Database*, ErrorLog*);
-static void validateEvent(GNode*, Database*, ErrorLog*);
-static void validateOther(GNode*, Database*, ErrorLog*);
+static bool validateSource(GNode*, Database*, ErrorLog*);
+static bool validateEvent(GNode*, Database*, ErrorLog*);
+static bool validateOther(GNode*, Database*, ErrorLog*);
 static void validateReferences(Database *database, ErrorLog*);
 
 int numValidations = 0;  //  DEBUG.
@@ -27,11 +27,12 @@ int numValidations = 0;  //  DEBUG.
 // validateDatabase validates a Database.
 bool validateDatabase(Database* database, ErrorLog* errorLog) {
 	ASSERT(database);
-	validatePersonIndex(database, errorLog);
-	validateFamilyIndex(database, errorLog);
-	//if (!validateIndex(database->sourceIndex)) isOkay = false;
-	//if (!validateIndex(database->eventIndex)) isOkay = false;
-	//if (!validateIndex(database->otherIndex)) isOkay = false;
+	bool isOkay = true;
+	if (!validatePersonIndex(database, errorLog)) isOkay = false;
+	if (!validateFamilyIndex(database, errorLog)) isOkay = false;
+	if (!validateSourceIndex(database, errorLog)) isOkay = false;
+	if (!validateEventIndex(database, errorLog)) isOkay = false;
+	if (!validateOtherIndex(database, errorLog)) isOkay = false;
 	//return isOkay;
 	validateReferences(database, errorLog);
 	if (lengthList(errorLog)) {
@@ -42,10 +43,43 @@ bool validateDatabase(Database* database, ErrorLog* errorLog) {
 	return true;
 }
 
+static bool validateSource(GNode* source, Database* database, ErrorLog* errorLog) {
+	return true; // Write me.
+}
+
+bool validateSourceIndex(Database* database, ErrorLog* errorLog) {
+	bool valid = true;
+	FORHASHTABLE(database->sourceIndex, element)
+		GNode* source = ((RecordIndexEl*) element)->root;
+		int numErrors = lengthList(errorLog);
+		if (!validateSource(source, database, errorLog)) valid = false;
+	ENDHASHTABLE
+	return valid;
+}
+
+bool validateEventIndex(Database* database, ErrorLog* errorLog) {
+	bool valid = true;
+	FORHASHTABLE(database->eventIndex, element)
+		GNode* event = ((RecordIndexEl*) element)->root;
+		int numErrors = lengthList(errorLog);
+		if (!validateEvent(event, database, errorLog)) valid = false;
+	ENDHASHTABLE
+	return valid;
+}
+
+bool validateOtherIndex(Database* database, ErrorLog* errorLog) {
+	bool valid = true;
+	FORHASHTABLE(database->otherIndex, element)
+		GNode* other = ((RecordIndexEl*) element)->root;
+		int numErrors = lengthList(errorLog);
+		if (!validateOther(other, database, errorLog)) valid = false;
+	ENDHASHTABLE
+	return valid;
+}
+
 extern String nameString(String);
-void validateSource(GNode* source, Database* database, ErrorLog* errorLog) {}
-void validateEvent(GNode* event, Database* database, ErrorLog* errorLog) {}
-void validateOther(GNode* other, Database* database, ErrorLog* errorLog) {}
+static bool validateEvent(GNode* event, Database* database, ErrorLog* errorLog) {return true;}
+static bool validateOther(GNode* other, Database* database, ErrorLog* errorLog) {return true;}
 
 static GNode* getFamily(String key, RecordIndex* index) {
 	GNode* root = searchRecordIndex(index, key);
