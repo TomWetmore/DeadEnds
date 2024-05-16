@@ -4,7 +4,7 @@
 // persons and other record types. It underlies the indiseq data type of DeadEnds Script.
 //
 // Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 4 May 2024.
+// Last changed on 16 May 2024.
 
 #include "standard.h"
 #include "sequence.h"
@@ -487,8 +487,8 @@ Sequence* familyToMothers(GNode* fam, Database* database) {
 	return null;
 }
 
-// siblingSequence creates the Sequence of the sibllings of the persons in the given Sequence.
-// If close is true include the persons in the initial Sequence in the sibling Sequence.
+// siblingSequence creates the Sequence of the siblings of the persons in the input Sequence.
+// If close is true persons in the input Sequence are added to the sibling Sequence.
 Sequence* siblingSequence(Sequence* sequence, bool close) {
 	Database* database = sequence->database;
 	StringTable* tab = createStringTable(numBucketsInSequenceTables);
@@ -521,44 +521,40 @@ Sequence* siblingSequence(Sequence* sequence, bool close) {
 	return siblingSequence;
 }
 
-// ancestorSequence creates the Sequence of all ancestors of the persons in the given Sequence.
-// The persons in the original sequence are not in the ancestor sequence unless they are an
-// ancestor of someone in the original Sequence.
+// ancestorSequence creates the Sequence of all ancestors of the persons in the input Sequence.
+// Persons in the input sequence are not in the ancestor sequence unless they are also an
+// ancestor of someone in the input Sequence.
 // TODO: Consider adding a "close" argument as done in siblingSequence.
-Sequence* ancestorSequence(Sequence* startSequence) {
+Sequence* ancestorSequence(Sequence* startSequence, bool close) {
 	ASSERT(startSequence);
 	Database* database = startSequence->database;
-	StringTable* ancestorKeys = createStringTable(numBucketsInSequenceTables);  // Keys of all persons encountered.
-	List* ancestorQueue = createList(null, null, null, false);  // Queue of ancestor keys to process.
-	Sequence* ancestorSequence = createSequence(database);  // The sequence holding the ancestors.
+	StringTable* ancestorKeys = createStringTable(numBucketsInSequenceTables);
+	List* ancestorQueue = createList(null, null, null, false); // Keys to process.
+	Sequence* ancestorSequence = createSequence(database);
+	if (close) uniqueSequenceInPlace(startSequence);
 
-	//  Initialize the ancestor queue with the keys of persons in the start sequence.
-	FORSEQUENCE(startSequence, el, num)
-		enqueueList(ancestorQueue, (void*) el->root->key);
+	FORSEQUENCE(startSequence, el, num) // Init ancestor queue.
+		String key = el->root->key;
+		enqueueList(ancestorQueue, (void*) key);
+		if (close) {
+			appendToSequence(ancestorSequence, key, 0);
+			addToStringTable(ancestorKeys, key, null);
+		}
 	ENDSEQUENCE
 
-	// Iterate the ancestor queue; it grows when ancestors are found.
-	while (!isEmptyList(ancestorQueue)) {
-		String key = (String) dequeueList(ancestorQueue);  //  Key of next person in queue.
+	while (!isEmptyList(ancestorQueue)) { // Process queue.
+		String key = (String) dequeueList(ancestorQueue);
 		String parentKey;
-
-		//  Get the father and mother, if any, of the person from the queue.
-		//  TODO: TREATS ONLY THE MOTHER AND FATHER OF THE PERSON'S 1ST FAMC FAMILY AS ANCESTORS.
 		GNode* person = keyToPerson(key, database);
 		GNode* father = personToFather(person, database);
 		GNode* mother = personToMother(person, database);
-
-		// If the father has not been seen, add him to the table and sequence.
 		if (father && !isInHashTable(ancestorKeys, parentKey = father->key)) {
 			appendToSequence(ancestorSequence, parentKey, 0);
-			//  MNOTE: Lists don'e save their elements.
 			enqueueList(ancestorQueue, strsave(parentKey));
 			addToStringTable(ancestorKeys, parentKey, null);
 		}
-		// If the mother has not been seen before, add her to the table and sequence.
 		if (mother && !isInHashTable(ancestorKeys, parentKey = mother->key)) {
 			appendToSequence(ancestorSequence, parentKey, 0);
-			//  MNOTE: Lists don't save their elements.
 			enqueueList(ancestorQueue, strsave(parentKey));
 			addToStringTable(ancestorKeys, parentKey, null);
 		}
@@ -568,9 +564,10 @@ Sequence* ancestorSequence(Sequence* startSequence) {
 	return ancestorSequence;
 }
 
-// descendentSequence creates the descendant Sequence of a Sequence. Those in the original are not
-// in the descendents unless they are a descendent of someone in the original.
-Sequence* descendentSequence(Sequence* startSequence) {
+// descendentSequence creates the descendant Sequence of a Sequence. Those in the input Sequence
+// are not in the descendents unless they are a descendent of someone in the input Sequence.
+// TODO: Consider adding a "close" flag to the interface.
+Sequence* descendentSequence(Sequence* startSequence, bool close) {
 	if (!startSequence) return null;
 	Database* database = startSequence->database;
 	String key, descendentKey;
@@ -579,7 +576,12 @@ Sequence* descendentSequence(Sequence* startSequence) {
 	List* descendentQueue = createList(null, null, null, false); // Descendent keys.
 	Sequence *descendentSequence = createSequence(database);
 	FORSEQUENCE(startSequence, element, count) // Init descendentQueue
-		enqueueList(descendentQueue, element->root->key);
+	String key = element->root->key;
+		enqueueList(descendentQueue, key);
+		if (close) {
+			appendToSequence(descendentSequence, key, 0);
+			addToStringTable(descendentKeys, key, null);
+		}
 	ENDSEQUENCE
 	while (!isEmptyList(descendentQueue)) { // Loop descendentQueue.
 		key = (String) dequeueList(descendentQueue);

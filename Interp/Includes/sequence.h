@@ -3,7 +3,7 @@
 // sequence.h is the header file for the Sequence datatype.
 //
 // Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 4 May 2024.
+// Last changed on 16 May 2024.
 
 #ifndef sequence_h
 #define sequence_h
@@ -58,7 +58,7 @@ Sequence* familyToFathers(GNode* family, Database*);
 Sequence* familyToMothers(GNode* family, Database*);
 Sequence* personToSpouses(GNode* person, Database*);
 Sequence* personToFamilies(GNode* person, bool, Database*);
-Sequence* nameToSequence(String, Database*);
+Sequence* nameToSequence(String name, Database*);
 Sequence* refnToSequence(String refn, Database*);
 
 Sequence* unionSequence(Sequence*, Sequence*);
@@ -67,9 +67,9 @@ Sequence* differenceSequence(Sequence*, Sequence*);
 Sequence* childSequence(Sequence*);
 Sequence* parentSequence(Sequence*);
 Sequence* spouseSequence(Sequence*);
-Sequence* ancestorSequence(Sequence*);
-Sequence* descendentSequence(Sequence*);
-Sequence* siblingSequence(Sequence*, bool);
+Sequence* ancestorSequence(Sequence*, bool close);
+Sequence* descendentSequence(Sequence*, bool close);
+Sequence* siblingSequence(Sequence*, bool close);
 bool elementFromSequence(Sequence*, int index, String* key, String* name);
 void renameElementInSequence(Sequence* sequence, String key);
 void sequenceToGedcom(Sequence*, FILE*);

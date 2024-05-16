@@ -311,7 +311,7 @@ PValue __ancestorset(PNode* pnode, Context* context, bool* errflag) {
         scriptError(pnode, "the argument to ancestorset must be a set.");
         return nullPValue;
     }
-    return PVALUE(PVSequence, uSequence, ancestorSequence(programValue.value.uSequence));
+    return PVALUE(PVSequence, uSequence, ancestorSequence(programValue.value.uSequence, false));
 }
 
 // __descendentset creates the descendent sequence of a sequence; two spellings allowed.
@@ -323,7 +323,7 @@ PValue __descendentset(PNode* pnode, Context* context, bool* eflg) {
         scriptError(pnode, "the arg to descendentset must be a set.");
         return nullPValue;
     }
-    return PVALUE(PVSequence, uSequence, descendentSequence(val.value.uSequence));
+    return PVALUE(PVSequence, uSequence, descendentSequence(val.value.uSequence, false));
 }
 //  __gengedcom -- Generate Gedcom output from a sequence.
 //    usage: gengedcom(SET) -> VOID
