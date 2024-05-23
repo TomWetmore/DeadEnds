@@ -786,8 +786,7 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
 	return InterpError;
 }
 
-// interpTraverse interprets the traverse statement that traverses a Gedcom node tree. It adds two
-// entries to the local symbol table for the loop variables.
+// interpTraverse interprets the traverse statement. It adds two entries to the symbol table.
 // Usage: traverse(GNode expr, GNode ident, int ident) {...}.
 // Fields: gnodeExpr, levelIden, gNodeIden.
 #define MAXTRAVERSEDEPTH 100
@@ -801,25 +800,21 @@ InterpType interpTraverse(PNode* traverseNode, Context* context, PValue* returnV
 	}
 	assignValueToSymbol(context->symbolTable, traverseNode->levelIden, PVALUE(PVInt, uInt, 0));
 	assignValueToSymbol(context->symbolTable, traverseNode->gnodeIden, PVALUE(PVGNode, uGNode, root));
-
-	// Normally getValueOfIden gets the value of an iden from a SymbolTable. In this case we want
-	// direct access to the PValues, because each iteration updates the values of two idents. The
-	// 'proper' way to do this is with assignments, but keeping pointers to the PValues allow them
-	// to be changed directly. So searchHashTable is used instead of getValueOfIden.
+	// Normally getValueOfIden gets values of idens in the SymbolTables. But here we use
+	// searchHashTable to get direct access to the PValues to simplify updating them.
 	PValue* level = ((Symbol*) searchHashTable(context->symbolTable, traverseNode->levelIden))->value;
 	PValue* node = ((Symbol*) searchHashTable(context->symbolTable, traverseNode->gnodeIden))->value;
 	ASSERT(node && level);
-
 	GNode *snode, *nodeStack[MAXTRAVERSEDEPTH]; // Stack of GNodes.
 	InterpType irc;
 	InterpType returnIrc = InterpOkay;
 
 	int lev = 0;
-	nodeStack[lev] = snode = root; // Init the stack and start traverse.
+	nodeStack[lev] = snode = root; // Init stack.
 	while (true) {
 		node->value.uGNode = snode; // Update symbol table.
 		level->value.uInt = lev;
-		switch (irc = interpret(traverseNode->loopState, context, returnValue)) { // Interpret loop.
+		switch (irc = interpret(traverseNode->loopState, context, returnValue)) { // Interpret.
 			case InterpContinue:
 			case InterpOkay: break;
 			case InterpBreak:
@@ -829,25 +824,20 @@ InterpType interpTraverse(PNode* traverseNode, Context* context, PValue* returnV
 				returnIrc = irc;
 				goto a;
 		}
-
-		// Modify lev and the stack for the next traverse.
-		// If the current node has a child go down.
-		if (snode->child) {
+		if (snode->child) { // Traverse child.
 			snode = nodeStack[++lev] = snode->child;
 			continue;
 		}
-		// If current node has a sibling, go there.
-		if (snode->sibling) {
+		if (snode->sibling) { // Traverse sibling.
 			snode = nodeStack[lev] = snode->sibling;
 			continue;
 		}
-		// If current node has no child or sibling, pop until either reach top or find a sibling.
-		while (--lev >= 0 && !(nodeStack[lev])->sibling)
+		while (--lev >= 0 && !(nodeStack[lev])->sibling) // Pop
 			;
 		if (lev < 0) break;
 		snode = nodeStack[lev] = (nodeStack[lev])->sibling;
 	}
-a:  removeFromHashTable(context->symbolTable, traverseNode->levelIden);
+a:  removeFromHashTable(context->symbolTable, traverseNode->levelIden); // Remove loop idens.
 	removeFromHashTable(context->symbolTable, traverseNode->gnodeIden);
 	return returnIrc;
 }

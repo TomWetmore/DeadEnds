@@ -3,7 +3,7 @@
 //  gnode.c has the functions for the GNode data type.
 //
 //  Created by Thomas Wetmore on 12 November 2022.
-//  Last changed on 11 May 2024.
+//  Last changed on 19 May 2024.
 
 #include "standard.h"
 #include "gnode.h"
@@ -16,16 +16,16 @@
 #include "readnode.h"
 #include "database.h"
 
-// tagTable is a StringTable that holds the single copy of all keys used in the GNodes.
+// tagTable is a StringTable that holds a single copy of all keys used in the GNodes.
 static StringTable *tagTable = null;
 
-// numNodeAllocs returns the number of nodes that have been allocated in the heap. Debugging.
+// numNodeAllocs returns the number of GNodes that have been allocated in the heap. Debugging.
 static int nodeAllocs = 0;
 int numNodeAllocs(void) {
 	return nodeAllocs;
 }
 
-// numNodeFrees returns the number of nodes that have been freed to the heap. Debugging.
+// numNodeFrees returns the number of GNodes that have been freed to the heap. Debugging.
 static int nodeFrees = 0;
 int numNodeFrees(void) {
 	return nodeFrees;
@@ -47,7 +47,7 @@ void freeGNode(GNode* node) {
 	stdfree(node);
 }
 
-// createGNode creates a GNode from a key, tag, value, and pointer to its parent.
+// createGNode creates a GNode from a key, tag, value, and pointer to parent.
 GNode* createGNode(String key, String tag, String value, GNode* parent) {
 	nodeAllocs++;
 	GNode* node = (GNode*) malloc(sizeof(GNode));;
@@ -183,8 +183,8 @@ void showGNode(int level, GNode* node) {
 	printf("\n");
 }
 
-// length_nodes returns the length of the list of GNodes.
-int length_nodes(GNode* first) {
+// gNodeListLength returns the length of the list of GNodes.
+int gNodeListLength(GNode* first) {
 	int len = 0;
 	while (first) {
 		len++;
@@ -193,7 +193,7 @@ int length_nodes(GNode* first) {
 	return len;
 }
 
-// shortenDate return the short form of a date value.
+// shortenDate returns the short form of a date value.
 String shortenDate(String date) {
 	static char buffer[3][MAXLINELEN+1];
 	static int dex = 0;

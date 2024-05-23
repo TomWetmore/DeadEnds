@@ -4,7 +4,7 @@
 // together. Calling split and join formats GNode trees into standard form.
 //
 // Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 12 May 2024.
+// Last changed on 19 May 2024.
 
 #include "standard.h"
 #include "gnode.h"
@@ -53,7 +53,7 @@ void splitPerson(GNode* indi, GNode** pname, GNode** prefn, GNode** psex, GNode*
 }
 
 // joinPerson joins a person GNode tree from parts.
-void joinPerson (GNode* indi, GNode* name, GNode* refn, GNode* sex, GNode* body, GNode* famc,
+void joinPerson(GNode* indi, GNode* name, GNode* refn, GNode* sex, GNode* body, GNode* famc,
                  GNode* fams) {
     GNode *node = null;
     ASSERT(indi && eqstr("INDI", indi->tag));

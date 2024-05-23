@@ -1,11 +1,9 @@
-//
 //  DeadEnds
 //
-//  errors.c -- Code for handling DeadEnds errors.
+//  errors.c has code for handling DeadEnds errors.
 //
 //  Created by Thomas Wetmore on 4 July 2023.
-//  Last changed on 26 March 2024.
-//
+//  Last changed on 21 May 2024.
 
 #include "errors.h"
 #include "list.h"
@@ -39,65 +37,50 @@ static void delete(Word error) {
 	return;
 }
 
-//  createErrorLog creates an error log. An ErrorLog is a specialized List.
-//--------------------------------------------------------------------------------------------------
-ErrorLog *createErrorLog(void)
-{
-	ErrorLog *errorLog = createList(getKey, compare, delete, false);
+// createErrorLog creates an error log, a specialized List.
+ErrorLog* createErrorLog(void) {
+	ErrorLog* errorLog = createList(getKey, compare, delete, false);
 	errorLog->sorted = true;
 	return errorLog;
 }
 
-//  createError -- Create an Error.
-//--------------------------------------------------------------------------------------------------
-Error *createError(ErrorType type, String fileName, int lineNumber, String message)
-{
-	Error *error = (Error*) stdalloc(sizeof(Error));
+// createError creates an Error.
+Error* createError(ErrorType type, String fileName, int lineNumber, String message) {
+	Error* error = (Error*) stdalloc(sizeof(Error));
 	error->type = type;
-	error->severity = severeError;  //  Override with setSeverityError.
-	error->fileName = fileName;  // MNOTE: Not saved; do not free.
+	error->severity = severeError;
+	error->fileName = fileName; // Do not free.
 	error->lineNumber = lineNumber;
 	error->message = strsave(message);
 	if (debugging) printf("CREATE ERROR: %s, %d, %s\n", fileName, lineNumber, message);
 	return error;
 }
 
-//  setSeverityError -- Set the severity of an Error. By default severity is set to severeError.
-//    Use this function to alter this value.
-//-------------------------------------------------------------------------------------------------
-void setSeverityError(Error *error, ErrorSeverity severity)
-{
+// setSeverityError changes the severity of an Error.
+void setSeverityError(Error* error, ErrorSeverity severity) {
 	error->severity = severity;
 }
 
-//  deleteError -- Delete an Error. MNOTE: Not freeing fileName.
-//-------------------------------------------------------------------------------------------------
-void deleteError (Error *error)
-{
+// deleteError deletes an Error.
+void deleteError (Error* error) {
 	if (error->message) stdfree(error->message);
 	stdfree(error);
 }
 
-//  addErrorToLog -- Add an Error to an ErrorLog.
-//-------------------------------------------------------------------------------------------------
-void addErrorToLog (ErrorLog *errorLog, Error *error)
-{
+// addErrorToLog adds an Error to an ErrorLog.
+void addErrorToLog (ErrorLog* errorLog, Error* error) {
 	if (!error) return;
 	appendToList(errorLog, error);
 }
 
-//  addErrorToLog -- Add an Error to an ErrorLog.
-//--------------------------------------------------------------------------------------------------
-void oldAddErrorToLog(ErrorLog *errorLog, ErrorType errorType, String fileName, int lineNumber,
-	String message)
-{
+// oldAddErrorToLog adds an Error to an ErrorLog. An earlier version.
+void oldAddErrorToLog(ErrorLog* errorLog, ErrorType errorType, String fileName, int lineNumber,
+	String message) {
 	appendToList(errorLog, createError(errorType, fileName, lineNumber, message));
 }
 
-//  showError -- Show an Error on standard output.
-//-------------------------------------------------------------------------------------------------
-void showError (Error *error)
-{
+// showError shows an Error on standard output.
+void showError(Error* error) {
 	/*switch (error->severity) {
 		case fatalError: printf("fatal "); break;
 		case severeError: printf("severe "); break;
@@ -120,10 +103,8 @@ void showError (Error *error)
 	printf("%s\n", error->message ? error->message : "no message");
 }
 
-//  showErrorLog -- Show the contents of an ErrorLog on standard output.
-//-------------------------------------------------------------------------------------------------
-void showErrorLog (ErrorLog *errorLog)
-{
+// showErrorLog shows the contents of an ErrorLog on standard output.
+void showErrorLog(ErrorLog* errorLog) {
 	//sortList(errorLog, true);
 	FORLIST(errorLog, error)
 		showError((Error*) error);

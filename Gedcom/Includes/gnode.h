@@ -56,7 +56,7 @@ String eventToPlace(GNode*, bool);
 void showGNodeTree(GNode*);
 void showGNodes(int, GNode*);
 void showGNode(int level, GNode*);
-int length_nodes(GNode*);
+int gNodeListLength(GNode*);
 String shortenDate(String);
 String shortenPlace(String);
 //static bool allDigits(String)

@@ -37,11 +37,17 @@ A DeadEnds database must be indexed in various ways to get access to the records
 
 ###### Indexing Reference Values
 
-All Gedcom records (except header and trailer) have keys; they are the values of the level 0 root nodes.The user does not control these keys. However Gedcom allows records to have 1 REFN \<value\> lines that let users to assign their own keys to records. The reference index maps these user-assigned keys to the key of the record using the reference key. This allows users to easily access records using their own keys.
+All Gedcom records (except header and trailer) have keys; they are the values of the level 0 root nodes.The user does not control these keys. However Gedcom allows records to have 1 REFN lines that allow users to assign their own keys to records. The reference index maps these user-assigned keys to the key of the record using the reference key. This allows users to easily access records using their own keys.
 
 ###### More Indexing
 
-The LifeLines code that DeadEnds comes from uses only name and reference indexing. It would be very useful, however, if records could also be indexed by place and date values. I often thought about adding these indexes for LifeLines but is never happened.
+The LifeLines code that DeadEnds comes from provides only NAME and REFN value indexing. It would be very useful, however, if records could also be indexed by DATE and PLAC values.
+
+###### Validation
+
+Validation involves checking that the records in the database are correct. Validation occurs at different points.
+
+A first level of validation occurs when reading the Gedcom files. If they are not syntactically correct this is discovered first hand and the a database from the file is not created.
 
 
 

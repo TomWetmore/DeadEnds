@@ -5,7 +5,7 @@
 // read and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 2 Msy 2024.
+// Last changed 16 May 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -22,7 +22,7 @@ extern bool importDebugging;
 bool indexNameDebugging = true;
 static int keyLineNumber(Database*, String key);
 
-// createDatabase creates and returns a database.
+// createDatabase creates a database.
 Database *createDatabase(String filePath) {
 	Database *database = (Database*) stdalloc(sizeof(Database));
 	database->filePath = strsave(filePath);
@@ -79,7 +79,7 @@ bool isEmptyDatabase(Database* database) {
 	return numberPersons(database) + numberFamilies(database) == 0;
 }
 
-//  keyToPerson gets a person record from a database.
+// keyToPerson gets a person record from a database.
 GNode* keyToPerson(String key, Database* database) {
 	RecordIndexEl* element = (RecordIndexEl*) searchHashTable(database->personIndex, key);
 	return element ? element->root : null;
@@ -168,7 +168,7 @@ void showTableSizes(Database *database) {
 }
 
 // indexNames indexes all person names in a database.
-void indexNames(Database* database) {
+void oldIndexNames(Database* database) {
 	if (indexNameDebugging) fprintf(debugFile, "Start indexNames\n");
 	static int count = 0;
 	int i, j;
@@ -189,6 +189,29 @@ void indexNames(Database* database) {
 		}
 		entry = nextInHashTable(database->personIndex, &i, &j);
 	}
+	if (indexNameDebugging) showNameIndex(database->nameIndex);
+	if (indexNameDebugging) printf("The number of names indexed was %d\n", count);
+}
+
+// indexNames indexes all person names in a database. NEW VERSION HASN'T BEEN TESTED.
+void indexNames(Database* database) {
+	if (indexNameDebugging) fprintf(debugFile, "Start indexNames\n");
+	static int count = 0;
+	FORHASHTABLE(database->personIndex, element)
+		RecordIndexEl* entry = element;
+		GNode* root = entry->root;
+		String recordKey = root->key;
+		if (indexNameDebugging) fprintf(debugFile, "indexNames: recordKey: %s\n", recordKey);
+		for (GNode* name = NAME(root); name && eqstr(name->tag, "NAME"); name = name->sibling) {
+			if (name->value) {
+				if (indexNameDebugging) fprintf(debugFile, "indexNames: name->value: %s\n", name->value);
+				String nameKey = nameToNameKey(name->value);
+				if (indexNameDebugging) fprintf(debugFile, "indexNames: nameKey: %s\n", nameKey);
+				insertInNameIndex(database->nameIndex, nameKey, recordKey);
+				count++;
+			}
+		}
+	ENDHASHTABLE
 	if (indexNameDebugging) showNameIndex(database->nameIndex);
 	if (indexNameDebugging) printf("The number of names indexed was %d\n", count);
 }

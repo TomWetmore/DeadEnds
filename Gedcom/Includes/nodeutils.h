@@ -16,7 +16,7 @@ GNode* unionNodes(GNode* node1, GNode* node2, bool kids, bool copy);
 GNode* intersect_nodes(GNode*, GNode*, bool);
 void classifyNodes(GNode**, GNode**, GNode**);
 GNode* difference_nodes(GNode*, GNode*, bool);
-bool value_in_nodes(GNode*, String);
+bool valueInNodes(GNode*, String);
 bool equalTree(GNode*, GNode*);
 bool equalNode(GNode*, GNode*);
 bool isoList(GNode*, GNode*);

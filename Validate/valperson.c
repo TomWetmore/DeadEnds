@@ -22,26 +22,18 @@ bool validatePersonIndex(Database* database, ErrorLog* errorLog) {
 	bool valid = true;
 	FORHASHTABLE(database->personIndex, element)
 		GNode* person = ((RecordIndexEl*) element)->root;
-		int numErrors = lengthList(errorLog);
 		if (!validatePerson(person, database, errorLog)) valid = false;
-		if (debugging && lengthList(errorLog) > numErrors) {
-			printf("There were %d errors validating %s\n", lengthList(errorLog) - numErrors, person->key);
-			numErrors = lengthList(errorLog);
-		}
 	ENDHASHTABLE
 	return valid;
 }
 
-// validatePerson validates a person record. Persons do not require NAME or SEX lines, but
-// if there is a SEX line its value is checked. Checks all FAMC and FAMS links to families,
-// and that the families have the correct links back.
+// validatePerson validates a person record. Persons require at least one NAME and one SEX line
+// with valid values. All FAMC and FAMS links must link to families that link back to the person.,
 static bool validatePerson(GNode* person, Database* database, ErrorLog* errorLog) {
 	String segment = database->lastSegment;
 	int errorCount = 0;
 	static char s[512];
-
-	//  Check that the FAMC and FAMS nodes link to existing families.
-	FORFAMCS(person, family, key, database)
+	FORFAMCS(person, family, key, database) // Check FAMC links to families.
 		if (!family) {
 			int lineNumber = personLineNumber(person, database);
 			sprintf(s, "INDI %s (line %d): FAMC %s (line %d) does not exist.",
@@ -53,7 +45,7 @@ static bool validatePerson(GNode* person, Database* database, ErrorLog* errorLog
 			errorCount++;
 		}
 	ENDFAMCS
-	FORFAMSS(person, family, key, database)
+	FORFAMSS(person, family, key, database) // Check FAMS links to families.
 		if (!family) {
 				int lineNumber = personLineNumber(person, database);
 				sprintf(s, "INDI %s (line %d): FAMS %s (line %d) does not exist.",
@@ -65,16 +57,10 @@ static bool validatePerson(GNode* person, Database* database, ErrorLog* errorLog
 			errorCount++;
 		}
 	ENDFAMSS
-	if (debugging && errorCount) printf("Returning from valpperson early.\n");
 	if (errorCount) return false;
-
-	// Loop through the families the person is a child in. Be sure the family has a CHIL link back.
-	FORFAMCS(person, family, key, database)
-		//if (debugging) printf("DB: Person is a child in family %s.\n", key);
+	FORFAMCS(person, family, key, database) // Check FAMC links back to person.
 		int numOccurrences = 0;
-		//  Loop through the children in a family the person should be a child in.
-		FORCHILDREN(family, child, chilKey, count, database)
-			//if (debugging) { printf("DB: Child %d: %s %s\n", count, child->key, NAME(child)->value); }
+		FORCHILDREN(family, child, chilKey, count, database) // Find child that links to person.
 			if (person == child) numOccurrences++;
 		ENDCHILDREN
 		if (numOccurrences == 0) {
@@ -86,19 +72,14 @@ static bool validatePerson(GNode* person, Database* database, ErrorLog* errorLog
 		}
 	ENDFAMCS
 	if (errorCount) return false;
-
-	// Loop through the families the person is a spouse in. Be sure the family has a HUSB or WIFE
-	// link back.
 	SexType sex = SEXV(person);
-	FORFAMSS(person, family, key, database)
-		//if (debugging) printf("  person should be a spouse in family %s.\n", family->key);
+	FORFAMSS(person, family, key, database) // Check FAMS links back to person.
 		GNode *parent = null;
 		if (sex == sexMale) {
 			parent = familyToHusband(family, database);
 		} else if (sex == sexFemale) {
 			parent = familyToWife(family, database);
 		} else {
-			//  Parents require a SEX node with M or F value.
 			int lineNumber = personLineNumber(person, database);
 			sprintf(s, "INDI %s (line %d) with FAMS %s (line %d) link has no sex value.",
 					person->key,
@@ -121,6 +102,7 @@ static bool validatePerson(GNode* person, Database* database, ErrorLog* errorLog
 		}
 a:;
 	ENDFAMSS
+	
 
 	//  Validate existance of NAME and SEX lines.
 	//  Find all other links in the record and validate them.

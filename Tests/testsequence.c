@@ -232,7 +232,7 @@ static Sequence* tomsDescendents(Database* database) {
 	deleteSequence(s);
 	return d;
 }
-static Sequence* lssDescendents(Database* database) {
+static Sequence* lusDescendents(Database* database) {
 	Sequence* s = createSequence(database);
 	appendToSequence(s, "@I2@", null);
 	Sequence* d = descendentSequence(s, false);

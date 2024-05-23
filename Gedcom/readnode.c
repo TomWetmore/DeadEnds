@@ -1,19 +1,16 @@
-//
 // DeadEnds
 //
 // readnode.c has the functions that read GNodes (Gedcom nodes) and GNode trees from files
 // and strings.
 //
 // Created by Thomas Wetmore on 17 December 2022.
-// Last changed on 25 April 2024.
-//
+// Last changed on 21 May 2024.
 
 #include "readnode.h"
 #include "stringtable.h"
 #include "list.h"
 #include "errors.h"
 
-//static bool debugging = true;
 extern bool importDebugging;
 extern FILE* debugFile;
 
@@ -26,62 +23,36 @@ static String tag;         // Tag of last line read.
 static String value;       // Value of last line read.
 static bool ateof = false; // File is at end of file.
 
-//  extractFields -- Process a String holding a single Gedcom line by extracting the level, key
-//    (if any), tag, and value (if any). The line may have a newline at the end. This function is
-//    called by both fileToLine and stringToLine. The key, tag and value fields are stored in
-//    the static state variables key, tag and value.
-//
-//    MNOTE: key, tag, and value are pointers into the input string. Callers must use or copy
-//    them before the next line is extracted.
-//--------------------------------------------------------------------------------------------------
-static ReadReturn extractFields (String p, Error **error)
-//  p -- Gedcom line before processing. Within the function p is used as a cursor.
-//  error -- (out) Error, if any.
-{
-	// Be sure a string was passed in.
-	if (!p || *p == 0) {
+// extractFields processes a String with a single Gedcom line into static field variables. Called
+// by both fileToLine and stringToLine.
+static ReadReturn originalExtractFields(String p, Error** error) {
+	if (!p || *p == 0) { // String exists?
 		*error = createError(syntaxError, fileName, fileLine, "Empty string");
 		return ReadError;
 	}
-	//if (debugging) printf("          EXTRACT FIELDS: %s", p);  // No \n because the buffer has it.
-	// Initialize the output parameters.
-	key = value = null;  // Shifting over to using the static variables.
-	// Strip trailing white space from the String. TODO: THIS SEEMS WASTEFUL.
+	key = value = null;
 	striptrail(p);
-
-	// See if the input string is too long.
 	if (strlen(p) > MAXLINELEN) {
 		*error = createError(syntaxError, fileName, fileLine, "Gedcom line is too long.");
 		return ReadError;
 	}
-
-	// Get the level number. Pass any whitespace that precedes the level.
-	while (iswhite(*p)) p++;
-
-	// The first non-white character must be a digit for the Gedcom's line level.
-	if (chartype(*p) != DIGIT) {
+	while (iswhite(*p)) p++; // Whitespace before level.
+	if (chartype(*p) != DIGIT) { // Level.
 		*error = createError(syntaxError, fileName, fileLine, "Line does not begin with a level");
 		return ReadError;
 	}
-
-	// Use ascii arithmetic to convert the digit characters to integers.
 	level = *p++ - '0';
 	while (chartype(*p) == DIGIT) level = level*10 + *p++ - '0';
-
-	// Pass any white space that precedes the key or tag.
-	while (iswhite(*p)) p++;
-
-	// If at the end of the string it is an error.
+	while (iswhite(*p)) p++; // Whitespace before key or tag.
 	if (*p == 0) {
 		*error = createError(syntaxError, fileName, fileLine, "Gedcom line is incomplete.");
 		return ReadError;
 	}
-
 	// If @ is the next character, this line has a key.
 	if (*p != '@') goto gettag;
 
 	// Get the key including @'s.
-	key = p++;  // MNOTE: key points into the input string.
+	key = p++;
 	if (*p == '@') {  // @@ is illegal.
 		*error = createError(syntaxError, fileName, fileLine, "Illegal key (@@)");
 		return ReadError;
@@ -100,50 +71,94 @@ static ReadReturn extractFields (String p, Error **error)
 	}
 	*p++ = 0;
 
-	// Get the tag field.
 gettag:
-	while (iswhite(*p)) p++;  // Allow additional white space before the tag (non-standard Gedcom).
+	while (iswhite(*p)) p++; // Whitespace before tag.
 	if ((int) *p == 0) {
 		*error = createError(syntaxError, fileName, fileLine, "The line is incomplete");
 		return ReadError;
 	}
-	tag = p++; // MNOTE: tag points into the input string.
+	tag = p++;
 	while (!iswhite(*p) && *p != 0) p++;
 	if (*p == 0) return ReadOkay;
 	*p++ = 0;
-
-	// Get the value field.
-	while (iswhite(*p)) p++;
-	value = p;  // MNOTE: value points into the input string.
+	while (iswhite(*p)) p++; // Value.
+	value = p;
 	return ReadOkay;
 }
 
-//  fileToLine -- Reads the next Gedcom line from a file. Empty lines are counted and ignored.
-//    The line is passed to extractFields for field extraction. An error message is returned if
-//    a problem is found. Returns a value of ReadOkay, ReadEOF, or ReadError, which is found
-//    when fileToLine calls extractFields. The function uses fgets to read the lines.
-//--------------------------------------------------------------------------------------------------
-static ReadReturn fileToLine(FILE *file, Error **error)
-//  file -- File to read the line from.
-//  weeie -- (out) Error, if any.
-{
-	static char buffer[MAXLINELEN];  // Buffer to store the line.
-	char *p = buffer;  // Buffer cursor.
+
+
+// Modified from originalExtractFields by CHATGPT.
+static ReadReturn extractFields(String p, Error** error) {
+	if (!p || *p == 0) {
+		*error = createError(syntaxError, fileName, fileLine, "Empty string");
+		return ReadError;
+	}
+	key = value = null;
+	striptrail(p);
+	if (strlen(p) > MAXLINELEN) {
+		*error = createError(syntaxError, fileName, fileLine, "Gedcom line is too long.");
+		return ReadError;
+	}
+	while (iswhite(*p)) p++; // Level.
+	if (chartype(*p) != DIGIT) {
+		*error = createError(syntaxError, fileName, fileLine, "Line does not begin with a level");
+		return ReadError;
+	}
+	level = *p++ - '0';
+	while (chartype(*p) == DIGIT) level = level*10 + *p++ - '0';
+	while (iswhite(*p)) p++; // Before key or tag.
+	if (*p == 0) {
+		*error = createError(syntaxError, fileName, fileLine, "Gedcom line is incomplete.");
+		return ReadError;
+	}
+	if (*p == '@') { // Key.
+		key = p++;
+		if (*p == '@') { // @@ illegal.
+			*error = createError(syntaxError, fileName, fileLine, "Illegal key (@@)");
+			return ReadError;
+		}
+		while (*p != '@' && *p != 0) p++; // Read to 2nd @-sign.
+		if (*p == 0) {
+			*error = createError(syntaxError, fileName, fileLine, "Gedcom line is incomplete.");
+			return ReadError;
+		}
+		if (*++p != ' ') {
+			*error = createError(syntaxError, fileName, fileLine, "There must be space between the key and tag.");
+			return ReadError;
+		}
+		*p++ = 0;
+	}
+	while (iswhite(*p)) p++; // Tag.
+	if ((int) *p == 0) {
+		*error = createError(syntaxError, fileName, fileLine, "The line is incomplete");
+		return ReadError;
+	}
+	tag = p++;
+	while (!iswhite(*p) && *p != 0) p++;
+	if (*p == 0) return ReadOkay;
+	*p++ = 0;
+	while (iswhite(*p)) p++; // Value.
+	value = p;
+	return ReadOkay;
+}
+
+// fileToLine reads the next Gedcom line from a file. Empty lines okay.
+static ReadReturn fileToLine(FILE* file, Error** error) {
+	static char buffer[MAXLINELEN];
+	char *p = buffer;
 	*error = null;
 	while (true) {
-		//  Read a line from the file; if fgets returns 0 assume reading is over.
-		if (!(p = fgets(buffer, MAXLINELEN, file))) {
+		if (!(p = fgets(buffer, MAXLINELEN, file))) { // Read line.
 			ateof = true;
 			return ReadEOF;
 		}
-		//if (debugging) printf("        FILE TO LINE: %s", buffer);
-		fileLine++;  // Increment the file line number.
-		if (!allwhite(p)) break; // If the line is all white continue to the next line.
+		fileLine++;
+		if (!allwhite(p)) break;
 	}
-
-	// Read a line and convert it to field values. The values point to locations in the buffer.
 	return extractFields(p, error);
 }
+
 
 //  stringToLine -- Get the next Gedcom line as fields from a string holding one or more Gedcom
 //    lines. This function reads to the next newline, if any, and processes that part of the
@@ -224,12 +239,9 @@ static ReadReturn fileToLine(FILE *file, Error **error)
 	return null;
 } */
 
-//  createNodeListElement -- Create an element for a NodeList. Either node or error must be null
-//    but not both.
-//--------------------------------------------------------------------------------------------------
-NodeListElement *createNodeListElement(GNode *node, int level, int lineNo, Error *error)
-{
-	ASSERT(node || error && (!node || !error));  // Ugly exclusive or.
+// createNodeListElement creates an element for a NodeList. Node or error must be null.
+NodeListElement* createNodeListElement(GNode* node, int level, int lineNo, Error* error) {
+	ASSERT(node || error && (!node || !error));
 	NodeListElement *element = (NodeListElement*) malloc(sizeof(NodeListElement));
 	element->node = node;
 	element->level = level;
@@ -238,33 +250,31 @@ NodeListElement *createNodeListElement(GNode *node, int level, int lineNo, Error
 	return element;
 }
 
-// getKey is the getKey function or NodeLists that returns the tag of the GNode in the element.
+// getKey is the getKey function for NodeLists.
 static String getKey(void* element) {
 	return ((NodeListElement*) element)->node->tag;
 }
 
-// createNodeList creates a NodeList; one type holds all GNodes from a file, the other holds the
-// list of root GNodes.
-NodeList *createNodeList(void) {
+// createNodeList creates a NodeList; one type holds all GNodes from a file, the other holds all
+// roots.
+NodeList* createNodeList(void) {
 	NodeList *nodeList = createList(getKey, null, null, false);
 	return nodeList;
 }
 
 // getNodeListFromFile uses fileToLine and extractFields to create a GNode for each line in a
 // Gedcom file. Lines with errors store Errors in the list rather than GNodes.
-NodeList *getNodeListFromFile(FILE *fp, int *numErrors) {
-	NodeList *nodeList = createNodeList();
-	Error *error;
+NodeList *getNodeListFromFile(FILE* fp, int* numErrors) {
+	NodeList* nodeList = createNodeList();
+	Error* error;
 
 	*numErrors = 0;
 	ReadReturn rc = fileToLine(fp, &error);
 	while (rc != ReadEOF) {
 		if (rc == ReadOkay) {
-			// Create the GNode from the extracted fields and add it to the list.
 			appendToList(nodeList, createNodeListElement(
 							createGNode(key, tag, value, null), level, fileLine, null));
 		} else {
-			// Add an error entry to the node list.
 			appendToList(nodeList, createNodeListElement(null, level, fileLine, error));
 			(*numErrors)++;
 		}
@@ -279,10 +289,8 @@ NodeList *getNodeListFromFile(FILE *fp, int *numErrors) {
 	return null;
 }
 
-//  showNodeList -- Show contents of a NodeList. For debugging.
-//-------------------------------------------------------------------------------------------------
-void showNodeList(NodeList *nodeList)
-{
+// showNodeList shows the contents of a NodeList. Debugging.
+void showNodeList(NodeList* nodeList) {
 	FORLIST(nodeList, element)
 		NodeListElement *nodeListElement = (NodeListElement*) element;
 		printf("%d ", nodeListElement->lineNo);
@@ -301,7 +309,7 @@ void showNodeList(NodeList *nodeList)
 #define elementFields(element) element->node->key, element->node->tag, element->node->value, null
 
 // getNodeTreesFromNodeList scans a NodeList of GNodes and creates a NodeList of GNode trees;
-//  uses a three state state machine to track levels and errors.
+// uses a three state state machine to track levels and errors.
 NodeList *getNodeTreesFromNodeList(NodeList *lowerList, ErrorLog *errorLog) {
 	enum ExState { InitialState, MainState, ErrorState };
 	enum ExState state = InitialState;
@@ -405,10 +413,8 @@ NodeList *getNodeTreesFromNodeList(NodeList *lowerList, ErrorLog *errorLog) {
 	return rootNodeList;
 }
 
-//  numberNodesInNodeList -- Return the number of GNodes or GNode trees in a NodeList.
-//-------------------------------------------------------------------------------------------------
-int numberNodesInNodeList(NodeList *list)
-{
+// numberNodesInNodeList returns the number of GNodes or GNode trees in a NodeList.
+int numberNodesInNodeList(NodeList* list) {
 	int numNodes = 0;
 	FORLIST(list, element)
 		NodeListElement *e = (NodeListElement*) element;
@@ -417,10 +423,8 @@ int numberNodesInNodeList(NodeList *list)
 	return numNodes;
 }
 
-//  numberErrorsInNodeList -- Return the number of Errors in a NodeList.
-//-------------------------------------------------------------------------------------------------
-int numberErrorsInNodeList(NodeList *list)
-{
+// numberErrorsInNodeList returns the number of Errors in a NodeList.
+int numberErrorsInNodeList(NodeList* list) {
 	int numErrors = 0;
 	FORLIST(list, element)
 		NodeListElement *e = (NodeListElement*) element;

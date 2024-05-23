@@ -3,14 +3,13 @@
 // nodeutils.c has GNode utility functions.
 //
 // Created by Thomas Wetmore on 12 November 2022.
-// Last changed on 13 May 2024.
+// Last changed on 21 May 2024.
 
 #include "standard.h"
 #include "gnode.h"
 #include "nodeutils.h"
 
-// uniqueNodes removes duplicates a from list of nodes; the original list is modified. If kids
-// is true, contents of children matter.
+// uniqueNodes removes duplicates a from list of nodes. If kids is true children matter.
 GNode* uniqueNodes(GNode* node, bool kids) {
 	GNode *node0 = node, *next;
 	if (!node) return null;
@@ -126,10 +125,10 @@ GNode* intersect_nodes (GNode* node1, GNode* node2, bool kids)
 // the first list. The second holds the values that were only in the second list. The third holds
 // all the values that were in both original lists. The input lists are modified.
 void classifyNodes (GNode** pnode1, GNode** pnode2, GNode** pnode3) {
-	GNode *node1, *node2, *node3, *curs1, *curs2, *curs3;
+	GNode *node1, *node2, *node3, *curs3;
 	GNode *prev1, *prev2, *next2;
-	curs1 = node1 = uniqueNodes(*pnode1, false);
-	curs2 = node2 = uniqueNodes(*pnode2, false);
+	GNode* curs1 = node1 = uniqueNodes(*pnode1, false);
+	GNode* curs2 = node2 = uniqueNodes(*pnode2, false);
 	curs3 = node3 = prev1 = prev2 = null;
 	while (curs1 && curs2) {
 		if (eqstr(curs1->value, curs2->value)) {
@@ -193,8 +192,8 @@ GNode* difference_nodes (GNode* node1, GNode* node2, bool kids) {
 	return node1;
 }
 
-// value_in_nodes checks if a list of GNodes contains a given value.
-bool value_in_nodes(GNode* node, String value) {
+// valueInNodes checks if a list of GNodes contains a given value. Not used.
+bool valueInNodes(GNode* node, String value) {
 	while (node) {
 		if (eqstr(value, node->value)) return true;
 		node = node->sibling;
@@ -208,7 +207,7 @@ bool equalTree(GNode* root1, GNode* root2) {
     String str1, str2;
     if (!root1 && !root2) return true;
     if (!root1 || !root2) return false;
-    if (length_nodes(root1) != length_nodes(root2)) return false;
+    if (gNodeListLength(root1) != gNodeListLength(root2)) return false;
     while (root1) {
         if (nestr(root1->tag, root2->tag)) return false;
         str1 = root1->value;
@@ -243,8 +242,8 @@ bool isoList(GNode* root1, GNode* root2) {
     GNode *node1, *node2;
     if (!root1 && !root2) return true;
     if (!root1 || !root2) return false;
-    len1 = length_nodes(root1);
-    len2 = length_nodes(root2);
+    len1 = gNodeListLength(root1);
+    len2 = gNodeListLength(root2);
     if (len1 != len2) return false;
     if (len1 == 0) return true;
     node1 = root1;
@@ -276,20 +275,19 @@ bool equalNodes(GNode* root1, GNode* root2, bool kids, bool sibs) {
     return (root2 == null);
 }
 
-// isoGNodes checks if two GNode structures are isomorphic; if kids and sibs are true include them
-// in the check.
+// isoGNodes checks if two GNode trees or forests are isomorphic; if kids and sibs are true
+// include them in the check.
 bool isoGNodes(GNode* root1, GNode *root2, bool kids, bool sibs) {
     if (!root1 && !root2) return true;
     if (!root1 || !root2) return false;
     if (!kids && !sibs) return equalNode(root1, root2);
     if (kids && !sibs) return equalNode(root1, root2) && isoGNodes(root1->child, root2->child, 1, 1);
-    int len1 = length_nodes(root1);
-    int len2 = length_nodes(root2);
+    int len1 = gNodeListLength(root1);
+    int len2 = gNodeListLength(root2);
     if (len1 != len2) return false;
     if (len1 == 0) return true;
-
     GNode* node1 = root1;
-    while (node1) {
+    while (node1) { // Can be in any order. N*N algorithm.
         GNode* node2 = root2;
         while (node2) {
             if (isoGNodes(node1, node2, kids, 0)) break;
