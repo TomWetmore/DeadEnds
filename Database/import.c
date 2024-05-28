@@ -4,7 +4,7 @@
 // import.c has the functions that import Gedcom files into Databases.
 //
 // Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 25 April 2024.
+// Last changed on 27 May 2024.
 //
 
 #include <unistd.h>
@@ -23,13 +23,14 @@
 #include "validate.h"
 #include "errors.h"
 #include "readnode.h"
+#include "gnodelist.h"
 #include "path.h"
 
 extern FILE* debugFile;
 
-// toString returns the GNode in a NodeListElement as a string; for debugging.
+// toString returns the GNode in a GNodeListElement as a string; for debugging.
 //static String toString(void* element) {
-	//GNode* gnode = ((NodeListElement*) element)->node;
+	//GNode* gnode = ((GNodeListElement*) element)->node;
 	//return gnodeToString(gnode, 0);
 //}
 
@@ -73,7 +74,7 @@ Database* importFromFile(String filePath, ErrorLog* errorLog) {
 	}
 	if (importDebugging) fprintf(debugFile, "importFromFile: calling getNodeListFromFile(%s,...\n", filePath);
 	int numErrors = 0;
-	NodeList* listOfNodes = getNodeListFromFile(file, &numErrors); // Get all lines as GNodes.
+	GNodeList* listOfNodes = getNodeListFromFile(file, &numErrors); // Get all lines as GNodes.
 	if (!listOfNodes) return null;
 	if (importDebugging) fprintf(debugFile, "importFromFile: back from getNodeListFromFile\n");
 	if (importDebugging) {
@@ -81,9 +82,9 @@ Database* importFromFile(String filePath, ErrorLog* errorLog) {
 		//fprintfBlock(debugFile, &(listOfNodes->block), toString);
 	}
 
-	// Convert the NodeList of GNodes and Errors into a NodeList of GNode trees.
+	// Convert the NodeList of GNodes and Errors into a GNodeList of GNode trees.
 	if (importDebugging) fprintf(debugFile, "importFromFile: calling getNodeTreesFromNodeList\n");
-	NodeList* listOfTrees = getNodeTreesFromNodeList(listOfNodes, errorLog);
+	GNodeList* listOfTrees = getNodeTreesFromNodeList(listOfNodes, errorLog);
 	if (importDebugging) fprintf(debugFile, "importFromFile: back from getNodeTreesFromNodeList\n");
 	if (importDebugging) {
 		fprintf(debugFile, "importFromFile: listOfGTrees contains\n");

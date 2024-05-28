@@ -552,7 +552,7 @@ InterpType interp_forsour (PNode *node, Context *context, PValue *pval)
 ////            if(scount < num_sours()) continue;
 ////            break;
 ////        }
-////        if (!(sour = stringToNodeTree(record))) continue;
+////        if (!(sour = stringToGNodeTree(record))) continue;
 ////        scount++;
 ////        insert_pvtable(stab, ielement(node), PSOUR,
 ////                       sour_to_cacheel(sour));
@@ -654,7 +654,7 @@ InterpType interpForFam (PNode* node, Context* context, PValue* pval)
 ////            if(fcount < num_fams()) continue;
 ////            break;
 ////        }
-////        if (!(fam = stringToNodeTree(record))) continue;
+////        if (!(fam = stringToGNodeTree(record))) continue;
 ////        fcount++;
 ////        insert_pvtable(stab, ielement(node), PFAM,
 ////                       (VPTR) fam_to_cacheel(fam));

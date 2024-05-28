@@ -1,6 +1,27 @@
 # Importing
 
-Importing in DeadEnds consists of reading the records in a Gedcom file into an in-Ram database. The records are checked for syntax and lineage semantics. Person records are indexed by name. The records are also indexed for any REFN values.
+Importing in DeadEnds consists of reading the records in a Gedcom file into an in-Ram database. The records are checked for syntax and lineage semantics errors. Person records are indexed by NAME and all reords are indexed for REFN values.
+
+###### Checks that Must Be Done
+
+Each line in the Gedcom files are checked for syntax. Checks:
+
+1. All lines must have a level and tag.
+2. All level 0 lines (except HEAD and TRLR) must have keys.
+3. All keys must be unique.
+4. All person records (0 INDI) records must have 1 or more 1 NAME lines with values and one 1 SEX line with a valid value (M, F, U).
+5. All family records (0 FAM) records must have at least one of 1 HUSB, 1 WIFE or 1 CHIL lines.
+
+Lineage semantic checks.
+
+1. Every 1 FAMS and 1 FAMC line in a person record must link to a family record.
+2. Every 1 HUSB, 1 WIFE and 1 CHIL line in a family record must link to a person record.
+3. Every family record that a person links to with a 1 FAMC link must have a 1 CHIL link back to the person.
+4. Every family record that a person links to with a 1 FAMS link must have a 1 HUSB or 1 WIFE link back to the person, and the sex of the person must match the HUSB or WIFE line.
+
+And this is after the list.
+
+
 
 ###### importFromFiles
 

@@ -1,0 +1,50 @@
+Thoughts from reading the readnode.c file. May want some reorganization.
+
+extern bool importDebugging;
+extern FILE* debugFile;
+
+// Variables that maintain state between functions.
+static String fileName;
+static int fileLine = 0;
+static int level;
+static String key;
+static String tag;
+static String value;
+static bool ateof = false;
+
+------------------------------------------------------------
+extractFields processes a Gedcom line into static variables.
+It takes a single String and either 1) sets the static variables and returns ReadOkay or 2)
+sets the error variable and returns ReadError.
+------------------------------------------------------------
+static ReadReturn extractFields(String p, Error** error)
+
+------------------------------------------------------------
+fileToLine reads the next Gedcom line from a file. Empty lines are okay.
+It takes an open FILE positioned at the beginning of a line to process.
+It either 1) returns ReadAtEnd if at end of file; 2) the result of
+calling extractFields (either ReadError or ReadOkay).
+------------------------------------------------------------
+static ReadReturn fileToLine(FILE*, Error**)
+------------------------------------------------------------
+
+------------------------------------------------------------
+stringToLine gets the next Gedcom line as fields from a String that holds
+one or more Gedcom lines. It looks ahead in the string til it finds either
+a newline or 0 (end of string). It calls extractFields to get the fields,
+and it adjusts the string pointer passed in to point to the start of the
+next line in the string. If it is called at the end of the string it
+returns ReadAtEnd, otherwise is returns the result from extracFields.
+------------------------------------------------------------
+static ReadReturn stringToLine(String*, Error**)
+------------------------------------------------------------
+
+------------------------------------------------------------
+stringToNodeTree converts a String holding a Gedcom record into a GNode tree.
+It repeatedly calls stringToLine to get the lines making up the record.
+It builds the tree using the level values to get the structure right.
+NOTE: That xxxxxxxxxxxxxxxxxx also uses level numbers to get the structure
+right, but these two algorithms do not use the same base code.
+------------------------------------------------------------
+GNode* stringToNodeTree(String, ErrorLog*)
+------------------------------------------------------------

@@ -40,6 +40,7 @@ static void indexNamesTest(Database*, int);
 static void testNewReadLayer(String);
 extern bool validateDatabase(Database*, ErrorLog*);
 static void countNodesBeforeTest(Database*, int);
+extern void testgedcomstrings(void);
 
 // main is the main function of a batch program that tests the DeadEnds infrastructure.
 int main(void) {
@@ -74,6 +75,7 @@ int main(void) {
 	//if (database) forTraverseTest(database, ++testNumber);
 	//if (database && validated) parseAndRunProgramTest(database, ++testNumber);
 	//if (database && validated) countNodesBeforeTest(database, ++testNumber);
+	testgedcomstrings();
 	fclose(debugFile);
 	return 0;
 }

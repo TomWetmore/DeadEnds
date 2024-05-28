@@ -183,8 +183,8 @@ void showGNode(int level, GNode* node) {
 	printf("\n");
 }
 
-// gNodeListLength returns the length of the list of GNodes.
-int gNodeListLength(GNode* first) {
+// gNodesLength returns the length of the list of GNodes.
+int gNodesLength(GNode* first) {
 	int len = 0;
 	while (first) {
 		len++;

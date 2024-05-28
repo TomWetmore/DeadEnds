@@ -7,8 +7,8 @@ LIBS=-lutils -lparser -ldatatypes -linterp -lgedcom -ldatabase -lvalidate
 all: test
 
 
-test: test.o testsequence.o ../Database/libdatabase.a ../Parser/libparser.a ../DataTypes/libdatatypes.a ../Interp/libinterp.a ../Gedcom/libgedcom.a ../Validate/libvalidate.a
-	$(CC) -o test test.o testsequence.o $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
+test: test.o testsequence.o testgedcomstrings.o ../Database/libdatabase.a ../Parser/libparser.a ../DataTypes/libdatatypes.a ../Interp/libinterp.a ../Gedcom/libgedcom.a ../Validate/libvalidate.a
+	$(CC) -o test test.o testsequence.o testgedcomstrings.o $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
 testset: testset.o ../Database/libdatabase.a ../Parser/libparser.a ../DataTypes/libdatatypes.a ../Interp/libinterp.a ../Gedcom/libgedcom.a
 	$(CC) -o testset testset.o $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc

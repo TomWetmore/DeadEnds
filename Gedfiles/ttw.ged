@@ -1,0 +1,596 @@
+0 @I51@ INDI
+1 NAME Thomas Trask /Wetmore/
+1 SEX M
+1 BIRT
+  2 DATE 10 February 1826
+    3 SOUR Connecticut Deaths and Burials, 1772-1934, FamilySearch.
+  2 PLAC Saint John, New Brunswick, Canada
+  2 SOUR Summary
+1 BIRT
+  2 DATE prob 1826, between 1825 and 1829
+  2 PLAC prob New Brunswick, Canada
+  2 SOUR Summary
+1 CENS
+  2 DATE 29 July 1850
+  2 PLAC Portsmouth, Rockingham County, New Hampshire, United States
+  2 NAME Thomas Whittemore
+  2 AGE 21
+  2 SEX M
+  2 OCCU Carpenter
+  2 BIRT
+    3 PLAC New Brunswick, Canada
+  2 NOTE He is boarding in a grocer's home. Another family in the same home is Peter and Lucy Pray with
+    3 CONT young son John. Thomas marries Anna Pray, who is also in Portsmouth at this time, so it seems
+    3 CONT likely that Anna is a sister of Peter Pray.
+  2 NOTE There is little doubt that this Thomas Whittemore is Thomas Trask Wetmore.
+  2 SOUR U.S. 1850 Census of Portsmouth, Rockingham, New Hampshire
+1 IMMI
+  2 DATE 1850
+  2 PLAC United States
+  2 SOUR U.S. 1910 Census
+1 ARRV
+  2 DATE 1 January 1855
+  2 PLAC Norwich, New London County, Connecticut, United States
+  2 NOTE He arrived in Norwich on January 1, 1855, to begin working in shipbuilding.
+  2 SOUR Clipping from Norwich Bulletin from March 1896.
+  2 SOUR Note he wrote to the Norwich "Bulletin" about shipbuilding when he was living in Titusville, Florida.
+1 MARR
+  2 DATE 1855
+  2 NOTE Marriage to Eliza J. Reed. I added this marriage because of so much similarity in birth year, father
+    3 CONT and mother's name, and Thomas' name.
+  2 NOTE There was probably a child in this family, Eliza Jane Wetmore, born in 1855 and died in 1860, probably
+    3 NOTE in either Norwich or New London.
+1 CENS
+  2 DATE 21 July 1860
+  2 PLAC Norwich, New London County, Connecticut, United States
+  2 HEAD
+    3 NAME Thomas Wetmore
+    3 SEX M
+    3 AGE 33 years
+    3 OCCU ship builder
+    3 INFO value of assets - $400
+    3 BIRT
+      4 PLAC New Brunswick, Canada
+  2 WIFE
+    3 NAME Anna Wetmore
+    3 AGE 26 years
+    3 SEX F
+    3 OCCU housekeeper
+    3 BIRT
+      4 PLAC New Hampshire, United States
+  2 SOUR U.S. 1860 Census of Connecticut, Norwich, page 172.
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1861
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship carpenter
+  2 ADDR 14 New London Turnpike
+  2 INFO home
+  2 SOUR 1861 Norwich city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1863
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship builder
+  2 ADDR New London Turnpike
+  2 SOUR 1863 Norwich city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1864
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship builder
+  2 ADDR n[orth of] rolling mill
+  2 SOUR 1864 Norwich city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1865
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship builder
+  2 ADDR n[orth of] rolling mill
+  2 SOUR 1865 Norwich city directory
+1 NATU
+  2 NAME Thomas T. Wetmore
+  2 DATE 28 March 1868
+  2 AGE 42 years
+  2 BIRT
+    3 DATE 1826, computed from age
+    3 PLAC Saint John, New Brunswick, Canada
+  2 RESI
+    3 PLAC Norwich, Connecticut, United States
+  2 WITN
+    3 NAME J B Rogers
+  2 WITN
+    3 NAME R E Cash
+  2 COUR Superior Court, Norwich, Connecticut, United States
+    3 INFO book 2 page 74
+  2 FROM Saint John, New Brunswick, Canada
+  2 SOUR index to immigration records, U.S. archives
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1867
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU Pres't Norwich Grocery Co.
+  2 ADDR 20 Thames
+  2 SOUR 1867 Norwich city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1868
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship builder
+  2 ADDR 20 Thames
+  2 SOUR 1868 Norwich city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1869
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship-builder
+  2 ADDR 48 Thames
+  2 SOUR 1869 Norwich city directory
+1 CENS
+  2 DATE 1870
+  2 PLAC Norwich, New London County, Connecticut, United States
+  2 HEAD
+    3 NAME Thomas T. Wetmore
+    3 AGE 44 years
+    3 COND M W
+    3 OCCU ship carpenter
+    3 BIRT
+      4 PLAC New Brunswick, Canada
+    3 INFO father and mother of foreign birth; U.S. citizen
+  2 SPOU
+    3 NAME Annie C Wetmore
+    3 AGE 36 years
+    3 COND F W
+    3 OCCU keeping house
+    3 BIRT
+      4 PLAC New Hampshire, United States
+    3 INFO She has $1200 of personal property.
+  2 SOUR U.S. 1870 Census of Connecticut
+    3 INFO Norwich, ward 2, page 24, dwelling 125, family 199
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1871
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship builder
+  2 ADDR 48 Thames
+  2 SOUR 1871 Norwich city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1872
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship builder
+  2 ADDR 48 Thames
+  2 SOUR 1872 Norwich city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1873
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship builder
+  2 ADDR 15 W. Thames
+  2 SOUR 1873 Norwich city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1873
+  2 PLAC Norwich, Connecticut, United States
+  2 ADDR 20 Thames
+  2 SOUR 1873 Brainerd's New London county directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1874
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship builder
+  2 ADDR 15 W. Thames
+  2 SOUR 1874 Norwich city directory
+1 RESI
+  2 NAME Thomas Wetmore
+  2 DATE 1874-5
+  2 PLAC New London, Connecticut, United States
+  2 ADDR boards Metropolitan Hotel
+  2 SOUR 1874-5 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1875
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship builder
+  2 ADDR 15 W. Thames
+  2 SOUR 1875 Norwich city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1876
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU shipbuilder
+  2 ADDR 15 West Thames
+  2 SOUR 1876 Norwich city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1877
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship builder
+  2 ADDR 15 West Thames
+  2 SOUR 1877 Norwich city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1878
+  2 PLAC Norwich, Connecticut, United States
+  2 OCCU ship builder
+  2 ADDR 15 West Thames
+  2 SOUR 1878 Norwich city directory
+1 INFO After 1878 Thomas does not appear in any Norwich city
+  2 CONT directories (not checked after 1900).
+1 CENS
+  2 DATE 7 June 1880
+  2 PLAC New London, New London County, Connecticut, United States
+  2 NAME Thos T Wetmore
+  2 COLO White
+  2 SEX M
+  2 AGE 52
+  2 RELA Head
+  2 STAT Married
+  2 OCCU Builder (House)
+  2 BIRT
+    3 PLAC New Brunswick, Canada
+  2 FATH
+    3 BIRT
+      4 PLAC New York
+  2 MOTH
+    3 BIRT
+      4 PLAC New Brunswick, Canada
+  2 NOTE Also in his household is Grace Cressie?, 16 year old neice, who is at school. She was
+    3 CONT born in Connecticut, father in New Jersey, and mother in Massachusetts.
+  2 SOUR 1880 U.S. Census
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1882-3
+  2 PLAC New London, Connecticut, United States
+  2 ADDR 57 Huntington
+  2 OCCU Bridge master, N L N R R
+    3 NOTE New London Northern Railroad
+  2 SOUR 1882-3 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1884-5
+  2 PLAC New London, Connecticut, United States
+  2 ADDR Metropolitan Hotel
+  2 OCCU Bridgemaster, N L N R R
+    3 NOTE New London Northern Railroad
+  2 SOUR 1884-5 New London city directory
+1 CENS
+  2 DATE 4 June 1885
+  2 PLAC Precinct 8, Putnam County, Florida
+  2 NAME T T Wetmore
+  2 SEX M
+  2 COLO W
+  2 AGE 59
+  2 STAT Married
+  2 RELA Head
+  2 OCCU Bridge Builder
+  2 BIRT
+    3 PLAC New Brunswick, Canada
+  2 FATH
+    3 BIRT
+      4 PLAC New Brunswick, Canada
+  2 MOTH
+    3 BIRT
+      4 PLAC New Brunswick, Canada
+  2 SOUR 1885 Florida State Census
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1886
+  2 PLAC Palatka, Florida, United States
+  2 ADDR Fourth corner Oak
+  2 OCCU Master bridge builder for J.T.&K.W.R.R
+  2 EMPL Jacksonville, Tampa & Key West Rail Road
+  2 SOUR 1886 Jacksonville City Directory
+1 RESI
+  2 NAME Thomas T. Wetmore
+  2 DATE 1887
+  2 PLAC Palatka, Florida, United States
+  2 ADDR Fourth corner Oak
+  2 OCCU bridge builder
+  2 SOUR 1887 Jacksonville City Directory
+1 RESI
+  2 NAME T. T. Wetmore
+  2 DATE March 1894
+  2 PLAC Titusville, Florida, United States
+  2 SOUR Article in Norwich Bulletin in March 1896
+  2 TEXT SHIPBUILDING ON THE THAMES
+    3 CONT Mr. T. T. Wetmore Writes Entertainingly of Shipbuilding Between 1855 and 1866.
+    3 CONT
+    3 CONT I saw in the BULLETIN of March 5, writes T. T. Wetmore from Titusville, Florida,
+    3 CONT a history of shipbuilding in Norwich from away back in the "ye olden times." As I had
+    3 CONT something to do in that line in Norwich from 1855 to 1866, I think I can give you a
+    3 CONT little more definite account of the vessels built in that time than anyone else.
+    3 CONT
+    3 CONT I went to Norwich on January 1, 1855, and took the job to plank and ceil the schooner
+    3 CONT Col. Lester of about 250 tons, built for J. M. Huntington & Co. and Col. Lester of
+    3 CONT Preston, by Harrison P. Lamphier. She was launched from a yard just below the old railroad
+    3 CONT bridge over the Shetucket, on July 4, 1855. That winter Mr. Lamphier contracted with
+    3 CONT J. M. Huntington & Co. to build the barge Thames, which I build under sub contract, and
+    3 CONT launched her June 12, the same year. She was 140 tons. As Lamphier had this yard leased,
+    3 CONT and there being no other available place, I started a new yard near the Norwich and
+    3 CONT Worcester railroad station, just where the iron bridge abutment is now, and build the
+    3 CONT schooner Sally Gay, 200 tons, and launched her April 7, 1856. Then I build the schooner
+    3 CONT I. K. Marvel of 200 tons, which was launched November 11, 1856. These were all for J. M.
+    3 CONT Huntington & Co.
+    3 CONT
+    3 CONT The I. K. Marvel, commanded by Capt. Eldridge of Cape Cod, was the pioneer schooner to
+    3 CONT open the West India trade which in later years grew to such large proportions.
+    3 CONT
+    3 CONT In the summer of 1860 the afore-named firm built a new shipyard at Thamesville by filling
+    3 CONT from the high bank where Shipping street now is, the pond of water inside the railroad
+    3 CONT track and the flats outside the track to the bulkhead near the channel, where we put in a
+    3 CONT marine railway, and I commenced to build the propeller Norwich, which was intended for
+    3 CONT a passenger and freight boat to run from Ponce to Saint John on the Isle of Porto Rico.
+    3 CONT She was of 432 tons burthen and about the size of the gunboats which were ordered by
+    3 CONT congress and the breaking out of the war. Samuel Rook[?], naval constructor, heard of this
+    3 CONT boat, and when she was well along in construction, bought her for one of the sixteen
+    3 CONT gunboats ordered by the government. She was coppered, gun deck put it, with magazine, and
+    3 CONT equipped all ready for her guns and delivered in New York to the government Sept. 28, 1861.
+    3 CONT
+    3 CONT I then build the propeller Trade Wind, of the same size, and launched her April 5, 1862.
+    3 CONT This boat followed Admiral Farragut into New Orleans. The captain bought a cargo of sugar
+    3 CONT and she paid for herself the first voyage she made.
+    3 CONT
+    3 CONT The owners, J. M. Huntington & Co., presented every man who worked on her with a 25-pound
+    3 CONT box of sugar; myself with a barrel of 228 pounds; E. Proctor 100 pounds; S. N. Gladwin,
+    3 CONT foreman joiner, 100 pounds. As only three and a half pounds of suger could then be bought
+    3 CONT for $1, the gift was appreciated pretty highly.
+    3 CONT
+    3 CONT The third vessel built was the propeller Prometheus, 650 tons, launched in 1863; fourth,
+    3 CONT propeller Perrit, 713 tons, launched in fall of 1863; fifth, the propeller Whirlwind,
+    3 CONT 430 tons, launched early in 1864; sixth, propeller Uncas, 325 tons, built in 1864;
+    3 CONT seventh, propeller Chace, 515 tons, launched in 1865; eighth, propeller Hunter, built in
+    3 CONT 1865, 515 tons; ninth, propeller Utility, 650 tons, launched 1866.
+    3 CONT
+    3 CONT These were all double decked vessels but the Uncas which was a single deck vessel.
+    3 CONT As there could be no yellow pine got from the south in those days on account of the war,
+    3 CONT we had to depend on our own country for all the timber, plank, etc., and the towns of
+    3 CONT Montville, Bozrah, Preston, Scotland and Lebanon were well scoured for timber. Many an
+    3 CONT old farmer who got big prices for timber had occasion to bless the name of J. M.
+    3 CONT Huntington & Co.
+    3 CONT
+    3 CONT Mr. E. Proctor was not foreman of the yard, but was the boss machinist and built the
+    3 CONT engines for all the boats but the Norwich, which were built by the late Eliot Barber.
+    3 CONT The boilers were built by William Troland.
+    3 CONT
+    3 CONT Titusville, Fla., March 9, 1894.
+1 EVEN
+  2 DATE 12 February 1895
+  2 NOTE Messrs. Wetmore and Gladwin represented the Indian River Ice Manufacturing Co., of Titusville,
+    3 CONT Florida, at the Florida Ice Manufacturers' Association.
+  2 SOUR Ice and Refrigeration, Volume 8, Number 3, March 1895, page 191.
+1 EVEN
+  2 DATE 13 February 1895
+  2 NOTE T. T. Wetmore and S. N. Gladwin, of Wetmore & Gladwin, Titusville, Florida, attended the
+    3 CONT Sixth Annual Convention of the Southern Ice Exchange as delegates.
+  2 SOUR Ice and Refrigeration, Volume 8, Number 3, March 1895, page 165.
+1 EVEN
+  2 DATE 1895
+  2 NAME J. T. Wetmore [sic]
+  2 TEXT The firm of Wetmore & Gladwin, ice manufacturers at Titusville, Fla., has been dissolved,
+    3 CONT J.[sic] T. Wetmore having purchased Mr. Gladwin's interests. Mr. Gladwin is looking for a
+    3 CONT site elsewhere in Florida, and October 18 was at Ft. Pierre.
+  2 SOUR Ice and Refrigeration, Volune 9, Number 5, November 1895, page 328.
+1 NEWS
+  2 DATE 29 March 1899
+  2 INFO Article in Norwich "Bulletin" about Thomas being in the artificial ice business in Florida.
+  2 SOUR Card file from the Norwich "Bulletin"
+1 NEWS
+  2 DATE 27 April 1900
+  2 NAME T. T. WETMORE, Proprietor
+  2 TEXT ICE ICE ICE
+    3 CONT AS GOOD AS THE BEST.
+    3 CONT Manufactured at the INDIAN RIVER ICE MANUFACTURY, T. T. WETMORE, Proprietor.
+    3 CONT Special attention paid to packing for family use, and shipped to any station on the East Coast
+    3 CONT railroad or by steamboat on the Indian river.
+  2 SOUR Florida Star, April 27, 1900, page 5.
+1 CENS
+  2 DATE 30 June 1900
+  2 PLAC Precinct 2 Titusville, Titusville Town, Brevard County, Florida
+  2 NAME Thomas T Wetmore
+  2 AGE 74
+  2 SEX M
+  2 COLO W
+  2 BIRT
+    3 DATE February 1826
+    3 PLAC New Brunswick, Canada
+    3 FATH
+      4 BIRT
+        5 PLAC New Brunswick, Canada
+    3 MOTH
+      4 BIRT
+        5 PLAC New Brunswick, Canada
+  2 FACT number years married - 15
+  2 FACT year of immigration - 1850
+  2 FACT number of years in the United States - 50
+  2 FACT naturalized
+  2 OCCU manufacturer ice
+  2 FACT can read, can write, can speak English
+  2 FACT rents home
+  2 SOUR 1900 U.S. Census
+1 EVEN
+  2 NAME T. T. Wetmore
+  2 DATE 27 March 1901
+  2 ASSO Florida Ice Manufacturers Association
+  2 NOTE T. T. Wetmore did not attend the annual convention due to sickness.
+  2 TEXT The secretary read a letter from Mr. T. Wetmore, stating his inability to attend the meeting
+    3 CONT owing to recent illness.
+  2 SOUR Ice and Refrigeration, Volume 20, Number 5, May, 1901, page 236.
+1 DEAT
+  2 DATE 16 November 1907
+    3 SOUR Connecticut Deaths and Burials, 1772-1934 on Family Search
+  2 PLAC Florida, United States
+    3 SOUR Card file from Norwich "Bulletin" indicating article 19 November 1907
+1 EVEN Letter to the Editor
+  2 DATE unknown
+  2 TEXT VAN COTT MILLIONS
+    3 CONT Eastern Connectiuct Heirs May Rightfully Claim Them.
+    3 CONT Thomas T. Wetmore writes from Titusville, Fla., as follows:
+    3 CONT "I notice in your issue of 3rd inst., that in speaking of the Van Cott estate
+    3 CONT you speak of D. L. Wetmore of New London, who is my eldest brother,
+    3 CONT as one of the heirs; that his great grandfather, John Wetmore, married
+    3 CONT Anna Van Cott, etc.
+    3 CONT John Wetmore was our grandfather, and Anna Van Cott our grandmother.
+    3 CONT Our father was named Daniel Van Cott after his mother's brother.
+    3 CONT I mention these facts to show that we are one generation nearer Anna Van Cott
+    3 CONT than your notice showed us to be."
+    3 CONT Mr. Wetmore will be remembered as the former master bridge builder of
+    3 CONT of the New London Northern.
+  2 NOTE This note clearly states the relationship between Daniel Van Cott Wetmore, father, and
+    3 CONT Daniel Lorenzo Wetmore and Thomas Trask Wetmore, two sons.
+  2 SOUR Clipping, probably from the New London "Day" or Norwich "Bulletin".
+1 NEWS
+  2 TITL East Coast Advocate and Indian River Chronicle
+  2 DATE 10 February 1905
+  2 PLAC Titusville, Florida
+  2 TEXT Mr. and Mrs. Isaac Denby, of New York, who have been on an extended trip through the
+    3 CONT West Indies, and have been at Miami and Palm Beach this week, arrived in Titusville,
+    3 CONT yesterday, on a visit to Mrs. Denby's brother, Mr. T. T. Wetmore. Mr. and Mrs. Denby
+    3 CONT have been in Titusville several times before, and have many friends here who are
+    3 CONT glad to see them again.
+1 NEWS
+  2 TITL East Coast Advocate and Indian River Chronicle
+  2 DATE 17 March 1905
+  2 PLAC Titusville, Florida
+  2 TEXT Mrs. Isaac Denby, of New York; and Mrs. H. M. Cresse, of East Orange, N. J., accompanied by
+    3 CONT their brother, Mr. T. T. Wetmore, were pleasant callers at this office yesterday.
+1 NEWS
+  2 TITL East Coast Advocate and Indian River Chronicle
+  2 DATE 31 March 1905
+  2 PLAC Titusville, Florida
+  2 TEXT Mr. T. T. Wetmore's two sisters, Mrs. Isaac Denby, of New York and Mrs. H. M. Cresse, of
+    3 CONT East Orange, N.J., who have been visiting Mr. and Mrs. Wetmore for some weeks past, left,
+    3 CONT on Saturday for St. Augustine and Jacksonville, leaving the latter place on Wednesday,
+    3 CONT via Clyde Line for, their respective homes.
+1 NEWS
+  2 TITL East Coast Advocate and Indian River Chronicle
+  2 DATE 13 October 1905
+  2 PLAC Titusville, Florida
+  2 TEXT Mr. and Mrs. Wetmore, are having another room added to their cottage in West Titusville.
+    3 CONT This will add to the comfort and appearance of thier now comfortable and cozy home.
+1 NEWS
+  2 TITL East Coast Advocate and Indian River Chronicle
+  2 DATE 23 March 1906
+  2 PLAC Titusville, Florida
+  2 TEXT Mrs. Bailey and daughter, of New London, Conn., who have been visiting Mr. and Mrs.
+    3 CONT Thomas T. Wetmore for several months, will leave here to-day, for home. They have made
+    3 CONT many friends in Titusville, who hope to see them here next winter.
+1 OBIT
+  2 TITL East Coast Advocate and Indian River Chronicle
+  2 DATE 22 November 1907
+  2 PLAC Titusville, Florida
+  2 TEXT Death of Mr. Wetmore
+    3 CONT
+    3 CONT On Saturday last, Nov. 16, at 10:30 a.m., departed this life Mr. Thomas T. Wetmore,
+    3 CONT of Titusville, of general debility, aged 82 years on Feb. 10th. The funeral service
+    3 CONT was held at the Wetmore residence at two o'clock on Sunday afternoon,
+    3 CONT Bishop Wm. C. Gray, assisted by Dean Percy J. Robottom, officiating;
+    3 CONT while the Episcopal church choir sang some appropriate hymns.
+    3 CONT
+    3 CONT After the Episcopal church service, the remains were turned over to the care of
+    3 CONT Indian River Lodge No. 90, F.&A.M., there being about 30 members present,
+    3 CONT and they accompanied the body to the Titusville cemetery, where it was laid to rest
+    3 CONT with full Masonic honors, Dean Robottom (a Shriner) and Mr. J. N. Waller
+    3 CONT (worshipful master of the above Lodge) conducting the beautiful Masonic service for the dead.
+    3 CONT
+    3 CONT The grave was then filled by Masons, each throwing in a few spadefuls of dirt.
+    3 CONT Beautiful wreath of flowers were laid on the grave by friends,
+    3 CONT and one by the Order of Eastern Star. The service then terminated,
+    3 CONT the Masons wending their way back to Masonic hall, and the large concourse of
+    3 CONT friends to their respective homes.
+    3 CONT
+    3 CONT Mr. Wetmore was born at St. John, New Brunswick, and came to Florida 23 years ago.
+    3 CONT He was connected with the old J., T.&K.W. Railway Co. for several years, building
+    3 CONT wharves, bridges, etc. He was a resident of Titusville for 18 years,
+    3 CONT and was owner of the ice factory at this place nearly all that time.
+    3 CONT
+    3 CONT Mr. Wetmore was a member of Friendship Chapter No. 11, Order of Eastern Star, Titusville;
+    3 CONT and of Somerset Lodge No. 34, F.&A.M., of Norwich, Conn.
+    3 CONT
+    3 CONT He leaves a widow, two brothers and three sisters to mourn his loss,
+    3 CONT who have the heartfelt sympathy of the people of Titusville in their sad bereavement.
+    3 CONT
+    3 CONT Mrs. Wetmore has gone to Jacksonville to stay a while with her friend, Mrs. Webster,
+    3 CONT but will return and continue to reside in Titusville among her many friends.
+1 WILL
+  2 TEXT Last Will and Testament of Thomas T. Wetmore, deceased.
+  2 TEXT
+  2 TEXT In the name of God amen.
+  2 TEXT
+  2 TEXT I, Thomas T. Wetmore, of the City of New London in the County of New London and State of
+  2 TEXT Connecticut, being of sound disposing mind and memory, do make, ordain, publish and declare
+  2 TEXT the following to be my last Will and Testament.
+  2 TEXT
+  2 TEXT First, I direct that my just debts and funeral expenses be paid by my Executrix,
+  2 TEXT hereinafter named.
+  2 TEXT
+  2 TEXT Second, I give, devise and bequeath to my beloved wife, Lucy M. Wetmore, all the rest and
+  2 TEXT residue of my estate, both real and personal of every kind, name and nature, wheresoever
+  2 TEXT same may be situated, and of whatsoever the same my consist, to have and to hold to her
+  2 TEXT and her heirs Forever.
+  2 TEXT
+  2 TEXT Third, I constitute and appoint Lucy M. Wetmore, my beloved wife, Executrix of this my last Will
+  2 TEXT and Testament. In witness whereof I have hereunto set my hand and seal at New London, this
+  2 TEXT 20th day of February A.D. 1885.
+  2 TEXT
+  2 TEXT Thomas T. Wetmore (L.S.)
+  2 TEXT
+  2 TEXT Signed sealed published and declared by the above named testator Thomas T. Wetmore as
+  2 TEXT and for his last Will and Testament, in the prescence of us, who in his presence and in
+  2 TEXT the presence of each other, have hereunto subscribed our names as witnesses.
+  2 TEXT
+  2 TEXT Peleg Williams (L.S)
+  2 TEXT Phil C. Dunford (L.S.)
+  2 TEXT Erastus I. Williams (L.S.)
+  2 TEXT
+  2 TEXT State of Connecticut
+  2 TEXT County of New London
+  2 TEXT
+  2 TEXT Personally appearted before me Peleg Williams and made solemn oath that he attested the
+  2 TEXT within will of Thomas T. Wetmore and subscribed the same in the presence of the
+  2 TEXT testator and in the presence of the two subscribing witnesses to said will and that they
+  2 TEXT also subscribed and attested said will in the prescense of the deponent and of each
+  2 TEXT other and in the presence of said testator and that said testator at the time of the
+  2 TEXT execution of said will was of sound mind and memory and signed and published said will
+  2 TEXT in the presence of said deponent and of the subscribing witnesses thereto.
+  2 TEXT
+  2 TEXT Andrew C. Sepperts, Jr.
+  2 TEXT Justice of the Peace
+  2 TEXT
+  2 TEXT State of Florida
+  2 TEXT Brevard County
+  2 TEXT
+  2 TEXT I, B. R. Wilson, County Judge of Brevard County and state aforesaid hereby certify that the
+  2 TEXT foregoing instrument of writing is a true and correct copy of the last Will and Testament
+  2 TEXT of Thomas T. Wetmore deceased as recorded in the Book of Wills, No. 2, Page 50 on file
+  2 TEXT in my office. Witness my hand and the seal of the Country Court this April 6th, A.D. 1908.
+  2 TEXT
+  2 TEXT (Seal of Court) B. R. Wilson, County Judge of Brevard County.
+  2 TEXT
+  2 TEXT Indorsed:
+  2 TEXT Certified copy of the Last Will and Testament of Thomas T. Wetmore deceased.
+  2 TEXT Filed April 7, 1908.
+  2 TEXT
+  2 TEXT M. I. Cox, County Judge
+  2 TEXT
+  2 TEXT Recorded by E. E. Haskell, County Judge
+1 NEWS
+  2 TITL East Coast Advocate and Indian River Chronicle
+  2 DATE 22 November 1905
+  2 PLAC Titusville, Florida
+  2 TEXT Mrs. T. T. Wetmore left here, Wednesday, for Jacksonville, to spend a week or so with
+    3 CONT her friend, Mrs. Webster, who returned to Jacksonville with Mrs. Wetmore.
+    3 CONT We are asked to make mention that the Titusville ice factory will be run as heretofore,
+    3 CONT under the supervision of Mrs. Wetmore.
+1 BIRT
+  2 DATE about 1866
+  2 PLAC Nova Scotia, Canada
+1 NATU
+  2 DATE 26 October 1888
+  2 PLAC Norwich, New London County, Connecticut, United States
+  2 COUR Court of Common Pleas of the State of Connecticut
+1 SOUR Naturalization papers
+1 FAMC @F9@
+1 FAMS @F4843@
+1 FAMS @F29@
+1 FAMS @F30@

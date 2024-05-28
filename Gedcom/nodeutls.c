@@ -207,7 +207,7 @@ bool equalTree(GNode* root1, GNode* root2) {
     String str1, str2;
     if (!root1 && !root2) return true;
     if (!root1 || !root2) return false;
-    if (gNodeListLength(root1) != gNodeListLength(root2)) return false;
+    if (gNodesLength(root1) != gNodesLength(root2)) return false;
     while (root1) {
         if (nestr(root1->tag, root2->tag)) return false;
         str1 = root1->value;
@@ -242,8 +242,8 @@ bool isoList(GNode* root1, GNode* root2) {
     GNode *node1, *node2;
     if (!root1 && !root2) return true;
     if (!root1 || !root2) return false;
-    len1 = gNodeListLength(root1);
-    len2 = gNodeListLength(root2);
+    len1 = gNodesLength(root1);
+    len2 = gNodesLength(root2);
     if (len1 != len2) return false;
     if (len1 == 0) return true;
     node1 = root1;
@@ -282,8 +282,8 @@ bool isoGNodes(GNode* root1, GNode *root2, bool kids, bool sibs) {
     if (!root1 || !root2) return false;
     if (!kids && !sibs) return equalNode(root1, root2);
     if (kids && !sibs) return equalNode(root1, root2) && isoGNodes(root1->child, root2->child, 1, 1);
-    int len1 = gNodeListLength(root1);
-    int len2 = gNodeListLength(root2);
+    int len1 = gNodesLength(root1);
+    int len2 = gNodesLength(root2);
     if (len1 != len2) return false;
     if (len1 == 0) return true;
     GNode* node1 = root1;
