@@ -1,0 +1,59 @@
+0 HEAD
+1 SOUR LIFELINES 3.2.0 (alpha)
+1 DEST ANY
+1 DATE 30 MAY 2024
+2 TIME 14:26
+1 SUBM
+1 GEDC
+2 VERS 5.5
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME Thomas Trask /Wetmore/ IV
+1 SEX M
+1 BIRT
+2 DATE 18 December 1949
+2 PLAC New London, Connecticut
+0 @I2@ INDI
+1 NAME Luann Francis /Grenda/
+1 SEX F
+1 BIRT
+2 DATE 10 July 1949
+2 PLAC Pittsburgh, Pennsylvania
+0 @I3@ INDI
+1 NAME Anna Vivian /Wetmore/
+1 SEX F
+1 BIRT
+2 DATE 14 December 1974
+2 PLAC Fairbanks, Alaska
+0 @I4@ INDI
+1 NAME Marie Margaret /Wetmore/
+1 SEX F
+1 BIRT
+2 DATE 26 April 1979
+2 PLAC Putnam, Connecticut
+0 @I5@ INDI
+1 NAME Thomas Trask /Wetmore/ V
+1 SEX M
+1 BIRT
+2 DATE 28 October 1982
+2 PLAC Newburyport, Massachusetts
+0 @I6@ INDI
+1 NAME Thomas Trask /Wetmore/ III
+1 SEX M
+1 BIRT
+2 DATE 15 October 1925
+2 PLAC New London, Connecticut
+1 DEAT
+2 DATE 30 December 2011
+2 PLAC New London, Connecticut
+0 @I7@ INDI
+1 NAME JoAn Marie /Hancock/
+1 SEX F
+1 BIRT
+2 DATE 6 June 1928
+2 PLAC New London, Connecticut
+1 DEAT
+2 DATE 9 December 2008
+2 PLAC New London, Connecticut
+0 TRLR

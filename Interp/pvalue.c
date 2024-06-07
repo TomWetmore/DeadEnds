@@ -26,9 +26,9 @@ static bool isZero(PValue);
 bool isZeroVUnion(PVType, VUnion);
 
 // allocPValue allocates a PValue. PValues are usually value types, but when stored in tables or
-// lists they in the heap.
+// lists they must be in the heap.
 PValue *allocPValue(PVType type, VUnion value) {
-	PValue* ppvalue = (PValue*) stdalloc(sizeof(ppvalue));
+	PValue* ppvalue = (PValue*) stdalloc(sizeof(PValue));
 	ppvalue->type = type;
 	ppvalue->value = value;
 	return ppvalue;

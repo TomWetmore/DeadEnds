@@ -43,6 +43,10 @@ void writeGNode(FILE* fp, int level, GNode* gnode, bool indent) {
     fprintf(fp, "\n");
 }
 
+void writeGNodeRecord(FILE* fp, GNode* root, bool indent) {
+	writeGNodes(fp, 0, root, false, true, true);
+}
+
 // writeGNodes writes a GNode tree or forest to a file. Level is the current level; indent
 // specifies indenting; kids and sibs indicate recursing to children and siblings.
 void writeGNodes(FILE* fp, int level, GNode* gnode, bool indent, bool kids, bool sibs) {

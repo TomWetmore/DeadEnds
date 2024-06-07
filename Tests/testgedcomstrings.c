@@ -8,10 +8,10 @@
 #include "standard.h"
 #include "readnode.h"
 
-// Written for me by ChatGPT.
 char* readFileIntoString(const char *filename);
 
-void testgedcomstrings(void) {
+// testGedcomStrings tests the stringToGnodeTree and showGNodeTree functions.
+void testGedcomStrings(void) {
 	printf("START OF TEST GEDCOM STRINGS\n");
 	String file = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/ttw.ged";
 	String record = readFileIntoString(file);
@@ -21,10 +21,10 @@ void testgedcomstrings(void) {
 	printf("END OF TEST GEDCOM STRINGS\n");
 }
 
-// Function to read a file into a string; written by ChatGPT.
-char* readFileIntoString(const char *filename) {
-	FILE *file = fopen(filename, "r");
-	char *buffer = NULL;
+// readFileIntoString reads a file into a string; written by ChatGPT.
+char* readFileIntoString(const char* filename) {
+	FILE* file = fopen(filename, "r");
+	char* buffer = NULL;
 	long length;
 
 	if (file) {

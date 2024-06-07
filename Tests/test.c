@@ -3,7 +3,7 @@
 //  test.c holds test functions used during development.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 26 April 2024.
+//  Last changed on 2 June 2024.
 
 #include <stdio.h>
 #include "standard.h"
@@ -40,7 +40,9 @@ static void indexNamesTest(Database*, int);
 static void testNewReadLayer(String);
 extern bool validateDatabase(Database*, ErrorLog*);
 static void countNodesBeforeTest(Database*, int);
-extern void testgedcomstrings(void);
+extern void testGedcomStrings(void);
+extern void testWriteDatabase(String file, Database*);
+static void testKeyGeneration(int);
 
 // main is the main function of a batch program that tests the DeadEnds infrastructure.
 int main(void) {
@@ -75,8 +77,10 @@ int main(void) {
 	//if (database) forTraverseTest(database, ++testNumber);
 	//if (database && validated) parseAndRunProgramTest(database, ++testNumber);
 	//if (database && validated) countNodesBeforeTest(database, ++testNumber);
-	testgedcomstrings();
+	testGedcomStrings();
+	testWriteDatabase("/Users/ttw4/output.ged", database);
 	fclose(debugFile);
+	testKeyGeneration(++testNumber);
 	return 0;
 }
 
@@ -192,6 +196,14 @@ static void showHashTableTest(RecordIndex* index, int testNumber) {
 	printf("\n%d: START OF SHOW HASH TABLE TEST: %2.3f\n", testNumber, getMilliseconds());
 	showHashTable(index, showPersonName);
 	printf("END OF SHOW HASH TABLE TEST: %2.3f\n", getMilliseconds());
+}
+
+extern String generateKey(RecordType rectype);
+static void testKeyGeneration(int testNumber) {
+	printf("\n%d: START OF KEY GENERATION TEST: %2.3f\n", testNumber, getMilliseconds());
+	for (int i = 0; i < 30; i++) {
+		printf("%s\n", generateKey(GRPerson));
+	}
 }
 
 // indexNamesTest tests the indexNames fumction.

@@ -4,12 +4,12 @@
 // expressions in the DeadEnds script language. They are the values stored in symbol tables.
 //
 // Created by Thomas Wetmore on 15 December 2022.
-// Last changed on 25 April 2024.
+// Last changed on 6 June 2024.
 
 #ifndef pvalue_h
 #define pvalue_h
 
-//  Forward references.
+// Forward references.
 typedef struct Sequence Sequence;
 typedef struct HashTable PValueTable;
 typedef struct GNode GNode;
@@ -21,7 +21,7 @@ typedef struct GNode GNode;
 #include "list.h"
 #include "symboltable.h"
 
-// Macros to simplify creating union value and program value constants.
+// Macros that simplify creating union value and program value constants.
 #define PV(x) ((VUnion) { x })
 #define PVALUE(type, ufield, uvalue) (PValue){type, PV(.ufield = uvalue)}
 
@@ -55,8 +55,8 @@ typedef struct PValue {
 // User Interface to PValues.
 void showPValue(PValue value);
 bool isPValue(PValue value);
-bool isRecordType(PVType type); // Is PValue a Gedcom record.
-bool isGNodeType(PVType type);  // Is PValue any kind of Gedcom line.
+bool isRecordType(PVType type); // PValue is a GNode root.
+bool isGNodeType(PVType type);  // PValue is any GNode.
 
 extern FILE *Poutfp;
 extern int Perrors;

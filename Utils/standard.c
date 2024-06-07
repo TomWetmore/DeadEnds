@@ -1,10 +1,9 @@
-//
-//  DeadEnds
+// DeadEnds
 //
 //  standard.c -- Standard routines.
 //
-//  Create by Thomas Wetmore on 7 November 2022.
-//  Last changed on 5 April 2024.
+// Create by Thomas Wetmore on 7 November 2022.
+// Last changed on 2 May 2024.
 
 #include <stdlib.h>
 #include "standard.h"
@@ -48,13 +47,8 @@ void __logAllocations(bool onOrOff)
     }
 }
 
-// __alloc -- Allocate memory - used by stdalloc
-//--------------------------------------------------------------------------------------------------
-char *__alloc (size_t len, String file, int line)
-// int len -- Number of bytes to allocate.
-// String file -- File requesting the allocation.
-// int line -- Line number in file requesting the allocation.
-{
+// __alloc allocates memory; used by stdalloc
+char *__alloc (size_t len, String file, int line) {
 	char *p;
 	if (len == 0) return null;
 	ASSERT(p = malloc(len));
@@ -93,25 +87,20 @@ void alloc_out(String str)
 	fprintf(allocLogFile, "%s\n", str);
 }
 
-// strsave saves a copy of a String on the heap and returns a pointer to it.
+// strsave returns a copy of a String on the heap.
 String strsave(String string) {
 	if (string == null || *string == 0) return null;
 	return strcpy(stdalloc(strlen(string) + 1), string);
 }
 
-// strconcat -- Catenate two strings and return a new String on the heap with the value.
-//--------------------------------------------------------------------------------------------------
-String strconcat(String s1, String s2)
-// String s1 -- first string to catenate.
-// String s2 -- second string to catenate.
-{
-	int c;
-    String s3, p;
-
+// strconcat catenates two Strings and return the value on the heap.
+String strconcat(String s1, String s2) {
 	if (!s1) return strsave(s2);
 	if (!s2) return strsave(s1);
 	size_t len = strlen(s1) + strlen(s2);
-	p = s3 = (String) stdalloc((int) len + 1);
+	String s3 = (String) stdalloc((int) len + 1);
+	String p = s3;
+	int c;
     while ((c = *s1++)) *p++ = c;
     while ((c = *s2++)) *p++ = c;
 	*p = 0;

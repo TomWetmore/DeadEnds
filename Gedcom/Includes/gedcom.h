@@ -26,6 +26,7 @@ typedef enum RecordType {
     GRUnknown = 0, GRPerson, GRFamily, GRSource, GREvent, GROther, GRHeader, GRTrailer
 } RecordType;
 
+String sexTypeToString(SexType);
 RecordType recordType(GNode *root);  // Return the type of a Gedcom record tree.
 
 int compareRecordKeys(String, String);  // gedcom.c

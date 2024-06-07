@@ -1,16 +1,14 @@
+// DeadEnds
 //
-//  DeadEnds
+// gedcom.c
 //
-//  gedcom.c
-//
-//  Created by Thomas Wetmore on 29 November 2022.
-//  Last changed on 11 October 2023.
-//
+// Created by Thomas Wetmore on 29 November 2022.
+// Last changed on 30 May 2024.
 
 #include "gedcom.h"
 
-RecordType recordType(GNode *root)
-{
+// recordType returns the type of a Gedcom record.
+RecordType recordType(GNode* root) {
     ASSERT(root);
     String tag = root->tag;
     if (eqstr(tag, "INDI")) return GRPerson;
@@ -22,15 +20,19 @@ RecordType recordType(GNode *root)
     return GROther;
 }
 
-//  compareRecordKeys -- Compare function to use in Sets and Lists holding Gedcom record keys.
-//   Longer keys sort after shorter keys.
-//--------------------------------------------------------------------------------------------------
-int compareRecordKeys(String a, String b)
-{
+//  compareRecordKeys compare record keys; longer keys sort after shorter keys.
+int compareRecordKeys(String a, String b) {
     ASSERT(strlen(a) > 1 && strlen(b) > 1);  // Is this strictly necessary?
     if (strlen(a) != strlen(b)) return (int) (strlen(a) - strlen(b));
     for (int i = 0; i < strlen(a); i++) {
         if (a[i] != b[i]) return a[i] - b[i];
     }
     return 0;
+}
+
+// sexTypeToString returns the Gedcom character for a SexType.
+String sexTypeToString(SexType sex) {
+	if (sex == sexMale) return "M";
+	if (sex == sexFemale) return "F";
+	return "U";
 }

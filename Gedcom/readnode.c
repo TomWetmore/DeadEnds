@@ -4,7 +4,7 @@
 // and strings.
 //
 // Created by Thomas Wetmore on 17 December 2022.
-// Last changed on 27 May 2024.
+// Last changed on 29 May 2024.
 
 #include "readnode.h"
 #include "stringtable.h"
@@ -126,7 +126,6 @@ GNode* stringToGNodeTree(String str, ErrorLog *errorLog) {
 		return null;
 	}
 	int curlev = 0;
-	int lev = 0;
 	GNode* root = createGNode(xkey, xtag, xvalue, null);
 	GNode* curnode = root;
 	while (stringToLine(&str, &error)) {

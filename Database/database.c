@@ -5,7 +5,7 @@
 // read and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 16 May 2024.
+// Last changed 30 May 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -16,6 +16,7 @@
 #include "path.h"
 #include "errors.h"
 #include "rootlist.h"
+#include "writenode.h"
 
 extern FILE* debugFile;
 extern bool importDebugging;
@@ -47,6 +48,22 @@ void deleteDatabase(Database* database) {
 	deleteRecordIndex(database->eventIndex);
 	deleteRecordIndex(database->otherIndex);
 	deleteNameIndex(database->nameIndex);
+}
+
+// writeDatabase writes the contents of a Database to a Gedcom file.
+void writeDatabase(String fileName, Database* database) {
+	FILE* file = fopen(fileName, "w");
+	if (file == null) {
+		printf("Can't open file to write database to\n");
+		return;
+	}
+	FORLIST(database->personRoots, element)
+		writeGNodeRecord(file, (GNode*) element, false);
+	ENDLIST
+	FORLIST(database->familyRoots, element)
+		writeGNodeRecord(file, (GNode*) element, false);
+	ENDLIST
+	fclose(file);
 }
 
 // numberPersons returns the number of persons in a database.
@@ -228,7 +245,7 @@ static int keyLineNumber (Database *database, String key) {
 	return element->lineNumber;
 }
 
-// getRecord gets a record from the database given a ket.
+// getRecord gets a record from the database given a key.
 GNode* getRecord(String key, Database* database) {
 	GNode *root;
 	if ((root = keyToPerson(key, database))) return root;
@@ -240,7 +257,17 @@ GNode* getRecord(String key, Database* database) {
 }
 
 //  Some debugging functions.
-//--------------------------------------------------------------------------------------------------
 void showPersonIndex(Database *database) { showHashTable(database->personIndex, null); }
 void showFamilyIndex(Database *database) { showHashTable(database->familyIndex, null); }
 int getCount(void) { return count; }
+
+
+// generateFamilyKey generates a new family key.
+String generateFamilyKey(Database* database) {
+	return "@Fxxxxxxx@";
+}
+
+// generatePersonKey generates a new person key.
+String generatePersonKey(Database* database) {
+	return "@Ixxxxxxx@";
+}
