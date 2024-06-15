@@ -3,7 +3,7 @@
 // database.h
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed on 18 April 2024.
+// Last changed on 15 June 2024.
 
 #ifndef database_h
 #define database_h
@@ -20,7 +20,7 @@
 typedef HashTable RecordIndex;
 typedef List RootList;
 
-//  Database is the structure used to hold DeadEnds' genealogical databases.
+// Database is the structure that hold DeadEnds databases.
 typedef struct Database {
 	String filePath;  // Path to the Gedcom file this database was built from.
 	String lastSegment;  // Last segment of the path for error messages.

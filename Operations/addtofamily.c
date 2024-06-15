@@ -1,18 +1,19 @@
 // DeadEnds
 //
-// addtofamily.c has functions to add existing children and spouses to an existing family.
+// addtofamily.c has functions to add an existing child or spouse to an existing family.
 //
 // Created by Thomas Wetmore on 30 May 2024.
-// Last changed on 30 May 2024.
+// Last changed on 8 June 2024.
 
 #include "stdlib.h"
 #include "splitjoin.h"
 #include "gnode.h"
 #include "gedcom.h"
 
-// addChildToFamily adds an existing child to an existing family in a Database.
+// addChildToFamily adds an existing child to an existing family in a Database; index can be used
+// to place the new child in the list of children.
 bool addChildToFamily (GNode *child, GNode *family, int index, Database *database) {
-	// Add CHIL link to family.
+	// Add CHIL family.
 	GNode *frefn, *husb, *wife, *chil, *rest;
 	splitFamily(family, &frefn, &husb, &wife, &chil, &rest);
 	int numChildren = gNodesLength(chil);
@@ -31,7 +32,7 @@ bool addChildToFamily (GNode *child, GNode *family, int index, Database *databas
 	else
 		chil = new;
 	joinFamily(family, frefn, husb, wife, chil, rest);
-	// Add FAMC link to child.
+	// Add FAMC to child.
 	GNode *names, *irefns, *sex, *body, *famcs, *famss;
 	splitPerson(child, &names, &irefns, &sex, &body, &famcs, &famss);
 	GNode *nfmc = createGNode(null, "FAMC", family->key, child);
@@ -46,19 +47,17 @@ bool addChildToFamily (GNode *child, GNode *family, int index, Database *databas
 	else
 		prev->sibling = nfmc;
 	joinPerson(child, names, irefns, sex, body, famcs, famss);
-
 	return true;
 }
 
 //  addSpouseToFamily adds an existing spouse to an existing family.
-bool addSpouseToFamily (GNode *spouse, GNode *family, SexType sext, Database *database) {
+bool addSpouseToFamily (GNode* spouse, GNode* family, SexType sext, Database* database) {
+	// Add HUSB or WIFE to family.
 	GNode *frefn, *husb, *wife, *chil, *rest;
 	splitFamily(family, &frefn, &husb, &wife, &chil, &rest);
-	//int numChildren = gNodesLength(chil);
-	GNode *prev = null;
-	GNode *this = null;
+	GNode* prev = null;
+	GNode* this = null;
 	if (sext == sexMale) {
-		prev = null;
 		this = husb;
 		while (this) {
 			prev = this;
@@ -70,7 +69,6 @@ bool addSpouseToFamily (GNode *spouse, GNode *family, SexType sext, Database *da
 		else
 			husb = new;
 	} else {
-		prev = null;
 		this = wife;
 		while (this) {
 			prev = this;
@@ -83,12 +81,10 @@ bool addSpouseToFamily (GNode *spouse, GNode *family, SexType sext, Database *da
 			wife = new;
 	}
 	joinFamily(family, frefn, husb, wife, chil, rest);
-
-	// Add a FAMS node to the spouse.
+	// Add FAMS to spouse.
 	GNode *names, *irefns, *sex, *body, *famcs, *famss;
 	splitPerson(spouse, &names, &irefns, &sex, &body, &famcs, &famss);
 	GNode *nfams = createGNode(NULL, "FAMS", family->key, spouse);
-
 	prev = null;
 	this = famss;
 	while (this) {

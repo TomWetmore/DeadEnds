@@ -17,9 +17,9 @@ extern String xtag;
 extern String xvalue;
 
 // createNodeListElement creates an element for a GNodeList. Node or error must be null.
-NodeListElement* createNodeListElement(GNode* node, int level, int lineNo, Error* error) {
+GNodeListElement* createNodeListElement(GNode* node, int level, int lineNo, Error* error) {
 	ASSERT(node || error && (!node || !error));
-	NodeListElement *element = (NodeListElement*) malloc(sizeof(NodeListElement));
+	GNodeListElement *element = (GNodeListElement*) malloc(sizeof(GNodeListElement));
 	element->node = node;
 	element->level = level;
 	element->lineNo = lineNo;
@@ -29,7 +29,7 @@ NodeListElement* createNodeListElement(GNode* node, int level, int lineNo, Error
 
 // getKey is the getKey function for NodeLists.
 static String getKey(void* element) {
-	return ((NodeListElement*) element)->node->tag;
+	return ((GNodeListElement*) element)->node->tag;
 }
 
 // createNodeList creates a GNodeList; one type holds all GNodes from a file, the other holds the
@@ -65,7 +65,7 @@ GNodeList *getNodeListFromFile(FILE* fp, int* numErrors) {
 // showNodeList shows the contents of a GNodeList. Debugging.
 void showNodeList(GNodeList* nodeList) {
 	FORLIST(nodeList, element)
-		NodeListElement *nodeListElement = (NodeListElement*) element;
+		GNodeListElement *nodeListElement = (GNodeListElement*) element;
 		printf("%d ", nodeListElement->lineNo);
 		if (nodeListElement->error) {
 			printf("Error: "); showError(nodeListElement->error);
@@ -94,7 +94,7 @@ GNodeList *getNodeTreesFromNodeList(GNodeList *lowerList, ErrorLog *errorLog) {
 	GNodeList *rootNodeList = createNodeList();
 
 	for (int index = 0; index < lengthList(lowerList); index++) {
-		NodeListElement *element = getListElement(lowerList, index);
+		GNodeListElement *element = getListElement(lowerList, index);
 		if (isNodeElement(element)) {
 			prevLevel = curLevel;
 			curLevel = element->level;
@@ -190,7 +190,7 @@ GNodeList *getNodeTreesFromNodeList(GNodeList *lowerList, ErrorLog *errorLog) {
 int numberNodesInNodeList(GNodeList* list) {
 	int numNodes = 0;
 	FORLIST(list, element)
-		NodeListElement *e = (NodeListElement*) element;
+		GNodeListElement *e = (GNodeListElement*) element;
 		if (e->node) numNodes++;
 	ENDLIST
 	return numNodes;
@@ -200,7 +200,7 @@ int numberNodesInNodeList(GNodeList* list) {
 int numberErrorsInNodeList(GNodeList* list) {
 	int numErrors = 0;
 	FORLIST(list, element)
-		NodeListElement *e = (NodeListElement*) element;
+		GNodeListElement *e = (GNodeListElement*) element;
 		if (e->error) numErrors++;
 	ENDLIST
 	return numErrors;

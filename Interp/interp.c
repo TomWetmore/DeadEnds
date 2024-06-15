@@ -506,14 +506,11 @@ InterpType interp_fornodes(PNode* node, Context* context, PValue *pval) {
 // Usage: forindi(INDI_V, INT_V) {...}; Fields: personIden, countIden, loopState.
 InterpType interpForindi (PNode* pnode, Context* context, PValue* pvalue) {
 	RootList *rootList = context->database->personRoots;
-	sortList(rootList);  // Sort the list by key??
+	sortList(rootList); // Sort by key.
 	int numPersons = lengthList(rootList);
 	for (int i = 0; i < numPersons; i++) {
-		// FOR DEBUGGING.
-		String keyFromRoot = rootList->getKey(getListElement(rootList, i));
-		// FOR DEBUGGING.
-		printf("key of the %dth person is %s\n", i, keyFromRoot);
-		GNode *person = keyToPerson(keyFromRoot, context->database);
+		String key = rootList->getKey(getListElement(rootList, i));
+		GNode* person = keyToPerson(key, context->database);
 		if (person) {
 			assignValueToSymbol(context->symbolTable, pnode->personIden, PVALUE(PVPerson, uGNode, person));
 			assignValueToSymbol(context->symbolTable, pnode->countIden, PVALUE(PVInt, uInt, i));

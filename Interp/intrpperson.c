@@ -3,7 +3,7 @@
 // intrpperson.c has the built-in script functions that deal with persons.
 //
 // Created by Thomas Wetmore on 17 March 2023.
-// Last changed on 6 May 2024.
+// Last changed on 13 June 2024.
 
 #include "standard.h"
 #include "pnode.h"
@@ -369,17 +369,15 @@ PValue __firstindi(PNode* pnode, Context* context, bool* eflg) {
 		scriptError(pnode, "There must be persons in the database to call firstindi.");
 		return nullPValue;
 	}
-	//checkPersonRoots(personRoots);  // DEBUG.
 	sortList(personRoots);
-	//checkPersonRoots(personRoots);  // DEBUG.
 	GNode *root = getListElement(personRoots, 0);
 	return PVALUE(PVPerson, uGNode, root);
 }
 
-//  nextindi -- Return the person who follows a person in the database.
-//  usage: nextindi(INDI) -> INDI
+// nextindi returns the next person in the database.
+// usage: nextindi(INDI) -> INDI
 PValue __nextindi(PNode* pnode, Context* context, bool* eflg) {
-    GNode* indi = evaluatePerson(pnode->arguments, context, eflg); // Preceding person.
+    GNode* indi = evaluatePerson(pnode->arguments, context, eflg); // Previous person.
     if (*eflg || !indi) {
         *eflg = true;
         scriptError(pnode, "The argument to nextindi must be a person.");

@@ -11,6 +11,7 @@
 #include "list.h"
 #include "gnode.h"
 
+// RootList is a List of GNode* roots.
 typedef List RootList;
 
 RootList *createRootList(void);  // Create a root list.

@@ -29,10 +29,10 @@
 extern FILE* debugFile;
 
 // toString returns the GNode in a GNodeListElement as a string; for debugging.
-//static String toString(void* element) {
-	//GNode* gnode = ((GNodeListElement*) element)->node;
-	//return gnodeToString(gnode, 0);
-//}
+static String toString(void* element) {
+	GNode* gnode = ((GNodeListElement*) element)->node;
+	return gnodeToString(gnode, 0);
+}
 
 // Error messages defined elsewhere.
 extern String idgedf, gdcker, gdnadd, dboldk, dbnewk, dbodel, cfoldk, dbdelk, dbrdon;
@@ -69,17 +69,18 @@ Database* importFromFile(String filePath, ErrorLog* errorLog) {
 	String lastSegment = lastPathSegment(filePath);
 	FILE* file = fopen(filePath, "r");
 	if (!file) {
-		addErrorToLog(errorLog, createError(systemError, lastSegment, 0, "Could not open file."));
+		addErrorToLog(errorLog, createError(systemError, lastSegment, 0, "Could not open Gedcom file."));
 		return null;
 	}
-	if (importDebugging) fprintf(debugFile, "importFromFile: calling getNodeListFromFile(%s,...\n", filePath);
+	if (importDebugging)
+		fprintf(debugFile, "importFromFile: calling getNodeListFromFile(%s,...\n", filePath);
 	int numErrors = 0;
 	GNodeList* listOfNodes = getNodeListFromFile(file, &numErrors); // Get all lines as GNodes.
 	if (!listOfNodes) return null;
-	if (importDebugging) fprintf(debugFile, "importFromFile: back from getNodeListFromFile\n");
 	if (importDebugging) {
+		fprintf(debugFile, "importFromFile: back from getNodeListFromFile\n");
 		fprintf(debugFile, "importFromFile: listOfNodes contains\n");
-		//fprintfBlock(debugFile, &(listOfNodes->block), toString);
+		fprintfBlock(debugFile, &(listOfNodes->block), toString);
 	}
 
 	// Convert the NodeList of GNodes and Errors into a GNodeList of GNode trees.
@@ -96,7 +97,7 @@ Database* importFromFile(String filePath, ErrorLog* errorLog) {
 	}
 	Database* database = createDatabase(filePath); // Create database and add records to it.
 	FORLIST(listOfTrees, element)
-		NodeListElement* e = (NodeListElement*) element;
+		GNodeListElement* e = (GNodeListElement*) element;
 		storeRecord(database, normalizeNodeTree(e->node), e->lineNo, errorLog);
 	ENDLIST
 	printf("And now it is time to sort those RootList\n");

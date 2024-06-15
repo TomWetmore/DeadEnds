@@ -3,7 +3,7 @@
 //  test.c holds test functions used during development.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 2 June 2024.
+//  Last changed on 9 June 2024.
 
 #include <stdio.h>
 #include "standard.h"
@@ -19,6 +19,7 @@
 #include "readnode.h"
 #include "validate.h"
 #include "utils.h"
+#include "stringtable.h"
 
 FILE* debugFile = null;
 bool useDebugFile = true;
@@ -44,7 +45,7 @@ extern void testGedcomStrings(void);
 extern void testWriteDatabase(String file, Database*);
 static void testKeyGeneration(int);
 
-// main is the main function of a batch program that tests the DeadEnds infrastructure.
+// main is the main function of the DeadEnds testing program.
 int main(void) {
 	if (useDebugFile) {
 		debugFile = fopen("/Users/ttw4/debug.txt", "w");
@@ -198,15 +199,25 @@ static void showHashTableTest(RecordIndex* index, int testNumber) {
 	printf("END OF SHOW HASH TABLE TEST: %2.3f\n", getMilliseconds());
 }
 
+// testKeyGeneration tests the random key generator.
 extern String generateKey(RecordType rectype);
 static void testKeyGeneration(int testNumber) {
 	printf("\n%d: START OF KEY GENERATION TEST: %2.3f\n", testNumber, getMilliseconds());
-	for (int i = 0; i < 30; i++) {
-		printf("%s\n", generateKey(GRPerson));
+	StringTable* table = createStringTable(2357);
+	for (int i = 0; i < 500000; i++) {
+		String key = generateKey(GRPerson);
+		if (isInStringTable(table, key)) {
+			printf("CLASH: %s\n", key);
+		} else {
+			addToStringTable(table, key, key);
+			//printf("NEW: %s\n", generateKey(GRPerson));
+		}
 	}
+	printf("The string table now holds %d keys\n", sizeHashTable(table));
+	printf("%d: END OF KEY GENERATION TEST: %2.3f\n", testNumber, getMilliseconds());
 }
 
-// indexNamesTest tests the indexNames fumction.
+// indexNamesTest tests the indexNames function.
 static void indexNamesTest(Database* database, int testNumber) {
 	printf("\n%d: START OF INDEX NAMES TEST\n", testNumber);
 	indexNames(database);

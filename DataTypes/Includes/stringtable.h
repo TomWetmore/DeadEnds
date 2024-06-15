@@ -26,6 +26,7 @@ typedef struct StringElement {
 //--------------------------------------------------------------------------------------------------
 HashTable *createStringTable(int numBuckets);
 String searchStringTable(StringTable*, String key);
+bool isInStringTable(StringTable*, String key);
 void addToStringTable(StringTable*, String key, String value);
 String fixString(StringTable *table, String string);
 void showStringTable(StringTable*);  //  For debugging.

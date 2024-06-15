@@ -5,7 +5,7 @@
 // read and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 30 May 2024.
+// Last changed 9 June 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -126,25 +126,18 @@ GNode* keyToOther(String key, Database* database) {
 	return element ? element->root : null;
 }
 
-static int count = 0;  // Debugging.
-
-// storeRecord stores a GNode tree in a database by adding it to a RecordIndex.
-// lineNumber is the location of the root node in the Gedcom file.
+// storeRecord stores a GNode tree/record in a database by adding it to a RecordIndex.
+// lineNumber is the line number of the root node in the Gedcom file.
 bool storeRecord(Database* database, GNode* root, int lineNumber, ErrorLog* errorLog) {
-	//if (importDebugging) fprintf(debugFile, "storeRecord called\n");
 	RecordType type = recordType(root);
-	//if (importDebugging) fprintf(debugFile, "type of record is %d\n", type);
-	if (type == GRHeader || type == GRTrailer) return true;
+	if (type == GRHeader || type == GRTrailer) return true; // Ignore HEAD and TRLR.
 	if (!root->key) {
 		Error *error = createError(syntaxError, database->lastSegment, lineNumber, "This record has no key.");
 		addErrorToLog(errorLog, error);
 		return false;
 	}
-	count++;
-	String key = root->key;  // MNOTE: insertInRecord copies the key.
-
-	// Duplicate key check done here.
-	int previousLine = keyLineNumber(database, key);
+	String key = root->key; // MNOTE: insertInRecord copies the key.
+	int previousLine = keyLineNumber(database, key); // Duplicate key check.
 	if (previousLine) {
 		char scratch[MAXLINELEN];
 		sprintf(scratch, "A record with key %s exists at line %d.", key, previousLine);
@@ -236,7 +229,7 @@ void indexNames(Database* database) {
 // keyLineNumber checks if a record with a key is in the database; if so it returns the line
 // number where the record began in its Gedcom file.
 static int keyLineNumber (Database *database, String key) {
-	RecordIndexEl* element = (RecordIndexEl*)searchHashTable(database->personIndex, key);
+	RecordIndexEl* element = (RecordIndexEl*) searchHashTable(database->personIndex, key);
 	if (!element) element = searchHashTable(database->familyIndex, key);
 	if (!element) element = searchHashTable(database->sourceIndex, key);
 	if (!element) element = searchHashTable(database->eventIndex, key);
@@ -259,7 +252,7 @@ GNode* getRecord(String key, Database* database) {
 //  Some debugging functions.
 void showPersonIndex(Database *database) { showHashTable(database->personIndex, null); }
 void showFamilyIndex(Database *database) { showHashTable(database->familyIndex, null); }
-int getCount(void) { return count; }
+//int getCount(void) { return count; }
 
 
 // generateFamilyKey generates a new family key.

@@ -63,10 +63,10 @@ void showList(List *list, String(*describe)(void*));
 
 #define FORLIST(list, value)\
 {\
-	void *value;\
-	Block *block = &(list->block);\
-	void **_values = (void**) block->elements;\
-	for (int _i = 0; _i < block->length; _i++) {\
+	void* value;\
+	Block* _block = &(list->block);\
+	void** _values = (void**) _block->elements;\
+	for (int _i = 0; _i < _block->length; _i++) {\
 		value = _values[_i];\
 		{
 #define ENDLIST\

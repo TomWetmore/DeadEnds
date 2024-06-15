@@ -3,7 +3,7 @@
 // standard.h -- Useful things.
 //
 // Created by Thomas Wetmore on 1 November 2022.
-// Last changed on 3 April 2024.
+// Last changed on 13 June 2024.
 
 #ifndef standard_h
 #define standard_h
@@ -25,7 +25,7 @@ typedef char* String;
 #define NAN 313131  // Poor man's implementation of NAN for integers.
 
 // CharacterType -- Characters are partitioned into different types.
-typedef enum { Letter = 300, Digit, White, Other } CharType;  // TODO: not used.
+typedef enum { Letter = 300, Digit, White, Other } CharType;
 
 String strsave(String);  // Save String in heap.
 bool iswhite(int);       // Is character white space?
@@ -43,8 +43,7 @@ String capitalize(String);
 #define unused(x) (void)(x)
 
 
-// Max and min. TODO: DON'T KNOW IF THESE ARE USED.
-//--------------------------------------------------------------------------------------------------
+// Max and min macros.
 #ifndef max
 #define max(x,y) ((x)>(y)?(x):(y))
 #endif

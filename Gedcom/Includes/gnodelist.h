@@ -20,11 +20,11 @@ typedef struct GNodeListElement {
 	int level;
 	Error *error;
 	int lineNo;
-} NodeListElement;
+} GNodeListElement;
 
 // User interface to GNodeList.
 GNodeList *createNodeList(void);
-NodeListElement *createNodeListElement(GNode*, int level, int lineNo, Error*);
+GNodeListElement *createNodeListElement(GNode*, int level, int lineNo, Error*);
 GNodeList *getNodeListFromFile(FILE*, int*);
 GNodeList *getNodeTreesFromNodeList(GNodeList*, ErrorLog*);
 void showNodeList(GNodeList *nodeList);  // Debugging.

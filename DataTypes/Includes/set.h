@@ -1,18 +1,16 @@
-//
 // DeadEnds
 //
 // set.h is the header file for the Set type.
 //
 // Created by Thomas Wetmore on 22 November 2022.
-// Last changed on 10 April 2024.
-//
+// Last changed on 15 June 2024.
 
 #ifndef set_h
 #define set_h
 
 #include "list.h"
 
-// Set implements a set using a sorted List. Its elements are structures with String keys.
+// Set implements a set with a sorted List. Its elements point to structures with String keys.
 // The getkey and compare functions are used to extract and compare keys.
 typedef struct Set {
 	List list;
@@ -27,10 +25,9 @@ void addToSet(Set*, void*);
 void removeFromSet(Set*, String);
 void iterateSet(Set*, void(*iter)(void*));
 void showSet(Set*, String(*show)(void*));
+List* listOfSet(Set*); // Underlying List.
 
-List* listOfSet(Set*); // Underlying sorted List.
-
-// FORSET/ENDSET are macros that allow general Set iteration.
+// FORSET and ENDSET are macros that iterate the elements of a Set.
 #define FORSET(set, element)\
 {\
 	void* element;\

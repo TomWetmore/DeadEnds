@@ -54,7 +54,6 @@ Bucket *createBucket(void) { //PH;
 // lengthBucket returns the length of a Bucket.
 int lengthBucket(Bucket* bucket) {
 	return lengthBlock(&(bucket->block));
-
 }
 
 // deleteBucket deletes a Bucket. If there is a delete function the elements are deleted.
@@ -154,7 +153,7 @@ bool addToHashTableIfNew(HashTable* table, void* element) { //PH;
 }
 
 // removeFromHashTable removes the element with given key from a HashTable.
-void removeFromHashTable(HashTable *table, String key) { //PH;
+void removeFromHashTable(HashTable* table, String key) { //PH;
 	int hash = getHash(key, table->numBuckets);
 	Bucket *bucket = table->buckets[hash];
 	if (!bucket) return /*false*/;
@@ -172,10 +171,9 @@ void appendToBucket(Bucket* bucket, void* element) { //PH;
 	appendToBlock(&(bucket->block), element);
 }
 
-//  removeElement -- remove an element from a hash table. This does not use binary search
-//    in cases where it could be used.
-//    TODO: GET BINARY SEARCH WORKING IF LENGTH IS OVER THRESHHOLD.
-//--------------------------------------------------------------------------------------------------
+// removeElement removes an element from a hash table. It does not use binary search in cases
+// when it should.
+// TODO: GET BINARY SEARCH WORKING IF LENGTH IS OVER THRESHHOLD.
 void removeElement(HashTable* table, void *element) { //PH;
 	String key = table->getKey(element);
 	Bucket *bucket = table->buckets[getHash(key, table->numBuckets)];
@@ -195,7 +193,7 @@ void removeElement(HashTable* table, void *element) { //PH;
 }
 
 //  sizeHashTable returns the size (number of elements) in a hash table.
-int sizeHashTable(HashTable *table) { //PH;
+int sizeHashTable(HashTable* table) { //PH;
 	int length = 0;
 	for (int i = 0; i < table->numBuckets; i++) {
 		if (table->buckets[i]) {
@@ -209,9 +207,9 @@ int sizeHashTable(HashTable *table) { //PH;
 // firstInHashTable returns the first element in a hash table; it works with nextInHashTable to
 // iterate the table, returning each element in turn. The (in, out) variables keep track of the
 // iteration state. The user provides two stack variables to hold the state.
-void* firstInHashTable(HashTable *table, int *bucketIndex, int *elementIndex) { //PH;
+void* firstInHashTable(HashTable* table, int* bucketIndex, int* elementIndex) { //PH;
 	for (int i = 0; i < table->numBuckets; i++) {
-		Bucket *bucket = table->buckets[i];
+		Bucket* bucket = table->buckets[i];
 		if (bucket == null) continue;
 		*bucketIndex = i;
 		*elementIndex = 0;
@@ -223,29 +221,28 @@ void* firstInHashTable(HashTable *table, int *bucketIndex, int *elementIndex) { 
 
 // nextInHashTable returns the next element in the hash table, using the (in,out) state
 // variables to keep track of the state of the iteration.
-void* nextInHashTable(HashTable *table, int *bucketIndex, int *elementIndex) { //PH;
-	Bucket *bucket = table->buckets[*bucketIndex];
-	Block *block = &(bucket->block);
+void* nextInHashTable(HashTable* table, int* bucketIndex, int* elementIndex) { //PH;
+	Bucket* bucket = table->buckets[*bucketIndex];
+	Block* block = &(bucket->block);
 	if (*elementIndex < block->length - 1) {
 		*elementIndex += 1;
 		return block->elements[*elementIndex];
 	}
-	// Reached the end of the current Bucket. Find the next Bucket with elements.
+	// Reached end of current Bucket; find next.
 	for (int i = *bucketIndex + 1; i < table->numBuckets; i++) {
 		bucket = table->buckets[i];
-		if (bucket == null) continue;  // Bucket has nothing in it.
-		// Found another Bucket with elements.
+		if (bucket == null) continue;  // 'Empty' bucket.
 		*bucketIndex = i;
 		*elementIndex = 0;
 		block = &(bucket->block);
-		return block->elements[0];  // Returns first element in next bucket with elements.
+		return block->elements[0];
 	}
-	return null;  // Reached the end of the table; no more elements to return.
+	return null; // No more elements.
 }
 
 // iterateHashTable iterates a hash table and perform a function on each element; elements are
 // visited in hash key order; returns the number of elements that match the predicate.
-int iterateHashTableWithPredicate(HashTable *table, bool (*predicate)(void*)) { //PH;
+int iterateHashTableWithPredicate(HashTable* table, bool (*predicate)(void*)) { //PH;
 	int bucketIndex, elementIndex;
 	int count = 0;
 	void* element = firstInHashTable(table, &bucketIndex, &elementIndex);
@@ -256,8 +253,8 @@ int iterateHashTableWithPredicate(HashTable *table, bool (*predicate)(void*)) { 
 	return count;
 }
 
-//  showHashTable is a debugging function that shows the contents of a hash table.
-void showHashTable (HashTable *table, void (*show)(void*)) { //PH;
+// showHashTable is a debugging function that shows the contents of a hash table.
+void showHashTable(HashTable* table, void (*show)(void*)) { //PH;
 	int count = 0;
 	FORHASHTABLE(table, element)
 		printf("%d %d ", __i, __j);
