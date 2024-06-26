@@ -1,0 +1,56 @@
+0 HEAD
+1 SOUR LIFELINES 3.2.0 (alpha)
+1 DEST ANY
+1 DATE 12 MAY 2024
+2 TIME 20:11
+1 SUBM
+1 GEDC
+2 VERS 5.5
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 MARR
+2 DATE 1 August 1970
+2 PLAC Governors Island, New York, New York
+1 CHIL @I3@
+1 CHIL @I4@
+1 CHIL @I5@
+0 @F2@ FAM
+1 HUSB @I6@
+1 WIFE @I7@
+1 MARR
+2 DATE 5 February 1949
+2 PLAC New London, New London County, Connecticut
+1 CHIL @I1@
+1 CHIL @I8@
+1 CHIL @I9@
+1 CHIL @I10@
+1 CHIL @I11@
+0 @F3@ FAM
+1 HUSB @I12@
+1 WIFE @I13@
+1 MARR
+2 DATE November 1937
+1 MARR
+2 DATE 1937
+2 PLAC Brooke, West Virginia, United States
+2 SOUR West Virginia County Records
+1 CHIL @I14@
+1 CHIL @I15@
+1 CHIL @I15808@
+1 CHIL @I2@
+1 CHIL @I16@
+0 @F4@ FAM
+1 HUSB @I17@
+1 WIFE @I18@
+1 MARR
+2 DATE 15 September 1924
+2 PLAC Danby, Vermont
+2 BY Reverend McIntire
+2 CHUR Danby congregational church
+3 SOUR T. T. Wetmore III
+2 INFO married at home
+1 CHIL @I6@
+1 CHIL @I19@

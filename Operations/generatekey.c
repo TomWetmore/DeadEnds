@@ -3,7 +3,7 @@
 // generatekey.c has the functions to generate random keys.
 //
 // Created by Thomas Wetmore on 1 June 2024.
-// Last changed on 8 June 2024.
+// Last changed on 15 June 2024.
 
 #include "stdlib.h"
 #include "time.h"
@@ -68,5 +68,44 @@ static String generate(char type) {
 	return null;
 }
 
+// Functions when reading a Gedcom file.
+// Variables:
+// Table of all keys encountered or created so far.
+// Table of all keys found in previously read Gedcom files.
+// Table of all keys found in reading the current Gedcom file.
+// What to do when findint a root key.
+// Has it been seen before in previous Gedcom files
 
+//if (newRoot) {
+//  newKey = gnode->key;
+//	if (hasBeenSeenInPreviousFiles(key)) {
+//		newKey = generateNewKey();
+//		addToHashTable(newKeysInCurrentFile, key, newKey, true, false);
+//	} else if (hasBeenSeenInCurrentFile(key)) {
+//      error(duplicate)
+//  } else {
+//		addToHashTable(keysInCurrentFile, key, key, true, false);
+//  }
+//} else if (hasBeenSeenInPreviousFiles(key)) {
+//		if (hasBeenSeenIn(newKeysInCurrentFile)
 
+Set* inPreviousFiles;
+Set* inCurrentFile;
+StringTable* newKeys;
+
+bool keySeenBefore(String key) { return true; }
+bool keyInPreviousFiles(String key) {
+	return isInSet(inPreviousFiles, key);
+}
+bool keyInCurrentFile(String key) {
+	return isInSet(inCurrentFile, key);
+}
+
+void processKey(String key, bool defining) {
+	if (defining) {
+
+	} else {
+
+	}
+
+}

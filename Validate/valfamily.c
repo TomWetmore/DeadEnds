@@ -33,14 +33,14 @@ bool validateFamilyIndex(Database *database, ErrorLog *errorLog) {
 	return valid;
 }
 
-// validateFamily validates a family GNode record tree. Checks that all HUSB, WIFE and CHIL links
-// refer to existing persons, and that the return links also exist.
+// validateFamily validates a family; it checks that all HUSBs, WIFEs and CHILs refer to existing
+// persons, and that the return links exist.
 static bool validateFamily(GNode *family, Database *database, ErrorLog* errorLog) {
 	String segment = database->lastSegment;
 	int errorCount = 0;
 	static char s[4096];
 
-	// Make sure all HUSB, WIFE and CHIL link to persons.
+	// All HUSB, WIFE and CHIL must link to persons.
 	FORHUSBS(family, husband, key, database)
 		if (!husband) {
 			int lineNumber = familyLineNumber(family, database);
@@ -84,7 +84,7 @@ static bool validateFamily(GNode *family, Database *database, ErrorLog* errorLog
 	if (errorCount) return false;
 
 	FORHUSBS(family, husband, hkey, database)
-		// The husband must have one FAMS link back to this family.
+		// Husband must have one FAMS link back to this family.
 		int numOccurences = 0;
 		FORFAMSS(husband, fam, fkey, database)
 			if (family == fam) numOccurences++;

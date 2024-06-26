@@ -45,8 +45,12 @@ extern void testGedcomStrings(void);
 extern void testWriteDatabase(String file, Database*);
 static void testKeyGeneration(int);
 
+extern int importTest(void);
+
 // main is the main function of the DeadEnds testing program.
 int main(void) {
+	importTest();
+	exit(0);
 	if (useDebugFile) {
 		debugFile = fopen("/Users/ttw4/debug.txt", "w");
 		if (debugFile == null) {

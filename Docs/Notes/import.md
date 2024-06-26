@@ -23,6 +23,14 @@ And this is after the list.
 
 
 
+#### Some Memory Ideas ####
+
+When a GNode is created it is expected to remain in memory for the full run of the program. Memory is allocated or the GNode once. Considering the fields of a GNode. The level is not kept in the structure, it is computed when needed by finding the level of a node in its tree. The tag values are allocated once, when the tag is seen for the first time. All GNodes with the same tag share the same String holding its tag value. Each value is allocated separately. In the future this might be changed as probably many values, for example, PLAC values, will be the same.
+
+Importing and validation and database creation is done in a sequence of steps. The first step is to read a Gedcom file into a GNodeList, a specialized List structure.
+
+
+
 ###### importFromFiles
 
 Importing starts by calling either the *importFromFiles* function if there are more than one Gedcom file to be read, or *importFromFile* if there is a single file to read. *importFromFiles* calls *importFromFile* for each file in a list.

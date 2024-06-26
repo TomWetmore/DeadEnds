@@ -1,10 +1,9 @@
-//  DeadEnds
+// DeadEnds
 //
-//  path.c has functions to manipulate UNIX file paths.
+// path.c has functions to manipulate UNIX file paths.
 //
-//  Created by Thomas Wetmore on 14 December 2022.
-//  Last changed on 15 May 2024.
-//
+// Created by Thomas Wetmore on 14 December 2022.
+// Last changed on 21 June 2024.
 
 #include <unistd.h>
 #include "standard.h"

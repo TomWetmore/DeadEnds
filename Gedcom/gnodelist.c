@@ -3,7 +3,7 @@
 // gnodelist.c
 //
 // Created by Thomas Wetmore on 27 May 2024.
-// Last changed on 27 May 2024.
+// Last changed on 26 June 2024.
 
 #include "gnodelist.h"
 #include "readnode.h"
@@ -17,13 +17,11 @@ extern String xtag;
 extern String xvalue;
 
 // createNodeListElement creates an element for a GNodeList. Node or error must be null.
-GNodeListElement* createNodeListElement(GNode* node, int level, int lineNo, Error* error) {
-	ASSERT(node || error && (!node || !error));
+GNodeListElement* createNodeListElement(GNode* node, int level, int lineNo) {
 	GNodeListElement *element = (GNodeListElement*) malloc(sizeof(GNodeListElement));
 	element->node = node;
 	element->level = level;
 	element->lineNo = lineNo;
-	element->error = error;
 	return element;
 }
 
@@ -41,19 +39,17 @@ GNodeList* createNodeList(void) {
 
 // getNodeListFromFile uses fileToLine and extractFields to create a GNode for each line in a
 // Gedcom file. Lines with errors store Errors in the list rather than GNodes.
-GNodeList *getNodeListFromFile(FILE* fp, int* numErrors) {
+GNodeList* getNodeListFromFile(FILE* fp, ErrorLog* errorLog) {
 	GNodeList* nodeList = createNodeList();
 	Error* error;
 
-	*numErrors = 0;
 	ReadReturn rc = fileToLine(fp, &error);
 	while (rc != ReadAtEnd) {
 		if (rc == ReadOkay) {
 			appendToList(nodeList, createNodeListElement(
-							createGNode(xkey, xtag, xvalue, null), xlevel, xfileLine, null));
+							createGNode(xkey, xtag, xvalue, null), xlevel, xfileLine));
 		} else {
-			appendToList(nodeList, createNodeListElement(null, xlevel, xfileLine, error));
-			(*numErrors)++;
+			addErrorToLog(errorLog, error);
 		}
 		rc = fileToLine(fp, &error);
 	}
@@ -67,141 +63,83 @@ void showNodeList(GNodeList* nodeList) {
 	FORLIST(nodeList, element)
 		GNodeListElement *nodeListElement = (GNodeListElement*) element;
 		printf("%d ", nodeListElement->lineNo);
-		if (nodeListElement->error) {
-			printf("Error: "); showError(nodeListElement->error);
-		} else if (nodeListElement->node) {
-			printf("Node: "); showGNode(nodeListElement->level, nodeListElement->node);
-		}
+		printf("Node: "); showGNode(nodeListElement->level, nodeListElement->node);
 	ENDLIST
 }
 
-#define isZeroLevelNode(element) ((element)->node && (element)->level == 0)
-#define isNonZeroLevelNode(element) ((element)->node && (element)->level != 0)
-#define isNodeElement(element) ((element)->node)
-#define isErrorElement(element) ((element)->error)
-#define elementFields(element) element->node->key, element->node->tag, element->node->value, null
-
-// getNodeTreesFromNodeList scans a GNodeList of GNodes and creates a GNodeList of GNode trees;
-// uses a three state state machine to track levels and errors.
+// getNodeTreesFromNodeList interates a GNodeList of GNodes to create a GNodeList of GNode trees;
+// it uses a three state state machine to track levels and errors.
 GNodeList *getNodeTreesFromNodeList(GNodeList *lowerList, ErrorLog *errorLog) {
-	enum ExState { InitialState, MainState, ErrorState };
-	enum ExState state = InitialState;
-	int prevLevel = 0;
-	int curLevel = 0;
-	int line0Number = 0;  // Line number of current root node.
-	GNode *curRoot = null;
-	GNode *curNode = null;
+	enum State { InitialState, MainState, ErrorState } state = InitialState;
+	GNodeListElement* element = null;
+	GNodeListElement* rootElement = null;
+	GNodeListElement* previous = null;
 	GNodeList *rootNodeList = createNodeList();
+	Block *block = &(lowerList->block);
+	void **elements = block->elements;
 
-	for (int index = 0; index < lengthList(lowerList); index++) {
-		GNodeListElement *element = getListElement(lowerList, index);
-		if (isNodeElement(element)) {
-			prevLevel = curLevel;
-			curLevel = element->level;
-		}
+	for (int i = 0; i < block->length; i++) {
+		previous = element;
+		element = elements[i];
+		//showGNode(element->level, element->node);
 		switch (state) {
-		case InitialState:
-			if (isZeroLevelNode(element)) {
-				curRoot = curNode = createGNode(elementFields(element));
-				line0Number = element->lineNo;
+		case InitialState: // At first element.
+			if (element->level == 0) {
+				rootElement = element;
 				state = MainState;
-				continue;
+				break;
 			}
-			if (isNonZeroLevelNode(element)) {
-				addErrorToLog(errorLog, createError(syntaxError, xfileName, element->lineNo, "Illegal line level."));
-				state = ErrorState;
-				continue;
-			}
-			if (isErrorElement(element)) {
-				addErrorToLog(errorLog, element->error);
-				state = ErrorState;
-				continue;
-			}
+			addErrorToLog(errorLog,
+				createError(syntaxError, xfileName, element->lineNo, 	"Illegal line level."));
+			state = ErrorState;
 			break;
-		case MainState:
-			// On error enter ErrorState but return the possibly partial current node tree.
-			if (isErrorElement(element)) {
-				addErrorToLog(errorLog, element->error);
-				appendToList(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
-				state = ErrorState;
-				continue;
+		case MainState: // Normal state.
+			if (element->level == 0) { // Found 0 level node of next record.
+				appendToList(rootNodeList, rootElement);
+				rootElement = element;
+				break;
 			}
-			// A 0-level node is the first node of the next record. Return current node tree.
-			if (isZeroLevelNode(element)) {
-				appendToList(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
-				curRoot = curNode = createGNode(elementFields(element));
-				prevLevel = curLevel = 0;
-				line0Number = element->lineNo;
-				continue;
+			if (element->level == previous->level) { // Found sibling.
+				element->elParent = previous->elParent;
+				element->node->parent = previous->node->parent;
+				previous->node->sibling = element->node;
+				break;
 			}
-			// Found sibling node. Add it to the tree and make it current.
-			if (curLevel == prevLevel) {
-				GNode *newNode = createGNode(elementFields(element));
-				newNode->parent = curNode->parent;
-				curNode->sibling = newNode;
-				curNode = newNode;
-				continue;
+			if (element->level == previous->level + 1) { // Found child.
+				element->elParent = previous;
+				element->node->parent = previous->node;
+				previous->node->child = element->node;
+				break;
 			}
-			// Found child node. Add it to the tree and make it current.
-			if (curLevel == prevLevel + 1) {
-				GNode *newNode = createGNode(elementFields(element));
-				newNode->parent = curNode;
-				curNode->child = newNode;
-				curNode = newNode;
-				continue;
-			}
-			// Found higher level node. Make it a sibling to higher node and make it current.
-			if (curLevel < prevLevel) {
-				while (curLevel < prevLevel) {
-					curNode = curNode->parent;
-					prevLevel--;
+			if (element->level < previous->level) { // Found lower (higher!) level.
+				int count = 0;
+				while (element->level < previous->level) {
+					if (count++ > 100) {
+						printf("Infinite Loop in Backing up tree?\n");
+						exit(4);
+					}
+					previous = previous->elParent;
 				}
-				GNode *newNode = createGNode(elementFields(element));
-				curNode->sibling = newNode;
-				newNode->parent = curNode->parent;
-				curNode = newNode;
-				continue;
+				previous->node->sibling = element->node;
+				element->node->parent = previous->node->parent;
+				element = previous;
+				break;
 			}
 			// Anything else is an error.
 			addErrorToLog(errorLog, createError(syntaxError, xfileName, element->lineNo, "Illegal level number."));
-			appendToList(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
+			appendToList(rootNodeList, rootElement);
 			state = ErrorState;
-			continue;
+			break;
 		case ErrorState:
-			if (isErrorElement(element)) continue;
-			if (isNonZeroLevelNode(element)) continue;
-			line0Number = element->lineNo;
-			curRoot = curNode = createGNode(elementFields(element));
-			prevLevel = curLevel = 0;
+			if (element->level != 0) continue;
 			state = MainState;
-			continue;
+			break;
 		default:
 			ASSERT(false);
 		}
 	}
-	//  If in MainState at the end there is a a tree to add to the list.
-	if (state == MainState) {
-		appendToList(rootNodeList, createNodeListElement(curRoot, 0, line0Number, null));
+	if (state == MainState) { // Add last tree to list.
+		appendToList(rootNodeList, rootElement);
 	}
 	return rootNodeList;
-}
-
-// numberNodesInNodeList returns the number of GNodes or GNode trees in a GNodeList.
-int numberNodesInNodeList(GNodeList* list) {
-	int numNodes = 0;
-	FORLIST(list, element)
-		GNodeListElement *e = (GNodeListElement*) element;
-		if (e->node) numNodes++;
-	ENDLIST
-	return numNodes;
-}
-
-// numberErrorsInNodeList returns the number of Errors in a GNodeList.
-int numberErrorsInNodeList(GNodeList* list) {
-	int numErrors = 0;
-	FORLIST(list, element)
-		GNodeListElement *e = (GNodeListElement*) element;
-		if (e->error) numErrors++;
-	ENDLIST
-	return numErrors;
 }

@@ -1,9 +1,9 @@
 //  DeadEnds Project
 //
-//  gnode.c has the functions for the GNode data type.
+//  gnode.c has many functions for the GNode data type.
 //
 //  Created by Thomas Wetmore on 12 November 2022.
-//  Last changed on 19 May 2024.
+//  Last changed on 19 June 2024.
 
 #include "standard.h"
 #include "gnode.h"
@@ -334,11 +334,11 @@ GNode* findTag(GNode* node, String tag) {
 	return null;
 }
 
-// valueToSex converts a 1 SEX GNode's value to internal form.
+// valueToSex converts a 1 SEX GNode value to enumerated form.
 SexType valueToSex (GNode* node) {
 	if (!node || !node->value) return sexUnknown;
-	if (!strcmp("M", node->value)) return sexMale;
-	if (!strcmp("F", node->value)) return sexFemale;
+	if (eqstr("M", node->value)) return sexMale;
+	if (eqstr("F", node->value)) return sexFemale;
 	return sexUnknown;
 }
 
@@ -383,8 +383,8 @@ static int countNodesInTree(GNode *node) {
 	return 1 + countNodes(node->child);
 }
 
-// countNodesBefore return the number of nodes that occur before this one in depth first,
-// left-to-rignt order; used in generating error messages. Nice algorithm.
+// countNodesBefore returns the number of GNodes that occur before this one in depth first,
+// left-to-rignt order; used in generating error messages. Sweet algorithm.
 int countNodesBefore(GNode* node) {
 	if (!node) return 0;
 	int count = 0;

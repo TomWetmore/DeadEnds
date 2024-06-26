@@ -3,7 +3,7 @@
 //  errors.c has code for handling DeadEnds errors.
 //
 //  Created by Thomas Wetmore on 4 July 2023.
-//  Last changed on 21 May 2024.
+//  Last changed on 22 June 2024.
 
 #include "errors.h"
 #include "list.h"
@@ -105,6 +105,15 @@ void showError(Error* error) {
 
 // showErrorLog shows the contents of an ErrorLog on standard output.
 void showErrorLog(ErrorLog* errorLog) {
+	if (!errorLog) {
+		printf("Error log does not exist.\n");
+		return;
+	}
+	if (lengthList(errorLog) == 0) {
+		printf("Error log is empty.\n");
+		return;
+	}
+	printf("Error log:\n");
 	//sortList(errorLog, true);
 	FORLIST(errorLog, error)
 		showError((Error*) error);

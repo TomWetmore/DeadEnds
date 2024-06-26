@@ -208,6 +208,21 @@ static void joinTree (GNode* root, GNode* refn, GNode* rest) {
 	}
 }
 
+// normalizeRecord normalizes GNode record trees to standard format.
+GNode* normalizeRecord(GNode* root) {
+	switch (recordType(root)) {
+		case GRHeader: return root;
+		case GRTrailer: return root;
+		case GRPerson: return normalizePerson(root);
+		case GRFamily:  return normalizeFamily(root);
+		case GREvent: return normalizeEvent(root);
+		case GRSource: return normalizeSource(root);
+		case GROther: return normalizeOther(root);
+		default: FATAL();
+	}
+	return null;
+}
+
 // normalizePerson puts a person GNode tree into standard format.
 GNode* normalizePerson(GNode *indi) {
 	GNode *names, *refns, *sex, *body, *famcs, *famss;
