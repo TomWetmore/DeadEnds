@@ -23,11 +23,19 @@ And this is after the list.
 
 
 
-#### Some Memory Ideas ####
+#### Permanence of GNodes
 
-When a GNode is created it is expected to remain in memory for the full run of the program. Memory is allocated or the GNode once. Considering the fields of a GNode. The level is not kept in the structure, it is computed when needed by finding the level of a node in its tree. The tag values are allocated once, when the tag is seen for the first time. All GNodes with the same tag share the same String holding its tag value. Each value is allocated separately. In the future this might be changed as probably many values, for example, PLAC values, will be the same.
+When a line of Gedcom is read a GNode is allocated to hold the line internall. It remains in memory for the full run of the program unless a user action deletes the line or the record it belongs to from the database. Every GNode is created only once. GNodes can occur in different tables and lists that may come and go, but the GNodes themselves are permanent. References to the same GNode may occur in various locations. When those locations are freed, the GNodes they contain must not be.
+
+GNode is created it is expected to remain in memory for the full run of the program. Memory is allocated for the GNode once. The level is not kept in a GNode as it can be computed if needed. Tag strings are allocated when seen for the first time so all GNodes with the same tag share the same string. Each value is allocated separately. This could be changed if need is found.
 
 Importing and validation and database creation is done in a sequence of steps. The first step is to read a Gedcom file into a GNodeList, a specialized List structure.
+
+### Some of the Pieces
+
+#### getNodeListFromFile
+
+getNodeListFromFile reads a Gedcom file 
 
 
 

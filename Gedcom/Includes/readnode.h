@@ -1,27 +1,26 @@
 //
 // DeadEnds
 //
-// readnode.h is the header file for functions and variables that read GNodes from Gedcom files
+// readnode.h is the header file for functions that read GNodes from Gedcom files.
 // and strings.
 //
 // Created by Thomas Wetmore on 17 December 2022.
-// Last changed on 27 May 2024.
+// Last changed on 2 July 2024.
 
 #ifndef readnode_h
 #define readnode_h
 
 #include "standard.h"
 #include "gnode.h"
-#include "errors.h"
 
 // Return codes from fileToLine and extractFields.
 typedef enum ReadReturn {
-	ReadAtEnd = 0, // At end of file.
-	ReadOkay,    // Last line okay.
-	ReadError    // Last line has an error.
+	ReadAtEnd = 0,
+	ReadOkay,
+	ReadError
 } ReadReturn;
 
-ReadReturn fileToLine(FILE*, Error**);
-GNode* stringToGNodeTree(String, ErrorLog*);
+ReadReturn fileToLine(FILE*, int* line, int* lev, String* key, String* tag, String* val, String* err);
+//GNode* stringToGNodeTree(String, ErrorLog*);
 
 #endif

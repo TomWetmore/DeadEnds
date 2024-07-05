@@ -3,7 +3,7 @@
 // valfamily.c has the functions that validate family records.
 //
 // Created by Thomas Wetmore on 18 December 2023.
-// Last changed on 14 May 2024.
+// Last changed on 5 July 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -12,30 +12,23 @@
 #include "lineage.h"
 #include "errors.h"
 
-static bool validateFamily(GNode *family, Database*, ErrorLog*);
-
-static bool debugging = false;
+static bool validateFamily(RecordIndexEl*, Database*, ErrorLog*);
+extern bool importDebugging;
 
 // validateFamilyIndex validates the family records in a database.
-bool validateFamilyIndex(Database *database, ErrorLog *errorLog) {
-	bool valid = true;
+void validateFamilies(Database *database, ErrorLog *errorLog) {
+	int numFamiliesValidated = 0;
 	FORHASHTABLE(database->familyIndex, element)
-		GNode* family = ((RecordIndexEl*) element)->root;
-		int numErrors = lengthList(errorLog);  // Debugging.
-		if (debugging) printf("Start validating %s\n", family->key);
-		if (!validateFamily(family, database, errorLog)) valid = false;
-		if (debugging && lengthList(errorLog) > numErrors) {
-			printf("There were %d errors validating %s\n", lengthList(errorLog) - numErrors, family->key);
-			numErrors = lengthList(errorLog);
-		}
-		if (debugging) printf("Done validating %s\n", family->key);
+		validateFamily(element, database, errorLog);
+		numFamiliesValidated++;
 	ENDHASHTABLE
-	return valid;
+	if (importDebugging) printf("The number of families validated is %d.\n", numFamiliesValidated);
 }
 
 // validateFamily validates a family; it checks that all HUSBs, WIFEs and CHILs refer to existing
 // persons, and that the return links exist.
-static bool validateFamily(GNode *family, Database *database, ErrorLog* errorLog) {
+static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog* errorLog) {
+	GNode* family = familyEl->root;
 	String segment = database->lastSegment;
 	int errorCount = 0;
 	static char s[4096];
@@ -131,5 +124,5 @@ static bool validateFamily(GNode *family, Database *database, ErrorLog* errorLog
 int familyLineNumber(GNode* family, Database* database) {
 	RecordIndexEl* element = searchHashTable(database->familyIndex, family->key);
 	if (!element) return 0;
-	return element->lineNumber;
+	return element->line;
 }

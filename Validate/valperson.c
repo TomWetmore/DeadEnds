@@ -3,7 +3,7 @@
 // valperson.c contains functions that validate person records in a Database.
 //
 // Created by Thomas Wetmore on 17 December 2023.
-// Last changed on 26 April 2024.
+// Last changed on 5 July 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -13,24 +13,24 @@
 #include "errors.h"
 #include "list.h"
 
-static bool validatePerson(GNode*, Database*, ErrorLog*);
+static bool validatePerson(RecordIndexEl*, Database*, ErrorLog*);
+extern bool importDebugging;
 
-static bool debugging = false;
-
-// validatePersonIndex validates the person index of a Database.
-bool validatePersonIndex(Database* database, ErrorLog* errorLog) {
-	bool valid = true;
+// validatePersons validates the persons in a Database.
+void validatePersons(Database* database, ErrorLog* errlog) {
+	int numPersonsValidated = 0;
 	FORHASHTABLE(database->personIndex, element)
-		GNode* person = ((RecordIndexEl*) element)->root;
-		if (!validatePerson(person, database, errorLog)) valid = false;
+		validatePerson(element, database, errlog);
+		numPersonsValidated++;
 	ENDHASHTABLE
-	return valid;
+	if (importDebugging) printf("Number of persons validated is %d.\n", numPersonsValidated);
 }
 
 // validatePerson validates a person record. Persons require at least one NAME and one SEX line
-// with valid values. All FAMC and FAMS links must link to families that link back to the person.,
-static bool validatePerson(GNode* person, Database* database, ErrorLog* errorLog) {
+// with valid values. All FAMC and FAMS links must link to families that link back to the person.
+static bool validatePerson(RecordIndexEl* personEl, Database* database, ErrorLog* errorLog) {
 	String segment = database->lastSegment;
+	GNode* person = personEl->root;
 	int errorCount = 0;
 	static char s[512];
 	FORFAMCS(person, family, key, database) // Check FAMC links to families.
@@ -102,7 +102,7 @@ static bool validatePerson(GNode* person, Database* database, ErrorLog* errorLog
 		}
 a:;
 	ENDFAMSS
-	
+
 
 	//  Validate existance of NAME and SEX lines.
 	//  Find all other links in the record and validate them.
@@ -112,5 +112,5 @@ a:;
 // personLineNumber returns the line number where a person was located in its Gedcom file.
 int personLineNumber(GNode* person, Database* database) {
 	RecordIndexEl *element = searchHashTable(database->personIndex, person->key);
-	return element ? element->lineNumber : 0;
+	return element ? element->line : 0;
 }

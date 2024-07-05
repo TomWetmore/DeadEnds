@@ -11,15 +11,15 @@
 char* readFileIntoString(const char *filename);
 
 // testGedcomStrings tests the stringToGnodeTree and showGNodeTree functions.
-void testGedcomStrings(void) {
-	printf("START OF TEST GEDCOM STRINGS\n");
-	String file = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/ttw.ged";
-	String record = readFileIntoString(file);
-	printf("The length of the record is %ld\n", strlen(record));
-	GNode* root = stringToGNodeTree(record, null);
-	showGNodeTree(root);
-	printf("END OF TEST GEDCOM STRINGS\n");
-}
+//void testGedcomStrings(void) {
+//	printf("START OF TEST GEDCOM STRINGS\n");
+//	String file = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/ttw.ged";
+//	String record = readFileIntoString(file);
+//	printf("The length of the record is %ld\n", strlen(record));
+//	GNode* root = stringToGNodeTree(record, null);
+//	showGNodeTree(root);
+//	printf("END OF TEST GEDCOM STRINGS\n");
+//}
 
 // readFileIntoString reads a file into a string; written by ChatGPT.
 char* readFileIntoString(const char* filename) {

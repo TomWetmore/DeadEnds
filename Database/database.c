@@ -5,7 +5,7 @@
 // read and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 9 June 2024.
+// Last changed 5 July 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -28,25 +28,27 @@ Database *createDatabase(String filePath) {
 	Database *database = (Database*) stdalloc(sizeof(Database));
 	database->filePath = strsave(filePath);
 	database->lastSegment = strsave(lastPathSegment(filePath));
-	database->personIndex = createRecordIndex();
-	database->familyIndex = createRecordIndex();
-	database->sourceIndex = createRecordIndex();
-	database->eventIndex = createRecordIndex();
-	database->otherIndex = createRecordIndex();
-	database->nameIndex = createNameIndex();
-	database->refnIndex = createRefnIndex();
-	database->personRoots = createRootList();
-	database->familyRoots = createRootList();
+	database->recordIndex = null; // For now.
+	database->personIndex = null;
+	database->familyIndex = null;
+	//database->sourceIndex = createRecordIndex();
+	//database->eventIndex = createRecordIndex();
+	//database->otherIndex = createRecordIndex();
+	database->nameIndex = createNameIndex(); // null?
+	database->refnIndex = createRefnIndex(); // null?
+	database->personRoots = createRootList(); // null?
+	database->familyRoots = createRootList(); // null?
 	return database;
 }
 
 //  deleteDatabase deletes a database.
 void deleteDatabase(Database* database) {
-	deleteRecordIndex(database->personIndex);
-	deleteRecordIndex(database->familyIndex);
-	deleteRecordIndex(database->sourceIndex);
-	deleteRecordIndex(database->eventIndex);
-	deleteRecordIndex(database->otherIndex);
+	deleteRecordIndex(database->recordIndex);
+	//deleteRecordIndex(database->personIndex);
+	//deleteRecordIndex(database->familyIndex);
+	//deleteRecordIndex(database->sourceIndex);
+	//deleteRecordIndex(database->eventIndex);
+	//deleteRecordIndex(database->otherIndex);
 	deleteNameIndex(database->nameIndex);
 }
 
@@ -66,29 +68,39 @@ void writeDatabase(String fileName, Database* database) {
 	fclose(file);
 }
 
+// numberRecordsOfType returns the number of records of given type.
+static int numberRecordsOfType(Database* database, RecordType recType) {
+	int numRecords = 0;
+	FORHASHTABLE(database->recordIndex, element)
+	RecordIndexEl* el = (RecordIndexEl*) element;
+	if (recordType(el->root) == recType) numRecords++;
+	ENDHASHTABLE
+	return numRecords;
+}
+
 // numberPersons returns the number of persons in a database.
 int numberPersons(Database* database) {
-	return database ? sizeHashTable(database->personIndex) : 0;
+	return numberRecordsOfType(database, GRPerson);
 }
 
 // numberFamilies returns the number of families in a database.
 int numberFamilies(Database* database) {
-	return database ? sizeHashTable(database->familyIndex) : 0;
+	return numberRecordsOfType(database, GRFamily);
 }
 
 // numberSources returns the number of sources in a database.
 int numberSources(Database* database) {
-	return database ? sizeHashTable(database->sourceIndex) : 0;
+	return numberRecordsOfType(database, GRSource);
 }
 
 // numberEvents returnw the number of (top level) events in the database.
 int numberEvents(Database* database) {
-	return database ? sizeHashTable(database->eventIndex) : 0;
+	return numberRecordsOfType(database, GREvent);
 }
 
 // numberOthers return the number of other records in the database.
 int numberOthers(Database* database) {
-	return database ? sizeHashTable(database->otherIndex) : 0;
+	return numberRecordsOfType(database, GROther);
 }
 
 // isEmptyDatabase returns true if the database has no persons or families.
@@ -96,34 +108,37 @@ bool isEmptyDatabase(Database* database) {
 	return numberPersons(database) + numberFamilies(database) == 0;
 }
 
+static GNode* keyToRecordOfType(String key, Database* database, RecordType recType) {
+	RecordIndexEl* el = (RecordIndexEl*) searchHashTable(database->recordIndex, key);
+	if (el == null) return null;
+	GNode* node = el->root;
+	if (recordType(node) != recType) return null;
+	return node;
+}
+
 // keyToPerson gets a person record from a database.
 GNode* keyToPerson(String key, Database* database) {
-	RecordIndexEl* element = (RecordIndexEl*) searchHashTable(database->personIndex, key);
-	return element ? element->root : null;
+	return keyToRecordOfType(key, database, GRPerson);
 }
 
 // keyToFamily gets a family record from a database.
 GNode* keyToFamily(String key, Database* database) {
-	RecordIndexEl *element = (RecordIndexEl*) searchHashTable(database->familyIndex, key);
-	return element == null ? null : element->root;
+	return keyToRecordOfType(key, database, GRFamily);
 }
 
 // keyToSource gets a source record from a database.
 GNode* keyToSource(String key, Database* database) {
-	RecordIndexEl* element = (RecordIndexEl*) searchHashTable(database->sourceIndex, key);
-	return element ? element->root : null;
+	return keyToRecordOfType(key, database, GRSource);
 }
 
 // keyToEvent gets an event record from a database.
 GNode* keyToEvent(String key, Database* database) {
-	RecordIndexEl *element = (RecordIndexEl*) searchHashTable(database->eventIndex, key);
-	return element ? element->root : null;
+	return keyToRecordOfType(key, database, GREvent);
 }
 
 // keyToOther gets an other record from a database.
 GNode* keyToOther(String key, Database* database) {
-	RecordIndexEl *element = (RecordIndexEl*) searchHashTable(database->otherIndex, key);
-	return element ? element->root : null;
+	return keyToRecordOfType(key, database, GROther);
 }
 
 // storeRecord stores a GNode tree/record in a database by adding it to a RecordIndex.
@@ -170,6 +185,7 @@ bool storeRecord(Database* database, GNode* root, int lineNumber, ErrorLog* erro
 
 // showTableSizes is a debug function that shows the sizes of the database tables.
 void showTableSizes(Database *database) {
+	printf("Size of recordIndex: %d\n", sizeHashTable(database->recordIndex));
 	printf("Size of personIndex: %d\n", sizeHashTable(database->personIndex));
 	printf("Size of familyIndex: %d\n", sizeHashTable(database->familyIndex));
 	printf("Size of sourceIndex: %d\n", sizeHashTable(database->sourceIndex));
@@ -182,9 +198,10 @@ void oldIndexNames(Database* database) {
 	if (indexNameDebugging) fprintf(debugFile, "Start indexNames\n");
 	static int count = 0;
 	int i, j;
-	RecordIndexEl* entry = firstInHashTable(database->personIndex, &i, &j);
-	while (entry) { // Loop persons.
+	RecordIndexEl* entry = firstInHashTable(database->recordIndex, &i, &j);
+	for (; entry; entry = nextInHashTable(database->recordIndex, &i, &j)) {
 		GNode* root = entry->root;
+		if (recordType(root) != GRPerson) continue;
 		String recordKey = root->key;
 		if (indexNameDebugging) fprintf(debugFile, "indexNames: recordKey: %s\n", recordKey);
 		for (GNode* name = NAME(root); name && eqstr(name->tag, "NAME"); name = name->sibling) {
@@ -197,7 +214,7 @@ void oldIndexNames(Database* database) {
 				count++;
 			}
 		}
-		entry = nextInHashTable(database->personIndex, &i, &j);
+		//entry = nextInHashTable(database->personIndex, &i, &j);
 	}
 	if (indexNameDebugging) showNameIndex(database->nameIndex);
 	if (indexNameDebugging) printf("The number of names indexed was %d\n", count);
@@ -207,7 +224,7 @@ void oldIndexNames(Database* database) {
 void indexNames(Database* database) {
 	if (indexNameDebugging) fprintf(debugFile, "Start indexNames\n");
 	static int count = 0;
-	FORHASHTABLE(database->personIndex, element)
+	NEWFORHASHTABLE(database->recordIndex, element)
 		RecordIndexEl* entry = element;
 		GNode* root = entry->root;
 		String recordKey = root->key;
@@ -221,7 +238,7 @@ void indexNames(Database* database) {
 				count++;
 			}
 		}
-	ENDHASHTABLE
+	NEWENDHASHTABLE
 	if (indexNameDebugging) showNameIndex(database->nameIndex);
 	if (indexNameDebugging) printf("The number of names indexed was %d\n", count);
 }
@@ -229,29 +246,31 @@ void indexNames(Database* database) {
 // keyLineNumber checks if a record with a key is in the database; if so it returns the line
 // number where the record began in its Gedcom file.
 static int keyLineNumber (Database *database, String key) {
-	RecordIndexEl* element = (RecordIndexEl*) searchHashTable(database->personIndex, key);
-	if (!element) element = searchHashTable(database->familyIndex, key);
-	if (!element) element = searchHashTable(database->sourceIndex, key);
-	if (!element) element = searchHashTable(database->eventIndex, key);
-	if (!element) element = searchHashTable(database->otherIndex, key);
-	if (!element) return 0; // Record doesn't exist.
-	return element->lineNumber;
+	RecordIndexEl* el = (RecordIndexEl*) searchHashTable(database->recordIndex, key);
+//	if (!element) element = searchHashTable(database->familyIndex, key);
+//	if (!element) element = searchHashTable(database->sourceIndex, key);
+//	if (!element) element = searchHashTable(database->eventIndex, key);
+//	if (!element) element = searchHashTable(database->otherIndex, key);
+	if (!el) return 0; // Record doesn't exist.
+	return el->line;
 }
 
 // getRecord gets a record from the database given a key.
 GNode* getRecord(String key, Database* database) {
-	GNode *root;
-	if ((root = keyToPerson(key, database))) return root;
-	if ((root = keyToFamily(key, database))) return root;
-	if ((root = keyToSource(key, database))) return root;
-	if ((root = keyToEvent(key, database))) return root;
-	if ((root = keyToOther(key, database))) return root;
-	return null;
+	return searchRecordIndex(database->recordIndex, key);
+//	GNode *root = keyToRecord(key, database);
+//
+//	if ((root = keyToPerson(key, database))) return root;
+//	if ((root = keyToFamily(key, database))) return root;
+//	if ((root = keyToSource(key, database))) return root;
+//	if ((root = keyToEvent(key, database))) return root;
+//	if ((root = keyToOther(key, database))) return root;
+//	return null;
 }
 
 //  Some debugging functions.
-void showPersonIndex(Database *database) { showHashTable(database->personIndex, null); }
-void showFamilyIndex(Database *database) { showHashTable(database->familyIndex, null); }
+//void showPersonIndex(Database *database) { showHashTable(database->personIndex, null); }
+//void showFamilyIndex(Database *database) { showHashTable(database->familyIndex, null); }
 //int getCount(void) { return count; }
 
 

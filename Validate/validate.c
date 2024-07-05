@@ -26,13 +26,13 @@ int numValidations = 0; // DEBUG.
 bool validateDatabase(Database* database, ErrorLog* errorLog) {
 	ASSERT(database);
 	bool isOkay = true;
-	if (!validatePersonIndex(database, errorLog)) isOkay = false;
-	if (!validateFamilyIndex(database, errorLog)) isOkay = false;
-	if (!validateSourceIndex(database, errorLog)) isOkay = false;
-	if (!validateEventIndex(database, errorLog)) isOkay = false;
-	if (!validateOtherIndex(database, errorLog)) isOkay = false;
+	//if (!validatePersonIndex(database, errorLog)) isOkay = false;
+	//if (!validateFamilyIndex(database, errorLog)) isOkay = false;
+	//if (!validateSourceIndex(database, errorLog)) isOkay = false;
+	//if (!validateEventIndex(database, errorLog)) isOkay = false;
+	//if (!validateOtherIndex(database, errorLog)) isOkay = false;
 	//if (!validateNameIndex(database, errorLog)) isOkay = false;
-	if (!validateRefns(database, errorLog)) isOkay = false;
+	//if (!validateRefns(database, errorLog)) isOkay = false;
 	return isOkay;
 }
 

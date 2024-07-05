@@ -75,4 +75,18 @@ void removeElement(HashTable*, void* element);
 			__element = nextInHashTable(__table, &__i, &__j);\
 		}}\
 
+
+#define NEWFORHASHTABLE(table, element) {\
+			int __i = 0, __j = 0;\
+			HashTable *__table = table;\
+			void *element = null;\
+			void *__element = firstInHashTable(__table, &__i, &__j);\
+			for(; __element; __element = nextInHashTable(__table, &__i, &__j)) {\
+				element = __element;
+
+#define NEWENDHASHTABLE \
+				__element = nextInHashTable(__table, &__i, &__j);\
+}}\
+
+
 #endif // hashtable_h

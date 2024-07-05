@@ -3,7 +3,7 @@ CFLAGS=-c -g -Wall
 INCLUDES=-I./Includes -I../DataTypes/Includes
 AR=ar
 ARFLAGS=-cr
-OFILES=errors.o standard.o unicode.o path.o utils.o
+OFILES=errors.o standard.o unicode.o path.o utils.o file.o
 LIBNAME=utils
 
 lib$(LIBNAME).a: $(OFILES)

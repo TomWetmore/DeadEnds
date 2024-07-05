@@ -15,7 +15,7 @@
 // the line number where the record was defined. The element's key is the key of the root node.
 typedef struct RecordIndexEl {
 	GNode *root;
-	int lineNumber;
+	int line;
 }  RecordIndexEl;
 
 // A RecordIndex is a HashTable of RecordIndexEls.

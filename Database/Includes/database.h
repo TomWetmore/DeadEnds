@@ -24,6 +24,7 @@ typedef List RootList;
 typedef struct Database {
 	String filePath;  // Path to the Gedcom file this database was built from.
 	String lastSegment;  // Last segment of the path for error messages.
+	RecordIndex* recordIndex; // Index of all keyed records.
 	RecordIndex *personIndex;  // Index of persons in this database.
 	RecordIndex *familyIndex;  // Index of families in this database.
 	RecordIndex *sourceIndex;  // Index of sources in this database.
