@@ -12,6 +12,7 @@
 #include "lineage.h"
 #include "errors.h"
 #include "list.h"
+#include "splitjoin.h"
 
 static bool validatePerson(RecordIndexEl*, Database*, ErrorLog*);
 extern bool importDebugging;
@@ -31,11 +32,12 @@ void validatePersons(Database* database, ErrorLog* errlog) {
 static bool validatePerson(RecordIndexEl* personEl, Database* database, ErrorLog* errorLog) {
 	String segment = database->lastSegment;
 	GNode* person = personEl->root;
+	normalizePerson(person);
 	int errorCount = 0;
 	static char s[512];
 	FORFAMCS(person, family, key, database) // Check FAMC links to families.
 		if (!family) {
-			int lineNumber = personLineNumber(person, database);
+			int lineNumber = rootLineNumber(person, database);
 			sprintf(s, "INDI %s (line %d): FAMC %s (line %d) does not exist.",
 					person->key,
 					lineNumber,
@@ -47,7 +49,7 @@ static bool validatePerson(RecordIndexEl* personEl, Database* database, ErrorLog
 	ENDFAMCS
 	FORFAMSS(person, family, key, database) // Check FAMS links to families.
 		if (!family) {
-				int lineNumber = personLineNumber(person, database);
+				int lineNumber = rootLineNumber(person, database);
 				sprintf(s, "INDI %s (line %d): FAMS %s (line %d) does not exist.",
 						person->key,
 						lineNumber,
@@ -80,7 +82,7 @@ static bool validatePerson(RecordIndexEl* personEl, Database* database, ErrorLog
 		} else if (sex == sexFemale) {
 			parent = familyToWife(family, database);
 		} else {
-			int lineNumber = personLineNumber(person, database);
+			int lineNumber = rootLineNumber(person, database);
 			sprintf(s, "INDI %s (line %d) with FAMS %s (line %d) link has no sex value.",
 					person->key,
 					lineNumber,
@@ -93,10 +95,10 @@ static bool validatePerson(RecordIndexEl* personEl, Database* database, ErrorLog
 		if (person != parent) {
 			sprintf(s, "FAM %s (line %d) should have %s link to INDI %s (line %d).",
 					key,
-					familyLineNumber(family, database),
+					rootLineNumber(family, database),
 					sex == sexMale ? "HUSB" : "WIFE",
 					person->key,
-					personLineNumber(person, database));
+					rootLineNumber(person, database));
 			addErrorToLog(errorLog, createError(linkageError, segment, 0, s));
 			errorCount++;
 		}
@@ -107,10 +109,4 @@ a:;
 	//  Validate existance of NAME and SEX lines.
 	//  Find all other links in the record and validate them.
 	return errorCount == 0;
-}
-
-// personLineNumber returns the line number where a person was located in its Gedcom file.
-int personLineNumber(GNode* person, Database* database) {
-	RecordIndexEl *element = searchHashTable(database->personIndex, person->key);
-	return element ? element->line : 0;
 }

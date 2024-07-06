@@ -1,11 +1,11 @@
-// DeadEnds Project
+// DeadEnds
 //
 // refnindex.c -- Handle user reference indexing.
 //
 // Gedcom records can have 1 REFN nodes whose values give records unique identifiers.
 //
 // Created by Thomas Wetmore on 16 December 2023.
-// Last changed on 16 May 2024.
+// Last changed on 5 July 2024.
 
 #include "refnindex.h"
 #include "gedcom.h"

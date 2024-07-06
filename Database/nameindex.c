@@ -1,11 +1,10 @@
 // DeadEnds Project
 //
-// nameindex.c implements the NameIndex data type. Gedcom names are mapped to name keys which are
-// keys in a NameIndex. The index maps the name keys to the Set of person keys who have names that
-// match the name key.
+// nameindex.c implements the NameIndex, an index that maps Gedcom name keys to the sets of person
+// record keys that have the names.
 //
 // Created by Thomas Wetmore on 26 November 2022.
-// Last changed on 8 May 2024.
+// Last changed on 5 July 2024.
 
 #include "nameindex.h"
 #include "name.h"
@@ -13,13 +12,12 @@
 #include "set.h"
 #include "gedcom.h"
 
-static NameElement* createNameElement(String nameKey, String recordKey);
-
+static NameIndexEl* createNameIndexEl(String nameKey, String recordKey);
 static int numNameIndexBuckets = 2048;
 
 // getKey gets the name key of a NameIndex element.
 static String getKey(void* element) {
-	return ((NameElement*) element)->nameKey;
+	return ((NameIndexEl*) element)->nameKey;
 }
 
 // compare compares two name keys.
@@ -29,7 +27,7 @@ static int compare(String a, String b) {
 
 // delete frees a NameIndex element.
 static void delete(void* element) {
-	NameElement *nameEl = (NameElement*) element;
+	NameIndexEl *nameEl = (NameIndexEl*) element;
 	stdfree(nameEl->nameKey);
 	deleteSet(nameEl->recordKeys);
 	stdfree(nameEl);
@@ -46,12 +44,11 @@ void deleteNameIndex(NameIndex *nameIndex) {
 }
 
 // insertInNameIndex adds a (name key, person key) relationship to a NameIndex.
-void insertInNameIndex(NameIndex* index, String nameKey, String recordKey)
-{
+void insertInNameIndex(NameIndex* index, String nameKey, String recordKey) {
 	//printf("insertInNameIndex: nameKey, personKey: %s, %s\n", nameKey, personKey); // DEBUG
-	NameElement* element = (NameElement*) searchHashTable(index, nameKey);
+	NameIndexEl* element = (NameIndexEl*) searchHashTable(index, nameKey);
 	if (!element) {
-		element = createNameElement(nameKey, recordKey);
+		element = createNameIndexEl(nameKey, recordKey);
 		addToHashTable(index, element, true);
 	}
 	Set* recordKeys = element->recordKeys;
@@ -63,7 +60,7 @@ void insertInNameIndex(NameIndex* index, String nameKey, String recordKey)
 // searchNameIndex searches NameIndex for a name and returns the record keys that have the name.
 Set* searchNameIndex(NameIndex* index, String name) {
 	String nameKey = nameToNameKey(name);
-	NameElement* element = searchHashTable(index, nameKey);
+	NameIndexEl* element = searchHashTable(index, nameKey);
 	return element == null ? null : element->recordKeys;
 }
 
@@ -72,7 +69,7 @@ static void showSetElement(void* setEl) {
 	printf("  %s\n", (String) setEl);
 }
 static void showElement(void* element) {
-	Set* recordKeys = ((NameElement*)element)->recordKeys;
+	Set* recordKeys = ((NameIndexEl*)element)->recordKeys;
 	iterateSet(recordKeys, showSetElement);
 }
 void showNameIndex(NameIndex* index) {
@@ -89,10 +86,10 @@ static int compareSetKeys(String a, String b) {
 	return compareRecordKeys(a, b);
 }
 
-// createNameElement creates and returns a NameElement.
-static NameElement* createNameElement(String nameKey, String recordKey) {
-	NameElement* element = (NameElement*) stdalloc(sizeof(NameElement));
-	element->nameKey = strsave(nameKey);  // MNOTE: nameKey is in data space.
-	element->recordKeys = createSet(getSetKey, compareSetKeys, null);
-	return element;
+// createNameIndexEl creates and returns a NameIndexEl.
+static NameIndexEl* createNameIndexEl(String nameKey, String recordKey) {
+	NameIndexEl* el = (NameIndexEl*) stdalloc(sizeof(NameIndexEl));
+	el->nameKey = strsave(nameKey);  // MNOTE: nameKey is in data space.
+	el->recordKeys = createSet(getSetKey, compareSetKeys, null);
+	return el;
 }

@@ -11,6 +11,7 @@
 #include "recordindex.h"
 #include "lineage.h"
 #include "errors.h"
+#include "splitjoin.h"
 
 static bool validateFamily(RecordIndexEl*, Database*, ErrorLog*);
 extern bool importDebugging;
@@ -29,6 +30,7 @@ void validateFamilies(Database *database, ErrorLog *errorLog) {
 // persons, and that the return links exist.
 static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog* errorLog) {
 	GNode* family = familyEl->root;
+	normalizeFamily(family);
 	String segment = database->lastSegment;
 	int errorCount = 0;
 	static char s[4096];
@@ -36,7 +38,7 @@ static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog
 	// All HUSB, WIFE and CHIL must link to persons.
 	FORHUSBS(family, husband, key, database)
 		if (!husband) {
-			int lineNumber = familyLineNumber(family, database);
+			int lineNumber = rootLineNumber(family, database);
 			sprintf(s, "FAM %s (line %d): HUSB %s (line %d) does not exist.",
 					family->key,
 					lineNumber,
@@ -49,7 +51,7 @@ static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog
 
 	FORWIFES(family, wife, key, database)
 		if (!wife) {
-			int lineNumber = familyLineNumber(family, database);
+			int lineNumber = rootLineNumber(family, database);
 			sprintf(s, "FAM %s (line %d): WIFE %s (line %d) does not exist.",
 					family->key,
 					lineNumber,
@@ -62,7 +64,7 @@ static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog
 
 	FORCHILDREN(family, child, key, n, database)
 	if (!child) {
-			int lineNumber = familyLineNumber(family, database);
+			int lineNumber = rootLineNumber(family, database);
 			sprintf(s, "FAM %s (line %d): CHIL %s (line %d) does not exist.",
 					family->key,
 					lineNumber,
@@ -118,11 +120,4 @@ static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog
 	//  Validate that the WIFEs are female.
 	//  Validate all other links.
 	return true;  // TODO: Deal with the errors properly.
-}
-
-// familyLineNumber returns the line number of a family root GNode in the original Gedcom file.
-int familyLineNumber(GNode* family, Database* database) {
-	RecordIndexEl* element = searchHashTable(database->familyIndex, family->key);
-	if (!element) return 0;
-	return element->line;
 }

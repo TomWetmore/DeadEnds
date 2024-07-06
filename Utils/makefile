@@ -11,3 +11,4 @@ lib$(LIBNAME).a: $(OFILES)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) $<
+

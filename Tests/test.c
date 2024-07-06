@@ -228,12 +228,11 @@ static void indexNamesTest(Database* database, int testNumber) {
 	printf("END OF INDEX NAMES TEST\n");
 }
 
-extern int personLineNumber(GNode*, Database*);
-
+// countNodesBeforeTest tests the countNodesBefore function.
 static void countNodesBeforeTest(Database* database, int testNumber) {
 	printf("\n%d: START OF COUNT NODES BEFORE TEST: %2.3f\n", testNumber, getMilliseconds());
 	GNode *person = keyToPerson("@I1@", database);
-	int startLineNumber = personLineNumber(person, database);
+	int startLineNumber = rootLineNumber(person, database);
 	if (person) {
 		FORTRAVERSE(person, node)
 			printf(" %d %s %s\n", startLineNumber + countNodesBefore(node), node->tag, node->value ? node->value : "");

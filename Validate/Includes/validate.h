@@ -13,12 +13,12 @@
 
 extern void validatePersons(Database*, ErrorLog*);
 extern void validateFamilies(Database*, ErrorLog*);
+extern void validateReferences(Database*, ErrorLog*);
 
-extern bool validateDatabase(Database*, ErrorLog*);
-extern bool validateSourceIndex(Database*, ErrorLog*);
-extern bool validateEventIndex(Database*, ErrorLog*);
-extern bool validateOtherIndex(Database*, ErrorLog*);
-extern int personLineNumber(GNode*, Database*);
-extern int familyLineNumber(GNode*, Database*);
+//extern bool validateDatabase(Database*, ErrorLog*);
+//extern bool validateSourceIndex(Database*, ErrorLog*);
+//extern bool validateEventIndex(Database*, ErrorLog*);
+//extern bool validateOtherIndex(Database*, ErrorLog*);
+extern int rootLineNumber(GNode*, Database*);
 
 #endif // validate_h

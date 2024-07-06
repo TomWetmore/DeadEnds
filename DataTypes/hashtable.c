@@ -4,7 +4,7 @@
 // customization.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 25 April 2024.
+// Last changed on 5 July 2024.
 
 #include "standard.h"
 #include "hashtable.h"
@@ -16,10 +16,6 @@ bool sortChecking = false;
 extern FILE* debugFile;
 
 static void* searchBucket(Bucket*, String key, String(*g)(void*), int(*c)(String, String), int* index);
-//static void* linearSearchBucket(Bucket*, String key, String(*g)(void*), int* index);
-//static void* binarySearchBucket(Bucket*, String key, String(*g)(void*), int(*c)(String, String), int* index);
-//static void sortBucket(Bucket*, String(*g)(void*), int(*c)(String, String));
-//static void removeFromBucketByIndex(Bucket* bucket, int index, void (*delete)(void*));
 
 // createHashTable creates and returns a HashTable. getKey is a function that returns the key of
 // an element, and delete is an optional function that frees an element.
@@ -33,6 +29,17 @@ HashTable* createHashTable(String(*getKey)(void*), int(*compare)(String, String)
 	table->buckets = (Bucket**) malloc(numBuckets*sizeof(Bucket));
 	for (int i = 0; i < table->numBuckets; i++) table->buckets[i] = null;
 	return table;
+}
+
+// deleteBucket deletes a Bucket. If there is a delete function the elements are deleted.
+static void deleteBucket(Bucket* bucket, void(*delete)(void*)) { //PH;
+	if (delete) {
+		Block* block = &(bucket->block);
+		for (int j = 0; j < block->length; j++) {
+			delete(block->elements[j]);
+		}
+	}
+	free(bucket);
 }
 
 // deleteHashTable deletes a HashTable. If there is a delete function it is called on the elements.
@@ -56,16 +63,7 @@ int lengthBucket(Bucket* bucket) {
 	return lengthBlock(&(bucket->block));
 }
 
-// deleteBucket deletes a Bucket. If there is a delete function the elements are deleted.
-void deleteBucket(Bucket* bucket, void(*delete)(void*)) { //PH;
-	if (delete) {
-		Block* block = &(bucket->block);
-		for (int j = 0; j < block->length; j++) {
-			delete(block->elements[j]);
-		}
-	}
-	free(bucket);
-}
+
 
 // getHash returns the hash code of a Strings; found on the internet.
 int getHash(String key, int maxHash) { //PH;

@@ -4,7 +4,7 @@
 // index the Gedcom names in person records. A NameIndex is a specialization of HashTable.
 //
 // Created by Thomas Wetmore on 26 November 2022.
-// Last changed on 13 May 2024.
+// Last changed on 5 July 2024.
 
 #ifndef nameindex_h
 #define nameindex_h
@@ -13,10 +13,10 @@
 #include "hashtable.h"
 
 // NameElement is an element in a NameIndex bucket.
-typedef struct NameElement {
+typedef struct NameIndexEl {
     String nameKey;
     Set* recordKeys;
-} NameElement;
+} NameIndexEl;
 
 // NameIndex is a synonym for HashTable.
 typedef HashTable NameIndex;

@@ -1,9 +1,9 @@
-//  DeadEnds
+// DeadEnds
 //
 // utils.c
 //
 // Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 21 April 2024.
+// Last changed on 5 July 2024.
 
 #include <sys/time.h>
 #include <string.h>
@@ -20,10 +20,15 @@ double getMilliseconds(void) {
     return seconds + milliseconds / 1000.;
 }
 
-//  substring -- Return substring
-//--------------------------------------------------------------------------------------------------
-String substring (String s, int i, int j)
-{
+String getMillisecondsString(void) {
+	double millis = getMilliseconds();
+	static char buffer[10];;
+	sprintf(buffer, "%2.3f", millis);
+	return buffer;
+}
+
+// substring returns a substring of a String.
+String substring(String s, int i, int j) {
 	static char scratch[MAXLINELEN+1];
 	if (!s || *s == 0 || i <= 0 || i > j || j > strlen(s)) return "";
 	strncpy(scratch, &s[i-1], j-i+1);
@@ -32,9 +37,7 @@ String substring (String s, int i, int j)
 }
 
 // rightjustify right justifies a String value.
-//--------------------------------------------------------------------------------------------------
-String rightjustify (String string, int len)
-{
+String rightjustify(String string, int len) {
 	static char scratch[MAXLINELEN+1];
 	if (len < 1) return "";
 	if (len > MAXLINELEN) len = MAXLINELEN;

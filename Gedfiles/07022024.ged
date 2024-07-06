@@ -692,7 +692,7 @@
 3 CONT
 3 CONT -Bob
 0 @X1@ SHIP
-1 REFN
+1 REFN bqueen
 1 NAME Baltic Queen
 0 @F10@ FAM
 1 HUSB @I8@

@@ -1,11 +1,9 @@
+// DeadEnds
 //
-//  DeadEnds Project
+// refnindex.h is the hearder file for the reference (REFN) index features.
 //
-//  refnindex.h -- Header file for the reference (REFN) index features.
-//
-//  Created on 17 December 2023.
-//  Last changed on 3 April 2024.
-//
+// Created on 17 December 2023.
+// Last changed on 5 July 2024.
 
 #ifndef refnindex_h
 #define refnindex_h
