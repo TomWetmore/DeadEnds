@@ -93,3 +93,16 @@ static NameIndexEl* createNameIndexEl(String nameKey, String recordKey) {
 	el->recordKeys = createSet(getSetKey, compareSetKeys, null);
 	return el;
 }
+
+// getNameIndexStats returns statistics about the NameIndex. For testing and debugging.
+void getNameIndexStats(NameIndex* index, int* pnumNameKeys, int* pnumRecordKeys) {
+	int numNameKeys = 0;
+	int numRecordKeys = 0;
+	FORHASHTABLE(index, element)
+		numNameKeys++;
+		NameIndexEl* el = (NameIndexEl*) element;
+		numRecordKeys += lengthSet(el->recordKeys);
+	ENDHASHTABLE
+	*pnumNameKeys = numNameKeys;
+	*pnumRecordKeys = numRecordKeys;
+}

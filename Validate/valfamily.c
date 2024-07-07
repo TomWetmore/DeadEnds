@@ -38,7 +38,7 @@ static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog
 	// All HUSB, WIFE and CHIL must link to persons.
 	FORHUSBS(family, husband, key, database)
 		if (!husband) {
-			int lineNumber = rootLineNumber(family, database);
+			int lineNumber = rootLine(family, database);
 			sprintf(s, "FAM %s (line %d): HUSB %s (line %d) does not exist.",
 					family->key,
 					lineNumber,
@@ -51,7 +51,7 @@ static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog
 
 	FORWIFES(family, wife, key, database)
 		if (!wife) {
-			int lineNumber = rootLineNumber(family, database);
+			int lineNumber = rootLine(family, database);
 			sprintf(s, "FAM %s (line %d): WIFE %s (line %d) does not exist.",
 					family->key,
 					lineNumber,
@@ -64,7 +64,7 @@ static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog
 
 	FORCHILDREN(family, child, key, n, database)
 	if (!child) {
-			int lineNumber = rootLineNumber(family, database);
+			int lineNumber = rootLine(family, database);
 			sprintf(s, "FAM %s (line %d): CHIL %s (line %d) does not exist.",
 					family->key,
 					lineNumber,

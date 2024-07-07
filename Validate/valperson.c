@@ -37,7 +37,7 @@ static bool validatePerson(RecordIndexEl* personEl, Database* database, ErrorLog
 	static char s[512];
 	FORFAMCS(person, family, key, database) // Check FAMC links to families.
 		if (!family) {
-			int lineNumber = rootLineNumber(person, database);
+			int lineNumber = rootLine(person, database);
 			sprintf(s, "INDI %s (line %d): FAMC %s (line %d) does not exist.",
 					person->key,
 					lineNumber,
@@ -49,7 +49,7 @@ static bool validatePerson(RecordIndexEl* personEl, Database* database, ErrorLog
 	ENDFAMCS
 	FORFAMSS(person, family, key, database) // Check FAMS links to families.
 		if (!family) {
-				int lineNumber = rootLineNumber(person, database);
+				int lineNumber = rootLine(person, database);
 				sprintf(s, "INDI %s (line %d): FAMS %s (line %d) does not exist.",
 						person->key,
 						lineNumber,
@@ -82,7 +82,7 @@ static bool validatePerson(RecordIndexEl* personEl, Database* database, ErrorLog
 		} else if (sex == sexFemale) {
 			parent = familyToWife(family, database);
 		} else {
-			int lineNumber = rootLineNumber(person, database);
+			int lineNumber = rootLine(person, database);
 			sprintf(s, "INDI %s (line %d) with FAMS %s (line %d) link has no sex value.",
 					person->key,
 					lineNumber,
@@ -95,10 +95,10 @@ static bool validatePerson(RecordIndexEl* personEl, Database* database, ErrorLog
 		if (person != parent) {
 			sprintf(s, "FAM %s (line %d) should have %s link to INDI %s (line %d).",
 					key,
-					rootLineNumber(family, database),
+					rootLine(family, database),
 					sex == sexMale ? "HUSB" : "WIFE",
 					person->key,
-					rootLineNumber(person, database));
+					rootLine(person, database));
 			addErrorToLog(errorLog, createError(linkageError, segment, 0, s));
 			errorCount++;
 		}

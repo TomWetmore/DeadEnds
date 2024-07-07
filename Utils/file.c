@@ -3,7 +3,7 @@
 // file.c
 //
 // Created by Thomas Wetmore on 1 July 2024.
-// Last changed on 1 July 2024.
+// Last changed on 7 July 2024.
 
 #include <stdio.h>
 #include "file.h"
@@ -26,4 +26,5 @@ void deleteFile(File* file) {
 	if (file->fp) fclose(file->fp);
 	if (file->path) stdfree(file->path);
 	if (file->name) stdfree(file->name);
+	stdfree(file);
 }

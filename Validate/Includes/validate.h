@@ -19,6 +19,6 @@ extern void validateReferences(Database*, ErrorLog*);
 //extern bool validateSourceIndex(Database*, ErrorLog*);
 //extern bool validateEventIndex(Database*, ErrorLog*);
 //extern bool validateOtherIndex(Database*, ErrorLog*);
-extern int rootLineNumber(GNode*, Database*);
+extern int rootLine(GNode*, Database*);
 
 #endif // validate_h

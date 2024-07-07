@@ -279,3 +279,21 @@ String generateFamilyKey(Database* database) {
 String generatePersonKey(Database* database) {
 	return "@Ixxxxxxx@";
 }
+
+// summarizeDatabase write a short text summary of a Database to standard output. Debug.
+void summarizeDatabase(Database* database) {
+	if (!database) {
+		printf("No database to summarize.\n");
+		return;
+	}
+	printf("summary of database: %s.\n", database->filePath);
+	if (database->personIndex) printf("Person index: %d\n", sizeHashTable(database->personIndex));
+	if (database->familyIndex) printf("Family index: %d\n", sizeHashTable(database->familyIndex));
+	if (database->recordIndex) printf("Record index: %d\n", sizeHashTable(database->recordIndex));
+	if (database->nameIndex) {
+		int numNames, numRecords;
+		getNameIndexStats(database->nameIndex, &numNames, &numRecords);
+		printf("Name index: %d, %d\n", numNames, numRecords);
+
+	}
+}

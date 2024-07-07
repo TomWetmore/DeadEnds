@@ -105,7 +105,7 @@ ReadReturn fileToLine(FILE* fp, int* pline, int* plevel, String* pkey, String* p
 // stringToLine gets the next Gedcom line as fields from a String with one or more Gedcom lines.
 // Reads to the next newline, if any, and processes that part of the String. Returns updated
 // pointer to next line.
-static ReadReturn stringToLine(String* ps, int* line, int* level, String* key, String* tag,
+ReadReturn stringToLine(String* ps, int* line, int* level, String* key, String* tag,
 							   String *value, String* err) {
 	String s0 = *ps;
 	if (!s0 || *s0 == 0) return ReadAtEnd;

@@ -50,6 +50,7 @@ extern int importTest(void);
 // main is the main function of the DeadEnds testing program.
 int main(void) {
 	importTest();
+	testGedcomStrings();
 	exit(0);
 	if (useDebugFile) {
 		debugFile = fopen("/Users/ttw4/debug.txt", "w");
@@ -232,7 +233,7 @@ static void indexNamesTest(Database* database, int testNumber) {
 static void countNodesBeforeTest(Database* database, int testNumber) {
 	printf("\n%d: START OF COUNT NODES BEFORE TEST: %2.3f\n", testNumber, getMilliseconds());
 	GNode *person = keyToPerson("@I1@", database);
-	int startLineNumber = rootLineNumber(person, database);
+	int startLineNumber = rootLine(person, database);
 	if (person) {
 		FORTRAVERSE(person, node)
 			printf(" %d %s %s\n", startLineNumber + countNodesBefore(node), node->tag, node->value ? node->value : "");

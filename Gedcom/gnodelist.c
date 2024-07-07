@@ -3,28 +3,19 @@
 // gnodelist.c implements the GNodeList data type.
 //
 // Created by Thomas Wetmore on 27 May 2024.
-// Last changed on 2 July 2024.
+// Last changed on 7 July 2024.
 
 #include "gnodelist.h"
 #include "readnode.h"
 #include "file.h"
 
-// Shared with readnode.c
-// DEPRECATED.
-//extern int xfileLine;
-extern String xfileName;
-//extern int xlevel;
-extern String xkey;
-extern String xtag;
-extern String xvalue;
-
-// createNodeListElement creates an element for a GNodeList.
-GNodeListEl* createNodeListEl(GNode* node, int level, int lineNo) {
+// createNodeListElement creates a GNodeList element.
+GNodeListEl* createGNodeListEl(GNode* node, int level, int lineNo) {
 	GNodeListEl *element = (GNodeListEl*) malloc(sizeof(GNodeListEl));
 	element->node = node;
 	element->level = level;
 	element->line = lineNo;
-	element->elParent = null; // Used when building trees.
+	element->elParent = null;
 	return element;
 }
 
@@ -38,46 +29,41 @@ static void delete(void* element) {
 	freeGNodes(((GNodeListEl*) element)->node);
 }
 
-// createNodeList creates a GNodeList. There are currently two types, one that holds all GNodes
+// createGNodeList creates a GNodeList. There are currently two types, one that holds all GNodes
 // from and file, and one that holds the roots of GNode trees.
-GNodeList* createNodeList(void) {
+GNodeList* createGNodeList(void) {
 	GNodeList *nodeList = createList(getKey, null, null, false);
 	return nodeList;
 }
 
-// deleteNodeList deletes a GNodeList; if delNodes is true the GNodes are also deleted.
-void deleteNodeList(GNodeList* list, bool delNodes) {
+// deleteGNodeList deletes a GNodeList; if delNodes is true the GNodes are also deleted.
+void deleteGNodeList(GNodeList* list, bool delNodes) {
 	if (delNodes) list->delete = delete;
 	else list->delete = null;
 	deleteList(list);
 }
 
-// getNodeListFromFile uses fileToLine and extractFields to create a GNode for each line in a
-// Gedcom file. Lines with errors add Errors to the ErrorLog.
-// DEPRECATED.
-//GNodeList* oldGetNodeListFromFile(File* file, ErrorLog* errorLog) {
-//	GNodeList* nodeList = createNodeList();
-//	Error* error;
-//
-//	ReadReturn rc = oldFileToLine(file, &error);
-//	while (rc != ReadAtEnd) {
-//		if (rc == ReadOkay) {
-//			appendToList(nodeList, createNodeListEl(
-//							createGNode(xkey, xtag, xvalue, null), xlevel, 0/*xfileLine*/));
-//		} else {
-//			addErrorToLog(errorLog, error);
-//		}
-//		rc = oldFileToLine(file, &error);
-//	}
-//	if (lengthList(nodeList) > 0) return nodeList;
-//	deleteList(nodeList);
-//	return null;
-//}
+// getGNodeTreesFromFile
+GNodeList* getGNodeTreesFromFile(File* file, ErrorLog* errorLog) {
+	int numErrors = lengthList(errorLog);
+	GNodeList* nodeList = getGNodeListFromFile(file, errorLog);
+	if (numErrors != lengthList(errorLog)) {
+		if (nodeList) deleteGNodeList(nodeList, true);
+		return null;
+	}
+	GNodeList* rootList = getNodeTreesFromNodeList(nodeList, file->name, errorLog);
+	if (numErrors != lengthList(errorLog)) {
+		deleteGNodeList(nodeList, true);
+		if (rootList) deleteGNodeList(rootList, true);
+		return null;
+	}
+	return rootList;
+}
 
-// getNodeListFromFile uses fileToLine and extractFields to create a GNodeList of all the GNodes
+// getGNodeListFromFile uses fileToLine and extractFields to create a GNodeList of all the GNodes
 // from a Gedcom file. Any errors are added to the ErrorLog.
-GNodeList* getNodeListFromFile(File* file, ErrorLog* errorLog) {
-	GNodeList* nodeList = createNodeList();
+GNodeList* getGNodeListFromFile(File* file, ErrorLog* errorLog) {
+	GNodeList* nodeList = createGNodeList();
 	int level;
 	int line = 0;
 	String key, tag, value;
@@ -88,7 +74,7 @@ GNodeList* getNodeListFromFile(File* file, ErrorLog* errorLog) {
 	while (rc != ReadAtEnd) {
 		if (rc == ReadOkay) {
 			GNode* gnode = createGNode(key, tag, value, null);
-			GNodeListEl* el = createNodeListEl(gnode, level, line);
+			GNodeListEl* el = createGNodeListEl(gnode, level, line);
 			appendToList(nodeList, el);
 		} else {
 			Error* error = createError(gedcomError, file->name, line, errstr);
@@ -101,23 +87,49 @@ GNodeList* getNodeListFromFile(File* file, ErrorLog* errorLog) {
 	return null;
 }
 
-// showNodeList shows the contents of a GNodeList. Debugging.
-void showNodeList(GNodeList* nodeList) {
+// getGNodeListFromString reads a String with Gedcom records and creates and converts them into
+// a NodeList.
+GNodeList* getGNodeListFromString(String string, ErrorLog* errorLog) {
+	GNodeList* nodeList = createGNodeList();
+	int level;
+	int line = 0;
+	String key, tag, value;
+	String errstr;
+	String b = string;
+	ReadReturn rc = stringToLine(&b, &line, &level, &key, &tag, &value, &errstr);
+	while (rc != ReadAtEnd) {
+		if (rc == ReadOkay) {
+			GNode* gnode = createGNode(key, tag, value, null);
+			GNodeListEl* el = createGNodeListEl(gnode, level, line);
+			appendToList(nodeList, el);
+		} else {
+			Error* error = createError(gedcomError, "string", line, errstr);
+			addErrorToLog(errorLog, error);
+		}
+		rc = stringToLine(&b, &line, &level, &key, &tag, &value, &errstr);
+	}
+	if (lengthList(nodeList) > 0) return nodeList;
+	deleteList(nodeList);
+	return null;
+}
+
+// showGNodeList shows the contents of a GNodeList. Debugging.
+void showGNodeList(GNodeList* nodeList) {
 	FORLIST(nodeList, element)
-		GNodeListEl *e = (GNodeListEl*) element;
-		printf("%d ", e->line);
-		printf("Node: "); showGNode(e->level, e->node);
+		GNodeListEl *el = (GNodeListEl*) element;
+		printf("%d ", el->line);
+		printf("Node: "); showGNode(el->level, el->node);
 	ENDLIST
 }
 
 // getNodeTreesFromNodeList iterates a GNodeList of GNodes to make a GNodeList of GNode trees;
 // it uses a state machine to track levels and errors.
-GNodeList* getNodeTreesFromNodeList(GNodeList *lowerList, String fileName, ErrorLog *errorLog) {
+GNodeList* getNodeTreesFromNodeList(GNodeList *lowerList, String name, ErrorLog *errorLog) {
 	enum State { InitialState, MainState, ErrorState } state = InitialState;
 	GNodeListEl* element = null;
 	GNodeListEl* rootElement = null;
 	GNodeListEl* previous = null;
-	GNodeList* rootNodeList = createNodeList();
+	GNodeList* rootNodeList = createGNodeList();
 	Block* block = &(lowerList->block);
 	void** elements = block->elements;
 
@@ -132,7 +144,7 @@ GNodeList* getNodeTreesFromNodeList(GNodeList *lowerList, String fileName, Error
 				break;
 			}
 			addErrorToLog(errorLog,
-				createError(syntaxError, fileName, element->line, 	"Illegal line level."));
+				createError(syntaxError, name, element->line, "Illegal line level."));
 			state = ErrorState;
 			continue;;
 		case MainState: // Normal state.
@@ -168,7 +180,7 @@ GNodeList* getNodeTreesFromNodeList(GNodeList *lowerList, String fileName, Error
 				continue;
 			}
 			// Anything else is an error.
-			addErrorToLog(errorLog, createError(syntaxError, xfileName, element->line, "Illegal level number."));
+			addErrorToLog(errorLog, createError(syntaxError, name, element->line, "Illegal level number."));
 			appendToList(rootNodeList, rootElement);
 			state = ErrorState;
 			continue;

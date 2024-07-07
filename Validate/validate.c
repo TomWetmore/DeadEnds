@@ -3,7 +3,7 @@
 // validate.c has the functions that validate Gedcom records.
 //
 // Created by Thomas Wetmore on 12 April 2023.
-// Last changed on 21 May 2024.
+// Last changed on 6 July 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -74,7 +74,7 @@ bool validateOtherIndex(Database* database, ErrorLog* errorLog) {
 static bool validateEvent(GNode* event, Database* database, ErrorLog* errorLog) {return true;}
 static bool validateOther(GNode* other, Database* database, ErrorLog* errorLog) {return true;}
 
-#define LN(root, database, node) rootLineNumber(root, database) + countNodesBefore(node)
+#define LN(root, database, node) rootLine(root, database) + countNodesBefore(node)
 
 // validateReferences creates the reference index while validating the 1 REFN nodes in a Database.
 void validateReferences(Database *database, ErrorLog* errorLog) {
@@ -102,8 +102,9 @@ void validateReferences(Database *database, ErrorLog* errorLog) {
 	return;
 }
 
-// rootLineNumber returns the line number where a root node was located in its Gedcom file.
-int rootLineNumber(GNode* root, Database* database) {
+// rootLine returns the line number where a root node was located in its Gedcom file.
+// Searches for the RecordIndexEl by the root's key and return the line property.
+int rootLine(GNode* root, Database* database) {
 	RecordIndexEl *el = searchHashTable(database->recordIndex, root->key);
 	return el ? el->line : 0;
 }
