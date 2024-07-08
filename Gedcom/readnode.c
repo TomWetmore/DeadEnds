@@ -25,8 +25,8 @@ String xtag;
 String xvalue;
 static bool ateof = false;
 
-// extractFields processes a String with a Gedcom line into its fields. Important: pkey, ptag adn
-// pvalue will point into the original String.
+// extractFields processes a String with a Gedcom line into its fields. Important: pkey, ptag and
+// pvalue point into the original String.
 static ReadReturn extractFields(String p, int* plevel, String* pkey, String *ptag,
 						String* pvalue, String* errorString) {
 	*pvalue = "";
@@ -86,8 +86,9 @@ static ReadReturn extractFields(String p, int* plevel, String* pkey, String *pta
 	return ReadOkay;
 }
 
-// fileToLine reads the next Gedcom line from a file. Empty lines okay.
-ReadReturn fileToLine(FILE* fp, int* pline, int* plevel, String* pkey, String* ptag, String* pvalue, String* err) {
+// fileToLine reads the next Gedcom line from a file. Empty lines are okay.
+ReadReturn fileToLine(FILE* fp, int* pline, int* plevel, String* pkey, String* ptag,
+					  String* pvalue, String* err) {
 	static char buffer[MAXLINELEN];
 	char *p = buffer;
 	*err = null;

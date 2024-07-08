@@ -594,3 +594,888 @@
 1 FAMS @F4843@
 1 FAMS @F29@
 1 FAMS @F30@
+0 @I25@ INDI
+1 NAME Thomas Trask /Wetmore/ Sr
+1 REFN ttwsr
+1 SEX M
+1 BIRT
+  2 DATE 13 March 1866
+  2 PLAC Plympton, Saint Mary's Bay, Digby County, Nova Scotia, Canada
+  2 SOUR summary
+1 REMV
+  2 DATE 1869
+  2 PLAC Norwich, New London County, Connecticut
+  2 INFO with father and family
+  2 SOUR obituary
+1 REMV
+  2 DATE 1872
+  2 PLAC New London, New London County, Connecticut
+  2 INFO with father and family
+  2 SOUR obituary
+1 RESI
+  2 NAME Thomas T Wetmore 2nd
+    3 INFO He was presumably called "2nd" because of his uncle.
+  2 DATE 1884-5
+  2 PLAC New London, Connecticut
+  2 ADDR 23 Starr
+    3 INFO This is also the address of his father.
+  2 OCCU clerk
+  2 SOUR 1884-5 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1886-7
+  2 PLAC New London, Connecticut
+  2 ADDR 17 Church
+    3 INFO This is also the address of his father.
+  2 OCCU clerk
+  2 SOUR 1886-7 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1888
+  2 PLAC New London, Connecticut
+  2 ADDR boards 24 Woodbridge
+    3 INFO This is also the address of his father.
+  2 OCCU clerk
+  2 SOUR 1888 New London city directory
+1 NATU
+  2 DATE 26 October 1888
+  2 PLAC Norwich, New London County, Connecticut
+  2 NAME Thomas T Wetmore
+  2 AGE 22 years
+  2 COUR New London County Court of Common Pleas, Norwich, Connecticut
+    3 INFO book 2 page 450
+  2 FROM Nova Scotia, Canada
+  2 SOUR copy of record from National Archives
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1889
+  2 PLAC New London, Connecticut
+  2 ADDR boards 24 Woodbridge
+    3 INFO This is also the address of his father.
+  2 OCCU clerk
+  2 SOUR 1889 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1890
+  2 PLAC New London, Connecticut
+  2 ADDR boards 24 Woodbridge
+    3 INFO This is also the address of his father.
+  2 OCCU clerk at 19 Bank
+  2 SOUR 1890 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1891
+  2 PLAC New London, Connecticut
+  2 ADDR 263 Bank
+  2 OCCU salesman at 19 Bank
+  2 SOUR 1891 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1892
+  2 PLAC New London, Connecticut
+  2 ADDR 787 Bank
+  2 OCCU salesman at 45 Bank
+  2 SOUR 1892 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1893
+  2 PLAC New London, Connecticut
+  2 ADDR 787 Bank
+  2 OCCU salesman at 45 Bank
+  2 SOUR 1893 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1894
+  2 PLAC New London, Connecticut
+  2 ADDR 12 Jefferson Avenue
+  2 OCCU salesman at 45 Bank
+  2 SOUR 1894 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1895
+  2 PLAC New London, Connecticut
+  2 ADDR 12 Jefferson Avenue
+  2 OCCU salesman at 16 Main
+  2 SOUR 1895 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1896
+  2 PLAC New London, Connecticut
+  2 ADDR 12 Jefferson Avenue
+  2 OCCU salesman at 16 Main
+  2 SOUR 1896 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1897
+  2 PLAC New London, Connecticut
+  2 ADDR 11 Lee Avenue
+  2 OCCU salesman at 16 Main
+  2 SOUR 1897 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1898
+  2 PLAC New London, Connecticut
+  2 ADDR 7 Lee Avenue
+  2 OCCU salesman at 16 Main
+  2 SOUR 1898 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1899
+  2 PLAC New London, Connecticut
+  2 ADDR 7 Lee Avenue
+  2 OCCU salesman at 243 State
+  2 SOUR 1899 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1900
+  2 PLAC New London, Connecticut
+  2 ADDR Montauk Avenue north of Steward
+  2 OCCU salesman at 243 State
+  2 SOUR 1900 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1901
+  2 PLAC New London, Connecticut
+  2 ADDR 70 Montauk Avenue
+  2 OCCU salesman at 243 State
+  2 SOUR 1901 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1902
+  2 PLAC New London, Connecticut
+  2 ADDR 70 Montauk Avenue
+  2 OCCU salesman at 243 State
+  2 SOUR 1902 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1903
+  2 PLAC New London, Connecticut
+  2 ADDR 70 Montauk Avenue
+  2 OCCU salesman at 243 State
+  2 SOUR 1903 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1904
+  2 PLAC New London, Connecticut
+  2 ADDR 70 Montauk Avenue
+  2 OCCU salesman at 243 State
+  2 SOUR 1904 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1905
+  2 PLAC New London, Connecticut
+  2 ADDR 76 Montauk Avenue
+  2 OCCU salesman at 247 State
+  2 SOUR 1905 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1906
+  2 PLAC New London, Connecticut
+  2 ADDR 76 Montauk Avenue
+  2 OCCU salesman at 247 State
+  2 SOUR 1906 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1907
+  2 PLAC New London, Connecticut
+  2 ADDR 76 Montauk Avenue
+  2 OCCU salesman at 247 State
+  2 SOUR 1907 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1908
+  2 PLAC New London, Connecticut
+  2 ADDR 76 Montauk Avenue
+  2 OCCU salesman at 247 State
+  2 SOUR 1908 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1909
+  2 PLAC New London, Connecticut
+  2 ADDR 76 Montauk Avenue
+  2 OCCU salesman at 230 State
+  2 SOUR 1909 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1910
+  2 PLAC New London, Connecticut
+  2 ADDR 76 Montauk Avenue
+  2 OCCU salesman at 230 State
+  2 SOUR 1910 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1911
+  2 PLAC New London, Connecticut
+  2 ADDR 76 Montauk Avenue
+  2 OCCU salesman at 230 State
+  2 SOUR 1911 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1912
+  2 PLAC New London, Connecticut
+  2 ADDR Ocean Beach
+    3 INFO His brother Daniel C is also living at Ocean Beach.
+  2 SOUR 1912 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1913
+  2 PLAC New London, Connecticut
+  2 ADDR Ocean Beach
+    3 INFO His brother Daniel C is also living at Ocean Beach.
+  2 SOUR 1913 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1914
+  2 PLAC New London, Connecticut
+  2 ADDR Easterly Place
+  2 SOUR 1914 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1915
+  2 PLAC New London, Connecticut
+  2 ADDR Easterly Place
+  2 SOUR 1915 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1916
+  2 PLAC New London, Connecticut
+  2 ADDR Easterly Place
+  2 SOUR 1916 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1917
+  2 PLAC New London, Connecticut
+  2 ADDR Easterly Place
+  2 SOUR 1917 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1918
+  2 PLAC New London, Connecticut
+  2 ADDR Easterly Place
+  2 SOUR 1918 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1919
+  2 PLAC New London, Connecticut
+  2 ADDR Easterly Place
+  2 SOUR 1919 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1920
+  2 PLAC New London, Connecticut
+  2 ADDR Easterly Place
+  2 SOUR 1920 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1921
+  2 PLAC New London, Connecticut
+  2 ADDR Easterly Place
+  2 SOUR 1921 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1923
+  2 PLAC New London, Connecticut
+  2 ADDR removed to Saybrook
+  2 SOUR 1923 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1925
+  2 PLAC New London, Connecticut
+  2 ADDR 148 Huntington
+  2 OCCU antiques at 447 Bank
+  2 WIFE
+    3 NAME Arleen
+  2 SOUR 1925 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1926
+  2 PLAC New London, Connecticut
+  2 ADDR 148 Huntington
+  2 OCCU antiques at 447 Bank
+  2 WIFE
+    3 NAME Arleen K.
+  2 SOUR 1926 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1927
+  2 PLAC New London, Connecticut
+  2 ADDR 148 Huntington
+  2 OCCU antiques at 447 Bank
+  2 WIFE
+    3 NAME Arleen K.
+  2 SOUR 1927 New London city directory
+1 RESI
+  2 NAME Thomas T Wetmore
+  2 DATE 1928
+  2 PLAC New London, Connecticut
+  2 ADDR 148 Huntington
+  2 OCCU antiques at 447 Bank
+  2 WIFE
+    3 NAME Arleen K.
+  2 SOUR 1928 New London city directory
+1 RESI
+  2 NAME Thomas I. Wetmore
+  2 DATE 1929
+  2 PLAC New London, Connecticut
+  2 ADDR 148 Huntington
+  2 OCCU antiques at 447 Bank
+  2 WIFE
+    3 NAME Arleen K.
+  2 SOUR 1929 New London city directory
+1 RESI
+  2 NAME Thomas I. Wetmore
+  2 DATE 1930
+  2 PLAC New London, Connecticut
+  2 ADDR 148 Huntington
+  2 OCCU antiques at 447 Bank
+  2 SOUR 1930 New London city directory
+1 EVEN Application for Social Security Account Number
+  2 NAME Thomas Trask Wetmore
+  2 DATE 10 September 1942
+  2 AGE 76 years
+  2 ADDR 73 Lower Boulevard, New London, Connecticut
+  2 BIRT
+    3 DATE 13 March 1866
+    3 PLAC Plympton, Digby, Nova Scotia, Canada
+  2 FATH
+    3 NAME Daniel Lorenzo Wetmore
+  2 MOTH
+    3 NAME Mary Ann Doty
+  2 COND male, white, unemployed, never before applied for social
+    3 CONT security account number or railroad retirement number
+  2 SIGN Thos. T Wetmore
+  2 SOUR Treasury Department Form SS-5, number 049-18-7383
+1 RESI
+  2 DATE 1924
+  2 PLAC Saybrook, Connecticut
+  2 SOUR Thomas T Wetmore III
+1 NOTE In 1924 he was living in Saybrook, Connecticut, in a large home
+  2 CONT with a large barn where he sold antiques.
+1 RESI
+  2 DATE 1929
+  2 PLAC New London, Connecticut
+  2 ADDR Huntington Street
+  2 SOUR Thomas T Wetmore III
+1 NOTE He was living in New London, in 1929, when Arleen died.
+1 NOTE Trask and Vivian and their children lived in the Huntington
+  2 CONT Street home around 1931 and 1932.
+1 DEAT
+  2 NAME Thomas Trask Wetmore
+  2 DATE 17 February 1947
+  2 AGE 80 years, 11 months, 4 days
+  2 TIME 7:15 p.m.
+  2 PLAC New London, New London County, Connecticut
+  2 ADDR 73 Lower Boulevard
+  2 COND white, male, widowed, retired, not veteran
+  2 BIRT
+    3 DATE 13 March 1866
+    3 PLAC Plympton, Nova Scotia, Canada
+  2 RESI
+    3 PLAC New London, New London County, Connecticut
+    3 ADDR 73 Lower Boulevard
+  2 OCCU Antique Dealer
+  2 FATH
+    3 NAME Daniel Lorenzo Wetmore
+  2 MOTH
+    3 NAME Mary Ann Doty
+  2 CAUS acute cardiac dilation, 2 days
+    3 CONT arteriosclerotic heart disease
+    3 CONT diabetes mellitos, 30 years
+  2 BURI
+    3 DATE 19 February 1947
+    3 CEME Jordan Cemetery
+    3 PLAC Waterford, New London County, Connecticut
+    3 INFO embalmed by J. T MacDougall, license no. 1257
+    3 UNDR Robert Byles, Byles Memorial Home, New London
+  2 INFR
+    3 NAME T T Wetmore, Jr.
+  2 PHYS
+    3 NAME Richard W. Starr, M.D.
+    3 ADDR New London, Conn
+    3 DATE 2/18/47
+  2 SOUR New London death records
+1 BURI
+  2 NAME Thomas Trask Wetmore
+  2 DATE 19 February 1947
+  2 PLAC Waterford, New London County, Connecticut
+  2 CEME Jordan cemetery
+  2 PLOT 387
+  2 SOUR Jordan cemetery records
+1 OBIT
+  2 SOUR newspaper clipping from Mrs. Brenda Benham, probably from
+    3 CONT the New London "Day."
+  2 TEXT
+    3 CONT T T Wetmore,
+    3 CONT Antiques Dealer,
+    3 CONT Dies, Aged 80
+    3 CONT
+    3 CONT Thomas Trask Wetmore, 80, well known antiques dealer, died
+    3 CONT about 7 o'clock last night at the residence of his son, Thomas
+    3 CONT T Wetmore, Jr., of 73 Lower Boulevard, with whom he made his
+    3 CONT home.  He was stricken seriously ill last Thursday.
+    3 CONT
+    3 CONT A recognized authority on antiques, Mr. Wetmore had a shop in
+    3 CONT Truman street for a number of years and later was located in
+    3 CONT Bank street.
+    3 CONT
+    3 CONT He was born at Barton, Nova Scotia, March 13, 1866, the son of
+    3 CONT Daniel L. and Mary Ann Doty Wetmore.
+    3 CONT His family came to this country in 1869 and settled in Norwich,
+    3 CONT before moving to this city in 1872.
+    3 CONT
+    3 CONT Mr. Wetmore was educated in the local schools.
+    3 CONT He then entered the piano business with the D. S. March Co. and
+    3 CONT was with that concern for many years.
+    3 CONT Upon his retirement from that business 20 years ago, he entered
+    3 CONT the antiques and real estate fields.
+    3 CONT He owned considerable property in the Ocean Beach area and was
+    3 CONT identified with the development of that resort.
+    3 CONT
+    3 CONT Mr. Wetmore was twice married.
+    3 CONT His first wife was Margaret Ellen Kaneen and his second wife
+    3 CONT was Arleen Keeny Carruthers.
+    3 CONT The latter died May 24, 1929.
+    3 CONT
+    3 CONT Mr. Wetmore was prominent in Masonic circles, being a member of
+    3 CONT Brainard lodge of Masons, Union chapter, Royal Arch Masons;
+    3 CONT Cushing council, Royal and Select Masters; Palestine
+    3 CONT commandery, Knights Templar, and Pyramid temple, Mystic Shrine,
+    3 CONT of Bridgeport.
+    3 CONT
+    3 CONT He is survived by his son, Thomas T Wetmore, Jr.; a stepson,
+    3 CONT William Carruthers of East Haddam; a stepdaughter, Mrs. Charles
+    3 CONT Watrous of Poquonoc Bridge; and three grandsons, Thomas W.
+    3 CONT Benham of Burbank, Calif., Thomas T Wetmore, 3rd, a cadet at
+    3 CONT the Coast Guard academy, and James H. Wetmore, a student at the
+    3 CONT University of Connecticut, Storrs.
+    3 CONT
+    3 CONT Funeral services will be held at 2:30 o'clock tomorrow
+    3 CONT afternoon at Byles Memorial home.
+    3 CONT Burial will be in Jordan cemetery.
+1 NOTE He came to Connecticut with his parents as an infant in 1868,
+  2 CONT making him about; he attended New London schools, and worked in
+  2 CONT the real estate and antiques businesses.
+1 NOTE He died of heart failure, at home, 73 Lower Blvd, New London.
+1 TODO Get his listings from the post-1930 New London city
+  2 CONT directories.
+1 SOUR Church marriage certificate with Margaret Ellen Kaneen
+1 FAMC @F14@
+1 FAMS @F6@
+1 FAMS @F15@
+0 @I17@ INDI
+1 NAME Thomas Trask /Wetmore/ Jr
+1 REFN ttwjr
+1 SEX M
+1 INFO He was generally called Trask.
+1 BIRT
+  2 NAME Thomas Trask Wetmore Jr
+  2 DATE 5 May 1896
+  2 PLAC New London, New London County, Connecticut, United States
+  2 ADDR 12 Jefferson Avenue
+  2 FATH
+    3 NAME Thomas Trask Wetmore
+    3 AGE 31 years
+    3 INFO white
+    3 OCCU music dealer
+    3 RESI
+      4 PLAC New London, New London County, Connecticut, United States
+        5 ADDR 12 Jefferson Avenue
+    3 BIRT
+      4 PLAC Maine
+  2 MOTH
+    3 NAME Margaret E Kaneen
+    3 AGE 34 years
+    3 INFO white
+    3 NOTE number of children 2
+    3 NOTE number of living children 2
+    3 BIRT
+      4 PLAC England
+  2 RECR E Morgan, 6 May 1896
+  2 SOUR New London birth records
+1 INFO He is not mentioned in New London city directories before 1914.
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1914
+  2 PLAC New London, Connecticut, United States
+  2 ADDR Easterly Place
+    3 INFO This is the same address as his father.
+  2 OCCU salesman at 243 State
+  2 SOUR 1914 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1915
+  2 PLAC New London, Connecticut, United States
+  2 ADDR Easterly Place
+    3 INFO This is the same address as his father.
+  2 OCCU salesman at 243 State
+  2 SOUR 1915 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1916
+  2 PLAC New London, Connecticut, United States
+  2 ADDR Easterly Place
+    3 INFO This is the same address as his father.
+  2 OCCU salesman at S.N.E.Tel.Co.
+  2 OCCU proprietor of Wetmore Piano Co.
+  2 SOUR 1916 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1917
+  2 PLAC New London, Connecticut, United States
+  2 ADDR Easterly Place
+    3 INFO This is the same address as his father.
+  2 OCCU cashier at S.N.E.Tel.Co.
+  2 SOUR 1917 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1918
+  2 PLAC New London, Connecticut, United States
+  2 ADDR Easterly Place
+    3 INFO This is the same address as his father.
+  2 OCCU cashier at S.N.E.Tel.Co.
+  2 SOUR 1918 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1919
+  2 PLAC New London, Connecticut, United States
+  2 ADDR Easterly Place
+    3 INFO This is the same address as his father.
+  2 OCCU cashier at S.N.E.Tel.Co.
+  2 SOUR 1919 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1920
+  2 PLAC New London, Connecticut, United States
+  2 ADDR 39 Brook
+  2 OCCU business man
+    3 INFO Wetmore and Beran, real estate and insurance
+      4 INFO Beran was J. A. Beran
+    3 ADDR (12) 159 State
+    3 PHON 96
+  2 SOUR 1920 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1921
+  2 PLAC New London, Connecticut, United States
+  2 ADDR 31 Hempstead
+  2 OCCU business man
+    3 INFO real estate and insurance
+    3 ADDR (12) 159 State
+    3 PHON 96
+  2 SOUR 1921 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1923
+  2 PLAC New London, Connecticut, United States
+  2 ADDR 29 Hempstead
+  2 OCCU business man
+    3 INFO real estate and insurance
+    3 ADDR (12) 159 State
+    3 PHON 96
+  2 SOUR 1923 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1924
+  2 PLAC New London, Connecticut, United States
+  2 ADDR 29 Hempstead
+  2 OCCU business man
+    3 INFO real estate and insurance
+    3 ADDR (12) 159 State
+    3 PHON 96
+  2 SOUR 1924 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1925
+  2 PLAC New London, Connecticut, United States
+  2 ADDR 73 Lower Blvd.
+  2 OCCU business man
+    3 INFO real estate and insurance
+    3 ADDR (12) 159 State
+    3 PHON 96
+  2 WIFE
+    3 NAME Vivian B.
+  2 SOUR 1925 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1926
+  2 PLAC New London, Connecticut, United States
+  2 ADDR 73 Lower Blvd.
+  2 OCCU business man
+    3 INFO real estate and insurance
+    3 ADDR (315-316) 309 State
+    3 PHON 96
+  2 WIFE
+    3 NAME Vivian B.
+  2 SOUR 1926 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1927
+  2 PLAC New London, Connecticut, United States
+  2 ADDR 73 Lower Blvd.
+  2 OCCU realtor
+    3 INFO real estate and insurance
+    3 ADDR (315-316) 309 State
+    3 PHON 96-2
+  2 WIFE
+    3 NAME Vivian B.
+  2 SOUR 1927 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1928
+  2 PLAC New London, Connecticut, United States
+  2 ADDR 73 Lower Blvd.
+  2 OCCU realtor
+    3 INFO real estate and insurance
+    3 ADDR (315-316) 309 State
+    3 PHON 7378
+  2 WIFE
+    3 NAME Vivian B.
+  2 SOUR 1928 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1929
+  2 PLAC New London, Connecticut, United States
+  2 ADDR 73 Lower Blvd.
+  2 OCCU realtor
+    3 INFO real estate and insurance
+    3 ADDR (315-316) 309 State
+    3 PHON 7378
+  2 WIFE
+    3 NAME Vivian B.
+  2 SOUR 1929 New London city directory
+1 RESI
+  2 NAME Thomas T. Wetmore Jr.
+  2 DATE 1930
+  2 PLAC New London, Connecticut, United States
+  2 ADDR 73 Lower Blvd.
+  2 OCCU real estate
+    3 ADDR (315-316) 309 State
+  2 WIFE
+    3 NAME Vivian B.
+  2 SOUR 1930 New London city directory
+1 INFO The New London city directories after 1930 haven't been
+  2 CONT checked.
+1 NOTE His social security number was 044-14-1792.
+1 RESI
+  2 PLAC New London, New London, Connecticut, United States
+  2 ADDR 73 Lower Boulevard
+  2 PHON 203-443-5427
+1 DEAT
+  2 DATE 8 November 1970
+  2 PLAC New London, New London County, Connecticut, United States
+1 BURI
+  2 PLAC Danby, Vermont, United States
+  2 CEME Scottsville Cemetery
+  2 SOUR direct knowledge
+1 INFO
+  2 TEXT Thomas Trask Wetmore, Jr., was born in New London, Connecticut, May 5, 1896,
+    3 CONT and there was educated in the public schools, leaving Bulkeley High School
+    3 CONT in his junior year.
+    3 CONT He was in the employ of the Ship and Engine Company until October 30, 1917,
+    3 CONT when he enlisted in the United States navy for the period of the war between
+    3 CONT the United States and Germany.
+    3 CONT He served until honorably discharged, then returned to New London, were he was
+    3 CONT engaged with the local telephone compnay until October 1, 1919, when, under the
+    3 CONT name Wetmore & Beran, he established a real estate and insurance business,
+    3 CONT now the most important of its kind in the city.
+    3 CONT The partnership was dissolved in February, 1921, and Mr. Wetmore continues the
+    3 CONT business alone.
+    3 CONT Mr. Wetmore is a young man of energy and ability and is succeeding in his business.
+  2 TEXT Mr. Wetmore is a son of Thomas Trask Wetmore, Sr., born in New London county,
+    3 CONT now a retire business man, but deeply interested in the subject of antique furniture.
+    3 CONT His wife, Margaret Ellen (Kaneen) Wetmore, born in New London, died May 10, 1900,
+    3 CONT leaving a son, Thomas Trask, Jr., of previous mention, and a daughter,
+    3 CONT Portia Louise, who married Captain Wales A Benham.
+  2 SOUR "A Modern History of New London County," Volume 2, edited by
+    3 CONT Benjamin Tinkham Marshall. 1922.
+1 OCCU real estate and insurance broker
+1 TODO Get his listings from the post-1930 New London city directories
+1 TODO Include his W W I miliary record.
+1 OBIT
+  2 DATE 9 November 1970
+  2 NEWS The New London Day
+  2 TEXT
+  2 TEXT Thomas Wetmore
+  2 TEXT New London -- Thomas Trask Wetmore Jr., 74, of 73 Lower Boulevard,
+  2 TEXT died unexpectedly Sunday at Lawrence Memorial Hospital, where he had
+  2 TEXT been admitted earlier in the day.
+  2 TEXT
+  2 TEXT Born May 5, 1896, in New London, he was the son of Thomas J. [sic] and
+  2 TEXT Margaret Kaneen Wetmore.
+  2 TEXT He was a real estat [sic] and insurance broker in New London for many years.
+  2 TEXT Mr. Wetmore was a Coast Guard veteran of World War I and was an avid fisherman
+  2 TEXT
+  2 TEXT Surviving are his widow, the former Vivian Brown; two sons, Thomas T. Wetmore 3rd
+  2 TEXT of Governors Island, N.Y., and James H. Wetmore of Groton, and nine grandchildren.
+  2 TEXT
+  2 TEXT Funeral services will be conducted at 11 a.m. Wednesday at the Byles Memorial
+  2 TEXT Funeral Home.
+  2 TEXT Burial will be Thursday in Danby, Vt.
+  2 TEXT
+  2 TEXT There are no calling hours.
+1 FAMC @F6@
+1 FAMS @F4@
+0 @I6@ INDI
+1 NAME Thomas Trask /Wetmore/ III
+1 REFN ttw3
+1 SEX M
+1 TITL Rear Admiral
+1 BIRT
+  2 DATE 15 October 1925
+  2 PLAC New London, New London, Connecticut, United States
+1 GRAD
+  2 DATE 1948
+  2 PLAC New London, New London, Connecticut, United States
+  2 INST United States Coast Guard Academy
+  2 DEGR Bachelor of Science, Marine Engineering
+1 RESI
+  2 PLAC Boston, Massachusetts, United States
+1 RESI
+  2 PLAC Glen Burnie, Maryland, United States
+  2 INST Naval Postgraduate School
+    3 PLAC Annapolis, Maryland
+1 RESI
+  2 PLAC Carmel, California, United States
+  2 INST Naval Postgraduate School
+    3 PLAC Monterey, California, United States
+1 RESI
+  2 PLAC Alexandria and Falls Church, Virginia, United States
+1 RESI
+  2 PLAC New London, New London County, Connecticut, United States
+1 RESI
+  2 PLAC Charleston, South Carolina, United States
+1 RESI
+  2 PLAC Chesapeake and Portsmouth, Virginia, United States
+  2 ADDR 3528 Wright Road, Edgewood Park, Churchland
+  2 PHON 484-4532
+1 RESI
+  2 PLAC Governors Island, New York, New York, United States
+1 RESI
+  2 PLAC New London, New London County, Connecticut
+1 RESI
+  2 PLAC Annandale, Virginia, United States
+1 RESI
+  2 PLAC Portsmouth, Virginia, United States
+1 RESI
+  2 PLAC New London, New London County, Connecticut, United States
+  2 ADDR 62 Glenwood Place
+  2 PHON 203-443-0089
+1 OCCU United States Coast Guard Officer
+1 EVEN write up in 1992-1993 Who's Who in America
+  2 TEXT WETMORE, THOMAS TRASK III, foundation administrator, retired
+    3 CONT coast guard officer; b. New London, Conn., Oct. 15, 1925;
+    3 CONT s. Thomas Trask and Vivian (Brown) W.; m. Joan M. Hancock,
+    3 CONT Feb. 5, 1949; children: Thomas Trask IV; James R., Jennifer
+    3 CONT Wetmore Sellers, Daniel H., Judith J. Wetmore Logan.
+    3 CONT Student, Yale U., 1943-44; B.S. in Marine Engring, U.S.
+    3 CONT Coast Guard Acad., 1948; postgrad., U.S. Naval Postgrad.
+    3 CONT Sch., 1951; M.A., N.Y.U., 1973.
+    3 CONT Commd. ensign U.S. Coast Guard, 1948, advanced through
+    3 CONT grades to rear adm., 1977; instr. profl. studies dept. C.G.
+    3 CONT Acad., New London, Conn., 1957-61; comdg. officer tender
+    3 CONT USCGC Papaw, Charleston, S.C., 1961-63; chief
+    3 CONT communications br. 5th C.G. Dist., Portsmouth, Va.,
+    3 CONT 1963-1967; comdg. officer USCGC Chincoteague, Norfolk, Va.,
+    3 CONT 1967-69; communications officer C.G. Atlantic Area,
+    3 CONT Governors Island, N.Y., 1969-71; chief aids to nav. br. 3rd
+    3 CONT C.G. Dist, Governors Island, 1971-74; chief ops. div. 3rd
+    3 CONT C.G. Dist, 1974-75; dep. comdr. Atlantic Area, 1975-76;
+    3 CONT asst. supt. C.G. Acad., 1976-77; chief Office of Reserve,
+    3 CONT U.S.C.G. Hdqrs., Washington, 1977-79; dist. comdr. 5th C.G.
+    3 CONT Dist., 1979-81; ret., 1981; exec. dir. Pequot Community
+    3 CONT Found.
+    3 CONT Effective cycling instr. League Am. Wheelmen.
+    3 CONT Decorated Legion of Merit, Meritorious Service medal with
+    3 CONT gold star, C.G. Commendation medal with gold star, C. G.
+    3 CONT Achievement medal with ops. disting. device.
+    3 CONT Mem. U.S.C.G. Acad. Alumni Assn., Ret. Officers Assn., Res.
+    3 CONT Officers Assn., Pequot Cycling Club.
+    3 CONT Club: Rotary.
+    3 CONT Home: 62 Glenwood Pl New London CT 06320-2907
+1 DEAT
+  2 DATE 30 December 2011
+  2 PLAC New London, New London, Connecticut, United States
+1 FAMC @F4@
+1 FAMS @F2@
+0 @I1@ INDI
+1 NAME Thomas Trask /Wetmore/ IV
+1 REFN ttw4
+1 SEX M
+1 BIRT
+  2 DATE 18 December 1949
+  2 PLAC New London, New London County, Connecticut, United States
+  2 DOCT Charles Barnham
+  2 SOUR New London birth records
+1 GRAD
+  2 INST Carnegie-Mellon University
+  2 DATE May 1971
+  2 PLAC Pittsburgh, Pennsylvania, United States
+  2 DEGR Bachelor of Arts, Psychology
+1 GRAD
+  2 INST University of Connecticut
+  2 DATE 1980
+  2 PLAC Storrs, Connecticut, United States
+  2 DEGR Master of Science, Computer Science
+1 GRAD
+  2 INST University of Connecticut
+  2 DATE 1982
+  2 PLAC Storrs, Connecticut
+  2 DEGR Doctor of Philosophy, Computer Science
+1 OCCU Computer Scientist, Software Engineer
+1 RESI
+  2 DATE 1972 to 1976
+  2 PLAC Fairbanks, Alaska, United States
+  2 ADDR 746 Ninth Avenue, 99701
+1 RESI
+  2 DATE 1976 to 1978
+  2 PLAC Edmonton, Alberta, Canada
+  2 ADDR 6549 112A Street
+1 RESI
+  2 DATE 1978 to 1982
+  2 PLAC Storrs, Mansfield, Windham, Connecticut
+  2 ADDR 128 Northwood Apartments
+1 RESI
+  2 DATE 1982 to 2015
+  2 PLAC Newburyport, Essex, Massachusetts, United States
+  2 ADDR 2 Barton Street, 01950
+  2 PHON 978-465-3220
+  2 SOUR Thomas T. Wetmore IV
+1 EMPL
+  2 DATE 1972 to 1976
+  2 PLAC College, Fairbanks, Alaska, United States
+  2 INST Geophysical Institute, University of Alaska
+1 EMPL
+  2 DATE 1976 to 1978
+  2 PLAC Edmonton, Alberta, Canada
+  2 INST L.G.L. Environmental Research Associates, Ltd
+1 EMPL
+  2 DATE 1978 to 1981
+  2 PLAC Storrs, Mansfield, Windham, Connecticut, United States
+  2 INST University of Connecticut
+1 EMPL
+  2 DATE 15 March 1982 to 1995
+  2 PLAC North Andover and Andover, Massachusetts, United States
+  2 INST AT&T Bell Laboratories
+1 EMPL
+  2 DATE 1996
+  2 PLAC North Andover, Massachusetts, United States
+  2 INST Lucent Technologies
+1 FAMC @F2@
+1 FAMS @F1@
+0 @I5@ INDI
+1 NAME Thomas Trask /Wetmore/ V
+1 NAME Thomas Trask /Wetmore/
+1 SEX M
+1 BIRT
+  2 NAME Thomas Trask Wetmore
+  2 DATE 28 October 1982
+  2 TIME 10:26 p.m.
+  2 PLAC Newburyport, Essex, Massachusetts, United States
+  2 ADDR 2 Barton Street
+  2 PHYC Dr. Alan "Quddus" Ward
+  2 SOUR Thomas Wetmore IV
+1 RESI
+  2 DATE 1982 to 1996
+  2 PLAC Newburyport, Massacuhsetts, United States
+1 FAMC @F1@
+1 FAMS @F5242@

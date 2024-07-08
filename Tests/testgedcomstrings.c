@@ -3,28 +3,34 @@
 // testgedcomstrings.c
 //
 // Created by Thomas Wetmore on 27 May 2024.
-// Last changed on 6 July 2024.
+// Last changed on 8 July 2024.
 
 #include "standard.h"
 #include "readnode.h"
 #include "gnodelist.h"
+#include "utils.h"
 
 char* readFileIntoString(const char *filename);
 
 // testGedcomStrings tests the stringToGnodeTree and showGNodeTree functions.
-void testGedcomStrings(void) {
-	printf("START OF TEST GEDCOM STRINGS\n");
+void testGedcomStrings(int testNumber) {
+	printf("%d: START OF TEST GEDCOM STRINGS TEST %s\n", testNumber, getMillisecondsString());
 	String file = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/ttw.ged";
 	String record = readFileIntoString(file);
 	ErrorLog* errlog = createErrorLog();
 	printf("The length of the record is %ld\n", strlen(record));
-	GNodeList* nodelist = getGNodeListFromString(record, errlog);
-	GNodeList* rootlist = getNodeTreesFromNodeList(nodelist, "string", errlog);
-	if (rootlist) printf("There are %d records from the string.\n", lengthList(rootlist));
-	GNode* root = ((GNodeListEl*) getListElement(rootlist, 0))->node;
+	//GNodeList* nodelist = getGNodeListFromString(record, errlog);
+	//GNodeList* rootlist = getNodeTreesFromNodeList(nodelist, "string", errlog);
+	GNodeList* list = getGNodeTreesFromString(record, "string", errlog);
+	if (list) printf("There are %d records from the string.\n", lengthList(list));
+	FORLIST(list, el)
+		GNode* root = ((GNodeListEl*) el)->node;
+		showGNodeTree(root);
+	ENDLIST
+	//GNode* root = ((GNodeListEl*) getListElement(rootlist, 0))->node;
 	//GNode* root = stringToGNodeTree(record, null);
-	showGNodeTree(root);
-	printf("END OF TEST GEDCOM STRINGS\n");
+	//showGNodeTree(root);
+	printf("%d: END OF TEST GEDCOM STRINGS\n", testNumber);
 }
 
 // readFileIntoString reads a file into a string; written by ChatGPT.

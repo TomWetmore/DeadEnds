@@ -29,7 +29,8 @@ void deleteGNodeList(GNodeList*, bool del);
 GNodeListEl* createGNodeListEl(GNode*, int lev, int line);
 GNodeList* getGNodeListFromFile(File*, ErrorLog*);
 GNodeList* getGNodeListFromString(String, ErrorLog*);
-GNodeList* getNodeTreesFromNodeList(GNodeList*, String file, ErrorLog*);
+GNodeList* getGNodeTreesFromNodeList(GNodeList*, String file, ErrorLog*);
+GNodeList* getGNodeTreesFromString(String, String, ErrorLog* errorLog);
 
 GNodeList* getGNodeTreesFromFile(File*, ErrorLog*);
 void showGNodeList(GNodeList* nodeList); // Debugging.

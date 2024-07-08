@@ -41,17 +41,18 @@ static void indexNamesTest(Database*, int);
 static void testNewReadLayer(String);
 extern bool validateDatabase(Database*, ErrorLog*);
 static void countNodesBeforeTest(Database*, int);
-extern void testGedcomStrings(void);
+extern void testGedcomStrings(int);
 extern void testWriteDatabase(String file, Database*);
 static void testKeyGeneration(int);
 
-extern int importTest(void);
+extern Database* importDatabaseTest(ErrorLog*, int);
 
 // main is the main function of the DeadEnds testing program.
 int main(void) {
-	importTest();
-	testGedcomStrings();
-	exit(0);
+	ErrorLog* errorLog = createErrorLog();
+	int testNumber = 0;
+	Database* database = importDatabaseTest(errorLog, ++testNumber);
+	testGedcomStrings(++testNumber);
 	if (useDebugFile) {
 		debugFile = fopen("/Users/ttw4/debug.txt", "w");
 		if (debugFile == null) {
@@ -59,17 +60,8 @@ int main(void) {
 			exit(2);
 		}
 	}
-	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/bad.ged";
-	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/051224.ged";
-	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/main.ged";
-	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/test.ged";
-	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/small.ged";
-	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/notthere.ged";
-	//String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/threezeros.ged";
-	int testNumber = 0;
-	ErrorLog *errorLog = createErrorLog();
-
-	Database *database = createDatabaseTest(gedcomFile, ++testNumber, errorLog);
+	//int testNumber = 0;
+	//ErrorLog *errorLog = createErrorLog();
 	bool validated = false;
 	showErrorLog(errorLog);
 
@@ -83,7 +75,6 @@ int main(void) {
 	//if (database) forTraverseTest(database, ++testNumber);
 	//if (database && validated) parseAndRunProgramTest(database, ++testNumber);
 	//if (database && validated) countNodesBeforeTest(database, ++testNumber);
-	testGedcomStrings();
 	testWriteDatabase("/Users/ttw4/output.ged", database);
 	fclose(debugFile);
 	testKeyGeneration(++testNumber);
