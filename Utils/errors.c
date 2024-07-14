@@ -3,7 +3,7 @@
 //  errors.c has code for handling DeadEnds errors.
 //
 //  Created by Thomas Wetmore on 4 July 2023.
-//  Last changed on 5 July 2024.
+//  Last changed on 10 July 2024.
 
 #include "errors.h"
 #include "list.h"
@@ -75,26 +75,10 @@ void addErrorToLog (ErrorLog* errorLog, Error* error) {
 
 // showError shows an Error on standard output.
 void showError(Error* error) {
-	/*switch (error->severity) {
-		case fatalError: printf("fatal "); break;
-		case severeError: printf("severe "); break;
-		case warningError: printf("warning: "); break;
-		case commentError: printf("comment: "); break;
-		default: printf("unknown (can't happen):"); break;
-	}*/
-	switch (error->type) {
-		case systemError: printf("system error "); break;
-		case syntaxError: printf("syntax error "); break;
-		case gedcomError: printf("semantic error "); break;
-		case linkageError: printf("linkage error "); break;
-		default: printf("unknown error (can't happen) "); break;
-	}
-	printf("in %s", error->fileName ? error->fileName : "no filename");
-	if (error->lineNumber)
-		printf(" line %d: ", error->lineNumber);
-	else
-		printf(": ");
-	printf("%s\n", error->message ? error->message : "no message");
+	printf("error");
+	if (error->fileName) printf(" in %s", error->fileName);
+	if (error->lineNumber) printf(" line %d:", error->lineNumber);
+	if (error->message) printf(": %s.\n", error->message);
 }
 
 // showErrorLog shows the contents of an ErrorLog on standard output.
@@ -108,7 +92,7 @@ void showErrorLog(ErrorLog* errorLog) {
 		return;
 	}
 	printf("Error log:\n");
-	//sortList(errorLog, true);
+	sortList(errorLog);
 	FORLIST(errorLog, error)
 		showError((Error*) error);
 	ENDLIST

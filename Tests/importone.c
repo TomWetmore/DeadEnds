@@ -11,8 +11,8 @@
 
 // importTest tests the new import organization.
  Database* importDatabaseTest(ErrorLog* log, int testNumber) {
-	printf("%d: START OF IMPORT DATABASE TEST: %s %s\n", testNumber, "07022024.ged", getMillisecondsString());
-	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/07022024.ged";
+	printf("%d: START OF IMPORT DATABASE TEST: %s %s\n", testNumber, "modified.ged", getMillisecondsString());
+	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/modified.ged";
 	//ErrorLog* errorLog = createErrorLog();
 	String lastSegment = lastPathSegment(gedcomFile);
 	printf("lastPathSegment: %s\n", lastSegment);

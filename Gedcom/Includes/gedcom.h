@@ -15,7 +15,7 @@ typedef struct GNode GNode; // Forward ref.
 
 // SexType is an enumeration of sex types.
 typedef enum SexType {
-    sexMale = 1, sexFemale, sexUnknown
+    sexMale = 1, sexFemale, sexUnknown, sexError
 } SexType;
 
 #define personToKey(indi) (indi->key)
@@ -27,6 +27,9 @@ typedef enum RecordType {
 } RecordType;
 
 String sexTypeToString(SexType);
+SexType sexTypeFromStribg(String);
+bool validSexString(String);
+
 RecordType recordType(GNode *root);  // Return the type of a Gedcom record tree.
 
 int compareRecordKeys(String, String);  // gedcom.c

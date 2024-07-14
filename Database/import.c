@@ -3,7 +3,7 @@
 // import.c has functions that import Gedcom files into internal structures.
 //
 // Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 27 May 2024.
+// Last changed on 13 July 2024.
 
 #include <unistd.h>
 #include <errno.h>
@@ -30,8 +30,7 @@ extern FILE* debugFile;
 
 static void checkKeysAndReferences(GNodeList*, String name, ErrorLog*);
 
-
-// toString returns the GNode in a GNodeListElement as a string; for debugging.
+// toString returns the GNode in a GNodeListEl as a string; for debugging.
 static String toString(void* element) {
 	GNode* gnode = ((GNodeListEl*) element)->node;
 	return gnodeToString(gnode, 0);
@@ -39,7 +38,7 @@ static String toString(void* element) {
 
 // Local flags.
 static bool timing = true; // Prints time at milestones.
-static bool debugging = true;
+//static bool debugging = true;
 bool importDebugging = true; // Detail debugging of import.
 
 // importFromFiles imports a list of Gedcom files into a List of Databases, one per file. If errors
@@ -65,31 +64,30 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 		return null;
 	}
 	// Get the list of GNode roots from file. These are all records from the Gedcom file including
-	// HEAD and TRLR. If errors occur listOfTrees will be null and the ErrorLog will hold Errors.
-	// errors.
-	GNodeList* listOfTrees = getGNodeTreesFromFile(file, log);
+	// HEAD and TRLR. If errors occur rootList will be null and the error log will hold Errors.
+	GNodeList* rootList = getGNodeTreesFromFile(file, log);
 	deleteFile(file);
-	if (timing) printf("Got listOfTrees: %s.\n", getMillisecondsString());
-	if (importDebugging) printf("listOfTrees contains %d records.\n", lengthList(listOfTrees));
+	if (timing) printf("Got rootList: %s.\n", getMillisecondsString());
+	if (importDebugging) printf("rootList contains %d records.\n", lengthList(rootList));
 	if (lengthList(log)) {
-		deleteGNodeList(listOfTrees, true);
+		deleteGNodeList(rootList, true);
 		return null;
 	}
-	// Check all keys and the references to them. There can be no duplicate keys and all
-	// references to keys must be to the record keys.
-	checkKeysAndReferences(listOfTrees, file->name, log);
+	// Check all keys and their references. Duplicate keys are not allowed and all references
+	// must be to existing keys.
+	checkKeysAndReferences(rootList, file->name, log);
 	if (timing) printf("Checked keys: %s.\n", getMillisecondsString());
 	if (lengthList(log)) {
-		deleteGNodeList(listOfTrees, true);
+		deleteGNodeList(rootList, true);
 		return null;
 	}
-	// Create record indexes. personIndex holds the INDI records; familyIndex holds the FAM
-	// records, and recordIndex holds all keyed records.
+	// Create personIndex for INDI records, familyIndex for FAM records, and recordIndex for
+	// all keyed records.
 	RecordIndex* personIndex = createRecordIndex();
 	RecordIndex* familyIndex = createRecordIndex();
 	RecordIndex* recordIndex = createRecordIndex();
-	int otherRecords = 0; // Of debugging interest.
-	FORLIST(listOfTrees, element)
+	int otherRecords = 0;
+	FORLIST(rootList, element)
 		GNodeListEl* el = (GNodeListEl*) element;
 		GNode* root = el->node;
 		if (root->key)
@@ -101,7 +99,7 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 		else
 			otherRecords++;
 	ENDLIST
-	deleteGNodeList(listOfTrees, false);
+	deleteGNodeList(rootList, false);
 	if (timing) printf("Created the three indexes: %s.\n", getMillisecondsString());
 	if (importDebugging) {
 		printf("The person index holds %d records.\n", sizeHashTable(personIndex));
@@ -119,13 +117,12 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 	if (timing) printf("Validated persons: %s.\n", getMillisecondsString());
 	validateFamilies(database, log);
 	if (timing) printf("Validated families: %s.\n", getMillisecondsString());
-	validateReferences(database, log);
 	if (lengthList(log)) {
 		deleteDatabase(database);
 		return null;
 	}
-	// Create name index.
-	indexNames(database);
+	// Create the name index.
+	getNameIndexForDatabase(database);
 	if (timing) printf("Indexed names: %s.\n", getMillisecondsString());
 	// Create the REFN index and validate it.
 	validateReferences(database, log);

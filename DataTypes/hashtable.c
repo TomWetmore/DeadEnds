@@ -44,6 +44,7 @@ static void deleteBucket(Bucket* bucket, void(*delete)(void*)) { //PH;
 
 // deleteHashTable deletes a HashTable. If there is a delete function it is called on the elements.
 void deleteHashTable(HashTable *table) { //PH;
+	if (!table) return;
 	for (int i = 0; i < table->numBuckets; i++) {
 		if (table->buckets[i] == null) continue;
 		deleteBucket(table->buckets[i], table->delete);

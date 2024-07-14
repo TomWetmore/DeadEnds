@@ -73,7 +73,7 @@ Sequence* siblingSequence(Sequence*, bool close);
 bool elementFromSequence(Sequence*, int index, String* key, String* name);
 void renameElementInSequence(Sequence* sequence, String key);
 void sequenceToGedcom(Sequence*, FILE*);
-void showSequence(Sequence*);
+void showSequence(Sequence*, String title);
 
 // FORSEQUENCE and ENDSEQUENCE iterate a Sequence.
 #define FORSEQUENCE(sequence, element, count) {\

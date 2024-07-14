@@ -26,7 +26,7 @@ void testSequence(Database* database, int testNumber) {
 	appendToSequence(sequence, "@I1@", null);
 	length = lengthSequence(sequence);
 	checkTest("Sequence should have one element", 1, length);
-	showSequence(sequence);
+	showSequence(sequence, "added I1 elememnt");
 
 	// Test emptySequence.
 	emptySequence(sequence);
@@ -40,12 +40,12 @@ void testSequence(Database* database, int testNumber) {
 	Sequence* copied = copySequence(sequence);
 	length = lengthSequence(copied);
 	checkTest("Copied Sequence should have 1 element", 1, length);
-	showSequence(sequence);
-	showSequence(copied);
+	showSequence(sequence, "original");
+	showSequence(copied, "copied");
 
 	// Test isInSequence.
 	appendToSequence(sequence, "@I2@", null);
-	showSequence(sequence);
+	showSequence(sequence, "added I2");
 	bool isIn = isInSequence(sequence, "@I1@");
 	checkTest("I1 should be in", isIn ? 1 : 0, 1);
 	isIn = isInSequence(sequence, "@I2@");
@@ -56,7 +56,7 @@ void testSequence(Database* database, int testNumber) {
 	// Test removeFromSequence.
 	bool removed = removeFromSequence(sequence, "@I1@");
 	checkTest("I1 should be removed", removed ? 1 : 0, 1);
-	showSequence(sequence);
+	showSequence(sequence, "removed I1");
 
 	// Test keySortSequence.
 	appendToSequence(sequence, "@I1@", null);
@@ -64,31 +64,31 @@ void testSequence(Database* database, int testNumber) {
 	appendToSequence(sequence, "@I3@", null);
 	appendToSequence(sequence, "@I5@", null);
 	appendToSequence(sequence, "@I4@", null);
-	showSequence(sequence);
+	showSequence(sequence, "I1, I5, I3, I5, I4");
 	printf("Calling keySortSequence\n");
 	keySortSequence(sequence);
-	showSequence(sequence);
+	showSequence(sequence, "key sorted");
 
 	// Test nameSortSequence.
 	printf("Calling nameSortSequence\n");
 	nameSortSequence(sequence);
-	showSequence(sequence);
+	showSequence(sequence, "name sorted");
 
 	// Test ancestorSequence.
 	printf("Testing ancestorSequence\n");
 	Sequence* ancestors = tomsAncestors(database);
-	showSequence(ancestors);
+	showSequence(ancestors, "Tom's Ancestors");
 	printf("Sort ancestors by key\n");
 	keySortSequence(ancestors);
-	showSequence(ancestors);
+	showSequence(ancestors, "Ancestors key sorted");
 	printf("Sort ancestors by name\n");
 	nameSortSequence(ancestors);
-	showSequence(ancestors);
+	showSequence(ancestors, "ancestors name sorted");
 	// Test closed form of ancestorSequence.
 	printf("Testing ancestorSequence with close set to true\n");
 	emptySequence(ancestors);
 	ancestors = tomAndLusAncestorsClosed(database);
-	showSequence(ancestors);
+	showSequence(ancestors, "tom and lu's ancestors closed");
 
 	// Test uniqueSequence.
 	printf("Setting up to test uniqueSequence\n");
@@ -97,35 +97,35 @@ void testSequence(Database* database, int testNumber) {
 	appendToSequence(sequence, "@I2@", null);
 	ancestors = ancestorSequence(sequence, false);
 	printf("THIS SHOULD BE LU'S ANCESTORS\n");
-	showSequence(ancestors);
+	showSequence(ancestors, "Lu's ancestors");
 	emptySequence(copied);
 	copied = copySequence(ancestors);
 	printf("THIS SOULD BE A COPY OF LU'S ANCESTORS\n");
-	showSequence(copied);
+	showSequence(copied, "Copy of Lu's ancestors");
 	printf("THIS SHOULD BE A SEQUENCE WITH ALL OF LU'S ANCESTORS TWICE\n");
 	appendSequenceToSequence(ancestors, copied);
-	showSequence(ancestors);
+	showSequence(ancestors, "Two copies of Lu's ancestors");
 	printf("Now doing the uniqueing\n");
 	Sequence* uniqued = uniqueSequence(ancestors);
-	showSequence(uniqued);
+	showSequence(uniqued, "Lu's two copied ancestors uniqued");
 	printf("Now doing the uniqueing in place -- first three copies\n");
 	appendSequenceToSequence(uniqued, ancestors);
-	showSequence(uniqued);
+	showSequence(uniqued, "Another copy of ancestors added");
 	uniqueSequenceInPlace(uniqued);
 	printf("And now one copy\n");
-	showSequence(uniqued);
+	showSequence(uniqued, "Those uniqued in place");
 
 	// Test personToChildren
 	printf("Testing personToChildren, personToFathers, personToMothers\n");
 	GNode* tom = getRecord("@I1@", database);
 	Sequence* kids = personToChildren(tom, database);
-	showSequence(kids);
+	showSequence(kids, "Kids of I1");
 	deleteSequence(kids);
 	// Test personToFathers, personToMothers
 	Sequence* fathers = personToFathers(tom, database);
-	showSequence(fathers);
+	showSequence(fathers, "fathers of I1");
 	Sequence* mothers = personToMothers(tom, database);
-	showSequence(mothers);
+	showSequence(mothers, "Mothers of I1");
 	deleteSequence(fathers);
 	deleteSequence(mothers);
 	// Test familyToChildren, familyToFathers, familyToMothers
@@ -134,9 +134,9 @@ void testSequence(Database* database, int testNumber) {
 	kids = familyToChildren(fam, database);
 	fathers = familyToFathers(fam, database);
 	mothers = familyToMothers(fam, database);
-	showSequence(kids);
-	showSequence(fathers);
-	showSequence(mothers);
+	showSequence(kids, "Kids of F1");
+	showSequence(fathers, "Fathers of F1");
+	showSequence(mothers, "Mothers of F1");
 	deleteSequence(kids);
 	deleteSequence(fathers);
 	deleteSequence(mothers);
@@ -144,34 +144,34 @@ void testSequence(Database* database, int testNumber) {
 	printf("Testing personToSpouses\n");
 	tom = getRecord("@I25@", database);
 	Sequence* spouses = personToSpouses(tom, database);
-	showSequence(spouses);
+	showSequence(spouses, "Spouses of I25");
 	// Test nameToSequence.
 	printf("Testing nameToSequence\n");
 	Sequence* tomwets = nameToSequence("Thomas Trask/Wtmre/", database);
-	showSequence(tomwets);
+	showSequence(tomwets, "Seauence of Thomas Trask/WTmre/s");
 	printf("Testing wild card name feature on */grenda/\n");
 	Sequence* grendas = nameToSequence("*/Grenda", database);
-	showSequence(grendas);
+	showSequence(grendas, "Sequence of */Grenda");
 	// Test childSequence.
 	printf("Testing childSequence\n");
 	Sequence* children = childSequence(tomwets);
-	showSequence(children);
+	showSequence(children, "Children of tomwets");
 	// Test parentSequence
 	printf("Testing parentSequence\n");
 	Sequence* parents = parentSequence(tomwets);
-	showSequence(parents);
+	showSequence(parents, "Parents of tomwets");
 	// Test spouseSequence.
 	printf("Testing spouseSequence\n");
 	spouses = spouseSequence(tomwets);
-	showSequence(spouses);
+	showSequence(spouses, "Spouses of tomwets");
 	// Test descendentSequence.
 	printf("Testing descendentSequence\n");
 	Sequence* desc = descendentSequence(tomwets, false);
-	showSequence(desc);
+	showSequence(desc, "Descendents of tomwets");
 	// Test siblingSequence
 	printf("Testing siblingSequence\n");
 	Sequence* sibs = siblingSequence(tomwets, 0);
-	showSequence(sibs);
+	showSequence(sibs, "Siblings of tomwets");
 	// Test elementFromSequence.
 	printf("Testing elementFromSequence\n");
 	for (int i = 0; i < lengthSequence(tomwets); i++) {
@@ -184,17 +184,17 @@ void testSequence(Database* database, int testNumber) {
 	Sequence* toms = tomsAncestors(database);
 	Sequence* lus = lusAncestors(database);
 	Sequence* unionseq = unionSequence(toms, lus);
-	showSequence(unionseq);
+	showSequence(unionseq, "Union of Tom and Lu's ancestors");
 	// Test intersectSequence.
 	printf("Testing intersectSequence\n");
 	Sequence* intersectseq = intersectSequence(toms, lus);
-	showSequence(intersectseq);
+	showSequence(intersectseq, "Intersection of Tom and Lu's ancestors");
 	// Test differenceSequence.
 	printf("Testing differenceSequence\n");
 	Sequence* tomDiffLu = differenceSequence(toms, lus);
 	Sequence* luDiffTom = differenceSequence(lus, toms);
-	showSequence(tomDiffLu);
-	showSequence(luDiffTom);
+	showSequence(tomDiffLu, "difference of Tom's and Lu's ancestors");
+	showSequence(luDiffTom, "Difference of Lu's and Tom's ancestors");
 
 	printf("END TEST SEQUENCE: %2.3f\n", getMilliseconds());
 //	Sequence *personToFamilies(GNode *person, bool, Database*);

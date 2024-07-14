@@ -5,7 +5,7 @@
 // read and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 5 July 2024.
+// Last changed 10 July 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -40,13 +40,13 @@ Database *createDatabase(String filePath) {
 
 //  deleteDatabase deletes a database.
 void deleteDatabase(Database* database) {
-	deleteRecordIndex(database->recordIndex);
-	deleteRecordIndex(database->personIndex);
-	deleteRecordIndex(database->familyIndex);
-	//deleteRecordIndex(database->sourceIndex);
-	//deleteRecordIndex(database->eventIndex);
-	//deleteRecordIndex(database->otherIndex);
-	deleteNameIndex(database->nameIndex);
+	if (database->recordIndex) deleteRecordIndex(database->recordIndex);
+	if (database->personIndex) deleteRecordIndex(database->personIndex);
+	if (database->familyIndex) deleteRecordIndex(database->familyIndex);
+	if (database->nameIndex) deleteNameIndex(database->nameIndex);
+	if (database->refnIndex) deleteRefnIndex(database->refnIndex);
+	if (database->personRoots) deleteList(database->personRoots);
+	if (database->familyRoots) deleteList(database->familyRoots);
 }
 
 // writeDatabase writes the contents of a Database to a Gedcom file.
@@ -90,7 +90,7 @@ int numberSources(Database* database) {
 	return numberRecordsOfType(database, GRSource);
 }
 
-// numberEvents returnw the number of (top level) events in the database.
+// numberEvents returns the number of (top level) events in the database.
 int numberEvents(Database* database) {
 	return numberRecordsOfType(database, GREvent);
 }
@@ -140,45 +140,45 @@ GNode* keyToOther(String key, Database* database) {
 
 // storeRecord stores a GNode tree/record in a database by adding it to a RecordIndex.
 // lineNumber is the line number of the root node in the Gedcom file.
-bool storeRecord(Database* database, GNode* root, int lineNumber, ErrorLog* errorLog) {
-	RecordType type = recordType(root);
-	if (type == GRHeader || type == GRTrailer) return true; // Ignore HEAD and TRLR.
-	if (!root->key) {
-		Error *error = createError(syntaxError, database->lastSegment, lineNumber, "This record has no key.");
-		addErrorToLog(errorLog, error);
-		return false;
-	}
-	String key = root->key; // MNOTE: insertInRecord copies the key.
-	int previousLine = keyLineNumber(database, key); // Duplicate key check.
-	if (previousLine) {
-		char scratch[MAXLINELEN];
-		sprintf(scratch, "A record with key %s exists at line %d.", key, previousLine);
-		Error *error = createError(gedcomError, database->lastSegment, lineNumber, scratch);
-		addErrorToLog(errorLog, error);
-	}
-	switch (type) {
-		case GRPerson:
-			addToRecordIndex(database->personIndex, key, root, lineNumber);
-			insertInRootList(database->personRoots, root);
-			return true;
-		case GRFamily:
-			addToRecordIndex(database->familyIndex, key, root, lineNumber);
-			insertInRootList(database->familyRoots, root);
-			return true;
-		case GRSource:
-			addToRecordIndex(database->sourceIndex, key, root, lineNumber);
-			return true;
-		case GREvent:
-			addToRecordIndex(database->eventIndex, key, root, lineNumber);
-			return true;
-		case GROther:
-			addToRecordIndex(database->otherIndex, key, root, lineNumber);
-			return true;
-		default:
-			ASSERT(false);
-			return false;
-	}
-}
+//bool storeRecord(Database* database, GNode* root, int lineNumber, ErrorLog* errorLog) {
+//	RecordType type = recordType(root);
+//	if (type == GRHeader || type == GRTrailer) return true; // Ignore HEAD and TRLR.
+//	if (!root->key) {
+//		Error *error = createError(syntaxError, database->lastSegment, lineNumber, "This record has no key.");
+//		addErrorToLog(errorLog, error);
+//		return false;
+//	}
+//	String key = root->key; // MNOTE: insertInRecord copies the key.
+//	int previousLine = keyLineNumber(database, key); // Duplicate key check.
+//	if (previousLine) {
+//		char scratch[MAXLINELEN];
+//		sprintf(scratch, "A record with key %s exists at line %d.", key, previousLine);
+//		Error *error = createError(gedcomError, database->lastSegment, lineNumber, scratch);
+//		addErrorToLog(errorLog, error);
+//	}
+//	switch (type) {
+//		case GRPerson:
+//			addToRecordIndex(database->personIndex, key, root, lineNumber);
+//			insertInRootList(database->personRoots, root);
+//			return true;
+//		case GRFamily:
+//			addToRecordIndex(database->familyIndex, key, root, lineNumber);
+//			insertInRootList(database->familyRoots, root);
+//			return true;
+//		case GRSource:
+//			addToRecordIndex(database->sourceIndex, key, root, lineNumber);
+//			return true;
+//		case GREvent:
+//			addToRecordIndex(database->eventIndex, key, root, lineNumber);
+//			return true;
+//		case GROther:
+//			addToRecordIndex(database->otherIndex, key, root, lineNumber);
+//			return true;
+//		default:
+//			ASSERT(false);
+//			return false;
+//	}
+//}
 
 // showTableSizes is a debug function that shows the sizes of the database tables.
 void showTableSizes(Database *database) {
@@ -217,9 +217,8 @@ void oldIndexNames(Database* database) {
 	if (indexNameDebugging) printf("The number of names indexed was %d\n", count);
 }
 
-// indexNames indexes all person names in a database. NEW VERSION HASN'T BEEN TESTED.
-void indexNames(Database* database) {
-	//if (indexNameDebugging) fprintf(debugFile, "Start indexNames\n");
+// indexNames indexes all person names in a database.
+void getNameIndexForDatabase(Database* database) {
 	int numNamesEncountered = 0;
 	NameIndex* nameIndex = createNameIndex();
 	FORHASHTABLE(database->personIndex, element)
@@ -235,33 +234,20 @@ void indexNames(Database* database) {
 		}
 	ENDHASHTABLE
 	database->nameIndex = nameIndex;
-	//if (indexNameDebugging) showNameIndex(database->nameIndex);
 	if (indexNameDebugging) printf("the number of names encountered is %d.\n", numNamesEncountered);
 }
 
-// keyLineNumber checks if a record with a key is in the database; if so it returns the line
-// number where the record began in its Gedcom file.
+// keyLineNumber returns the line in the Gedcome file where the record with the given key began.
+// If the key does not exist returns 0.
 static int keyLineNumber (Database *database, String key) {
 	RecordIndexEl* el = (RecordIndexEl*) searchHashTable(database->recordIndex, key);
-//	if (!element) element = searchHashTable(database->familyIndex, key);
-//	if (!element) element = searchHashTable(database->sourceIndex, key);
-//	if (!element) element = searchHashTable(database->eventIndex, key);
-//	if (!element) element = searchHashTable(database->otherIndex, key);
-	if (!el) return 0; // Record doesn't exist.
+	if (!el) return 0;
 	return el->line;
 }
 
 // getRecord gets a record from the database given a key.
 GNode* getRecord(String key, Database* database) {
 	return searchRecordIndex(database->recordIndex, key);
-//	GNode *root = keyToRecord(key, database);
-//
-//	if ((root = keyToPerson(key, database))) return root;
-//	if ((root = keyToFamily(key, database))) return root;
-//	if ((root = keyToSource(key, database))) return root;
-//	if ((root = keyToEvent(key, database))) return root;
-//	if ((root = keyToOther(key, database))) return root;
-//	return null;
 }
 
 //  Some debugging functions.

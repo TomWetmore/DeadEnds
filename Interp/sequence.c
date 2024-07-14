@@ -772,7 +772,8 @@ Sequence* nameToSequence(String name, Database* database) {
 }
 
 // showSequence is a debug function that shows the contents of a Sequence.
-void showSequence(Sequence* sequence) {
+void showSequence(Sequence* sequence, String title) {
+	if (title) printf("%s:\n", title);
 	FORSEQUENCE(sequence, element, count)
 		printf("%d: %s: %s\n", count, element->root->key, element->name ? element->name : "no name");
 	ENDSEQUENCE

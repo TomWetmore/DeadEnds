@@ -3,7 +3,7 @@
 // database.h
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed on 15 June 2024.
+// Last changed on 10 July 2024.
 
 #ifndef database_h
 #define database_h
@@ -18,12 +18,14 @@
 #include "rootlist.h"
 
 typedef HashTable RecordIndex;
+typedef HashTable NameIndex;
 typedef List RootList;
 
 // Database is the structure that hold DeadEnds databases.
 typedef struct Database {
 	String filePath;  // Path to the Gedcom file this database was built from.
 	String lastSegment;  // Last segment of the path for error messages.
+	GNode* header; // Root of header record.
 	RecordIndex* recordIndex; // Index of all keyed records.
 	RecordIndex *personIndex;  // Index of persons in this database.
 	RecordIndex *familyIndex;  // Index of families in this database.
@@ -57,6 +59,7 @@ bool storeRecord(Database*, GNode*, int lineno, ErrorLog*); // Add a record to t
 void showTableSizes(Database*);  // Show the sizes of the database tables. Debugging.
 void showPersonIndex(Database*); // Show the person index. Debugging.
 void showFamilyIndex(Database*); // Show the family index. Debugging.
+void getNameIndexForDatabase(Database*);
 void summarizeDatabase(Database*);
 
 String generateFamilyKey(Database*);

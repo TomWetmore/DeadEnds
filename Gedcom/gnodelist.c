@@ -3,10 +3,11 @@
 // gnodelist.c implements the GNodeList data type.
 //
 // Created by Thomas Wetmore on 27 May 2024.
-// Last changed on 8 July 2024.
+// Last changed on 13 July 2024.
 
 #include "gnodelist.h"
 #include "readnode.h"
+#include "writenode.h"
 #include "file.h"
 
 // createNodeListElement creates a GNodeList element. gnode is the GNode, level is its level, and
@@ -45,8 +46,11 @@ void deleteGNodeList(GNodeList* list, bool delNodes) {
 	deleteList(list);
 }
 
-// getGNodeTreesFromFile gets the GNodeList for the Gedcom records in a Gedcom file. If successful
-// the list is returned; otherwise null is returned and the ErrorLog holds the errors.
+// getGNodeTreesFromFile gets the GNodeList of all GNode records from a Gedcom file, including
+// HEAD and TRLR. If successful the list is returned; otherwise null is returned and the ErrorLog
+// holds the errors. Uses getNodeListFromFile to get the list of all GNodes, one node per line,
+// and GetNodeTreesFromNodeList to build the trees from the nodes. If any errors occur null is
+// returned.
 GNodeList* getGNodeTreesFromFile(File* file, ErrorLog* errorLog) {
 	int numErrors = lengthList(errorLog);
 	GNodeList* nodeList = getGNodeListFromFile(file, errorLog);
@@ -57,7 +61,7 @@ GNodeList* getGNodeTreesFromFile(File* file, ErrorLog* errorLog) {
 	GNodeList* rootList = getGNodeTreesFromNodeList(nodeList, file->name, errorLog);
 	if (numErrors != lengthList(errorLog)) {
 		deleteGNodeList(nodeList, true);
-		if (rootList) deleteGNodeList(rootList, true);
+		if (rootList) deleteGNodeList(rootList, false);
 		return null;
 	}
 	return rootList;
@@ -66,6 +70,10 @@ GNodeList* getGNodeTreesFromFile(File* file, ErrorLog* errorLog) {
 // getGNodeListFromFile uses fileToLine and extractFields to create a GNodeList of all the GNodes
 // from a Gedcom file. Any errors are added to the ErrorLog.
 GNodeList* getGNodeListFromFile(File* file, ErrorLog* errorLog) {
+	if (file == null) {
+		addErrorToLog(errorLog, createError(systemError, "unknown", 0, "no file name"));
+		return null;
+	}
 	GNodeList* nodeList = createGNodeList();
 	int level;
 	int line = 0;
@@ -216,4 +224,12 @@ GNodeList* getGNodeTreesFromNodeList(GNodeList *lowerList, String name, ErrorLog
 		appendToList(rootNodeList, rootElement);
 	}
 	return rootNodeList;
+}
+
+// writeGNodeTreesToFile writes a GNodeList to a File in Gedcom format.
+void writeGNodeTreesToFile(GNodeList* list, File* file) {
+	FORLIST(list, element)
+		GNode* root = ((GNodeListEl*) element)->node;
+		writeGNodeRecord(file->fp, root, false);
+	ENDLIST
 }

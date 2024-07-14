@@ -34,5 +34,19 @@ int compareRecordKeys(String a, String b) {
 String sexTypeToString(SexType sex) {
 	if (sex == sexMale) return "M";
 	if (sex == sexFemale) return "F";
-	return "U";
+	if (sex == sexUnknown) return "U";
+	return "X";
+}
+
+//
+SexType sexTypeFromString(String s) {
+	if (eqstr("M", s)) return sexMale;
+	if (eqstr("F", s)) return sexFemale;
+	if (eqstr("U", s)) return sexUnknown;
+	return sexError;
+}
+
+bool validSexString(String s) {
+	if (!s) return false;
+	return sexTypeFromString(s) != sexError;
 }

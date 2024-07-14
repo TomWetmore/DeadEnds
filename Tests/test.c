@@ -52,7 +52,7 @@ int main(void) {
 	ErrorLog* errorLog = createErrorLog();
 	int testNumber = 0;
 	Database* database = importDatabaseTest(errorLog, ++testNumber);
-	testGedcomStrings(++testNumber);
+	//testGedcomStrings(++testNumber);
 	if (useDebugFile) {
 		debugFile = fopen("/Users/ttw4/debug.txt", "w");
 		if (debugFile == null) {
@@ -60,24 +60,21 @@ int main(void) {
 			exit(2);
 		}
 	}
-	//int testNumber = 0;
-	//ErrorLog *errorLog = createErrorLog();
 	bool validated = false;
 	showErrorLog(errorLog);
 
 	//if (database) listTest(database, ++testNumber);
 	//if (database) forHashTableTest(database, ++testNumber);
 	//if (database) showHashTableTest(database->personIndex, ++testNumber);
-	if (database) indexNamesTest(database, ++testNumber);
-	//if (database) validated = validateDatabaseTest(database, ++testNumber);
-	if (database) testSequence(database, ++testNumber);
+	//if (database) indexNamesTest(database, ++testNumber);
+	//if (database) testSequence(database, ++testNumber);
 	validated = true;
 	//if (database) forTraverseTest(database, ++testNumber);
 	//if (database && validated) parseAndRunProgramTest(database, ++testNumber);
-	//if (database && validated) countNodesBeforeTest(database, ++testNumber);
-	testWriteDatabase("/Users/ttw4/output.ged", database);
+	if (database && validated) countNodesBeforeTest(database, ++testNumber);
+	//testWriteDatabase("/Users/ttw4/output.ged", database);
 	fclose(debugFile);
-	testKeyGeneration(++testNumber);
+	//testKeyGeneration(++testNumber);
 	return 0;
 }
 
@@ -127,7 +124,7 @@ void listTest(Database* database, int testNumber) {
 	printf("END OF LIST TEST: %2.3f\n", getMilliseconds());
 }
 
-// forHashTableTest tests FORHASHTABLE by showing keys and names of persons in a person index.
+// forHashTableTest tests FORHASHTABLE by showing the keys and names of the persons in an index.
 void forHashTableTest(Database* database, int testNumber) {
 	printf("\n%d: START OF FORHASHTABLE test: %2.3f\n", testNumber, getMilliseconds());
 	int numberPersons = 0;
@@ -138,7 +135,7 @@ void forHashTableTest(Database* database, int testNumber) {
 		printf("%s: %s\n", person->key, NAME(person)->value);
 	ENDHASHTABLE
 	printf("%d persons were found in the index.\n", numberPersons);
-	printf("END OF FORHASHTABLE TEST: %2.3f\n", getMilliseconds());
+	printf("%d: END OF FORHASHTABLE TEST: %2.3f\n", testNumber, getMilliseconds());
 }
 
 // parseAndRunProgramTest parses a DeadEndScript program and runs it. To call the script's
@@ -174,7 +171,7 @@ static void forTraverseTest(Database* database, int testNumber) {
 	printf("\n%d: START OF FORTRAVERSE TEST: %2.3f\n", testNumber, getMilliseconds());
 	GNode* person = keyToPerson("@I1@", database);
 	FORTRAVERSE(person, node)
-		printf("%s\n", node->tag);
+		printf("%s %s\n", node->tag, node->value ? node->value : "");
 	ENDTRAVERSE
 	printf("END OF FORTRAVERSE TEST: %2.3f\n", getMilliseconds());
 }
@@ -192,7 +189,7 @@ static void showPersonName(void* element) {
 static void showHashTableTest(RecordIndex* index, int testNumber) {
 	printf("\n%d: START OF SHOW HASH TABLE TEST: %2.3f\n", testNumber, getMilliseconds());
 	showHashTable(index, showPersonName);
-	printf("END OF SHOW HASH TABLE TEST: %2.3f\n", getMilliseconds());
+	printf("%d: END OF SHOW HASH TABLE TEST: %2.3f\n", testNumber, getMilliseconds());
 }
 
 // testKeyGeneration tests the random key generator.
