@@ -24,6 +24,8 @@ extern bool importDebugging;
 // validatePersons validates the persons in a Database.
 void validatePersons(Database* database, ErrorLog* errlog) {
 	int numPersonsValidated = 0;
+	if (importDebugging)
+		printf("Before validating, there are %d persons.\n", sizeHashTable(database->personIndex));
 	FORHASHTABLE(database->personIndex, element)
 		validatePerson(element, database, errlog);
 		numPersonsValidated++;

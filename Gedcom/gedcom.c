@@ -11,6 +11,7 @@
 RecordType recordType(GNode* root) {
     ASSERT(root);
     String tag = root->tag;
+	//printf("%s ", tag);
     if (eqstr(tag, "INDI")) return GRPerson;
     if (eqstr(tag, "FAM"))  return GRFamily;
     if (eqstr(tag, "SOUR")) return GRSource;

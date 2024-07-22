@@ -3,16 +3,16 @@
 // generatekey.c has the functions to generate random keys.
 //
 // Created by Thomas Wetmore on 1 June 2024.
-// Last changed on 15 June 2024.
+// Last changed on 20 June 2024.
 
 #include "stdlib.h"
 #include "time.h"
 #include "gedcom.h"
 #include "stringtable.h"
 #include "stringset.h"
+#include "generatekey.h"
 
-static void initKeyGen(void);
-static String generate(char);
+static String generate(char type);
 
 // keyCharacters are the 36 characters that make up key values.
 static char keyCharacters[36] = {
@@ -31,28 +31,33 @@ static char recordChar(RecordType recType) {
 	return 'X';
 }
 
-// generateKey generates a new random Gedcom key ('cross-reference identifier').
-static bool first = true;
-String generateKey(RecordType recType) {
-	if (first) initKeyGen();
+// generateRecordKey generates a new random Gedcom key ('cross-reference identifier').
+static StringSet* keysInUse = null;
+String generateRecordKey(RecordType recType) {
+	static bool first = true;
+	if (first) {
+		initRecordKeyGenerator();
+		first = false;
+	}
 	return generate(recordChar(recType));
 }
 
-// initKeyGen initializes random key generation.
+// initRecordKeyGenerator initializes random key generation.
 static char keyBuffer[10];
-static void initKeyGen(void) {
+void initRecordKeyGenerator(void) {
 	srand((unsigned)time(0));
-	first = false;
 	keyBuffer[0] = keyBuffer[8] = '@';
 	keyBuffer[9] = 0;
+	if (keysInUse) deleteStringSet(keysInUse, true);
+	keysInUse = createStringSet();
 }
 
 // inUse returns true if the key is in use.
 static bool inUse(String key) {
-	return false;
+	return isInSet(keysInUse, key);
 }
 
-// generate generates a new random key.
+// generateRecordKey generates a random record key.
 static String generate(char type) {
 	int infiniteLoopProtection = 50;
 	int counter = 0;
@@ -67,27 +72,6 @@ static String generate(char type) {
 	exit(2); // Could not generate a key.
 	return null;
 }
-
-// Functions when reading a Gedcom file.
-// Variables:
-// Table of all keys encountered or created so far.
-// Table of all keys found in previously read Gedcom files.
-// Table of all keys found in reading the current Gedcom file.
-// What to do when findint a root key.
-// Has it been seen before in previous Gedcom files
-
-//if (newRoot) {
-//  newKey = gnode->key;
-//	if (hasBeenSeenInPreviousFiles(key)) {
-//		newKey = generateNewKey();
-//		addToHashTable(newKeysInCurrentFile, key, newKey, true, false);
-//	} else if (hasBeenSeenInCurrentFile(key)) {
-//      error(duplicate)
-//  } else {
-//		addToHashTable(keysInCurrentFile, key, key, true, false);
-//  }
-//} else if (hasBeenSeenInPreviousFiles(key)) {
-//		if (hasBeenSeenIn(newKeysInCurrentFile)
 
 Set* inPreviousFiles;
 Set* inCurrentFile;

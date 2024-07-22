@@ -9,7 +9,6 @@
 #define patchsex_h
 
 #include <stdio.h>
-
 #include "gnodelist.h"
 
 #endif /* patchsex_h */

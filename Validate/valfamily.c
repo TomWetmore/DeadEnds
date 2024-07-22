@@ -36,8 +36,10 @@ static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog
 	static char s[4096];
 
 	// All HUSB, WIFE and CHIL must link to persons.
+	//printf("ALL FAM KEYS FROM FORHUSBS\n"); // DEBUG
 	FORHUSBS(family, husband, key, database)
 		if (!husband) {
+			//printf("%s ", family->key); // DEBUG
 			int lineNumber = rootLine(family, database);
 			sprintf(s, "FAM %s (line %d): HUSB %s (line %d) does not exist.",
 					family->key,
@@ -48,8 +50,9 @@ static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog
 			errorCount++;
 		}
 	ENDHUSBS
-
+	//printf("\nALL FAM KEYS FROM FORWIVES\n"); // DEBUG
 	FORWIFES(family, wife, key, database)
+		//printf("%s ", family->key); // DEBUG
 		if (!wife) {
 			int lineNumber = rootLine(family, database);
 			sprintf(s, "FAM %s (line %d): WIFE %s (line %d) does not exist.",
@@ -61,9 +64,10 @@ static bool validateFamily(RecordIndexEl* familyEl, Database *database, ErrorLog
 			errorCount++;
 		}
 	ENDWIFES
-
+	//printf("\nALL FAM KEYS FROM FORCHILDREN\n"); // DEBUG
 	FORCHILDREN(family, child, key, n, database)
 	if (!child) {
+			//printf("%s ", family->key); // DEBUG
 			int lineNumber = rootLine(family, database);
 			sprintf(s, "FAM %s (line %d): CHIL %s (line %d) does not exist.",
 					family->key,

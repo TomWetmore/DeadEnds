@@ -3,7 +3,7 @@
 //  gnode.c has many functions for the GNode data type.
 //
 //  Created by Thomas Wetmore on 12 November 2022.
-//  Last changed on 19 June 2024.
+//  Last changed on 17 July 2024.
 
 #include "standard.h"
 #include "gnode.h"
@@ -47,7 +47,9 @@ void freeGNode(GNode* node) {
 	stdfree(node);
 }
 
-// createGNode creates a GNode from a key, tag, value, and pointer to parent.
+// createGNode creates a GNode from a key, tag, value, and pointer to parent. When a GNode is
+// created the key and value, if there, are allocated in the heap, and the tag pointer is taken
+// from the tag table. This is the only time that memory for these fields is handled.
 GNode* createGNode(String key, String tag, String value, GNode* parent) {
 	nodeAllocs++;
 	GNode* node = (GNode*) malloc(sizeof(GNode));;
@@ -240,12 +242,12 @@ String shortenPlace(String place) {
 }
 
 // allDigits checks if a String is all digits. (No longer called.)
-static bool allDigits(String s) {
-	int c;
-	while ((c = *s++))
-		if (c < '0' || c > '9') return false;
-	return true;
-}
+//static bool allDigits(String s) {
+//	int c;
+//	while ((c = *s++))
+//		if (c < '0' || c > '9') return false;
+//	return true;
+//}
 
 // copyNode copies a GNode.
 GNode* copyNode(GNode* node) {

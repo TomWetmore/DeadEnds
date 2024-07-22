@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include "file.h"
 
-// createFile creates a File structure.
-File* createFile(String path, String mode) {
+// openFile creates a File structure.
+File* openFile(String path, String mode) {
 	if (!path || !mode) return null;
 	FILE* fp = fopen(path, mode);
 	String name = lastPathSegment(path);
@@ -21,8 +21,8 @@ File* createFile(String path, String mode) {
 	return file;
 }
 
-// deleteFile deletes a File structure.
-void deleteFile(File* file) {
+// closeFile deletes a File structure.
+void closeFile(File* file) {
 	if (file->fp) fclose(file->fp);
 	if (file->path) stdfree(file->path);
 	if (file->name) stdfree(file->name);

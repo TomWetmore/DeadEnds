@@ -1,9 +1,9 @@
 // DeadEnds
 //
-//  standard.c -- Standard routines.
+// standard.c hold some standard utiltiy functions.
 //
-// Create by Thomas Wetmore on 7 November 2022.
-// Last changed on 2 May 2024.
+// Creates by Thomas Wetmore on 7 November 2022.
+// Last changed on 17 July 2024.
 
 #include <stdlib.h>
 #include "standard.h"
@@ -60,7 +60,7 @@ char* __alloc(size_t len, String file, int line) {
 	return p;
 }
 
-//  __free deallocates memory; called by sdtfree.
+// __free deallocates memory; called by sdtfree.
 void __free (void* ptr, String file, int line) {
 	if (loggingAllocs) {
         fprintf(allocLogFile, "F  %s\t%d\t%ld\t%ld\n", lastPathSegment(file), line,
@@ -70,7 +70,7 @@ void __free (void* ptr, String file, int line) {
 	free(ptr);
 }
 
-// strsave returns a copy of a String on the heap.
+// strsave returns a copy of a String on the heap. If the string is null or empty null is returned.
 String strsave(String string) {
 	if (string == null || *string == 0) return null;
 	return strcpy(stdalloc(strlen(string) + 1), string);
@@ -118,39 +118,26 @@ void __fatal (String file, int line)
 	abort();
 }
 
-// __assert -- Make an assertion.
-//--------------------------------------------------------------------------------------------------
-void __assert (bool exp, String file, int line)
-//  exp -- Expression that must evaluate to true.
-// String file -- File calling the assert.
-// int line -- Line number in file calling the assert.
-{
+// __assert makes an assertion.
+void __assert (bool exp, String file, int line) {
 	if (exp) return;
 	__fatal(file, line);
 }
 
-// iswhite -- Check whether a character is white space. Probably doesn't change with Unicode.
-//--------------------------------------------------------------------------------------------------
-bool iswhite(int c)
-// int c -- Checks whether this character is white space.
-{
+// iswhite checks whether a character is white space.
+bool iswhite(int c) {
 	return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
-// isLetter -- Checks whether a character is a letter. Must change with Unicode.
-//--------------------------------------------------------------------------------------------------
-bool isLetter(int c)
-// int c -- Checks whether this character is a letter.
-{
+// isLetter checks whether a character is a letter. Must change with Unicode.
+bool isLetter(int c) {
 	if (c >= 'a' && c <= 'z') return true;
 	return c >= 'A' && c <= 'Z';
 }
 
-//  lower -- Convert a string to lower case. Must change with Unicode.
-//    MNOTE: Reuses data space buffere for the returned string.
-//--------------------------------------------------------------------------------------------------
-String lower(String str)
-{
+// lower converts a string to lower case. Must change with Unicode.
+// MNOTE: Reuses buffer for the returned string.
+String lower(String str) {
     ASSERT(strlen(str) < MAXSTRINGSIZE);
 	static char scratch[MAXSTRINGSIZE];
     String p = scratch;
@@ -160,11 +147,9 @@ String lower(String str)
 	return scratch;
 }
 
-//  upper -- Convert a string to upper case. Must change with Unicode.
-//    MNOTE: Reuses data space buffer for the returned string.
-//--------------------------------------------------------------------------------------------------
-String upper(String str)
-{
+// upper converts a string to upper case. Must change with Unicode.
+// MNOTE: Reuses data space buffer for the returned string.
+String upper(String str) {
     ASSERT(strlen(str) < MAXSTRINGSIZE);
 	static char scratch[MAXSTRINGSIZE];
     String p = scratch;
@@ -174,11 +159,9 @@ String upper(String str)
 	return scratch;
 }
 
-// capitalize -- Capitalize a string. Must change with Unicode.
-//    MNOTE: Reuses data space buffer for the returned string.
-//--------------------------------------------------------------------------------------------------
-String capitalize(String str)
-{
+// capitalize capitalizes a string. Must change with Unicode.
+// MNOTE: Reuses data space buffer for the returned string.
+String capitalize(String str) {
     String p = lower(str);
 	*p = toupper(*p);
 	return p;

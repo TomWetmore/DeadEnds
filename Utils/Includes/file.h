@@ -3,21 +3,21 @@
 // file.h
 //
 // Created by Thomas Wetmore on 1 July 2024.
-// Last changed on 5 July 2024.
+// Last changed on 21 July 2024.
 
 #ifndef file_h
 #define file_h
 
 #include "standard.h"
 
-// File provides a file structure that hold both Unix FILE pointer and the file's name.
+// File is a structure that holds a file's name and Unix FILE pointer.
 typedef struct File {
 	FILE* fp;
 	String path;
 	String name;
 } File;
 
-File* createFile(String path, String mode);
-void deleteFile(File*);
+File* openFile(String path, String mode);
+void closeFile(File*);
 
 #endif // file_h

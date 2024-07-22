@@ -14,7 +14,7 @@ static void patchSexLine(GNode*, int);
 
 // main is the main program of the patchsex tool. It processes a Gedcom file looking for persons
 // with missing or erroneous SEX lines. If fixes them and then writes the file back out.
-int main(void) {
+int oomain(void) {
 	// Get the Gedcom records from the file.
 	String fileName = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/07022024.ged";
 	File* file = createFile(fileName, "r");
@@ -43,6 +43,7 @@ int main(void) {
 	File* outfile = createFile("/Users/ttw4/Desktop/DeadEnds/Gedfiles/modified.ged", "w");
 	writeGNodeTreesToFile(roots, outfile);
 	deleteFile(outfile);
+	return 0;
 }
 
 // patchSexLine adds a SEX line to an INDI record if it does not have one. It has the side

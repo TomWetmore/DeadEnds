@@ -192,24 +192,6 @@ static void showHashTableTest(RecordIndex* index, int testNumber) {
 	printf("%d: END OF SHOW HASH TABLE TEST: %2.3f\n", testNumber, getMilliseconds());
 }
 
-// testKeyGeneration tests the random key generator.
-extern String generateKey(RecordType rectype);
-static void testKeyGeneration(int testNumber) {
-	printf("\n%d: START OF KEY GENERATION TEST: %2.3f\n", testNumber, getMilliseconds());
-	StringTable* table = createStringTable(2357);
-	for (int i = 0; i < 500000; i++) {
-		String key = generateKey(GRPerson);
-		if (isInStringTable(table, key)) {
-			printf("CLASH: %s\n", key);
-		} else {
-			addToStringTable(table, key, key);
-			//printf("NEW: %s\n", generateKey(GRPerson));
-		}
-	}
-	printf("The string table now holds %d keys\n", sizeHashTable(table));
-	printf("%d: END OF KEY GENERATION TEST: %2.3f\n", testNumber, getMilliseconds());
-}
-
 // indexNamesTest tests the indexNames function.
 static void indexNamesTest(Database* database, int testNumber) {
 	printf("\n%d: START OF INDEX NAMES TEST\n", testNumber);

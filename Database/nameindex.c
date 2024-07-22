@@ -57,6 +57,33 @@ void insertInNameIndex(NameIndex* index, String nameKey, String recordKey) {
 	}
 }
 
+// removeFromNameIndex
+void removeFromNameIndex(NameIndex* index, String nameKey, String recordKey) {
+	NameIndexEl* el = (NameIndexEl*) searchHashTable(index, nameKey);
+	if (!el) {
+		// Log something happened.
+		return;
+	}
+	Set* recordKeys = el->recordKeys;
+	if (!isInSet(recordKeys, recordKey)) {
+		// Log something happened.
+		return;
+	}
+	removeFromSet(recordKeys, recordKey);
+}
+
+// Remove all names of a person from a NameIndex.
+void removeNamesOfPersonFromIndex(NameIndex* index, GNode* person) {
+	String recordKey = person->key;
+	GNode* name = NAME(person);
+	while (name) {
+		String nameKey = nameToNameKey(name->value);
+		removeFromNameIndex(index, nameKey, recordKey);
+		name = name->sibling;
+		if (name && nestr(name->tag, "NAME")) name = null;
+	}
+}
+
 // searchNameIndex searches NameIndex for a name and returns the record keys that have the name.
 Set* searchNameIndex(NameIndex* index, String name) {
 	String nameKey = nameToNameKey(name);

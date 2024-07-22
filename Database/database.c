@@ -5,7 +5,7 @@
 // read and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 10 July 2024.
+// Last changed 21 July 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -21,7 +21,7 @@
 extern FILE* debugFile;
 extern bool importDebugging;
 bool indexNameDebugging = true;
-static int keyLineNumber(Database*, String key);
+//static int keyLineNumber(Database*, String key);
 
 // createDatabase creates a database.
 Database *createDatabase(String filePath) {
@@ -105,6 +105,7 @@ bool isEmptyDatabase(Database* database) {
 	return numberPersons(database) + numberFamilies(database) == 0;
 }
 
+// keyToRecordOfType returns the root of the GNode tree with given key and record type.
 static GNode* keyToRecordOfType(String key, Database* database, RecordType recType) {
 	RecordIndexEl* el = (RecordIndexEl*) searchHashTable(database->recordIndex, key);
 	if (el == null) return null;
@@ -138,48 +139,6 @@ GNode* keyToOther(String key, Database* database) {
 	return keyToRecordOfType(key, database, GROther);
 }
 
-// storeRecord stores a GNode tree/record in a database by adding it to a RecordIndex.
-// lineNumber is the line number of the root node in the Gedcom file.
-//bool storeRecord(Database* database, GNode* root, int lineNumber, ErrorLog* errorLog) {
-//	RecordType type = recordType(root);
-//	if (type == GRHeader || type == GRTrailer) return true; // Ignore HEAD and TRLR.
-//	if (!root->key) {
-//		Error *error = createError(syntaxError, database->lastSegment, lineNumber, "This record has no key.");
-//		addErrorToLog(errorLog, error);
-//		return false;
-//	}
-//	String key = root->key; // MNOTE: insertInRecord copies the key.
-//	int previousLine = keyLineNumber(database, key); // Duplicate key check.
-//	if (previousLine) {
-//		char scratch[MAXLINELEN];
-//		sprintf(scratch, "A record with key %s exists at line %d.", key, previousLine);
-//		Error *error = createError(gedcomError, database->lastSegment, lineNumber, scratch);
-//		addErrorToLog(errorLog, error);
-//	}
-//	switch (type) {
-//		case GRPerson:
-//			addToRecordIndex(database->personIndex, key, root, lineNumber);
-//			insertInRootList(database->personRoots, root);
-//			return true;
-//		case GRFamily:
-//			addToRecordIndex(database->familyIndex, key, root, lineNumber);
-//			insertInRootList(database->familyRoots, root);
-//			return true;
-//		case GRSource:
-//			addToRecordIndex(database->sourceIndex, key, root, lineNumber);
-//			return true;
-//		case GREvent:
-//			addToRecordIndex(database->eventIndex, key, root, lineNumber);
-//			return true;
-//		case GROther:
-//			addToRecordIndex(database->otherIndex, key, root, lineNumber);
-//			return true;
-//		default:
-//			ASSERT(false);
-//			return false;
-//	}
-//}
-
 // showTableSizes is a debug function that shows the sizes of the database tables.
 void showTableSizes(Database *database) {
 	printf("Size of recordIndex: %d\n", sizeHashTable(database->recordIndex));
@@ -190,34 +149,7 @@ void showTableSizes(Database *database) {
 	printf("Size of otherIndex:  %d\n", sizeHashTable(database->otherIndex));
 }
 
-// indexNames indexes all person names in a database.
-void oldIndexNames(Database* database) {
-	if (indexNameDebugging) fprintf(debugFile, "Start indexNames\n");
-	static int count = 0;
-	int i, j;
-	RecordIndexEl* entry = firstInHashTable(database->recordIndex, &i, &j);
-	for (; entry; entry = nextInHashTable(database->recordIndex, &i, &j)) {
-		GNode* root = entry->root;
-		if (recordType(root) != GRPerson) continue;
-		String recordKey = root->key;
-		if (indexNameDebugging) fprintf(debugFile, "indexNames: recordKey: %s\n", recordKey);
-		for (GNode* name = NAME(root); name && eqstr(name->tag, "NAME"); name = name->sibling) {
-			if (name->value) {
-				if (indexNameDebugging) fprintf(debugFile, "indexNames: name->value: %s\n", name->value);
-				// MNOTE: nameKey is in data space. It is heapified in insertInNameIndex.
-				String nameKey = nameToNameKey(name->value);
-				if (indexNameDebugging) fprintf(debugFile, "indexNames: nameKey: %s\n", nameKey);
-				insertInNameIndex(database->nameIndex, nameKey, recordKey);
-				count++;
-			}
-		}
-		//entry = nextInHashTable(database->personIndex, &i, &j);
-	}
-	if (indexNameDebugging) showNameIndex(database->nameIndex);
-	if (indexNameDebugging) printf("The number of names indexed was %d\n", count);
-}
-
-// indexNames indexes all person names in a database.
+// getNameIndexForDatabase indexes all person names in a database.
 void getNameIndexForDatabase(Database* database) {
 	int numNamesEncountered = 0;
 	NameIndex* nameIndex = createNameIndex();
@@ -239,47 +171,31 @@ void getNameIndexForDatabase(Database* database) {
 
 // keyLineNumber returns the line in the Gedcome file where the record with the given key began.
 // If the key does not exist returns 0.
-static int keyLineNumber (Database *database, String key) {
-	RecordIndexEl* el = (RecordIndexEl*) searchHashTable(database->recordIndex, key);
-	if (!el) return 0;
-	return el->line;
-}
+//static int keyLineNumber (Database *database, String key) {
+//	RecordIndexEl* el = (RecordIndexEl*) searchHashTable(database->recordIndex, key);
+//	if (!el) return 0;
+//	return el->line;
+//}
 
 // getRecord gets a record from the database given a key.
 GNode* getRecord(String key, Database* database) {
 	return searchRecordIndex(database->recordIndex, key);
 }
 
-//  Some debugging functions.
-//void showPersonIndex(Database *database) { showHashTable(database->personIndex, null); }
-//void showFamilyIndex(Database *database) { showHashTable(database->familyIndex, null); }
-//int getCount(void) { return count; }
-
-
-// generateFamilyKey generates a new family key.
-String generateFamilyKey(Database* database) {
-	return "@Fxxxxxxx@";
-}
-
-// generatePersonKey generates a new person key.
-String generatePersonKey(Database* database) {
-	return "@Ixxxxxxx@";
-}
-
-// summarizeDatabase write a short text summary of a Database to standard output. Debug.
+// summarizeDatabase writes a short summary of a Database to standard output.
 void summarizeDatabase(Database* database) {
 	if (!database) {
 		printf("No database to summarize.\n");
 		return;
 	}
-	printf("summary of database: %s.\n", database->filePath);
-	if (database->personIndex) printf("Person index: %d\n", sizeHashTable(database->personIndex));
-	if (database->familyIndex) printf("Family index: %d\n", sizeHashTable(database->familyIndex));
-	if (database->recordIndex) printf("Record index: %d\n", sizeHashTable(database->recordIndex));
+	printf("Summary of database: %s.\n", database->filePath);
+	if (database->personIndex) printf("\tPerson index: %d records.\n", sizeHashTable(database->personIndex));
+	if (database->familyIndex) printf("\tFamily index: %d records.\n", sizeHashTable(database->familyIndex));
+	if (database->recordIndex) printf("\tRecord index: %d records.\n", sizeHashTable(database->recordIndex));
 	if (database->nameIndex) {
 		int numNames, numRecords;
 		getNameIndexStats(database->nameIndex, &numNames, &numRecords);
-		printf("Name index: %d, %d\n", numNames, numRecords);
+		printf("\tName index: %d name keys in %d records.\n", numNames, numRecords);
 
 	}
 }

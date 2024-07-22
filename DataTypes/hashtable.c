@@ -135,7 +135,10 @@ void addToHashTable(HashTable* table, void* element, bool replace) { //PH;
 		setBlockElement(&(bucket->block), element, table->delete, index);
 		return;
 	}
-	if (found) return; // Element exists, but don't replace.
+	if (found) {
+		printf("Duplicate key: %s found when adding to hash table\n", table->getKey(element)); // DEBUG
+		return; // Element exists, but don't replace.
+	}
 	bucket = table->buckets[hash]; // Add it; be sure Bucket exists.
 	if (!bucket) {
 		bucket = createBucket();
