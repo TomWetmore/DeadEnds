@@ -7,4 +7,3 @@ all:
 	cd Utils; make
 	cd Validate; make
 	cd Operations; make
-	cd Tests; make
