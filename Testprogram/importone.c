@@ -3,7 +3,7 @@
 // importone.c has the test function that tries to create a Database for the rest of the tests.
 //
 // Created by Thomas Wetmore on 21 June 2024.
-// Last changed on 8 July 2024.
+// Last changed on 22 July 2024.
 
 #include "standard.h"
 #include "import.h"
@@ -13,7 +13,6 @@
  Database* importDatabaseTest(ErrorLog* log, int testNumber) {
 	printf("%d: START OF IMPORT DATABASE TEST: %s %s\n", testNumber, "modified.ged", getMillisecondsString());
 	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/modified.ged";
-	//ErrorLog* errorLog = createErrorLog();
 	String lastSegment = lastPathSegment(gedcomFile);
 	printf("lastPathSegment: %s\n", lastSegment);
 	Database* database = gedcomFileToDatabase(gedcomFile, log);
@@ -25,3 +24,4 @@
 	printf("%d: END OF CREATE DATABASE TEST: %s\n", testNumber, getMillisecondsString());
 	return database;
 }
+
