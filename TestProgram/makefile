@@ -1,17 +1,16 @@
 CC=clang
 CFLAGS=-g -c -Wall -Wno-unused-function
-INCLUDES= -I../Utils/Includes -I../DataTypes/Includes -I../Parser/Includes -I../Interp/Includes -I../Gedcom/Includes -I../Database/Includes -I../Validate/Includes
-LIBLOCNS=-L../Utils/ -L../DataTypes/ -L../Parser/ -L../Interp -L../Gedcom -L../Database -L../Validate -L../Operations
-LIBS=-lutils -lparser -ldatatypes -linterp -lgedcom -ldatabase -lvalidate -loperations
+LL=../DeadEndslib/
+INCLUDES= -I$(LL)Database/Includes -I$(LL)DataTypes/Includes -I$(LL)Gedcom/Includes -I$(LL)Interp/Includes -I$(LL)Operations/Includes -I$(LL)Parser/Includes -I$(LL)Utils/Includes -I$(LL)Validate/Includes
+LIBLOCNS=-L$(LL)Database -L$(LL)DataTypes -L$(LL)Gedcom -L$(LL)Interp -L$(LL)Operations -L$(LL)Parser -L$(LL)Utils -L$(LL)Validate
+LIBS=-ldatabase -ldatatypes -lgedcom -linterp -loperations -lparser -lutils -lvalidate
 
-all: test
-
-
-test: test.o testsequence.o testgedcomstrings.o testwritedatabase.o importone.o ../Database/libdatabase.a ../Parser/libparser.a ../DataTypes/libdatatypes.a ../Interp/libinterp.a ../Gedcom/libgedcom.a ../Validate/libvalidate.a
+testprogram: test.o testsequence.o testgedcomstrings.o testwritedatabase.o importone.o $(LL)/Database/libdatabase.a $(LL)/Parser/libparser.a $(LL)/DataTypes/libdatatypes.a $(LL)/Interp/libinterp.a $(LL)/Gedcom/libgedcom.a $(LL)/Validate/libvalidate.a
 	$(CC) -o test test.o testsequence.o testgedcomstrings.o testwritedatabase.o importone.o  $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
-
-testset: testset.o ../Database/libdatabase.a ../Parser/libparser.a ../DataTypes/libdatatypes.a ../Interp/libinterp.a ../Gedcom/libgedcom.a
-	$(CC) -o testset testset.o $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) $<
+
+clean:
+	rm *.o test
+

@@ -8,8 +8,8 @@ LIBS=-ldatabase -ldatatypes -lgedcom -linterp -loperations -lparser -lutils -lva
 randomizekeys: randomizekeys.o
 	$(CC) -o randomizekeys randomizekeys.o  $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
-testset: testset.o ../Database/libdatabase.a ../Parser/libparser.a ../DataTypes/libdatatypes.a ../Interp/libinterp.a ../Gedcom/libgedcom.a
-	$(CC) -o testset testset.o $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
+clean:
+	rm *.o randomizekeys
 
 %.o: %.c
 	echo echo $(INCLUDES)
