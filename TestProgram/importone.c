@@ -1,4 +1,4 @@
-ls// DeadEnds
+// DeadEnds
 //
 // importone.c has the test function that tries to create a Database for the rest of the tests.
 //
@@ -23,5 +23,4 @@ ls// DeadEnds
 	summarizeDatabase(database);
 	printf("%d: END OF CREATE DATABASE TEST: %s\n", testNumber, getMillisecondsString());
 	return database;
-}ls
-
+}
