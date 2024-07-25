@@ -1,9 +1,10 @@
 *.o
 *.a
 **/.DS_Store
-*test
 output.txt
 y.tab.c
-testset.c
-teststringtable.c
 testoutput
+patchsex
+randomizekeys
+testprogram
+runscript

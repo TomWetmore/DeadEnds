@@ -6,11 +6,11 @@ LIBLOCNS=-L$(LL)Database -L$(LL)DataTypes -L$(LL)Gedcom -L$(LL)Interp -L$(LL)Ope
 LIBS=-ldatabase -ldatatypes -lgedcom -linterp -loperations -lparser -lutils -lvalidate
 
 testprogram: test.o testsequence.o testgedcomstrings.o testwritedatabase.o importone.o $(LL)/Database/libdatabase.a $(LL)/Parser/libparser.a $(LL)/DataTypes/libdatatypes.a $(LL)/Interp/libinterp.a $(LL)/Gedcom/libgedcom.a $(LL)/Validate/libvalidate.a
-	$(CC) -o test test.o testsequence.o testgedcomstrings.o testwritedatabase.o importone.o  $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
+	$(CC) -o testprogram test.o testsequence.o testgedcomstrings.o testwritedatabase.o importone.o  $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) $<
 
 clean:
-	rm *.o test
+	rm *.o testprogram
 
