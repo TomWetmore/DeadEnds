@@ -10,7 +10,6 @@
 #include "splitjoin.h"
 #include "utils.h"
 #include "file.h"
-#include "gnodelist.h"
 
 FILE* debugFile; // Get rid of this.
 

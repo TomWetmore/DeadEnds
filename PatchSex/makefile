@@ -8,8 +8,8 @@ LIBS=-ldatabase -ldatatypes -lgedcom -linterp -loperations -lparser -lutils -lva
 patchsex: patchsex.o
 	$(CC) -o patchsex patchsex.o  $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
-testset: testset.o ../Database/libdatabase.a ../Parser/libparser.a ../DataTypes/libdatatypes.a ../Interp/libinterp.a ../Gedcom/libgedcom.a
-	$(CC) -o testset testset.o $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
+clean:
+	rm *.o patchsex
 
 %.o: %.c
 	echo echo $(INCLUDES)
