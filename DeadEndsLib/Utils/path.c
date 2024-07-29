@@ -3,7 +3,7 @@
 // path.c has functions to manipulate UNIX file paths.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 21 June 2024.
+// Last changed on 26 July                 2024.
 
 #include <unistd.h>
 #include "standard.h"
@@ -11,13 +11,13 @@
 #define MAXPATHBUFFER 1024
 
 // filePath finds a file in a sequence of paths.
-static String filePath (String fileName, String searchPath) {
-	if (!fileName || *fileName == 0) return null;
-	if (!searchPath || *searchPath == 0) return fileName;
-	if (*fileName == '/' || *fileName == '.') return fileName; // Bug: . could be part of name.
-	if (strlen(fileName) + strlen(searchPath) >= MAXPATHBUFFER) return null;
+String resolveFile(String name, String path) {
+	if (!name || *name == 0) return null;
+	if (!path || *path == 0) return name;
+	if (*name == '/' || *name == '.') return name; // Bug: . could be part of name.
+	if (strlen(name) + strlen(path) >= MAXPATHBUFFER) return null;
 	unsigned char buf1[MAXPATHBUFFER];
-	strcpy((String) buf1, searchPath);
+	strcpy((String) buf1, path);
 	String p = (String) buf1; // Convert :'s to 0's.
 	int c;
 	while ((c = *p)) {
@@ -33,19 +33,19 @@ static String filePath (String fileName, String searchPath) {
 		strcpy(q, p);
 		q += strlen(q);
 		strcpy(q++, "/");
-		strcpy(q, fileName);
+		strcpy(q, name);
 		if (access((const char*) buf2, 0) == 0)
 			return strsave((String) buf2); // Memory leak.
 		p += strlen(p);
 		p++;
 	}
-	return fileName;
+	return name;
 }
 
 // fopenPath attempta to open a file using a path variable.
 FILE *fopenPath(String name, String mode, String path) {
 	String str;
-	if (!(str = filePath(name, path))) return null;
+	if (!(str = resolveFile(name, path))) return null;
 	return fopen(str, mode);
 }
 

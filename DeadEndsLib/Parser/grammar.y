@@ -1,41 +1,31 @@
-//
 //  DeadEnds
 //
-//  interp.y -- Grammar and semantic actions for the DeadEnds programming language.
+//  interp.y is the yacc file for the DeadEnds script language.
 //
 //  Created by Thomas Wetmore on 8 December 2022.
-//  Last changed 28 September 2023.
-//
+//  Last changed 29 July 2024.
 %{
-//#include "llstdlib.h"
 #include "lexer.h"
 #include "symboltable.h"
 #include "functiontable.h"
-//#include "gedcom.h"
-//#include "cache.h"
-//#include "indiseq.h"
 #include "list.h"
 #include "interp.h"
 #include <stdlib.h>
 
-//  Global variables that form the channel between the lexer, parser and interpreter. They should
-//    not be mentioned in header files and used as tunnels.
-//--------------------------------------------------------------------------------------------------
-extern SymbolTable *globalTable;    // Table of global variables.
-extern FunctionTable *procedureTable; // Table of user-defined procedures.
-extern FunctionTable *functionTable;  // Table of user-defined functions.
-extern List *pendingFileList;  // Pending list of included files.
-extern int currentProgramLineNumber;  // Current line number in current file.
+// Global variables that form the channel between the lexer, parser and interpreter.
+extern SymbolTable *globalTable; // Global variables.
+extern FunctionTable *procedureTable;// User procedures.
+extern FunctionTable *functionTable; // User functions.
+extern List *pendingFiles; // Pending list of included files.
+extern int currentLine; // Line number in current file.
 
 static PNode *this, *prev;
 
 // Functions defined in the third section.
-//--------------------------------------------------------------------------------------------------
-static void join(PNode *list, PNode *last);
+static void join(PNode* list, PNode* last);
 static void yyerror(String str);
 
 #define YYSTYPE SemanticValue
-
 %}
 
 %token  <integer> ICONS
@@ -64,26 +54,23 @@ static void yyerror(String str);
     // A defn is a procedure, function, global or include.
     defn 	:	proc
     |	func
-    |	IDEN '(' IDEN ')' {  // Only interested in "global".
-        if (eqstr("global", $1)) {
+    |	IDEN '(' IDEN ')' {  // Interested in "global".
+        if (eqstr("global", $1))
             assignValueToSymbol(globalTable, $3, (PValue) {PVAny});
-            //insertInHashTable(globalTable, $3, allocPValue(PVAny, PV()));
-        }
     }
-    |	IDEN '(' SCONS ')' {  // Only interested in "include".
+    |	IDEN '(' SCONS ')' {  // Interested in "include".
         if (eqstr("include", $1))
-        prependToList(pendingFileList, $3);
+			prependToList(pendingFiles, $3);
     }
     ;
 
-    // A proc is "proc", name, params, and body. They are added to the proc table.
+    // A proc is "proc", name, params, and body. Add it to the proc table.
     proc	:	PROC IDEN '(' idenso ')' '{' states '}' {
-    	printf("Added procedure %s to the procedure table.\n", $2);
         addToFunctionTable(procedureTable, $2, (Word)procDefPNode($2, $4, $7));
     }
     ;
 
-    // A func is "func", name, parms, and a body with a return expr. They are added to the func table.
+    // A func is "func", name, parms, and a body with a return expr. Add it to the func table.
     func	:	FUNC_TOK IDEN '(' idenso ')' '{' states '}' {
         addToFunctionTable(functionTable, $2, (Word)funcDefPNode($2, $4, $7));
     }
@@ -293,16 +280,15 @@ static void yyerror(String str);
     }
     ;
     m	:	/* empty */ {
-        $$ = currentProgramLineNumber;
+        $$ = currentLine;
     }
 
 %%
 
-// join -- Join a list of PNodes to another PNode (which may be the start of another list).
-//--------------------------------------------------------------------------------------------------
-void join (PNode *list, PNode *last)
-{
-	PNode *prev = null;
+// join Joins a list of PNodes to another PNode (which may be the start of another list).
+// TODO: Isn't this generic enough to be moved to the pnode.[hc] files?
+void join(PNode* list, PNode* last) {
+	PNode* prev = null;
 	while (list) {
 		prev = list;
 		list = list->next;
@@ -311,10 +297,8 @@ void join (PNode *list, PNode *last)
 	prev->next = last;
 }
 
-void yyerror (String str)
-{
-	extern String currentProgramFileName;
-
-	printf("Syntax Error (%s): %s: line %d\n", str, currentProgramFileName, currentProgramLineNumber);
+void yyerror(String str) {
+	extern String currentFileName;
+	printf("Syntax Error (%s): %s: line %d\n", str, currentFileName, currentLine);
 	Perrors++;
 }

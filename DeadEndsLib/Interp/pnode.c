@@ -1,9 +1,9 @@
 // DeadEnds
 //
-// pnode.c holds functions that create PNodes (program nodes).
+// pnode.c holds the functions that manage PNodes (program nodes).
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 25 April 2024.
+// Last changed on 28 July 2024.
 
 #include "pnode.h"
 #include "standard.h"
@@ -23,8 +23,8 @@ String pnodeTypes[] = {
 };
 
 extern FunctionTable *functionTable;  // parse.c
-extern String currentProgramFileName;  // parse.c; used to set the file name of PNodes.
-extern int currentProgramLineNumber;;   // parse.c; used to set the line numbers of PNodes.
+extern String currentFileName;  // parse.c; used to set the file name of PNodes.
+extern int currentLine;   // parse.c; used to set the line numbers of PNodes.
 
 // showPNode shows a PNode useful for debugging.
 void showPNode(PNode* pnode) {
@@ -70,11 +70,11 @@ static void setParents(PNode* list, PNode* parent); // Set the parents of a PNod
 static PNode* allocPNode(int type) {
     PNode* node = (PNode*) stdalloc(sizeof(*node));
     if (debugging) {
-        printf("allocPNode(%d) %s, %d\n", type, currentProgramFileName, currentProgramLineNumber);
+        printf("allocPNode(%d) %s, %d\n", type, currentFileName, currentLine);
     }
     node->type = type;
-    node->fileName = strsave(currentProgramFileName); // TODO: MEMORY!!!!!!!!!
-    node->lineNumber = currentProgramLineNumber; // Overwritten by the yacc m production?
+    node->fileName = strsave(currentFileName); // TODO: MEMORY!!!!!!!!!
+    node->lineNumber = currentLine; // Overwritten by the yacc m production?
     return node;
 }
 
@@ -119,7 +119,7 @@ PNode* whilePNode(PNode* cond, PNode* body) {
     return node;
 }
 
-// breakPNode -- Create a break PNode.
+// breakPNode creates a break PNode.
 PNode* breakPNode(void) { return allocPNode(PNBreak); }
 
 // continuePNode creates a continue PNode.
@@ -142,7 +142,7 @@ PNode* procDefPNode(String name, PNode* parms, PNode* body) {
     return node;
 }
 
-// procCallPNode create a proc call node.
+// procCallPNode creates a user-defined proc call node.
 PNode* procCallPNode(String name, PNode *args) {
     PNode *node = allocPNode(PNProcCall);
     node->procName = strsave(name);
@@ -258,15 +258,10 @@ PNode* spousesPNode (PNode* pexpr, String svar, String fvar, String count, PNode
     return node;
 }
 
-//  childrenPNode -- Create a children loop program node that loops through all chidren in a
-//    family. Called by yyparse() on rule reduction.
-//--------------------------------------------------------------------------------------------------
-PNode *childrenPNode (PNode *fexpr, String cvar, String nvar, PNode *body)
-//  fexpr -- Program node expression that evaluates to a family gedcom node.
-//  cvar -- Name of the child loop variable.
-//  nvar -- Name of the loop counter variable.
-//  body -- First PNode of the loop body.
-{
+// childrenPNode createa a children loop PNode that loops through the chidren in a family.
+// Called by yyparse() on rule reduction; fexpr is the family expression; cvar is the child
+// loop var; nvar is the counter; body is the root PNode of the loop body.
+PNode *childrenPNode (PNode *fexpr, String cvar, String nvar, PNode *body) {
     PNode *node = allocPNode(PNChildren);
     node->familyExpr = fexpr;
     node->childIden = cvar;

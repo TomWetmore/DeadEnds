@@ -15,8 +15,8 @@ static void unreadchar(int c);  // Unread a character to the current file.
 static bool reserved(String word, int *pval);  // Check whether an identifier is reserved.
 
 // Global variables.
-extern FILE* currentProgramFile;      // Current FILE* being parsed.
-extern int currentProgramLineNumber;;  // Current line number in file being parsed.
+extern FILE* currentFile;      // Current FILE* being parsed.
+extern int currentLine;;  // Current line number in file being parsed.
 
 // Define yylval here for now.
 extern SemanticValue yylval;  // Defined in y.tab.c
@@ -182,8 +182,8 @@ static int getTokenLow(void) {
 
 // inchar gets the next character from the Lexer.
 static int inchar(void) {
-    int c = getc(currentProgramFile);
-    if (c == '\n') currentProgramLineNumber++;
+    int c = getc(currentFile);
+    if (c == '\n') currentLine++;
     if (debugging) printf("+: '%c'\n", c);
     return c == EOF ? 0 : c;
 }
@@ -192,8 +192,8 @@ static int inchar(void) {
 static void unreadchar(int c) {
     if (c == 0) return;
     if (debugging) printf("-: '%c'\n", c);
-    ungetc(c, currentProgramFile);
-    if (c == '\n') currentProgramLineNumber--;
+    ungetc(c, currentFile);
+    if (c == '\n') currentLine--;
 }
 
 // rwordtable is the reserved word table; keep in alphabetical order.

@@ -10,8 +10,8 @@
 #include "utils.h"
 
 extern FILE* debugFile;
-static bool timing = true;
-bool importDebugging = true;
+static bool timing = false;
+bool importDebugging = false;
 
 // importFromFiles imports a list of Gedcom files into a List of Databases, one per file. If errors
 // are found in a file the file's Database is not created and the ErrorLog will hold the errors.
@@ -51,16 +51,23 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 		deleteGNodeList(rootList, true);
 		return null;
 	}
-	// Create the record indexes.
+	// Create the record indexes and root lists.
 	RecordIndex* personIndex = createRecordIndex();
 	RecordIndex* familyIndex = createRecordIndex();
 	RecordIndex* recordIndex = createRecordIndex();
+	RootList* personRoots = createRootList();
+	RootList* familyRoots = createRootList();
 	FORLIST(rootList, element)
 		GNodeListEl* el = (GNodeListEl*) element;
 		GNode* root = el->node;
 		if (root->key) addToRecordIndex(recordIndex, root->key, root, el->line);
-		if (recordType(root) == GRPerson) addToRecordIndex(personIndex, root->key, root, el->line);
-		else if (recordType(root) == GRFamily) addToRecordIndex(familyIndex, root->key, root, el->line);
+		if (recordType(root) == GRPerson) {
+			addToRecordIndex(personIndex, root->key, root, el->line);
+			insertInRootList(personRoots, root);
+		} else if (recordType(root) == GRFamily) {
+			addToRecordIndex(familyIndex, root->key, root, el->line);
+			insertInRootList(familyRoots, root);
+		}
 	ENDLIST
 	deleteGNodeList(rootList, false);
 	// Create the Database and add the indexes.
@@ -68,6 +75,8 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 	database->recordIndex = recordIndex;
 	database->personIndex = personIndex;
 	database->familyIndex = familyIndex;
+	database->personRoots = personRoots;
+	database->familyRoots = familyRoots;
 	if (importDebugging) summarizeDatabase(database);
 	if (timing) printf("%s: database created.\n", getMillisecondsString());
 	// Validate persons and families.

@@ -5,7 +5,7 @@
 // read and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 21 July 2024.
+// Last changed 28 July 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -20,8 +20,7 @@
 
 extern FILE* debugFile;
 extern bool importDebugging;
-bool indexNameDebugging = true;
-//static int keyLineNumber(Database*, String key);
+bool indexNameDebugging = false;
 
 // createDatabase creates a database.
 Database *createDatabase(String filePath) {

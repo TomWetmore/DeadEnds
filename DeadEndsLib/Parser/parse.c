@@ -2,9 +2,8 @@
 //
 // parse.c contains two functions, parseProgram and parseFile, which parse DeadEnds scripts.
 //
-//  Created by Thomas Wetmore on 4 January 2023.
-//  Last changed on 20 April 2024.
-//
+// Created by Thomas Wetmore on 4 January 2023.
+// Last changed on 27 July 2024.
 
 #include "parse.h"
 #include <stdarg.h>
@@ -18,82 +17,61 @@
 #include "pnode.h"
 #include <unistd.h>  // sleep.
 
-static bool debugging = true;  //  Turn on local debugging in this file.
-extern bool programParsing;     //  True when program files are being parsed.
+static bool debugging = false;
+extern bool programParsing;
 
-//  Global variables defined and created here. Not mentioned in header files.
-//--------------------------------------------------------------------------------------------------
-SymbolTable *globalTable;             // Table of global variables.
-FunctionTable *functionTable;         // Table of user-defined functions.
-FunctionTable *procedureTable;        // Table of user-defined procedures.
-List *pendingFileList;                // List of names of the files to be parsed.
-String currentProgramFileName = null; // Name of file being parsed
-FILE *currentProgramFile = null;      // File structure of the file being parsed.
-int currentProgramLineNumber = 1;     // Current line number in file being parsed.
+// Shared global variables.
+SymbolTable* globalTable; // Global variables.
+FunctionTable* functionTable; // User functions.
+FunctionTable* procedureTable; // User procedures.
+List* pendingFiles; // Files to be parsed.
+String currentFileName = null; // File being parsed
+FILE* currentFile = null; // FILE being parsed.
+int currentLine = 1; // Line number in current file.
 
-static void parseFile(String fileName, String searchPath);
+static void parseFile(String file, String path);
 
 // parseProgram parses a DeadEnds script and prepares for interpreting. A file name and search
-// path are passed in. The file may include other files. This function is called on each.
+// path are passed in. The file may include other files. parseFile is called on each.
 void parseProgram(String fileName, String searchPath) {
-    pendingFileList = createList(null, null, null, false); // Queue of files to parse.
-    prependToList(pendingFileList, fileName); // Add first file to queue.
+    pendingFiles = createList(null, null, null, false);
+    prependToList(pendingFiles, fileName);
+	Set* included = createStringSet(); // Parsed so far.
     programParsing = true;
 
-    //  Use an IntegerTable to simulate a Set.
-    Set* includedFileSet = createStringSet();
+    globalTable = createSymbolTable();
+    procedureTable = createFunctionTable();
+    functionTable = createFunctionTable();
 
-    globalTable = createSymbolTable(); // Global symbol table.
-    procedureTable = createFunctionTable(); // User-defined procedures.
-    functionTable = createFunctionTable();  // User-defined functions.
-
-    while (!isEmptyList(pendingFileList)) {
-        String pendingFile = (String) getLastListElement(pendingFileList); // Dequeue file.
-        if (!isInSet(includedFileSet, pendingFile)) {
-            addToSet(includedFileSet, pendingFile);
-
-            // Parse the file. This may add elements to the tables and the pending file set.
-            parseFile(pendingFile, searchPath);
+    while (!isEmptyList(pendingFiles)) { // Iterate the files.
+        String nextFile = (String) getLastListElement(pendingFiles);
+        if (!isInSet(included, nextFile)) {
+            addToSet(included, nextFile);
+            parseFile(nextFile, searchPath); // May add to pendingFiles.
         }
-        // Free the saved copy of the file name.
-        removeLastListElement(pendingFileList);
+        removeLastListElement(pendingFiles);
     }
-
-    // Done with the pending file list so delete it.
-    deleteList(pendingFileList);
-    pendingFileList = null;
-
-    // Done parsing.
+    deleteList(pendingFiles);
+    pendingFiles = null;
     programParsing = false;
 
     // If there were errors in the program say something about it.
     if (Perrors) { printf("The program contains errors.\n"); }
 }
 
-
-
-//  parseFile - Parse a program file. The function calls the yacc-generated yyparse function.
-//--------------------------------------------------------------------------------------------------
-static void parseFile(String fileName, String searchPath)
-//  fileName -- Name of the file to parse.
-//  searchPath -- Searchpath used to locate the file.
-{
-    // Make sure the file name makes sense.
+// parseFile parses a single script file with the yacc-generated parser.
+static void parseFile(String fileName, String searchPath) {
     if (!fileName || *fileName == 0) return;
-
-    // Set the global file name.
-    currentProgramFileName = fileName;
-    // Try to open the file for reading and handle errors.
-    currentProgramFile = fopenPath(fileName, "r", searchPath);
-    if (!currentProgramFile) {
-        printf("Error: file \"%s\" not found.\n", fileName);
-        currentProgramFileName = null;
+    currentFileName = fileName;
+    currentFile = fopenPath(fileName, "r", searchPath);
+    if (!currentFile) {
+        printf("Error: file \"%s\" cannot be found.\n", fileName);
+        currentFileName = null;
         Perrors++;
         return;
     }
-    if (debugging) printf("File %s found and about to be processed\n", fileName);
-    // The program file is open. Call yyparse to process it.
-    currentProgramLineNumber = 1;
-    yyparse();  // Use the yacc-generated parser to parse the file.
-    fclose(currentProgramFile);
+    if (debugging) printf("Parsing %s.\n", fileName);
+    currentLine = 1;
+    yyparse(); // Yacc parser.
+    fclose(currentFile);
 }
