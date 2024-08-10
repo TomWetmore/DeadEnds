@@ -3,7 +3,7 @@
 // validate.c has the functions that validate Gedcom records.
 //
 // Created by Thomas Wetmore on 12 April 2023.
-// Last changed on 9 July 2024.
+// Last changed on 31 July 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -13,28 +13,12 @@
 #include "errors.h"
 #include "refnindex.h"
 
-//static bool debugging = true;
-
 static bool validateSource(GNode*, Database*, ErrorLog*);
 static bool validateEvent(GNode*, Database*, ErrorLog*);
 static bool validateOther(GNode*, Database*, ErrorLog*);
 static bool validateRefns(Database *database, ErrorLog*);
 
 int numValidations = 0; // DEBUG.
-
-// validateDatabase validates a Database. DEPRECATED.
-bool validateDatabase(Database* database, ErrorLog* errorLog) {
-	ASSERT(database);
-	bool isOkay = true;
-	//if (!validatePersonIndex(database, errorLog)) isOkay = false;
-	//if (!validateFamilyIndex(database, errorLog)) isOkay = false;
-	//if (!validateSourceIndex(database, errorLog)) isOkay = false;
-	//if (!validateEventIndex(database, errorLog)) isOkay = false;
-	//if (!validateOtherIndex(database, errorLog)) isOkay = false;
-	//if (!validateNameIndex(database, errorLog)) isOkay = false;
-	//if (!validateRefns(database, errorLog)) isOkay = false;
-	return isOkay;
-}
 
 // validateSource validates a source record.
 static bool validateSource(GNode* source, Database* database, ErrorLog* errorLog) {

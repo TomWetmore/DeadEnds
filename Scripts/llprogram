@@ -1,6 +1,8 @@
 proc main()
 {
+	set(j, 1)
 	forindi(root, i) {
-		d(i) nl()
+		d(j) " " key(root) " " name(root) nl()
+		set(j, add(j, 1))
 	}
 }

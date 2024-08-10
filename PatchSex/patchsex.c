@@ -4,14 +4,12 @@
 // INDI records, and adds them in INDI records that do not have one.
 //
 // Created by Thomas Wetmore on 10 July 2024.
-// Last changed on 23 July 2024.
+// Last changed on 10 August 2024.
 
 #include "patchsex.h"
 #include "splitjoin.h"
 #include "utils.h"
 #include "file.h"
-
-FILE* debugFile; // Get rid of this.
 
 static void patchSexLine(GNode*, int);
 

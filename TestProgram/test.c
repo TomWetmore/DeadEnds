@@ -3,7 +3,7 @@
 //  test.c holds test functions used during development.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 9 June 2024.
+//  Last changed on 30 July 2024.
 
 #include <stdio.h>
 #include "standard.h"
@@ -21,9 +21,7 @@
 #include "utils.h"
 #include "stringtable.h"
 
-FILE* debugFile = null;
-bool useDebugFile = true;
-
+static bool debugging = true;
 extern String currentFileName;
 extern int currentLine;
 extern FunctionTable *procedureTable;
@@ -43,7 +41,6 @@ extern bool validateDatabase(Database*, ErrorLog*);
 static void countNodesBeforeTest(Database*, int);
 extern void testGedcomStrings(int);
 extern void testWriteDatabase(String file, Database*);
-static void testKeyGeneration(int);
 
 extern Database* importDatabaseTest(ErrorLog*, int);
 
@@ -53,28 +50,19 @@ int main(void) {
 	int testNumber = 0;
 	Database* database = importDatabaseTest(errorLog, ++testNumber);
 	//testGedcomStrings(++testNumber);
-	if (useDebugFile) {
-		debugFile = fopen("/Users/ttw4/debug.txt", "w");
-		if (debugFile == null) {
-			printf("Could not open the debug file: quitting\n");
-			exit(2);
-		}
-	}
 	bool validated = false;
 	showErrorLog(errorLog);
 
-	//if (database) listTest(database, ++testNumber);
-	//if (database) forHashTableTest(database, ++testNumber);
-	//if (database) showHashTableTest(database->personIndex, ++testNumber);
-	//if (database) indexNamesTest(database, ++testNumber);
-	//if (database) testSequence(database, ++testNumber);
+	if (database) listTest(database, ++testNumber);
+	if (database) forHashTableTest(database, ++testNumber);
+	if (database) showHashTableTest(database->personIndex, ++testNumber);
+	if (database) indexNamesTest(database, ++testNumber);
+	if (database) testSequence(database, ++testNumber);
 	validated = true;
-	//if (database) forTraverseTest(database, ++testNumber);
-	//if (database && validated) parseAndRunProgramTest(database, ++testNumber);
+	if (database) forTraverseTest(database, ++testNumber);
+	if (database && validated) parseAndRunProgramTest(database, ++testNumber);
 	if (database && validated) countNodesBeforeTest(database, ++testNumber);
-	//testWriteDatabase("/Users/ttw4/output.ged", database);
-	fclose(debugFile);
-	//testKeyGeneration(++testNumber);
+	testWriteDatabase("/Users/ttw4/output.ged", database);
 	return 0;
 }
 
@@ -144,7 +132,7 @@ void parseAndRunProgramTest(Database *database, int testNumber) {
 	printf("\n%d: START OF PARSE AND RUN PROGRAM TEST: %2.3f\n", testNumber, getMilliseconds());
 	//parseProgram("llprogram", "/Users/ttw4/Desktop/DeadEnds/Reports/");
 	//parseProgram("scriptindiseq", "/Users/ttw4/Desktop/DeadEnds/Reports/");
-	parseProgram("scriptlist", "/Users/ttw4/Desktop/DeadEnds/Reports/");
+	parseProgram("llprogram", "/Users/ttw4/Desktop/DeadEnds/Scripts");
 	printf("Finished parsing: %2.3f\n", getMilliseconds());
 
 	currentFileName = "internal";
@@ -195,7 +183,7 @@ static void showHashTableTest(RecordIndex* index, int testNumber) {
 // indexNamesTest tests the indexNames function.
 static void indexNamesTest(Database* database, int testNumber) {
 	printf("\n%d: START OF INDEX NAMES TEST\n", testNumber);
-	indexNames(database);
+	getNameIndexForDatabase(database);
 	printf("END OF INDEX NAMES TEST\n");
 }
 

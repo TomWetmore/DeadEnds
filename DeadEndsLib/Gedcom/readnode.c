@@ -4,7 +4,7 @@
 // and strings.
 //
 // Created by Thomas Wetmore on 17 December 2022.
-// Last changed on 2 July 2024.
+// Last changed on 10 August 2024.
 
 #include "readnode.h"
 #include "stringtable.h"
@@ -14,7 +14,6 @@
 #include "file.h"
 
 extern bool importDebugging;
-extern FILE* debugFile;
 
 // Variables that maintain state between functions.
 String xfileName;

@@ -17,3 +17,6 @@ lib$(LIBNAME).a: $(OFILES)
 %.c: %.y
 #	oyacc -d $<
 #	cp -f y.tab.c $@
+
+clean:
+	rm *.o *.a

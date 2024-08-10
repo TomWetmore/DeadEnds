@@ -3,13 +3,12 @@
 // import.c has functions that import Gedcom files into internal structures.
 //
 // Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 21 July 2024.
+// Last changed on 10 August 2024.
 
 #include "import.h"
 #include "validate.h"
 #include "utils.h"
 
-extern FILE* debugFile;
 static bool timing = false;
 bool importDebugging = false;
 

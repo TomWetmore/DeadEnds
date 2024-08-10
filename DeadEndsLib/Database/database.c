@@ -18,7 +18,6 @@
 #include "rootlist.h"
 #include "writenode.h"
 
-extern FILE* debugFile;
 extern bool importDebugging;
 bool indexNameDebugging = false;
 

@@ -4,13 +4,12 @@
 // customization.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 5 July 2024.
+// Last changed on 31 July 2024.
 
 #include "standard.h"
 #include "hashtable.h"
 #include "sort.h"
 
-bool debugging = true;
 bool debuggingHash = false;
 bool sortChecking = false;
 extern FILE* debugFile;
@@ -20,7 +19,7 @@ static void* searchBucket(Bucket*, String key, String(*g)(void*), int(*c)(String
 // createHashTable creates and returns a HashTable. getKey is a function that returns the key of
 // an element, and delete is an optional function that frees an element.
 HashTable* createHashTable(String(*getKey)(void*), int(*compare)(String, String),
-						   void(*delete)(void*), int numBuckets) { PH;
+						   void(*delete)(void*), int numBuckets) {
 	HashTable *table = (HashTable*) malloc(sizeof(HashTable));
 	table->compare = compare;
 	table->delete = delete;
@@ -255,14 +254,14 @@ int iterateHashTableWithPredicate(HashTable* table, bool (*predicate)(void*)) { 
 	return count;
 }
 
-// showHashTable is a debugging function that shows the contents of a hash table.
-void showHashTable(HashTable* table, void (*show)(void*)) { //PH;
+// showHashTable shows the contents of a hash table, including bucket and element indexes.
+// show is a function to show an element. For debugging.
+void showHashTable(HashTable* table, void (*show)(void*)) {
 	int count = 0;
 	FORHASHTABLE(table, element)
 		printf("%d %d ", __i, __j);
-		(*show)(element);
+		if (show) (*show)(element);
 		count++;
-		//printf("\n");
 	ENDHASHTABLE
 	printf("showHashTable showed %d elements\n", count);
 }

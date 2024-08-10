@@ -3,22 +3,28 @@
 // randomizekeys.c is the DeadEnds tool that randomizes the keys in a Gedcom file.
 //
 // Created by Thomas Wetmore on 14 July 2024.
-// Last changed on 21 July 2024.
+// Last changed on 10 August 2024.
 
 #include "randomizekeys.h"
-#include "stringtable.h"
-#include "writenode.h"
-#include "file.h"
 
-FILE* debugFile = null; // Need to get rid of this.
+static void getArguments(int, char**, String*);
+static void getEnvironment(String*);
+static void usage(void);
 static void goAway(ErrorLog*);
 
+static bool debugging = true;
+
 // main is the main program of the randomize keys batch program.
-int main(void) {
-	printf("randomize keys: %s: start.\n", getMillisecondsString());
+int main(int argc, char** argv) {
+	String gedcomFile = null;
+	String searchPath = null;
+	printf("%s: RandomizeKeys begin.\n", getMillisecondsString());
+	getArguments(argc, argv, &gedcomFile);
+	getEnvironment(&searchPath);
+	gedcomFile = resolveFile(gedcomFile, searchPath);
+	if (debugging) printf("Resolved file: %s\n", gedcomFile);
 	// Get the Gedcom records from a file.
-	String fileName = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/rekeyed.ged";
-	File* file = openFile(fileName, "r");
+	File* file = openFile(gedcomFile, "r");
 	ErrorLog* log = createErrorLog();
 
 	// Parse the Gedcom file and build a GNodeList of all of its records.
@@ -68,16 +74,44 @@ int main(void) {
 	ENDLIST
 	printf("ramdomize keys: %s: rekeyed records.\n", getMillisecondsString());
 
-	// Write the modified GNodeList as a new Gedcom file.
-	fileName = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/rekeyed.ged";
-	file = openFile(fileName, "w");
+	// Write the modified GNodeList to standard out.
 	FORLIST(roots, element)
 		GNodeListEl* el = (GNodeListEl*) element;
-		writeGNodeRecord(file->fp, el->node, false);
+		writeGNodeRecord(stdout, el->node, false);
 	ENDLIST
 	printf("ramdomize keys: %s: wrote gedcom file.\n", getMillisecondsString());
-	closeFile(file);
 	return 0;
+}
+
+// getFileArguments gets the file names from the command line. They are mandatory.
+static void getArguments(int argc, char* argv[], String* gedcomFile) {
+	int ch;
+	while ((ch = getopt(argc, argv, "g:")) != -1) {
+		switch(ch) {
+		case 'g':
+			*gedcomFile = strsave(optarg);
+			break;
+		case '?':
+		default:
+			usage();
+			exit(1);
+		}
+	}
+	if (!*gedcomFile) {
+		usage();
+		exit(1);
+	}
+}
+
+// getEnvironment checks for the DE_GEDCOM_PATH env variable.
+static void getEnvironment(String* gedcomPath) {
+	*gedcomPath = getenv("DE_GEDCOM_PATH");
+	if (!*gedcomPath) *gedcomPath = ".";
+}
+
+// usage prints the RunScript usage message.
+static void usage(void) {
+	fprintf(stderr, "usage: RandomizeKeys -g gedcomfile\n");
 }
 
 static void goAway(ErrorLog* log) {

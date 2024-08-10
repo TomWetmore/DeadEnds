@@ -3,7 +3,7 @@ CFLAGS=-c -g -Wall -Wno-unused-function -Wno-unused-but-set-variable
 INCLUDES=-I./Includes -I../DataTypes/Includes -I../Gedcom/Includes -I../Utils/Includes -I../Validate/Includes
 AR=ar
 ARFLAGS=-cr
-OFILES=database.o nameindex.o recordindex.o import.o addops.o removeops.o refnindex.o rootlist.o
+OFILES=database.o nameindex.o recordindex.o import.o removeops.o refnindex.o rootlist.o
 LIBNAME=database
 
 lib$(LIBNAME).a: $(OFILES)
@@ -11,3 +11,6 @@ lib$(LIBNAME).a: $(OFILES)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) $<
+
+clean:
+	rm *.o *.a
