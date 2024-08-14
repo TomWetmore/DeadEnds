@@ -2,8 +2,8 @@
 //  personmenu.c
 //  UseMenus
 //
-//  Created by Thomas Wetmore on 8/5/24.
-//
+//  Created by Thomas Wetmore on 5 August 2024.
+// Last changed on 10 August 2024
 
 #include "personmenu.h"
 

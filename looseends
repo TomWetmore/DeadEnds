@@ -1,0 +1,137 @@
+------------------------------------------------------------------------------------------
+LIST OF LOOSEENDS FOR DEADENDS -- BEGAN ON 12 MARCH 2023.
+------------------------------------------------------------------------------------------
+OPEN LOOSEENDS
+------------------------------------------------------------------------------------------
+26 May 2023
+o  My Gedcom file has sequential I keys for persons and F keys for families. This is not a
+   guarantee. Fix DeadEnds to handle funny keys.
+
+18 May 2023
+o  Does descendentset work in the programming language?
+
+10 May 2023
+o  If a function call in a deadends program appears before the definition of the function,
+   an undefined error is emitted.
+o  Find the bug in testtraverse.
+
+ 5 May 2023
+o  Want the keys in the Gedcom nodes to have the @-signs. Want the database keys to not have
+   the @-signs. So fakeImport is in error.
+
+30 April 2023
+o  Sequences use a different quicksort than hash table buckets and lists. Get them all usng the
+   same sort functions.
+
+21 April 2023
+o  Put PValueTable into its own file.
+
+14 April 2023
+o  Get the looping macros (FORCHILDREN, etc.) under better control.
+o  When importing why is there one less call to insertInHashtable than there is to storeRecord?
+
+12 April 2023
+o  When nameString removes slashes it doesn't make sure there is a space between parts.
+
+11 April 2023
+o  When should names be indexed?
+
+ 9 April 2023
+0  modify evaluateBoolean to return a boolean.
+
+ 6 April 2023
+o  in removeFromHashTable use a binary search when the bucket reaches the sort threshold.
+
+ 5 April 2023
+o  Really, really have to get the quick sort code straightened out.
+
+ 1 April 2023
+o  evaluateBoolean does not work like LifeLines, so programs will break.
+
+31 March 2023
+o  Name keys should be stored in a string table because there will be many duplicates.
+o  How do I implement the remove_name feature from LifeLines. (Not needed until the
+   database edit features are added.)
+
+25 March 2023
+o  Why are the hash table derivatives using the bucket functions?
+
+18 March 2023
+o  nameToKey() in name.c allocates a new string for every key it creates.
+
+17 March 2023
+o  Devise a scheme for breaking the built-in functions into smaller, functionally based
+   files.
+o  And how about the __root built-in; where should it go?
+o  __xref should deprecated in favor of __key; reconcile the differences between the
+   current versions of __xref and __key.
+o  Where should __savenode go?
+
+16 March 2023
+o  Decide how to handle the report output file. It's a little complicated in LifeLines.
+o  Get createnode() and related builtin figured out and working.
+
+14 March 2023
+o  Fix the SOMETHING ELSE laziness.
+o  Function uniqueSequenceInPlace() has a memory leak.
+o  Finalize the new name index and clean out old LifeLines code.
+
+12 March 2023
+o  When sequences are deleted, how do we handle the value fields. Currently we do nothing.
+o  There is no access in the programming langage for getting the sequences of fathers or
+   mothers or families.
+
+------------------------------------------------------------------------------------------
+CLOSED LOOSEENDS
+------------------------------------------------------------------------------------------
+
+12 March 2023
+o  Rules for memory managment of names in sequences. Decision was to have the sequence
+   element own its copy of he name, and below, it owns its own copy of the key.`
+o  Rules for memory management for the keys in sequences. Are they allocated before
+   appendToSequence() is called or are they allocated by appendToSequence()? Decision
+   was to give the responsibility to allocate to appendToSequence().
+o  Sort out the number of spouses functions.
+o  prog_error() doesn't seem to use the VARARGS arguments properly. Resolved. It called
+   printf instead of vprintf.
+
+13 March 2023
+o  Sort out the number of families functions.
+o  Remove the pv macro and replace it with uses of PVALUE and PV. Resolve the issues.
+o  Test personToNextSibling to see if @-removal done rightr in keyToPerson call. Resolved
+   by adding calls to rmvat. Also applied to personToPreviousSibling.
+
+14 March 2023
+o  Get the return() and return(expr) statements working. I was using pArguments instead of
+   pReturnExpr for the pnode return field.
+o  Test uniqueset builtin. Changed uniqueSequence to return a new sequence to hold the
+   unique elements. This may conflict with existing LifeLines report programs.
+o  Need two versions of uniqueSequence, the in-place version and the create new version.
+o  Get the evaluation of booleans working.
+o  Get the if statement working. To do so must get booleans going.
+o  Get the while statement working. To do so must get some boolean expressions working.
+
+15 March 2023
+o  Test the name index by creating and testing it in the fakc import process.
+o  Get familyToChildren(), personToSpouses(), personToFathers() & personToMothers() converted.
+o  Get builtins __and and __or converted.
+
+16 March 2023
+o  Get builtins __and and __or tested.
+o  Get familyToChildren(), personToSpouses(), personToFathers() & personToMothers() tested.
+
+17 March 2023
+o  The __key built-in should not be in persons file but in the pure node file. That file was
+   named intrpgnode.c
+
+22 March 2023
+o  Add keepSorted and sortThreshold to the List type to limit sorting when lists are small.
+
+31 March 2023
+o  Use HashTable to implement SymbolTable to replace the current use of Table as symbol
+   tables.
+o  Implement new hash table where keys are always strings.
+
+ 
+ 8 April 2023
+o  Bug in tag builtin after some changes. Isolate and fix.

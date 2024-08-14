@@ -22,7 +22,7 @@ extern SymbolTable *globalTable; /* Global variables.*/
 extern FunctionTable *procedureTable;/* User procedures.*/
 extern FunctionTable *functionTable; /* User functions.*/
 extern List *pendingFiles; /* Pending list of included files.*/
-extern int currentLine; /* Line number in current file.*/
+extern int curLine; /* Line number in current file.*/
 
 static PNode *this, *prev;
 
@@ -553,8 +553,8 @@ void join(PNode* list, PNode* last) {
 }
 
 void yyerror(String str) {
-	extern String currentFileName;
-	printf("Syntax Error (%s): %s: line %d\n", str, currentFileName, currentLine);
+	extern String curFileName;
+	printf("Syntax Error (%s): %s: line %d\n", str, curFileName, curLine);
 	Perrors++;
 }
 #line 553 "y.tab.c"
@@ -1100,7 +1100,7 @@ break;
 case 56:
 #line 282 "grammar.y"
 {
-        yyval.integer = currentLine;
+        yyval.integer = curLine;
     }
 break;
 #line 1099 "y.tab.c"

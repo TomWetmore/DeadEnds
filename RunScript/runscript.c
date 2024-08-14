@@ -1,26 +1,27 @@
 // DeadEnds
 //
-// main.c is the DeadEnds RunScript program.
-// 1. RunScript creates a Database from a Gedcom file.
-// 2. It parses a script file and builds the internal form of the program.
-// 3. It runs the script on the database and writes ouput to stdout.
+// main.c is the DeadEnds RunScript program. It has three steps.
+//  1. Create a Database from a Gedcom file.
+//  2. Parse a DeadEnds script file into its internal form.
+//  3. Runs the script on the Ddatabase and writes any output to stdout.
 //
-// usage: RunScript -g gedcomfile -s scriptfile
+// usage: runscript -g gedcomfile -s scriptfile
 //
-// If DE_GEDCOM_PATH or DE_SCRIPTS_PATH are in the environment, they may be used to find the files.
+// If DE_GEDCOM_PATH and/or DE_SCRIPTS_PATH are defined, they may be used to find the files.
 //
 // Created by Thomas Wetmore on 21 July 2024
-// Last changed on 10 August 2024.
+// Last changed on 13 August 2024.
 
 #include "runscript.h"
 
+// Local functions.
 static void usage(void);
 static void getArguments(int, char**, String*, String*);
 static void getEnvironment(String*, String*);
 static void getDatabase(void);
 static void runScript(Database*, String);
 
-// main is the main program for the RunScript command line program.
+// main is the main program of the RunScript program.
 int main(int argc, char* argv[]) {
 	// Get the files.
 	fprintf(stderr, "%s: RunScript started.\n", getMillisecondsString());
@@ -34,11 +35,11 @@ int main(int argc, char* argv[]) {
 	gedcomFile = resolveFile(gedcomFile, gedcomPath);
 	ErrorLog* errorLog = createErrorLog();
 	Database* database = gedcomFileToDatabase(gedcomFile, errorLog);
-	fprintf(stderr, "%s: Database created.\n", getMillisecondsString());
 	if (lengthList(errorLog)) {
 		showErrorLog(errorLog);
 		exit(1);
 	}
+	fprintf(stderr, "%s: Database created.\n", getMillisecondsString());
 	// Parse and run the script.
 	parseProgram(scriptFile, scriptPath);
 	fprintf(stderr, "%s: Script parsed.\n", getMillisecondsString());
@@ -69,7 +70,7 @@ void getArguments(int argc, char* argv[], String* gedcom, String* script) {
 	}
 }
 
-// getEnvironment checks for DE_GEDCOM_PATH or DE_SCRIPTS_PATH in the environment.
+// getEnvironment looks for DE_GEDCOM_PATH or DE_SCRIPTS_PATH in the environment.
 static void getEnvironment(String* gedcom, String* script) {
 	*gedcom = getenv("DE_GEDCOM_PATH");
 	*script = getenv("DE_SCRIPTS_PATH");
@@ -77,13 +78,16 @@ static void getEnvironment(String* gedcom, String* script) {
 	if (!*script) *script = ".";
 }
 
-// runScript runs a script by interpreting the main proc.
-extern String currentFileName;
-extern int currentLine;
+// runScript runs a script by interpreting its main proc. After a script is parsed there must
+// be a proc named "main" in the global procedureTable. runScript creates a PNode to call that
+// proc, then creates the Context to call it in, and then calls it. The Context consists of the
+// Database and the main proc's SymbolTable.
+extern String curFileName;
+extern int curLine;
 void runScript(Database* database, String fileName) {
 	// Create a PNode to call the main proc.
-	currentFileName = "internal";
-	currentLine = 1;
+	curFileName = "internal";
+	curLine = 1;
 	PNode* pnode = procCallPNode("main", null);
 	// Call the main proc.
 	SymbolTable* symbols = createSymbolTable();
@@ -93,5 +97,5 @@ void runScript(Database* database, String fileName) {
 
 // usage prints the RunScript usage message.
 static void usage(void) {
-	fprintf(stderr, "usage: RunScript -g gedcomfile -s scriptfile\n");
+	fprintf(stderr, "usage: runscript -g gedcomfile -s scriptfile\n");
 }

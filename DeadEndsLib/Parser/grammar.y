@@ -17,7 +17,7 @@ extern SymbolTable *globalTable; // Global variables.
 extern FunctionTable *procedureTable;// User procedures.
 extern FunctionTable *functionTable; // User functions.
 extern List *pendingFiles; // Pending list of included files.
-extern int currentLine; // Line number in current file.
+extern int curLine; // Line number in current file.
 
 static PNode *this, *prev;
 
@@ -280,7 +280,7 @@ static void yyerror(String str);
     }
     ;
     m	:	/* empty */ {
-        $$ = currentLine;
+        $$ = curLine;
     }
 
 %%
@@ -298,7 +298,7 @@ void join(PNode* list, PNode* last) {
 }
 
 void yyerror(String str) {
-	extern String currentFileName;
-	printf("Syntax Error (%s): %s: line %d\n", str, currentFileName, currentLine);
+	extern String curFileName;
+	printf("Syntax Error (%s): %s: line %d\n", str, curFileName, curLine);
 	Perrors++;
 }

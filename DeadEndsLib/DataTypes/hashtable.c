@@ -4,7 +4,7 @@
 // customization.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 31 July 2024.
+// Last changed on 10 August 2024.
 
 #include "standard.h"
 #include "hashtable.h"
@@ -12,7 +12,6 @@
 
 bool debuggingHash = false;
 bool sortChecking = false;
-extern FILE* debugFile;
 
 static void* searchBucket(Bucket*, String key, String(*g)(void*), int(*c)(String, String), int* index);
 

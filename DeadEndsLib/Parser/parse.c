@@ -25,9 +25,9 @@ SymbolTable* globalTable; // Global variables.
 FunctionTable* functionTable; // User functions.
 FunctionTable* procedureTable; // User procedures.
 List* pendingFiles; // Files to be parsed.
-String currentFileName = null; // File being parsed
+String curFileName = null; // File being parsed
 FILE* currentFile = null; // FILE being parsed.
-int currentLine = 1; // Line number in current file.
+int curLine = 1; // Line number in current file.
 
 static void parseFile(String file, String path);
 
@@ -62,16 +62,16 @@ void parseProgram(String fileName, String searchPath) {
 // parseFile parses a single script file with the yacc-generated parser.
 static void parseFile(String fileName, String searchPath) {
     if (!fileName || *fileName == 0) return;
-    currentFileName = fileName;
+    curFileName = fileName;
     currentFile = fopenPath(fileName, "r", searchPath);
     if (!currentFile) {
         printf("Error: file \"%s\" cannot be found.\n", fileName);
-        currentFileName = null;
+        curFileName = null;
         Perrors++;
         return;
     }
     if (debugging) printf("Parsing %s.\n", fileName);
-    currentLine = 1;
+    curLine = 1;
     yyparse(); // Yacc parser.
     fclose(currentFile);
 }

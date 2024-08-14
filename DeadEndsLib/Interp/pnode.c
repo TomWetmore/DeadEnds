@@ -23,8 +23,8 @@ String pnodeTypes[] = {
 };
 
 extern FunctionTable *functionTable;  // parse.c
-extern String currentFileName;  // parse.c; used to set the file name of PNodes.
-extern int currentLine;   // parse.c; used to set the line numbers of PNodes.
+extern String curFileName;  // parse.c; used to set the file name of PNodes.
+extern int curLine;   // parse.c; used to set the line numbers of PNodes.
 
 // showPNode shows a PNode useful for debugging.
 void showPNode(PNode* pnode) {
@@ -70,11 +70,11 @@ static void setParents(PNode* list, PNode* parent); // Set the parents of a PNod
 static PNode* allocPNode(int type) {
     PNode* node = (PNode*) stdalloc(sizeof(*node));
     if (debugging) {
-        printf("allocPNode(%d) %s, %d\n", type, currentFileName, currentLine);
+        printf("allocPNode(%d) %s, %d\n", type, curFileName, curLine);
     }
     node->type = type;
-    node->fileName = strsave(currentFileName); // TODO: MEMORY!!!!!!!!!
-    node->lineNumber = currentLine; // Overwritten by the yacc m production?
+    node->fileName = strsave(curFileName); // TODO: MEMORY!!!!!!!!!
+    node->lineNumber = curLine; // Overwritten by the yacc m production?
     return node;
 }
 
