@@ -410,8 +410,7 @@ format_year (int yr,
     return (String) scratch;
 }
 
-//  extractDate -- Attempt to extract a date from free format string.
-//--------------------------------------------------------------------------------------------------
+//  extractDate attempts to extract a date from a free format String.
 void extractDate (String str, int *pmod, int *pda, int *pmo, int *pyr, String *pyrstr)
 //  str -- String assumed to hold a date in some format.
 //  pmod -- Month or day ???

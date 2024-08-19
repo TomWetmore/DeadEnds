@@ -83,9 +83,39 @@ AskReturn askForStringInSet(String msg, List* strings, int returnSet, String* re
 	return askOkay; // Will never get here.
 }
 
-AskReturn askForAnyString(String msg, int returnSet, String* result) {
-	printf("%s: ", msg);
-	return askOkay;
+AskReturn askForString(String msg, int returnSet, String* result) {
+	static char response[256];
+	printf("%s: ", msg); // Try first time outside retry loop.
+	fgets(response, sizeof(response), stdin);
+	response[strcspn(response, "\n")] = 0;
+	if (strlen(response)) {
+		*result = response;
+		return askOkay;
+	}
+	while (true) { // Retry loop.
+		if (returnSet & askQuit) {
+			printf("Please enter a string or q to quit :");
+			fgets(response, sizeof(response), stdin);
+			response[strcspn(response, "\n")] = 0;
+			if (strcmp(response, "q")) {
+				*result = null;
+				return askQuit;
+			}
+			if (strlen(response)) {
+				*result = response;
+				return askOkay;
+			}
+		} else {
+			printf("Please enter a string: ");
+			fgets(response, sizeof(response), stdin);
+			response[strcspn(response, "\n")] = 0;
+			if (strlen(response)) {
+				*result = response;
+				return askOkay;
+			}
+		}
+	}
+	return askOkay; // Will never get here.
 }
 
 
@@ -110,9 +140,9 @@ bool isInStringList(String string, List* strings) {
 	return false;
 }
 
-// createStringList creates a List of Strings of any non-zero length. Caller must use null
-// as the last argument to end the list.
-// MNOTE: User is responible for freeing the list; when freed the elements are also freed.
+// createStringList creates a List of Strings of any non-zero length. Caller must pass null as
+// the last argument to end the list.
+// MNOTE: User is responible for freeing the list; when freed the String elements are also freed.
 static void del(void* element) { stdfree(element); }
 List* createStringList(String first, ...) {
 	va_list args;
@@ -122,7 +152,7 @@ List* createStringList(String first, ...) {
 		appendToList(list, strsave(arg));
 	}
 	va_end(args);
-	return list; // MNOTE: Caller is responsible for freeing.
+	return list; // MNOTE: Caller responsible for freeing.
 }
 
 // askForPattern asks the user to enter a String that matches a regular expression.
@@ -174,5 +204,23 @@ AskReturn askForPattern(String msg, String pattern, int returnSet, String* resul
 		}
 	}
 	return askOkay; // Cannot get here.
+}
+
+AskReturn askForPerson(Database* database, int codes, GNode** proot) {
+	String name = null;
+	// Ask first time outside of loop.
+	AskReturn rcode = askForString("Enter the name of a person: ", askQuit, &name);
+	if (rcode == askQuit) return rcode; // User backed out.
+
+	return askOkay;
+}
+
+AskReturn getPersonFromName(Database* database, String name, GNode** root) {
+	// Get the list of persons who match the name.
+	// If the list is of length one, return that one person.
+	// Get user to choose person from a List.
+	// If user doesn't choose return askQuit.
+	// If user does choose return askOkay with the GNode* of the person's root.
+	return askOkay;
 }
 

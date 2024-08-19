@@ -1,9 +1,8 @@
+// personmenu.h
+// UseMenus
 //
-//  personmenu.h
-//  UseMenus
-//
-//  Created by Thomas Wetmore on 8/5/24.
-// Last changed on 6 August 2024.
+// Created by Thomas Wetmore on 5 August 2024.
+// Last changed on 15 August 2024.
 
 #ifndef personmenu_h
 #define personmenu_h
@@ -12,7 +11,9 @@
 #include "sequence.h"
 #include "gnode.h"
 #include "lineage.h"
+#include "name.h"
 
+// BrowseReturn is the type of return codes from some menu operations.
 typedef enum {
 	browseQuit,
 	browseFamily,
@@ -21,4 +22,4 @@ typedef enum {
 	browseTandem,
 } BrowseReturn;
 
-#endif /* personmenu_h */
+#endif // personmenu_h

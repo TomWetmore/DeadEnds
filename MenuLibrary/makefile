@@ -1,6 +1,6 @@
 CC=clang
 CFLAGS=-c -g -Wall -Wno-unused-function
-INCLUDES=-I./Includes -I../DeadEndsLib/Utils/Includes -I../DeadEndsLib/DataTypes/Includes
+INCLUDES=-I./Includes -I../DeadEndsLib/Utils/Includes -I../DeadEndsLib/DataTypes/Includes -I../DeadEndsLib/Database/Includes -I../DeadEndsLib/Gedcom/Includes	
 AR=ar
 ARFLAGS=-cr
 OFILES=ask.o menu.o

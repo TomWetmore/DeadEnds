@@ -1,6 +1,6 @@
-# Files and File Names (and Line Numbers)
+# Files, File Names and Line Numbers
 
-DeadEnds reads files. Specifically it reads Gedcom files to build databases and it read DeadEndScript files to be run agains tht databases.
+DeadEnds reads Gedcom files and builds Databases from them, and read DeadEndScript files that are programs that run against the contents of databases.
 
 ## Gedcom Files
 

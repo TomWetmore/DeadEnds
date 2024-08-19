@@ -9,8 +9,8 @@ But Gedcom keys can have many formats. A key is called a *cross reference identi
 |key:|@ keychar+ @|
 |keychar:| [A_Z] \| [0-9] \| _|
 
-The non-@ part of a key can be a single character; the characters allowed are uppercase ASCII, the underscore (U005F) and the ten ASCII digits.
-DeadEnds has the Sequence data type that implements lists of persons and several operations on those lists. To perform some of the operations the sequences they must be sorted, and the sorting is often based on the record keys. The following compare function is used so the psuedo-number keys are sorted propertly among themselves.
+The non-@ part of a key can be a single character; the characters allowed are uppercase ASCII letters, the underscore (U005F) and the ten ASCII digits.
+DeadEnds has the Sequence data type that implements lists of persons and several operations on those lists. To perform some of the operations the sequences must be sorted, and the sorting is often based on the record keys. The following compare function is used so the psuedo-number keys are sorted propertly among themselves.
 
 ```
 //  compareRecordKeys -- Compare function for record keys.

@@ -1,9 +1,9 @@
 // DeadEnds
 //
-// builtin.c contains many of the built-in functions of the DeadEnds script language.
+// builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 2 May 2024.
+// Last changed on 19 August 2024.
 
 #include "standard.h"
 #include "gnode.h"    // GNode.
@@ -15,7 +15,6 @@
 #include "recordindex.h" // searchRecordIndex.
 #include "database.h"    // personIndex, familyIndex.
 #include "hashtable.h"
-//#include "gedcom.h"
 #include "evaluate.h"  // evaluate.
 #include "path.h"      // fopenPath.
 #include "symboltable.h"
@@ -40,7 +39,6 @@ bool isZeroVUnion(PVType type, VUnion vunion)
 		default: return false;
 	}
 }
-
 
 // * __getint -- Have user provide integer
 // *   usage: getint(IDEN [,STRING]) --> VOID
@@ -165,7 +163,7 @@ bool isZeroVUnion(PVType type, VUnion vunion)
 //    return NULL;
 //}
 
-// __strsoundex computes the DeadEnds SOUNDEX function a string.
+// __strsoundex computes the DeadEnds version of the SOUNDEX function of a String.
 // usage: strsoundex(STRING) -> STRING
 PValue __strsoundex(PNode* expr, Context* context, bool* eflg) {
 	PValue pvalue = evaluate(expr->arguments, context, eflg);
@@ -451,8 +449,6 @@ PValue __root (PNode *pnode, Context *context, bool *errflg)
 	return PVALUE(PVGNode, uGNode, gnode);
 }
 
-
-
 //  __extractdate -- Extract date from EVENT or DATE NODE
 //    usage: extractdate(NODE, VARB, VARB, VARB) -> VOID
 //--------------------------------------------------------------------------------------------------
@@ -539,13 +535,11 @@ PValue __extractnames (PNode *pnode, Context *context, bool *errflg)
 	return nullPValue;
 }
 
-/*===============================================================
- * _extractplaces -- Extract place parts from event or PLAC NODE.
- *   usage: extractplaces(NODE, LIST, VARB) -> VOID
- *=============================================================*/
-PValue __extractplaces (PNode *pnode, Context *context, bool *errflg)
-{
-	// Get the PLAC GNode to extract the places from.
+// _extractplaces extracts the place phrases from an event or PLAC GNode.
+// usage: extractplaces(NODE, LIST, VARB) -> VOID
+// MNOTE: decide how to handle freeing the List.
+PValue __extractplaces (PNode *pnode, Context *context, bool *errflg) {
+	// Get the PLAC GNode to extract the place phrases from.
 	PNode *nexp = pnode->arguments;
 	GNode *place = evaluateGNode(nexp, context, errflg);
 	if (*errflg) {

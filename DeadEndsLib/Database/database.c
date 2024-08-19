@@ -149,22 +149,22 @@ void showTableSizes(Database *database) {
 
 // getNameIndexForDatabase indexes all person names in a database.
 void getNameIndexForDatabase(Database* database) {
-	int numNamesEncountered = 0;
+	int numNamesFound = 0; // For debugging.
 	NameIndex* nameIndex = createNameIndex();
-	FORHASHTABLE(database->personIndex, element)
+	FORHASHTABLE(database->personIndex, element) // Loop over all persons.
 		RecordIndexEl* el = element;
 		GNode* root = el->root;
-		String recordKey = root->key;
+		String recordKey = root->key; // Key of record, used as is in name index.
 		for (GNode* name = NAME(root); name && eqstr(name->tag, "NAME"); name = name->sibling) {
 			if (name->value) {
-				numNamesEncountered++;
-				String nameKey = nameToNameKey(name->value);
+				numNamesFound++; // For debugging.
+				String nameKey = nameToNameKey(name->value); // MNOTE: points to static memory.
 				insertInNameIndex(nameIndex, nameKey, recordKey);
 			}
 		}
 	ENDHASHTABLE
 	database->nameIndex = nameIndex;
-	if (indexNameDebugging) printf("the number of names encountered is %d.\n", numNamesEncountered);
+	if (indexNameDebugging) printf("the number of names encountered is %d.\n", numNamesFound);
 }
 
 // keyLineNumber returns the line in the Gedcome file where the record with the given key began.

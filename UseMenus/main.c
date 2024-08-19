@@ -3,51 +3,119 @@
 // UseMenus
 //
 // Created by Thomas Wetmore on 31 July 2024.
-// Last changed on 8 August 2024.
+// Last changed on 18 August 2024.
 
 #include <stdio.h>
 #include "menu.h"
 #include "list.h"
 #include "database.h"
 #include "ask.h"
+#include "utils.h"
+#include "import.h"
+#include "name.h"
+#include "sequence.h"
 
-static void getEnvironment(String*, String*);
+static void getEnvironment(String*);
+static void getArguments(int, char**, String*);
 static Menu* createLoadDatabaseMenu(void);
+static void usage(void);
+
 Database* database = null;
 static bool debugging = true;
+static bool timing = true;
 
 // main is the main program for the DeadEnds command line program.
-int main(int argc, const char * argv[]) {
-	String gedcomPath, scriptsPath;
+int main(int argc, char** argv) {
+	// Get the files.
+	if (timing) fprintf(stderr, "%s: UseMenus started.\n", getMillisecondsString());
+	String gedcomFile = null;
+	String gedcomPath = null;
 	// Check for environment variables.
-	getEnvironment(&gedcomPath, &scriptsPath);
-	if (debugging) printf("gedcomPath is %s\n", gedcomPath);
-	Menu* loadMenu = createLoadDatabaseMenu();
+	getArguments(argc, argv, &gedcomFile);
+	getEnvironment(&gedcomPath);
+	if (debugging) fprintf(stderr, "gedcomFile, gedcomPath = %sm %s\n", gedcomFile, gedcomPath);
+
+	AskReturn rcode = 0;
+	if (!gedcomFile) askForString("Enter name of Gedcom file with database", 0, &gedcomFile);
+	if (debugging) fprintf(stderr, "gedcomFile = %s\n", gedcomFile);
+	// Build the Database from the Gedcom file.
+	gedcomFile = resolveFile(gedcomFile, gedcomPath);
+	if (debugging) fprintf(stderr, "resolved gedcomFile = %s\n", gedcomFile);
+	ErrorLog* errorLog = createErrorLog();
+	Database* database = gedcomFileToDatabase(gedcomFile, errorLog);
+	if (lengthList(errorLog)) {
+		showErrorLog(errorLog);
+		exit(1);
+	}
+	if (debugging) summarizeDatabase(database);
+	if (timing) fprintf(stderr, "%s: Database created.\n", getMillisecondsString());
+	//Menu* loadMenu = createLoadDatabaseMenu();
 	//menuMachine(loadMenu);
+	// FOLLOWING EXPERIMENTS TO FIND THE CODE TO PICK A PERSON USING NAMES
+	int count = 0;
+	String* keys = personKeysFromName("Thomas Trask /Wetmore/", database, &count);
+	printf("personKeysFromName returned %d keys. They are:\n", count);
+	for (int i = 0; i < count; i++) {
+		printf("%s ", keys[i]);
+	}
+	printf("\n");
+	// Get the names of the persons.
+	for (int i = 0; i < count; i++) {
+		GNode* name = (NAME(keyToPerson(keys[i], database)));
+		String namstr = name->value ? nameString(name->value) : "no name";
+		printf("%s\n", namstr);
+	}
+
+	// TRY IT ANOTHER WAY USING SEQUENCES
+	Sequence* seq = nameToSequence("Thomas Trask /Wetmore/", database);
+	//Sequence* seq = nameToSequence("*/wetmore/", database);
+	showSequence(seq, "A TITLE FOR A SEQUENCE");
+
 
 	int answer;
-	AskReturn rcode = 0;
-	//AskReturn rcode = askForInteger("Enter an integer", askQuit, &answer);
-	//if (rcode == askOkay)
-		//printf("The answer is %d\n", answer);
-	//else
-		//printf("The user did not answer\n");
-	String stringAnswer;
-	//List* list = createStringList("alpha", "beta", "delta", "gamma", null);
-	//rcode = askForStringInSet("Choose from alpha, beta, delta or gamma", list, 0, &stringAnswer);
+	//AskReturn rcode = 0;
 
-	String emailPattern = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-	rcode = askForPattern("Enter an email address", emailPattern, askQuit, &stringAnswer);
-	printf("email address oka: %s\n", stringAnswer);
+//	rcode = askForInteger("Enter an integer", askQuit, &answer);
+//	if (rcode == askOkay) printf("The answer is %d\n", answer);
+//	else printf("The user did not answer\n");
+//	String stringAnswer;
+//
+//	List* list = createStringList("alpha", "beta", "delta", "gamma", null);
+//	rcode = askForStringInSet("Choose from alpha, beta, delta or gamma", list, 0, &stringAnswer);
+//	if (rcode == askOkay) printf("The answer is %s\n", stringAnswer);
+//	else printf("Not an okay answer\n");
+//
+//	String emailPattern = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+//	rcode = askForPattern("Enter an email address", emailPattern, askQuit, &stringAnswer);
+//	if (rcode == askOkay) printf("email address okay: %s\n", stringAnswer);
+//	else printf("email address not okay\n");
+
+	
+
 	return 0;
 }
 
-// getEnvironment checks for DE_GEDCOM_PATH or DE_SCRIPTS_PATH in the environment.
-static void getEnvironment(String* gedcom, String* script) {
+// getArguments handles the command line arguments.
+static void getArguments(int argc, char* argv[], String* gedcom) {
+	int ch;
+	*gedcom = null;
+	while ((ch = getopt(argc, argv, "g:")) != -1) {
+		switch(ch) {
+		case 'g':
+			*gedcom = strsave(optarg);
+			break;
+		case '?':
+		default:
+			usage();
+			exit(1);
+		}
+	}
+}
+
+// getEnvironment checks for DE_GEDCOM_PATH in the environment.
+static void getEnvironment(String* gedcom) {
 	*gedcom = getenv("DE_GEDCOM_PATH");
-	*script = getenv("DE_SCRIPTS_PATH");
 	if (!*gedcom) *gedcom = ".";
-	if (!*script) *script = ".";
 }
 
 // loadDatabaseAction is the action that happens when a user choose to load a Database from
@@ -85,4 +153,9 @@ static Menu* createLoadDatabaseMenu(void) {
 // creates a Menu of persons who match a given name.
 static Menu* createNameMenu(Database* database, String name) {
 	return null;
+}
+
+// usage prints the RunScript usage message.
+static void usage(void) {
+	fprintf(stderr, "usage: usemenus [-g gedcomfile]\n");
 }

@@ -10,7 +10,7 @@
 // If DE_GEDCOM_PATH and/or DE_SCRIPTS_PATH are defined, they may be used to find the files.
 //
 // Created by Thomas Wetmore on 21 July 2024
-// Last changed on 13 August 2024.
+// Last changed on 16 August 2024.
 
 #include "runscript.h"
 
@@ -32,14 +32,14 @@ int main(int argc, char* argv[]) {
 	getArguments(argc, argv, &gedcomFile, &scriptFile);
 	getEnvironment(&gedcomPath, &scriptPath);
 	// Build the Database from the Gedcom file.
-	gedcomFile = resolveFile(gedcomFile, gedcomPath);
-	ErrorLog* errorLog = createErrorLog();
-	Database* database = gedcomFileToDatabase(gedcomFile, errorLog);
-	if (lengthList(errorLog)) {
-		showErrorLog(errorLog);
-		exit(1);
-	}
-	fprintf(stderr, "%s: Database created.\n", getMillisecondsString());
+		gedcomFile = resolveFile(gedcomFile, gedcomPath);
+		ErrorLog* errorLog = createErrorLog();
+		Database* database = gedcomFileToDatabase(gedcomFile, errorLog);
+		if (lengthList(errorLog)) {
+			showErrorLog(errorLog);
+			exit(1);
+		}
+		fprintf(stderr, "%s: Database created.\n", getMillisecondsString());
 	// Parse and run the script.
 	parseProgram(scriptFile, scriptPath);
 	fprintf(stderr, "%s: Script parsed.\n", getMillisecondsString());
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
 	fprintf(stderr, "%s: RunScript done.\n", getMillisecondsString());
 }
 
-// getFileArguments gets the file names from the command line.
+// getArguments gets the file names from the command line.
 void getArguments(int argc, char* argv[], String* gedcom, String* script) {
 	int ch;
 	while ((ch = getopt(argc, argv, "g:s:")) != -1) {

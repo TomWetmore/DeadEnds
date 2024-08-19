@@ -3,7 +3,7 @@
 // utils.c
 //
 // Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 5 July 2024.
+// Last changed on 16 August 2024.
 
 #include <sys/time.h>
 #include <string.h>
@@ -20,6 +20,7 @@ double getMilliseconds(void) {
     return seconds + milliseconds / 1000.;
 }
 
+// getMillisecondsString gets the current time in milliseconds as a static String.
 String getMillisecondsString(void) {
 	double millis = getMilliseconds();
 	static char buffer[10];;

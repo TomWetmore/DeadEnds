@@ -4,7 +4,7 @@
 // persons and other record types. It underlies the indiseq data type of DeadEnds Script.
 //
 // Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 16 May 2024.
+// Last changed on 18 August 2024.
 
 #include "standard.h"
 #include "sequence.h"
@@ -187,7 +187,8 @@ Sequence* copySequence(Sequence* sequence) {
 	return copy;
 }
 
-// uniqueSequence return a Sequence with the unique elements from the given Sequence.
+// uniqueSequence returns a Sequence with the unique elements from the given Sequence.
+// MNOTE: creates a new Sequence, so caller may need to free the original.
 Sequence* uniqueSequence(Sequence* sequence) {
 	ASSERT(sequence);
 	Block* block = &(sequence->block);
@@ -628,34 +629,29 @@ Sequence* spouseSequence(Sequence *sequence) {
 static void writeLimitedPerson(GNode *person);
 static void writeLimitedFamily(GNode *family);
 
-//  sequenceToGedcom -- Generate a Gedcom file from a sequence of persons. Only persons in
-//    the sequence are written to the file. Families with links to at least two persons in the
-//    sequence are also written to the file. Other persons referred to in the families are not
-//    included in the file, and the links to the other persons are removed.
-//--------------------------------------------------------------------------------------------------
-static Sequence *personSequence;  // Person in the sequence to be generated as a Gedcom file.
-static Sequence *familySequence;  // The families that interconnect persons in the person sequence.
-void sequenceToGedcom(Sequence *sequence, FILE *fp)
-//  sequence -- Sequence of persons to output in Gedcom format.
-{
+// sequenceToGedcom generate a Gedcom file from a sequence of persons. Only persons in the
+// the sequence are written. Families with links to at least two persons in the sequence are also
+// written to the file. Other persons referred to in the families are not included, and the links
+// to the other persons are removed.
+static Sequence *personSequence; // Person in the sequence to be generated in a Gedcom file.
+static Sequence *familySequence; // Families that interconnect persons in the person sequence.
+void sequenceToGedcom(Sequence *sequence, FILE *fp) {
 	if (!sequence) return;
 	Database *database = sequence->database;
 	if (!fp) fp = stdout;
 	personSequence = sequence;  // Yuck. External access to these two sequences are required.
 	familySequence = createSequence(database);
-	StringTable *personTable = createStringTable(numBucketsInSequenceTables);  //  Table of person keys.
-	StringTable *familyTable = createStringTable(numBucketsInSequenceTables);  //  Table of family keys.
+	StringTable *personTable = createStringTable(numBucketsInSequenceTables); // Table of person keys.
+	StringTable *familyTable = createStringTable(numBucketsInSequenceTables); // Table of family keys.
 
-	//  Add all person keys to the person key hash table.
+	// Add all person keys to the person key hash table.
 	FORSEQUENCE(sequence, element, num)
 		addToStringTable(personTable, element->root->key, null);
 	ENDSEQUENCE
-
 	//  Loop through each person in the sequence.
 	FORSEQUENCE(sequence, element, num)
 		GNode *person = keyToPerson(element->root->key, database);  // Get the person.
 		SexType sex = SEXV(person);  //  And the person's sex.
-
 		//  Check the person's parent families to see if any FAMC families should be output.
 		FORFAMCS(person, family, key, database)
 			if (isInHashTable(familyTable, family->key)) goto a;
@@ -729,13 +725,14 @@ static void writeLimitedFamily (GNode *family) {
 
 // nameToSequence returns the Sequence of persons who match a Gedcom name. If the first letter of
 // the given names is '*', the Sequence will contain all persons who match the surname.
+// MNOTE: returns a new sequence; caller responsible for its memory.
 Sequence* nameToSequence(String name, Database* database) {
 	ASSERT(name && *name && database);
 	if (!name || *name == 0 || !database) return null;
 	int num;
 	Sequence *seq = null;
 	if (*name != '*') { // Name does not start with '*'.
-		String *keys = personKeysFromName(name, database, &num /*true*/);
+		String *keys = personKeysFromName(name, database, &num); // MNOTE: keys is static.
 		if (num == 0) return null;
 		seq = createSequence(database);
 		for (int i = 0; i < num; i++)
@@ -743,7 +740,6 @@ Sequence* nameToSequence(String name, Database* database) {
 		nameSortSequence(seq);
 		return seq;
 	}
-
 	// Name starts with a '*'.
 	char scratch[MAXLINELEN+1];
 	sprintf(scratch, "a/%s/", getSurname(name));
@@ -765,7 +761,9 @@ Sequence* nameToSequence(String name, Database* database) {
 		}
 	}
 	if (seq) {
-		uniqueSequence(seq);
+		Sequence* useq = uniqueSequence(seq);
+		deleteSequence(seq);
+		seq = useq;
 		nameSortSequence(seq);
 	}
 	return seq;

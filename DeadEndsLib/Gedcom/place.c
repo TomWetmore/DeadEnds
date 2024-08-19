@@ -1,9 +1,9 @@
 // DeadEnds
 //
-// place.c has the functions that handle place values.
+// place.c has the functions that handle Gedcom place values.
 //
 // Created by Thomas Wetmore on 12 February 2024.
-// Last changed on 21 April 2024.
+// Last changed on 19 August 2024.
 
 #include <stdio.h>
 #include "standard.h"
@@ -12,10 +12,10 @@
 static bool inString (int chr, String str);
 bool valueToList (String str, List *list, int *plen, String dlm);
 
-//  place_to_list -- Convert place string to word list
-//--------------------------------------------------------------------------------------------------
-bool placeToList(String place, List *list, int *plen)
-{
+// placeToList conterts a Gedcom PLAC value to a List of phrases. A phrase is a string that
+// occurs before the first comma, after the last comma, and between successive commas. White
+// space is trimmed from the phrases.
+bool placeToList(String place, List *list, int *plen) {
 	return valueToList(place, list, plen, ",");
 }
 

@@ -1,10 +1,10 @@
 // DeadEnds Project
 //
-// nameindex.c implements the NameIndex, an index that maps Gedcom name keys to the sets of person
+// nameindex.c implements the NameIndex, an index that maps Gedcom name keys to the Sets of person
 // record keys that have the names.
 //
 // Created by Thomas Wetmore on 26 November 2022.
-// Last changed on 5 July 2024.
+// Last changed on 18 August 2024.
 
 #include "nameindex.h"
 #include "name.h"
@@ -12,7 +12,8 @@
 #include "set.h"
 #include "gedcom.h"
 
-static NameIndexEl* createNameIndexEl(String nameKey, String recordKey);
+static NameIndexEl* createNameIndexEl(String nameKey);
+static bool nameIndexDebugging = false;
 static int numNameIndexBuckets = 2048;
 
 // getKey gets the name key of a NameIndex element.
@@ -26,11 +27,14 @@ static int compare(String a, String b) {
 }
 
 // delete frees a NameIndex element.
+// MNOTE: the nameKey is freed.
+// MNOTE: the recordKeys Set is freed (the recordKeys it contains are not).
+// MNOTE: the element itself is freed.
 static void delete(void* element) {
-	NameIndexEl *nameEl = (NameIndexEl*) element;
-	stdfree(nameEl->nameKey);
-	deleteSet(nameEl->recordKeys);
-	stdfree(nameEl);
+	NameIndexEl *el = (NameIndexEl*) element;
+	stdfree(el->nameKey);
+	deleteSet(el->recordKeys);
+	stdfree(el);
 }
 
 // createNameIndex creates a NameIndex.
@@ -44,16 +48,19 @@ void deleteNameIndex(NameIndex *nameIndex) {
 }
 
 // insertInNameIndex adds a (name key, person key) relationship to a NameIndex.
+// MNOTE: nameKey is in static memory; it is saved if createNameIndexEl is called.
+// MNOTE: recordKey is the record key from the database; it is not saved.
 void insertInNameIndex(NameIndex* index, String nameKey, String recordKey) {
-	//printf("insertInNameIndex: nameKey, personKey: %s, %s\n", nameKey, personKey); // DEBUG
-	NameIndexEl* element = (NameIndexEl*) searchHashTable(index, nameKey);
-	if (!element) {
-		element = createNameIndexEl(nameKey, recordKey);
+	if (nameIndexDebugging)
+		printf("insertInNameIndex: nameKey, personKey: %s, %s\n", nameKey, recordKey);
+	NameIndexEl* element = (NameIndexEl*) searchHashTable(index, nameKey); // Name key seen before?
+	if (!element) { // No.
+		element = createNameIndexEl(nameKey); // MNOTE: createNameIndexEl saves nameKey.
 		addToHashTable(index, element, true);
 	}
 	Set* recordKeys = element->recordKeys;
 	if (!isInSet(recordKeys, recordKey)) {
-		addToSet(recordKeys, recordKey);
+		addToSet(recordKeys, recordKey); // MNOTE: recordKey from Database stored in index as is.
 	}
 }
 
@@ -85,6 +92,7 @@ void removeNamesOfPersonFromIndex(NameIndex* index, GNode* person) {
 }
 
 // searchNameIndex searches NameIndex for a name and returns the record keys that have the name.
+// MNOTE: The set that is returned is in the NameIndex. It cannot be changed.
 Set* searchNameIndex(NameIndex* index, String name) {
 	String nameKey = nameToNameKey(name);
 	NameIndexEl* element = searchHashTable(index, nameKey);
@@ -114,9 +122,12 @@ static int compareSetKeys(String a, String b) {
 }
 
 // createNameIndexEl creates and returns a NameIndexEl.
-static NameIndexEl* createNameIndexEl(String nameKey, String recordKey) {
+// MNOTE: nameKey is in static memory so must be saved.
+// MNOTE: the Set is created to hold the record keys.
+// MNOTE: the Set's delete function is null because the record keys are not freed.
+static NameIndexEl* createNameIndexEl(String nameKey) {
 	NameIndexEl* el = (NameIndexEl*) stdalloc(sizeof(NameIndexEl));
-	el->nameKey = strsave(nameKey);  // MNOTE: nameKey is in data space.
+	el->nameKey = strsave(nameKey);
 	el->recordKeys = createSet(getSetKey, compareSetKeys, null);
 	return el;
 }

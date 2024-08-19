@@ -189,16 +189,17 @@ static void squeeze(String in, String out) {
 }
 
 // personKeysFromName finds all persons with a name that matches a given name; returns an
-// array of Strings with the record keys; pcount set to number of Strings.
-String* personKeysFromName(String name, Database* database, int* pcount)
-{
+// array of Strings with the record keys; pcount set to number of Strings. 
+// MNOTE: This function uses a static Block to hold record keys. It is reused on every call.
+// MNOTE: The caller must not change the returned list of Strings.
+String* personKeysFromName(String name, Database* database, int* pcount) {
     static bool first = true;
-	static Block recordKeys; // Dangerous state variable.
+	static Block recordKeys; // See note in comment.
     if (first) {
 		initBlock(&recordKeys);
         first = false;
     }
-	if (pcount) *pcount = 0;
+	*pcount = 0;
     Set *keySet = searchNameIndex(database->nameIndex, name); // Keys of persons who match.
     if (!keySet || lengthSet(keySet) == 0) return null;
     emptyBlock(&recordKeys, null);
@@ -208,8 +209,7 @@ String* personKeysFromName(String name, Database* database, int* pcount)
 	FORLIST(list, recordKey)
 		GNode* person = keyToPerson((String) recordKey, database);
 		for (GNode* node = NAME(person); node && eqstr(node->tag, "NAME"); node = node->sibling) {
-			if (!exactMatch(name, node->value)) continue;
-			//printf("EXACT MATCH SAYS THESE ARE THE SAME: %s and %s\n", name, node->value);
+			if (!exactMatch(name, node->value)) continue; // exactMatch doesn't mean 'exact.'
 			appendToBlock(&recordKeys, recordKey);
 			count++;
 			break;

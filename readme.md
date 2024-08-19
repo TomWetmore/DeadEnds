@@ -4,7 +4,7 @@ DeadEnds is a C-based genealogical software project.
 
 ## Introduction
 
-DeadEnds is a static library that supports genealogical operations and a collection of command line programs that use the library. It is an eventual goal to provide a genealogical program with a graphical user interface that uses the DeadEnds library.
+DeadEnds is a collection of static libraries and command line programs that support genealogical operations. It is an eventual goal to provide a genealogical program with a graphical user interface that uses the DeadEnds library.
 
 DeadEnds is based on the UNIX-based LifeLines program, which I wrote in the early 1990s, before there were  genealogical programs available for UNIX. Key features of LifeLines include:
 - A B-Tree based database that stores genealogical records in Gedcom format.
@@ -25,8 +25,11 @@ The home directory of the DeadEnds repository is named, unsurprisingly, *DeadEnd
 | SubDirectory | Description                                                  |
 | ------------ | ------------------------------------------------------------ |
 | GedcomLib    | The DeadEnds Gedcom library. See the next table for its contents. |
+| MenuLib      | MenuLib is a library that supports simple user interfaces that use stdin and stdout to ask questions and present menus. |
 | RunScript    | Command line program that reads a Gedcom file into a Database, reads a script file (program file) and runs the program using the data in the Database. |
 | TestProgram  | Command line program used during development as the primary test tool. |
+| MenuTest     | Command line program used during development to test the menu library. |
+| PatchSex     | One off command line program that reads a Gedcom file and rewrites it after adding or modifying 1 SEX lines in 0 INDI records that don't adhere to standards but can be easily put into standard format. |
 | Gedfiles     | Collection of Gedcom files used to test features during development. |
 | Scripts      | Collection of DeadEnds scripts (programs) used to test the script subsystem. |
 | Docs         | Collection of documentation files that are woefully out of date. |
