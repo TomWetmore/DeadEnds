@@ -35,7 +35,7 @@ bool gnodesToFile(int level, GNode* gnode, String fileName, bool indent) {
 // writeGNode writes a single GNode to a file. Level is the node's level; indent specifies whether
 // to indent the lines.
 void writeGNode(FILE* fp, int level, GNode* gnode, bool indent) {
-    if (indent) for (int i = 1; i < level; i++) fprintf(fp, "  ");
+    if (indent) for (int i = 1; i < level; i++) fputs("  ", fp);
     fprintf(fp, "%d", level);
     if (gnode->key) fprintf(fp, " %s", gnode->key);
     fprintf(fp, " %s", gnode->tag);

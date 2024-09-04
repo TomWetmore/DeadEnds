@@ -1,9 +1,9 @@
 // DeadEnds
 //
-// database.h
+// database.h is the header file for the Database type.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed on 10 July 2024.
+// Last changed on 30 August 2024.
 
 #ifndef database_h
 #define database_h
@@ -33,7 +33,7 @@ typedef struct Database {
 	RecordIndex *eventIndex;  // Index of events in this database.
 	RecordIndex *otherIndex;  // Index of other records in this database.
 	NameIndex *nameIndex;  // Index of the names of the persons in this database.
-	RefnIndex *refnIndex;  // Inde of the REFN values in this database.
+	RefnIndex *refnIndex;  // Index of the REFN values in this database.
 	RootList *personRoots;  // List of all person roots in the database.
 	RootList *familyRoots;  // List of all family roots in the database.
 } Database;

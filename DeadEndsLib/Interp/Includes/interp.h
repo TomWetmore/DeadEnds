@@ -1,9 +1,9 @@
 // DeadEnds
 //
-// interp.h -- Header for the DeadEnds language interpreter.
+// interp.h if the header file for the DeadEnds script interpreter.
 //
 // Created by Thomas Wetmore on 8 December 2022.
-// Last changed on 18 April 2024.
+// Last changed on 21 August 2024.
 
 #ifndef interp_h
 #define interp_h
@@ -17,12 +17,12 @@ typedef struct HashTable SymbolTable;
 #include "symboltable.h"
 #include "database.h"
 
-// InterpType is the enumeration of interpreter return types.
+// InterpType enumerates the interpreter functions return types.
 typedef enum InterpType {
     InterpError = 0, InterpOkay, InterpBreak, InterpContinue, InterpReturn
 } InterpType;
 
-// Context is the data type that holds the context in which interpretation takes place.
+// Context holds the context in which interpretation takes place.
 typedef struct Context {
     SymbolTable *symbolTable;
     Database *database;
@@ -74,7 +74,7 @@ PValue evaluateUserFunc(PNode*, Context*, bool*);
 //GNode* evaluateFamily(PNode*, Context*, bool*);
 GNode* evaluateGNode(PNode*, Context*, bool*);
 //void extract_date(String, int*, int*, int*, int*, String*);
-String format_date(String, int, int, int, int, bool);
+String formatDate(String, int, int, int, int, bool);
 void free_all_pnodes(void);
 void free_pnode_tree(PNode*);
 String get_date(void);

@@ -1,10 +1,9 @@
+// DeadEnds
 //
-//  intrpevent.c -- The built-in functions for events, dates and places.
-//  JustParsing
+// intrpevent.c has the built-in functions for events, dates and places.
 //
-//  Created by Thomas Wetmore on 17 March 2023.
-//  Last changed on 9 February 2024.
-//
+// Created by Thomas Wetmore on 17 March 2023.
+// Last changed on 31 August 2024.
 
 #include "standard.h"
 #include "pnode.h"
@@ -15,11 +14,9 @@ static int daycode = 0;
 static int monthcode = 3;
 static int datecode = 0;
 
-//  __date -- Return date of event
-//    usage: date(EVENT) -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __date (PNode *pnode, Context *context, bool *errflg)
-{
+// __date returns the date of an event.
+// usage: date(EVENT) -> STRING
+PValue __date(PNode *pnode, Context *context, bool *errflg) {
 	PValue pvalue = evaluate(pnode->arguments, context, errflg);
 	if (*errflg || !isGNodeType(pvalue.type)) return nullPValue;
 	String date = eventToDate(pvalue.value.uGNode, false);
@@ -27,11 +24,9 @@ PValue __date (PNode *pnode, Context *context, bool *errflg)
 	return nullPValue;
 }
 
-//  __place -- Return the place of event, the value of the first PLAC GNode in an event.
-//    usage: place(EVENT) -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __place(PNode *pnode, Context *context, bool *errflg)
-{
+// __place returns the place of an event, the value of the first PLAC GNode in an event.
+//  usage: place(EVENT) -> STRING
+PValue __place(PNode *pnode, Context *context, bool *errflg) {
     PValue pvalue = evaluate(pnode->arguments, context, errflg);
     if (*errflg || !isGNodeType(pvalue.type)) return nullPValue;
     String place = eventToPlace(pvalue.value.uGNode, false);
@@ -39,11 +34,9 @@ PValue __place(PNode *pnode, Context *context, bool *errflg)
     return nullPValue;
 }
 
-//  __year -- Return the year of a Gedcom event as a string.
-//    usage: year(EVENT) -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __year(PNode *pnode, Context *context, bool* errflg)
-{
+// __year return the year of a Gedcom event as a string.
+// usage: year(EVENT) -> STRING
+PValue __year(PNode *pnode, Context *context, bool* errflg) {
     PValue evnt = evaluate(pnode->arguments, context, errflg);
     if (*errflg || !isGNodeType(evnt.type)) return nullPValue;
     return PVALUE(PVString, uString, strsave(eventToDate(evnt.value.uGNode, true)));
@@ -110,12 +103,12 @@ PValue __dateformat(PNode *node, Context *context, bool* eflg)
 //--------------------------------------------------------------------------------------------------
 PValue __stddate(PNode *node, Context *context, bool* eflg)
 {
-    extern String format_date(String, int, int, int, int, bool);
+    extern String formatDate(String, int, int, int, int, bool);
 
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || !isGNodeType(pvalue.type)) return nullPValue;
     GNode* gnode = pvalue.value.uGNode;
-    String date = format_date(eventToDate(gnode, false), daycode, monthcode, 1, datecode, false);
+    String date = formatDate(eventToDate(gnode, false), daycode, monthcode, 1, datecode, false);
     return PVALUE(PVString, uString, strsave(date));
 }
 

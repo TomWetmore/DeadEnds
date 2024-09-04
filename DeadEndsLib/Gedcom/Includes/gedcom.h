@@ -3,7 +3,7 @@
 // gedcom.h is the header file for Gedcom related data types and operations.
 //
 // Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 10 May 2024.
+// Last changed on 31 August 2024.
 
 #ifndef gedcom_h
 #define gedcom_h
@@ -194,21 +194,21 @@ int compareRecordKeys(String, String);  // gedcom.c
     deleteList(stack);\
 }
 
-//  Macros that return specific Gedcom nodes from a record tree.
-#define NAME(indi)  findTag(indi->child,"NAME")
-#define SEX(indi)   findTag(indi->child,"SEX")
-#define SEXV(indi)  valueToSex(findTag(indi->child,"SEX"))
-#define BIRT(indi)  findTag(indi->child,"BIRT")
-#define DEAT(indi)  findTag(indi->child,"DEAT")
-#define BAPT(indi)  findTag(indi->child,"CHR")
-#define BURI(indi)  findTag(indi->child,"BURI")
-#define FAMC(indi)  findTag(indi->child,"FAMC")
-#define FAMS(indi)  findTag(indi->child,"FAMS")
-#define HUSB(fam)   findTag(fam->child,"HUSB")
-#define WIFE(fam)   findTag(fam->child,"WIFE")
-#define MARR(fam)   findTag(fam->child,"MARR")
-#define CHIL(fam)   findTag(fam->child,"CHIL")
-#define DATE(evnt)  findTag(evnt->child,"DATE")
-#define PLAC(evnt)  findTag(evnt->child,"PLAC")
+//  Macros that return specific GNodes from a record tree.
+#define NAME(indi)  findTag((indi)->child,"NAME") // First name of person.
+#define SEX(indi)   findTag((indi)->child,"SEX") // First sex of person.
+#define SEXV(indi)  valueToSex(findTag((indi)->child,"SEX")) // First sex value of person.
+#define BIRT(indi)  findTag((indi)->child,"BIRT") // First birth of person.
+#define DEAT(indi)  findTag((indi)->child,"DEAT") // First death of person.
+#define BAPT(indi)  findTag((indi)->child,"CHR") // First christening of person.
+#define BURI(indi)  findTag((indi)->child,"BURI") // First burial of person.
+#define FAMC(indi)  findTag((indi)->child,"FAMC") // First family as child of person.
+#define FAMS(indi)  findTag((indi)->child,"FAMS") // First family as spouse of person.
+#define HUSB(fam)   findTag((fam)->child,"HUSB") // First husband of family.
+#define WIFE(fam)   findTag((fam)->child,"WIFE") // First wife of family.
+#define MARR(fam)   findTag((fam)->child,"MARR") // First marriage of family.
+#define CHIL(fam)   findTag((fam)->child,"CHIL") // First child of family.
+#define DATE(evnt)  findTag((evnt)->child,"DATE") // First date of event.
+#define PLAC(evnt)  findTag((evnt)->child,"PLAC") // First place of event.
 
 #endif // gedcom_h

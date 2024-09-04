@@ -1,10 +1,10 @@
 // DeadEnds
 //
 // hashtable.c implements a general hash table. Specialized hash tables are created through
-// customization.
+// customiziing the compare, delete and getKey functions.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 10 August 2024.
+// Last changed on 31 August 2024.
 
 #include "standard.h"
 #include "hashtable.h"
@@ -29,7 +29,7 @@ HashTable* createHashTable(String(*getKey)(void*), int(*compare)(String, String)
 	return table;
 }
 
-// deleteBucket deletes a Bucket. If there is a delete function the elements are deleted.
+// deleteBucket deletes a Bucket. If there is a delete function it is called on the elements.
 static void deleteBucket(Bucket* bucket, void(*delete)(void*)) { //PH;
 	if (delete) {
 		Block* block = &(bucket->block);
@@ -206,7 +206,9 @@ int sizeHashTable(HashTable* table) { //PH;
 
 // firstInHashTable returns the first element in a hash table; it works with nextInHashTable to
 // iterate the table, returning each element in turn. The (in, out) variables keep track of the
-// iteration state. The user provides two stack variables to hold the state.
+// iteration state. The caller must provide the locations to two integer varibalbes to hold the
+// stage. This function and nextInHashTable must be called from the same function. Macros
+// FORHASHTABLE and ENDHASHTABLE are available to simplify calling these two functions.
 void* firstInHashTable(HashTable* table, int* bucketIndex, int* elementIndex) { //PH;
 	for (int i = 0; i < table->numBuckets; i++) {
 		Bucket* bucket = table->buckets[i];
@@ -240,21 +242,27 @@ void* nextInHashTable(HashTable* table, int* bucketIndex, int* elementIndex) { /
 	return null; // No more elements.
 }
 
-// iterateHashTable iterates a hash table and perform a function on each element; elements are
-// visited in hash key order; returns the number of elements that match the predicate.
+// iterateHashTable iterates a hash table and performs a function on each element; elements
+// are visited in hash key order.
+void iterateHashTable(HashTable* table, void (*function)(void*)) {//PH;
+	if (!function) return;
+	FORHASHTABLE(table, element)
+		(*function)(element);
+	ENDHASHTABLE
+}
+
+// iterateHashTableWithPredicate iterates a hash table running a predicate on each; elements
+// are visited in hash key order; returns the number of elements that match the predicate.
 int iterateHashTableWithPredicate(HashTable* table, bool (*predicate)(void*)) { //PH;
-	int bucketIndex, elementIndex;
 	int count = 0;
-	void* element = firstInHashTable(table, &bucketIndex, &elementIndex);
-	while (element) {
+	FORHASHTABLE(table, element)
 		if ((*predicate)(element)) count++;
-		element = nextInHashTable(table, &bucketIndex, &elementIndex);
-	}
+	ENDHASHTABLE
 	return count;
 }
 
 // showHashTable shows the contents of a hash table, including bucket and element indexes.
-// show is a function to show an element. For debugging.
+// show is a function to show an element. For debugging. Uses variables defined in macro.
 void showHashTable(HashTable* table, void (*show)(void*)) {
 	int count = 0;
 	FORHASHTABLE(table, element)

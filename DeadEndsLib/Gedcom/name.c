@@ -188,22 +188,24 @@ static void squeeze(String in, String out) {
     }
 }
 
-// personKeysFromName finds all persons with a name that matches a given name; returns an
-// array of Strings with the record keys; pcount set to number of Strings. 
+// personKeysFromName finds all persons with a name that matches a given name pattern; returns
+// an array of Strings with the record keys; pcount set to number of Strings. The strings are
+// the elements in a static block. See MNOTE below.
 // MNOTE: This function uses a static Block to hold record keys. It is reused on every call.
-// MNOTE: The caller must not change the returned list of Strings.
+// MNOTE: Caller must save the returned Strings if they are to persist.
 String* personKeysFromName(String name, Database* database, int* pcount) {
     static bool first = true;
-	static Block recordKeys; // See note in comment.
+	static Block recordKeys; // See MNOTE above.
     if (first) {
 		initBlock(&recordKeys);
         first = false;
     }
 	*pcount = 0;
-    Set *keySet = searchNameIndex(database->nameIndex, name); // Keys of persons who match.
+	// Get Set of person keys with names that match the pattern.
+    Set *keySet = searchNameIndex(database->nameIndex, name);
     if (!keySet || lengthSet(keySet) == 0) return null;
+	// Copy person keys with matching names to a Block.
     emptyBlock(&recordKeys, null);
-
 	int count = 0;
 	List* list = listOfSet(keySet);
 	FORLIST(list, recordKey)

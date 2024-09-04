@@ -449,22 +449,20 @@ PValue __root (PNode *pnode, Context *context, bool *errflg)
 	return PVALUE(PVGNode, uGNode, gnode);
 }
 
-//  __extractdate -- Extract date from EVENT or DATE NODE
-//    usage: extractdate(NODE, VARB, VARB, VARB) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __extractdate (PNode *pnode, Context *context, bool* errflg)
-{
-    int da = 0, mo = 0, yr = 0, daormo = 0;
+// __extractdate tries to extract a Date from an event or DATE GNode.
+// usage: extractdate(NODE, VARB, VARB, VARB) -> VOID
+PValue __extractdate(PNode *pnode, Context *context, bool* errflg) {
+    int day = 0, month = 0, year = 0, daormo = 0;
     String str;
-    PNode *arg = pnode->arguments;
-    PNode *dvar = arg->next;
-    PNode *mvar = dvar->next;
-    PNode *yvar = mvar->next;
+    PNode *arg = pnode->arguments; // GNode of event or DATE.
     GNode *gnode = evaluateGNode(arg, context, errflg);
 	if (*errflg) {
 		scriptError(pnode, "The first argument to extractdate must be a event or DATE node.");
 		return nullPValue;
 	}
+	PNode *dvar = arg->next; // Symbol to hold day integer.
+	PNode *mvar = dvar->next; // Symbol to hold month integer.
+	PNode *yvar = mvar->next; // Symbol to hold year integer.
     *errflg = true;
 	bool error = false;
 	if (dvar->type != PNIdent) error = true;
@@ -482,10 +480,10 @@ PValue __extractdate (PNode *pnode, Context *context, bool* errflg)
         str = gnode->value;
 	if (!str || *str == 0) return nullPValue;  // Not considered an error.
 	String stryear;
-    extractDate(str, &daormo, &da, &mo, &yr, &stryear);
-    assignValueToSymbol(context->symbolTable, dvar->identifier, PVALUE(PVInt, uInt, da));
-	assignValueToSymbol(context->symbolTable, mvar->identifier, PVALUE(PVInt, uInt, mo));
-	assignValueToSymbol(context->symbolTable, yvar->identifier, PVALUE(PVInt, uInt, yr));
+    extractDate(str, &daormo, &day, &month, &year, &stryear);
+    assignValueToSymbol(context->symbolTable, dvar->identifier, PVALUE(PVInt, uInt, day));
+	assignValueToSymbol(context->symbolTable, mvar->identifier, PVALUE(PVInt, uInt, month));
+	assignValueToSymbol(context->symbolTable, yvar->identifier, PVALUE(PVInt, uInt, year));
     *errflg = false;
     return nullPValue;
 }
@@ -707,12 +705,10 @@ PValue __addnode (PNode *node, Context *context, bool *eflg)
 	return nullPValue;
 }
 
-//  __deletenode -- Remove node from GEDCOM tree
-//    usage: deletenode(NODE) -> VOID
-//    MNOTE: MEMORY LEAK?
-//--------------------------------------------------------------------------------------------------
-PValue __deletenode (PNode *node, Context *context, bool *eflg)
-{
+// __deletenode removes subtree from a Gedcom tree/record.
+// usage: deletenode(NODE) -> VOID
+// mnote: memory leak.
+PValue __deletenode(PNode *node, Context *context, bool *eflg) {
 	PValue pvalue = evaluate(node->arguments, context, eflg);
 	if (*eflg || !isGNodeType(pvalue.type)) {
 		*eflg = true;
@@ -739,6 +735,8 @@ PValue __deletenode (PNode *node, Context *context, bool *eflg)
 		parent->child = next;
 	else
 		prev->sibling = next;
+	this->parent = null;
+	this->sibling = null;
 	return nullPValue;
 }
 

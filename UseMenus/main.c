@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 	// Check for environment variables.
 	getArguments(argc, argv, &gedcomFile);
 	getEnvironment(&gedcomPath);
-	if (debugging) fprintf(stderr, "gedcomFile, gedcomPath = %sm %s\n", gedcomFile, gedcomPath);
+	if (debugging) fprintf(stderr, "gedcomFile, gedcomPath = %s, %s\n", gedcomFile, gedcomPath);
 
 	AskReturn rcode = 0;
 	if (!gedcomFile) askForString("Enter name of Gedcom file with database", 0, &gedcomFile);
@@ -70,6 +70,10 @@ int main(int argc, char** argv) {
 	Sequence* seq = nameToSequence("Thomas Trask /Wetmore/", database);
 	//Sequence* seq = nameToSequence("*/wetmore/", database);
 	showSequence(seq, "A TITLE FOR A SEQUENCE");
+	FORSEQUENCE(seq, element, n)
+	GNode* root = element->root;
+	printf("%d %s\n", n, element->name);
+	ENDSEQUENCE
 
 
 	int answer;

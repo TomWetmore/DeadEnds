@@ -1,16 +1,17 @@
-// DeadEnds
+// DeadEnds Library
 //
-// integertable.c
+// integertable.c implements the IntegerTable data type, a HashTable that maps Strings
+// to integers.
 //
 // Created by Thomas Wetmore on 23 April 2023.
-// Last changed on 1 May 2024.
+// Last changed on 22 August 2024.
 
 #include "integertable.h"
 
 String integerGetKey(void* element) { return ((IntegerElement*) element)->key; }
 
 // createIntegerTable creates and returns an IntegerTable.
-IntegerTable *createIntegerTable(int numBuckets) {
+IntegerTable* createIntegerTable(int numBuckets) {
     return createHashTable(integerGetKey, null, null, numBuckets);
 }
 
@@ -21,9 +22,10 @@ int searchIntegerTable(IntegerTable* table, String key) {
 }
 
 // insertInIntegerTable inserts a string key with integer value into an integer table.
-void insertInIntegerTable(IntegerTable *table, String key, int value) {
+// mnote: The string key is not saved.
+void insertInIntegerTable(IntegerTable* table, String key, int value) {
     IntegerElement* element = (IntegerElement*) searchHashTable(table, key);
-    if (element) { // If there change value.
+    if (element) { // If there change value. mnote: possible leak of old value.
         element->value = value;
         return;
     }
@@ -39,5 +41,3 @@ void incrIntegerTable(IntegerTable* table, String key) {
 	if (element) (element->value)++;
 	else insertInIntegerTable(table, key, 1);
 }
-
-

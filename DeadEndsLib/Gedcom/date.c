@@ -1,9 +1,9 @@
-//  DeadEnds
+//  DeadEnds Library
 //
-//  date.c has most of the functions that deal with Gedcom-based dates.
+//  date.c has the functions that deal with Gedcom-based dates.
 //
 //  Created by Thomas Wetmore on 22 February 2023.
-//  Last changed on 18 April 2024.
+//  Last changed on 2 September 2024.
 
 #include <time.h>
 #include "standard.h"
@@ -17,17 +17,19 @@
 #define ICONS_TOK 4
 
 static void format_ymd(String, String, String, int, int, String*);
-static void format_mod(int, String*);
-static String format_day(int, int);
-static String format_month(int, int);
-static String format_year(int, int);
+static void formatDateModifier(int, String*);
+static String formatDay(int, int);
+static String formatMonth(int, int);
+static String formatYear(int, int);
 static void set_date_string(String);
 static int getDateToken(int*, String*);
-static void init_monthtbl(void);
+static void initMonthTable(void);
 
+// Strings that are aded to monthTable.
 static struct {
     char *sl, *su, *ll, *lu;
-} monthstrs[19] = {
+} monthStrings[] = {
+	// Month words and abbreviations.
     { "Jan", "JAN", "January", "JANUARY" },
     { "Feb", "FEB", "February", "FEBRUARY" },
     { "Mar", "MAR", "March", "MARCH" },
@@ -40,23 +42,24 @@ static struct {
     { "Oct", "OCT", "October", "OCTOBER" },
     { "Nov", "NOV", "November", "NOVEMBER" },
     { "Dec", "DEC", "December", "DECEMBER" },
-
-    /* date modifiers appended to the month table */
-
-    { "abt", "ABT", "about", "ABOUT" },     /*  1 */
-    { "bef", "BEF", "before", "BEFORE" },   /*  2 */
-    { "aft", "AFT", "after", "AFTER" },     /*  3 */
-    { "bet", "BET", "between", "BETWEEN" }, /*  4 - range */
-    { "and", "AND", "and", "AND" },         /*  5 */
-    { "from", "FROM", "from", "FROM" },     /*  6 - range */
-    { "to", "TO", "to", "TO" },             /*  7 */
+    // Date modifier words.
+    { "abt", "ABT", "about", "ABOUT" },     // 1
+    { "bef", "BEF", "before", "BEFORE" },   // 2
+    { "aft", "AFT", "after", "AFTER" },     // 3
+    { "bet", "BET", "between", "BETWEEN" }, // 4 - range
+    { "and", "AND", "and", "AND" },         // 5
+    { "from", "FROM", "from", "FROM" },     // 6 - range
+    { "to", "TO", "to", "TO" },             // 7
+	{ "est", "EST", "estimated", "ESTIMATED" }, // 8
+	{ "cal", "CAL", "calculated", "CALCULATED" }, // 9
+	{ "cmp", "CMP", "computed", "COMPUTED" }, // 10
 };
 
 static String sstr = null;
-static StringTable *monthtbl = null;
+static StringTable *monthTable = null; // Maps month Strings to integers.
 
 /*==========================================
- * format_date -- Do general date formatting
+ * formatDate -- Do general date formatting
  * str - raw string containing a date
  * dfmt - day format:  0 - num, space
  *                     1 - num, lead 0
@@ -84,43 +87,32 @@ static StringTable *monthtbl = null;
  * cmplx - if TRUE, then treat string as complex, including
  *         date modifiers, ranges, and/or double-dating
  *========================================*/
-String format_date (String str, int dfmt, int mfmt, int yfmt, int sfmt, bool cmplx)
-{
-    int mod, da, mo, yr;
+String formatDate (String string, int dayFmt, int monthFmt, int yearFmt, int dateFmt, bool cmplx) {
+    int mod, day, month, year;
     String sda, smo, syr;
     static char scratch[50], daystr[4];
     String p = scratch;
-    if (!str) return null;
-    extractDate(str, &mod, &da, &mo, &yr, &syr);
-    if ((sda = format_day(da, dfmt))) sda = strcpy(daystr, sda);
-    smo = format_month(mo, mfmt);
-    if (!cmplx) syr = format_year(yr, yfmt);
-    else format_mod(mod%100, &p);
-    format_ymd(syr, smo, sda, sfmt, mod, &p);
+    if (!string) return null;
+    extractDate(string, &mod, &day, &month, &year, &syr);
+    if ((sda = formatDay(day, dayFmt))) sda = strcpy(daystr, sda);
+    smo = formatMonth(month, monthFmt);
+    if (!cmplx) syr = formatYear(year, yearFmt);
+    else formatDateModifier(mod%100, &p);
+    format_ymd(syr, smo, sda, dateFmt, mod, &p);
     if (cmplx && (mod%100 == 4 || mod%100 == 6)) {
         *p++ = ' ';
-        format_mod(mod%100 + 1, &p);
-        extractDate(null, &mod, &da, &mo, &yr, &syr);
-        if ((sda = format_day(da, dfmt))) sda = strcpy(daystr, sda);
-        smo = format_month(mo, mfmt);
-        format_ymd(syr, smo, sda, sfmt, mod, &p);
+        formatDateModifier(mod%100 + 1, &p);
+        extractDate(null, &mod, &day, &month, &year, &syr);
+        if ((sda = formatDay(day, dayFmt))) sda = strcpy(daystr, sda);
+        smo = formatMonth(month, monthFmt);
+        format_ymd(syr, smo, sda, dateFmt, mod, &p);
     }
     return (String) scratch;
-
 }
-/*===================================================
- * format_ymd -- Assembles date according to dateformat
- *=================================================*/
-static void
-format_ymd (String syr,
-            String smo,
-            String sda,
-            int sfmt,           /* format code */
-            int mod,
-            String *output)
-{
-    String p = *output;
 
+// format_ymd -- Assembles date according to dateformat
+static void format_ymd (String syr, String smo, String sda, int sfmt, int mod, String *output) {
+    String p = *output;
     switch (sfmt) {
         case 0:        /* da mo yr */
             if (sda) {
@@ -330,110 +322,90 @@ format_ymd (String syr,
     return;
 }
 
-/*=====================================
- * format_mod -- Format date modifier
- *===================================*/
-static void
-format_mod (int mod,
-            String *pp)
-{
-    if (mod < 1 || mod > 7) return;
-    strcpy(*pp, monthstrs[mod+12-1].ll);
+// formatDateModifier -- Format date modifier
+static void formatDateModifier (int mod, String *pp) {
+    if (mod < 1 || mod > 10) return;
+    strcpy(*pp, monthStrings[mod+12-1].ll);
     *pp += strlen(*pp);
     **pp = ' ';
     *pp += 1;
     return;
 }
-/*=======================================
- * format_day -- Formats day part of date
- *=====================================*/
-static String
-format_day (int da,         /* day - 0 for unknown */
-            int dfmt)       /* format code */
-{
+
+// formatDay formats the day part of a date. day is the day number (0 for unknown), and
+// format is a code.
+// MNOTE: may return a static buffer.
+static String formatDay (int day, int format) {
     static char scratch[3];
     String p;
-    if (da < 0 || da > 99 || dfmt < 0 || dfmt > 2) return null;
+    if (day < 0 || day > 99 || format < 0 || format > 2) return null;
     strcpy(scratch, "  ");
-    if (da >= 10) {
-        scratch[0] = da/10 + '0';
-        scratch[1] = da%10 + '0';
+    if (day >= 10) {
+        scratch[0] = day/10 + '0';
+        scratch[1] = day%10 + '0';
         return (String) scratch;
     }
     p = scratch;
-    if (da == 0) {
-        if (dfmt == 2) return null;
+    if (day == 0) {
+        if (format == 2) return null;
         return (String) scratch;
     }
-    if (dfmt == 0)  p++;
-    else if (dfmt == 1)  *p++ = '0';
-    *p++ = da + '0';
+    if (format == 0)  p++;
+    else if (format == 1)  *p++ = '0';
+    *p++ = day + '0';
     *p = 0;
     return (String) scratch;
 }
-/*===========================================
- * format_month -- Formats month part of date
- *  returns static buffer
- *=========================================*/
-static String
-format_month (int mo,         /* month - 0 for unknown */
-              int mfmt)       /* format code */
-{
+
+// formatMonth formats the month part of a date. month is the month number (0 for unknown), format
+// is a code.
+// MNOTE: may return a static buffer or .text space.
+static String formatMonth (int month, int format) {
     static char scratch[3];
     String p;
-    if (mo < 0 || mo > 12 || mfmt < 0 || mfmt > 6) return null;
-    if (mfmt <= 2)  {
-        if ((p = format_day(mo, mfmt))) return strcpy(scratch, p);
+    if (month < 0 || month > 12 || format < 0 || format > 6) return null;
+    if (format <= 2)  {
+        if ((p = formatDay(month, format))) return strcpy(scratch, p);
         return null;
     }
-    if (mo == 0) return (String) "   ";
-    switch (mfmt) {
-        case 3: return (String) monthstrs[mo-1].su;
-        case 4: return (String) monthstrs[mo-1].sl;
-        case 5: return (String) monthstrs[mo-1].lu;
-        case 6: return (String) monthstrs[mo-1].ll;
+    if (month == 0) return (String) "   ";
+    switch (format) {
+        case 3: return (String) monthStrings[month-1].su;
+        case 4: return (String) monthStrings[month-1].sl;
+        case 5: return (String) monthStrings[month-1].lu;
+        case 6: return (String) monthStrings[month-1].ll;
     }
     return null;
 }
-/*=========================================
- * format_year -- Formats year part of date
- *=======================================*/
-static String
-format_year (int yr,
-             int yfmt)
-{
-    static char scratch[50];
-    if (yr <= 0)  return null;
-    switch (yfmt) {
-        default: sprintf(scratch, "%d", yr);
+
+// formatYear formats the year part of a date.
+// MNOTE: return static .bss memory.
+static String formatYear (int year, int format) {
+    static char scratch[5];
+    if (year <= 0 || year > 5000) return null;
+    switch (format) {
+        default: sprintf(scratch, "%d", year);
     }
     return (String) scratch;
 }
 
-//  extractDate attempts to extract a date from a free format String.
-void extractDate (String str, int *pmod, int *pda, int *pmo, int *pyr, String *pyrstr)
-//  str -- String assumed to hold a date in some format.
-//  pmod -- Month or day ???
-//  pda -- Integer returned with extracted day of the month.
-//  pmo -- Integer returned with extracted month.
-//  pyr -- Integer returned with extracted year.
-//  pyrstr -- ???
-{
+// extractDate attempts to extract a date from any String.
+void extractDate(String string, int *pmod, int *pday, int *pmonth, int *pyear, String *pyrstr) {
     int tok, ival, era = 0;
     String sval;
     static unsigned char yrstr[10];  // Year string?
     *pyrstr = "";
-    *pmod = *pda = *pmo = *pyr = 0;
-    if (str) set_date_string(str);  // I think this shares the value of the string with token getter.
+    *pmod = *pday = *pmonth = *pyear = 0;
+    if (string) set_date_string(string);  // I think this shares the value of the string with token getter.
     while ((tok = getDateToken(&ival, &sval))) {
         switch (tok) {
             case MONTH_TOK:
-                if (*pmo == 0) *pmo = ival;
+                if (*pmonth == 0) *pmonth = ival;
                 continue;
             case CHAR_TOK:
                 continue;
             case WORD_TOK:
-                if (*pyr == 0 && *pda == 0 && ival < 0) ival = -ival;
+                if (*pyear == 0 && *pday == 0 && ival < 0) ival = -ival;
                 if (ival > 0 && ival < 20 && *pmod == 0) *pmod = ival;
                 if (ival == -99) era = 100;
                 if ((*pmod == 4 && ival == 5) ||
@@ -446,10 +418,10 @@ void extractDate (String str, int *pmod, int *pda, int *pmo, int *pyr, String *p
                     if (eqstr(*pyrstr,"")) {
                         strcpy((char*) yrstr, sval);
                         *pyrstr = (char*) yrstr;
-                        *pyr = ival;
+                        *pyear = ival;
                     }
                 }
-                else if (ival <= 31 && *pda == 0) *pda = ival;
+                else if (ival <= 31 && *pday == 0) *pday = ival;
                 continue;
             default:
                 FATAL();
@@ -460,17 +432,13 @@ combine:
 }
 
 //  set_date_string -- Initialize the date extraction string.
-//--------------------------------------------------------------------------------------------------
-static void set_date_string (String str)
-{
+static void set_date_string (String str) {
     sstr = str;
-    if (!monthtbl) init_monthtbl();
+    if (!monthTable) initMonthTable();
 }
 
-//  getDateToken -- Return next date extraction token.
-//--------------------------------------------------------------------------------------------------
-static int getDateToken (int *pival, String *psval)
-{
+// getDateToken returns the next date extraction token.
+static int getDateToken (int *pival, String *psval) {
     static unsigned char scratch[256];
     String p = (String) scratch;  // p is the cursor when finding words.
     int i, c;
@@ -488,7 +456,7 @@ static int getDateToken (int *pival, String *psval)
         sstr--;
         *psval = (String) scratch;
 		// If the word is in the month table, return the month's integer.
-        if ((i = searchIntegerTable(monthtbl, upper((String)scratch))) > 0 && i <= 12) {
+        if ((i = searchIntegerTable(monthTable, upper((String)scratch))) > 0 && i <= 12) {
             *pival = i;
             return MONTH_TOK;
         }
@@ -519,31 +487,27 @@ static int getDateToken (int *pival, String *psval)
     return CHAR_TOK;
 }
 
-//  init_monthtbl -- Initialize the month string table.
-//--------------------------------------------------------------------------------------------------
-static void init_monthtbl (void)
-{
+// initMonthTable initializes the monthTable a static IntegerTable.
+static void initMonthTable(void) {
     int i, j;
-    monthtbl = createIntegerTable(5);
+    monthTable = createIntegerTable(5);
     for (i = 0; i < 19; i++) {
         j = i + 1;
-        insertInIntegerTable(monthtbl, monthstrs[i].su, j);
-        insertInIntegerTable(monthtbl, monthstrs[i].lu, j);
+        insertInIntegerTable(monthTable, monthStrings[i].su, j);
+        insertInIntegerTable(monthTable, monthStrings[i].lu, j);
     }
-    insertInIntegerTable(monthtbl, "EST", -1);  /* ignored after date */
-    insertInIntegerTable(monthtbl, "BC", -99);
+    insertInIntegerTable(monthTable, "EST", -1); // Ignored after date.
+    insertInIntegerTable(monthTable, "BC", -99);
 }
 
-//  get_date -- Get today's date
-//--------------------------------------------------------------------------------------------------
-String get_date(void)
-{
+// get_date gets today's date.
+String get_date(void) {
     struct tm *pt;
     time_t curtime;
     static char dat[20];
     curtime = time(null);
     pt = localtime(&curtime);
-    sprintf(dat, "%d %s %d", pt->tm_mday, monthstrs[pt->tm_mon].su, 1900 + pt->tm_year);
+    sprintf(dat, "%d %s %d", pt->tm_mday, monthStrings[pt->tm_mon].su, 1900 + pt->tm_year);
     return (String) dat;
 }
 
