@@ -6,3 +6,12 @@ all:
 	cd PatchSex; make
 	cd TestProgram; make
 	cd RandomizeKeys; make
+
+clean:
+	cd DeadEndsLib; make clean
+	cd MenuLibrary; make clean
+	cd UseMenus; make clean
+	cd RunScript; make clean
+	cd PatchSex; make clean
+	cd TestProgram; make clean
+	cd RandomizeKeys; make clean
