@@ -26,7 +26,7 @@ NameIndex *createNameIndex(void);
 void deleteNameIndex(NameIndex*);
 void insertInNameIndex(NameIndex*, String nameKey, String personKey);
 void showNameIndex(NameIndex*);
-Set *searchNameIndex(NameIndex*, String);
+Set* searchNameIndex(NameIndex*, String);
 void getNameIndexStats(NameIndex*, int*, int*);
 
 #endif // nameindex_h

@@ -21,7 +21,7 @@ RecordType recordType(GNode* root) {
     return GROther;
 }
 
-//  compareRecordKeys compare record keys; longer keys sort after shorter keys.
+//  compareRecordKeys compares record keys; longer keys sort after shorter keys.
 int compareRecordKeys(String a, String b) {
     ASSERT(strlen(a) > 1 && strlen(b) > 1);  // Is this strictly necessary?
     if (strlen(a) != strlen(b)) return (int) (strlen(a) - strlen(b));

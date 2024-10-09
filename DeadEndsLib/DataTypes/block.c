@@ -86,6 +86,10 @@ void* findInBlock(Block* block, String key, String(*getKey)(void*), int* index) 
 // binary search.
 void* findInSortedBlock(Block* block, String key, String(*getKey)(void*),
 						int(*compare)(String, String), int* index) {
+	if (block->length == 0) {
+		if (index) *index = 0;
+		return null;
+	}
 	return binarySearch(block->elements, block->length, key, getKey, compare, index);
 }
 

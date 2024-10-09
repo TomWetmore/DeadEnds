@@ -99,13 +99,13 @@ bool addSpouseToFamily (GNode* spouse, GNode* family, SexType sext, Database* da
 	return true;
 }
 
-static int numChildrenInFamily(GNode* firstChild) {
-	int count = 0;
-	GNode* child = firstChild;
-	while (child) {
-		count++;
-		child = child->sibling;
-	}
-	return count;
-}
+//static int numChildrenInFamily(GNode* firstChild) {
+//	int count = 0;
+//	GNode* child = firstChild;
+//	while (child) {
+//		count++;
+//		child = child->sibling;
+//	}
+//	return count;
+//}
 

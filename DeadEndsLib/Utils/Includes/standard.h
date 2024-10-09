@@ -3,7 +3,7 @@
 // standard.h -- Useful things.
 //
 // Created by Thomas Wetmore on 1 November 2022.
-// Last changed on 10 August 2024.
+// Last changed on 3 October 2024.
 
 #ifndef standard_h
 #define standard_h
@@ -20,7 +20,7 @@ typedef char* String;
 #include <unistd.h>
 #include "path.h"
 
-#define DEBUGALLOCS // EMPTY
+//#define DEBUGALLOCS // EMPTY
 #define MAXSTRINGSIZE 512
 #define NAN 313131  // Poor man's implementation of NAN for integers.
 
@@ -53,35 +53,32 @@ String capitalize(String);
 #endif
 
 // User interface to the standard functions.
-//--------------------------------------------------------------------------------------------------
-char* __alloc(size_t, String, int);
-void __free(void* ptr, String, int);
+void* _alloc(size_t, String, int);
+void _free(void* ptr, String, int);
 bool isLetter(int);  // Is character is an Ascii letter?
 String trim(String, int); // Trim String to size.
 void __logAllocations(bool);  // Turn allocation logging on and off.
 
-// Turn on alloc and free debugging.
-#ifdef DEBUGALLOCS
-#define stdalloc(l)   __alloc(l, __FILE__, __LINE__)
-#define stdfree(p)    __free(p, __FILE__, __LINE__)
-#define logAllocations(b) __logAllocations((b))
-// Otherwise stdalloc and stdfree use malloc and free directly.
-#else
-#define stdalloc(l) malloc((l))
-#define stdfree(p) free((p))
-#define logAllocations(b)
+#ifdef DEBUGALLOCS // Debugging allocs and free.
+	#define stdalloc(l) _alloc(l, __FILE__, __LINE__)
+	#define stdfree(p)  _free(p, __FILE__, __LINE__)
+	#define logAllocations(b) _logAllocations((b))
+#else // Not debugging allocs and frees.
+	#define stdalloc(l) malloc((l))
+	#define stdfree(p) free((p))
+	#define logAllocations(b)
 #endif
 
-#define fatal(s)      __fatal(__FILE__, __LINE__)
-#define FATAL()       __fatal(__FILE__, __LINE__)
-#define ASSERT(b)     if(!(b)) __fatal(__FILE__, __LINE__)
+#define fatal(s)      _fatal(__FILE__, __LINE__)
+#define FATAL()       _fatal(__FILE__, __LINE__)
+#define ASSERT(b)     if(!(b)) _fatal(__FILE__, __LINE__)
 #define eqstr(s,t)    (!strcmp((s),(t)))
 #define nestr(s,t)    (strcmp((s),(t)))
 
 #define ARRAYSIZE(a)	(sizeof(a)/sizeof(a[0]))
 
-void __fatal(String, int); // standard.c
-void __assert(bool, String, int); // standard.c
+void _fatal(String, int); // standard.c
+void _assert(bool, String, int); // standard.c
 
 // These macros are used for character types in the chartype() function.
 #define WHITE  ' '

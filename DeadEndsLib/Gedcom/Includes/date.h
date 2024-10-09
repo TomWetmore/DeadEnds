@@ -11,6 +11,18 @@
 #include <stdio.h>
 #include "standard.h"
 
+typedef enum DateToken {
+	monthToken = 260,
+	wordToken,
+	charToken,
+	intToken,
+	unknownToken,
+	atEndToken = 0
+} DateToken;
+
+/* static */ void setExtractString(String);
+/*static*/ DateToken getDateToken(int *pInt, String *pString);
+
 void extractDate(String, int*, int*, int*, int*, String*);
 
 #endif // date_h

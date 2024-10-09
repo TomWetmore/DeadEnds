@@ -3,14 +3,14 @@
 // standard.c hold some standard utiltiy functions.
 //
 // Creates by Thomas Wetmore on 7 November 2022.
-// Last changed on 17 July 2024.
+// Last changed on 3 October 2024.
 
 #include <stdlib.h>
 #include "standard.h"
 #include "path.h"
 #include <malloc/malloc.h> // For malloc_size().
 
-#define ALLOCLOGFILE "./alloc.log"
+#define ALLOCLOGFILE "~/alloc.log"
 
 static FILE *allocLogFile = null;  // The logging file.
 static bool logopen = false;       // The logging file is open for writing.
@@ -21,7 +21,7 @@ static long bytesFreed = 0;
 String version = "deadends.1.0.0";
 
 // logAllocations turns allocation logging on or off; for debugging heap memory.
-void __logAllocations(bool onOrOff) {
+void _logAllocations(bool onOrOff) {
     static bool firstOn = true;  // Open for writing on first call.
     if (onOrOff) {
         if (firstOn) {
@@ -47,8 +47,8 @@ void __logAllocations(bool onOrOff) {
     }
 }
 
-// __alloc allocates memory; called by stdalloc.
-char* __alloc(size_t len, String file, int line) {
+// _alloc allocates memory; called by stdalloc.
+void* _alloc(size_t len, String file, int line) {
 	char* p;
 	if (len == 0) return null;
 	ASSERT(p = malloc(len));
@@ -60,8 +60,8 @@ char* __alloc(size_t len, String file, int line) {
 	return p;
 }
 
-// __free deallocates memory; called by sdtfree.
-void __free (void* ptr, String file, int line) {
+// _free deallocates memory; called by sdtfree.
+void _free (void* ptr, String file, int line) {
 	if (loggingAllocs) {
         fprintf(allocLogFile, "F  %s\t%d\t%ld\t%ld\n", lastPathSegment(file), line,
 				malloc_size(ptr), (long) ptr);
@@ -108,20 +108,16 @@ int chartype(int c) {
 	return c;
 }
 
-// __fatal -- Fatal error routine
-//--------------------------------------------------------------------------------------------------
-void __fatal (String file, int line)
-// String file -- Name of file calling __fatal.
-// int line -- Line number of file calling __fatal.
-{
+// _fatal is the fatal error function. file and line are the file and line number of the call.
+void _fatal (String file, int line) {
 	printf("FATAL: %s: line %d\n", file, line);
 	abort();
 }
 
-// __assert makes an assertion.
-void __assert (bool exp, String file, int line) {
+// _assert makes an assertion.
+void _assert (bool exp, String file, int line) {
 	if (exp) return;
-	__fatal(file, line);
+	_fatal(file, line);
 }
 
 // iswhite checks whether a character is white space.

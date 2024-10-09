@@ -1,9 +1,9 @@
-//  DeadEnds Library
+// DeadEnds Library
+
+// date.c has the functions that deal with Gedcom-based dates.
 //
-//  date.c has the functions that deal with Gedcom-based dates.
-//
-//  Created by Thomas Wetmore on 22 February 2023.
-//  Last changed on 2 September 2024.
+// Created by Thomas Wetmore on 22 February 2023.
+// Last changed on 13 September 2024.
 
 #include <time.h>
 #include "standard.h"
@@ -11,25 +11,20 @@
 #include "stringtable.h"
 #include "integertable.h"
 
-#define MONTH_TOK 1
-#define CHAR_TOK  2
-#define WORD_TOK  3
-#define ICONS_TOK 4
-
 static void format_ymd(String, String, String, int, int, String*);
 static void formatDateModifier(int, String*);
 static String formatDay(int, int);
 static String formatMonth(int, int);
 static String formatYear(int, int);
-static void set_date_string(String);
-static int getDateToken(int*, String*);
+/*static*/ void setExtractString(String);
+/*static*/ DateToken getDateToken(int*, String*);
 static void initMonthTable(void);
 
-// Strings that are aded to monthTable.
+// Strings that make up monthTable.
 static struct {
     char *sl, *su, *ll, *lu;
 } monthStrings[] = {
-	// Month words and abbreviations.
+	// Month words.
     { "Jan", "JAN", "January", "JANUARY" },
     { "Feb", "FEB", "February", "FEBRUARY" },
     { "Mar", "MAR", "March", "MARCH" },
@@ -42,7 +37,7 @@ static struct {
     { "Oct", "OCT", "October", "OCTOBER" },
     { "Nov", "NOV", "November", "NOVEMBER" },
     { "Dec", "DEC", "December", "DECEMBER" },
-    // Date modifier words.
+    // Modifier words.
     { "abt", "ABT", "about", "ABOUT" },     // 1
     { "bef", "BEF", "before", "BEFORE" },   // 2
     { "aft", "AFT", "after", "AFTER" },     // 3
@@ -55,7 +50,8 @@ static struct {
 	{ "cmp", "CMP", "computed", "COMPUTED" }, // 10
 };
 
-static String sstr = null;
+static String extractString = null;
+static String extractCursor = null;
 static StringTable *monthTable = null; // Maps month Strings to integers.
 
 /*==========================================
@@ -87,6 +83,7 @@ static StringTable *monthTable = null; // Maps month Strings to integers.
  * cmplx - if TRUE, then treat string as complex, including
  *         date modifiers, ranges, and/or double-dating
  *========================================*/
+
 String formatDate (String string, int dayFmt, int monthFmt, int yearFmt, int dateFmt, bool cmplx) {
     int mod, day, month, year;
     String sda, smo, syr;
@@ -396,22 +393,22 @@ void extractDate(String string, int *pmod, int *pday, int *pmonth, int *pyear, S
     static unsigned char yrstr[10];  // Year string?
     *pyrstr = "";
     *pmod = *pday = *pmonth = *pyear = 0;
-    if (string) set_date_string(string);  // I think this shares the value of the string with token getter.
+    if (string) setExtractString(string);
     while ((tok = getDateToken(&ival, &sval))) {
         switch (tok) {
-            case MONTH_TOK:
+            case monthToken: // Month string
                 if (*pmonth == 0) *pmonth = ival;
                 continue;
-            case CHAR_TOK:
+            case charToken:
                 continue;
-            case WORD_TOK:
+			case wordToken:
                 if (*pyear == 0 && *pday == 0 && ival < 0) ival = -ival;
                 if (ival > 0 && ival < 20 && *pmod == 0) *pmod = ival;
                 if (ival == -99) era = 100;
                 if ((*pmod == 4 && ival == 5) ||
                     (*pmod == 6 && ival == 7)) goto combine;
                 continue;
-            case ICONS_TOK:
+            case intToken:
                 /* years 1-99 are denoted by at least two leading zeroes */
                 if (ival >= 100 ||
                     (ival > 0 && sval[0] == '0' && sval[1] == '0')) {
@@ -423,6 +420,8 @@ void extractDate(String string, int *pmod, int *pday, int *pmonth, int *pyear, S
                 }
                 else if (ival <= 31 && *pday == 0) *pday = ival;
                 continue;
+			case unknownToken:
+				continue;
             default:
                 FATAL();
         }
@@ -431,60 +430,68 @@ combine:
     *pmod += era;
 }
 
-//  set_date_string -- Initialize the date extraction string.
-static void set_date_string (String str) {
-    sstr = str;
+// setExtractString initializes the file static date extraction string.
+/*static*/ void setExtractString (String str) {
+    extractString = str;
+	extractCursor = str;
     if (!monthTable) initMonthTable();
 }
 
-// getDateToken returns the next date extraction token.
-static int getDateToken (int *pival, String *psval) {
-    static unsigned char scratch[256];
-    String p = (String) scratch;  // p is the cursor when finding words.
+// getDateToken returns the next token from the date extraction string.
+/*static*/ DateToken getDateToken(int *pInt, String *pString) {
+    static unsigned char scratch[256]; // Where tokens are built.
+    String p = (String) scratch;
+	*pInt = 0;
+	*pString = (String) scratch;
     int i, c;
-	// sstr must be set up before the first call.
-    if (!sstr) return 0;
-	// Move past white space.
-    while (iswhite(*sstr++))
-        ;
-    sstr--;
+    if (!extractString) return atEndToken; // Must exist.
+    while (iswhite(*extractString++)) ; // Skip white.
+    extractString--;
 	// Found a letter so look for a word.
-    if (isLetter(*sstr)) {
-        while (isLetter(*p++ = *sstr++)) // Loads the word in scratch.
-            ;
+    if (isLetter(*extractString)) {
+		while (isLetter(*p++ = *extractString++)) // Load word into scratch.
+			;
         *--p = 0;
-        sstr--;
-        *psval = (String) scratch;
+        extractString--;
+		*pString = (String) scratch;
+		if (strlen((const char*) scratch) == 1) return charToken;
 		// If the word is in the month table, return the month's integer.
         if ((i = searchIntegerTable(monthTable, upper((String)scratch))) > 0 && i <= 12) {
-            *pival = i;
-            return MONTH_TOK;
+            *pInt = i;
+            return monthToken;
         }
-        *pival = 0;
-        if (i > 12) *pival = i - 12;
-        if (i < 0) *pival = i;
-        return WORD_TOK;
+		// If word is one of the known date words return its index.
+        *pInt = 0;
+		if (i > 12 && i <= 22) {
+			*pInt = i - 12;
+			return wordToken;
+		}
+        *pInt = 0;
+        return unknownToken;
     }
-    if (chartype(*sstr) == DIGIT) {
+    if (chartype(*extractString) == DIGIT) {
         i = 0;
-        while (chartype(c = *p++ = *sstr++) == DIGIT)
-            i = i*10 + c - '0';
-        if (c == '/') {
-            while (chartype(*p++ = *sstr++) == DIGIT) ;
-        }
+		while (chartype(c = *p++ = *extractString++) == DIGIT) {
+			i = i*10 + c - '0';
+		}
+        //if (c == '/') { // Intended to handle double year dates.
+            //while (chartype(*p++ = *extractString++) == DIGIT) ;
+        //}
         *--p = 0;
-        sstr--;
-        *psval = (String) scratch;
-        *pival = i;
-        return ICONS_TOK;
+        extractString--;
+        *pString = (String) scratch;
+        *pInt = i;
+        return intToken;
     }
-    if (*sstr == 0)  {
-        sstr = null;
-        return 0;
+    if (*extractString == 0)  {
+        extractString = null;
+        return atEndToken;
     }
-    *pival = *sstr++;
-    *psval = (String) "";
-    return CHAR_TOK;
+	*p++ = *extractString++;
+	*p = 0;
+	*pString = (String) scratch;
+	*pInt = (int) scratch[0];
+	return charToken;
 }
 
 // initMonthTable initializes the monthTable a static IntegerTable.

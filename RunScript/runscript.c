@@ -10,7 +10,7 @@
 // If DE_GEDCOM_PATH and/or DE_SCRIPTS_PATH are defined, they may be used to find the files.
 //
 // Created by Thomas Wetmore on 21 July 2024
-// Last changed on 16 August 2024.
+// Last changed on 3 October 2024.
 
 #include "runscript.h"
 
@@ -18,7 +18,7 @@
 static void usage(void);
 static void getArguments(int, char**, String*, String*);
 static void getEnvironment(String*, String*);
-static void getDatabase(void);
+//static void getDatabase(void);
 static void runScript(Database*, String);
 
 // main is the main program of the RunScript program.
@@ -84,7 +84,7 @@ static void getEnvironment(String* gedcom, String* script) {
 // Database and the main proc's SymbolTable.
 extern String curFileName;
 extern int curLine;
-void runScript(Database* database, String fileName) {
+static void runScript(Database* database, String fileName) {
 	// Create a PNode to call the main proc.
 	curFileName = "internal";
 	curLine = 1;

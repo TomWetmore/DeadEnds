@@ -4,7 +4,7 @@
 // FILEs.
 //
 // Created by Thomas Wetmore on 2 May 2023.
-// Last changed on 13 May 2024.
+// Last changed on 3 October 2024.
 
 #include "standard.h"
 #include "gnode.h"
@@ -45,7 +45,7 @@ void writeGNode(FILE* fp, int level, GNode* gnode, bool indent) {
 
 // writeGNodeRecord writes a GNode record to a file.
 void writeGNodeRecord(FILE* fp, GNode* root, bool indent) {
-	writeGNodes(fp, 0, root, false, true, true);
+	writeGNodes(fp, 0, root, indent, true, true);
 }
 
 // writeGNodes writes a GNode tree or forest to a file. Level is the current level; indent

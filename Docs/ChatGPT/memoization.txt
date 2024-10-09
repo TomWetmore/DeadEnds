@@ -1,0 +1,41 @@
+Your program seems to have most of the elements for correctly memoizing ancestor and descendant calculations, but there are a few details that might be causing the excessive recalculations, especially on large files. I’ll point out a few areas where changes could optimize your code further:
+
+	1.	Memoization:
+	•	While you have memoization flags (ancestorsDone and descendentsDone) and cached values (numAncestors and numDescendents) in the ConnectData structure, these cached results are not consistently updated after each calculation.
+	•	In getNumAncestors and getNumDescendents, you should set ancestorsDone = true and descendentsDone = true, respectively, and save the calculated values in numAncestors and numDescendents before returning. Otherwise, the program recalculates these values whenever they’re needed again.
+Update these functions as follows:
+
+2.	String Set for Visited Records:
+	•	In recursive ancestor or descendant calculations, it’s also possible for individuals to have looping relationships in genealogy records (e.g., intermarriages), which can cause infinite or redundant loops. Consider using a local StringSet in each function to track the individuals already visited during the recursive call, which prevents revisiting the same nodes within the same function call stack.
+	3.	Recursive Stack Overflow on Large Files:
+	•	If some partitions have deep genealogical trees, the recursive nature of getNumAncestors and getNumDescendents may cause a stack overflow on very large datasets. Consider converting these recursive functions to iterative ones using an explicit stack (e.g., a list structure) to manage the nodes.
+	4.	Optimization Check with Debugging:
+	•	To ensure the memoization is working effectively, add a debug statement within getNumAncestors and getNumDescendents that logs each time an ancestor or descendant is calculated. If you see repeated calculations for the same individuals, it indicates that the memoization is not being utilized as intended.
+
+Implementing these changes should reduce redundant visits and improve runtime efficiency on larger files. Let me know if you’d like to go over any specific point in more detail.
+
+SECOND RESPONSE:
+
+Your code appears generally sound, with memoization being correctly applied by caching the ancestor and descendant counts. However, the slowdown might still be caused by one or more subtle factors related to redundant processing or recursive inefficiency. Here are a few advanced optimization ideas that might help:
+
+	1.	Avoid Redundant Traversals with a “Visited” Check for Recursive Calls:
+	•	Recursive calls in getNumAncestors and getNumDescendents could still be re-calculating values if intermediate ancestors/descendants aren’t cached. To reduce this, introduce a local set (e.g., visitedAncestors or visitedDescendants) within each recursive function to prevent re-visiting nodes during the traversal.
+	•	Example in getNumAncestors:
+
+	if (isInSet(visitedAncestors, root->key)) return 0;
+addToSet(visitedAncestors, root->key);
+
+This ensures each node is only processed once per call stack. Implement the same in getNumDescendents if applicable.
+
+	2.	Check GNodeIndex Lookup Costs:
+	•	If searchHashTable(index, key) is inefficient, especially for large datasets, it could be adding to the runtime significantly. If possible, optimize searchHashTable for quicker lookups or confirm that your hashing function distributes keys evenly, as high collision rates could lead to excessive search times.
+	3.	Switch to an Iterative Approach for Deep Recursions:
+	•	Deeply nested genealogical trees could lead to excessive recursion depth, especially if the recursion spans many generations. Try converting the recursive approach to an iterative one with an explicit stack, which might handle deeply nested ancestor/descendant structures more efficiently and avoid potential stack overflow.
+	4.	Parallelize Ancestor/Descendant Calculations:
+	•	If your computing environment supports multithreading, consider processing partitions in parallel. For example, each partition could be processed independently with its own ancestor and descendant calculations in parallel threads, reducing overall processing time.
+	5.	Verify Unintentional Structure Growth in Partitions:
+	•	If any intermediate structures (like List* partition or StringSet* visited) are accidentally growing in unexpected ways, they could cause performance issues. Add debug logs to check the size of these structures periodically to ensure they are not larger than expected, especially for larger files.
+	6.	Optimize createPartition for Fewer Redundant Insertions:
+	•	In createPartition, ensure you are not redundantly adding the same nodes multiple times into the queue. Since you’re also storing each partition in a List, duplicate entries could cause more processing in the long run.
+
+Applying these steps, particularly the first two and checking searchHashTable efficiency, should help pinpoint further performance gains. Let me know if any of these ideas yield improvements or if more targeted solutions are needed based on any new observations.

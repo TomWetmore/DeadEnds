@@ -30,7 +30,7 @@ static int compare(String a, String b) {
 }
 
 // delete frees an Error from an ErrorLog.
-static void delete(Word error) {
+static void delete(void* error) {
 	String message = ((Error*) error)->message;
 	if (message) stdfree(message);
 	stdfree(error);

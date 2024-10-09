@@ -54,6 +54,7 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 	RecordIndex* personIndex = createRecordIndex();
 	RecordIndex* familyIndex = createRecordIndex();
 	RecordIndex* recordIndex = createRecordIndex();
+	RecordIndex* sourceIndex = createRecordIndex();
 	RootList* personRoots = createRootList();
 	RootList* familyRoots = createRootList();
 	FORLIST(rootList, element)
@@ -66,6 +67,8 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 		} else if (recordType(root) == GRFamily) {
 			addToRecordIndex(familyIndex, root->key, root, el->line);
 			insertInRootList(familyRoots, root);
+		} else if (recordType(root) == GRSource) {
+			addToRecordIndex(sourceIndex, root->key, root, el->line);
 		}
 	ENDLIST
 	deleteGNodeList(rootList, false);
@@ -74,6 +77,7 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 	database->recordIndex = recordIndex;
 	database->personIndex = personIndex;
 	database->familyIndex = familyIndex;
+	database->sourceIndex = sourceIndex;
 	database->personRoots = personRoots;
 	database->familyRoots = familyRoots;
 	if (importDebugging) summarizeDatabase(database);
