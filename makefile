@@ -6,6 +6,7 @@ all:
 	cd PatchSex; make
 	cd TestProgram; make
 	cd RandomizeKeys; make
+	cd Partition; make
 
 clean:
 	cd DeadEndsLib; make clean
@@ -15,3 +16,4 @@ clean:
 	cd PatchSex; make clean
 	cd TestProgram; make clean
 	cd RandomizeKeys; make clean
+	cd Partition; make clean

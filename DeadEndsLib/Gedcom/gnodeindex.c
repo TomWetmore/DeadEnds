@@ -20,7 +20,7 @@ static String getKey(void* element) {
 
 // delete deletes the contents of a GNode index element. By default it does nothing; if one is
 // required the user must set it.
-static void delete(void* word) { }
+static void defaultDelete(void* word) { }
 
 // createGNodeIndexEl creates an element for a GNodeIndex hash table.
 GNodeIndexEl* createGNodeIndexEl(GNode* root, void* data) {
@@ -31,8 +31,9 @@ GNodeIndexEl* createGNodeIndexEl(GNode* root, void* data) {
 }
 
 // createGNodeIndex create a hash table that indexes GNode roots with arbitrary void* data.
-GNodeIndex* createGNodeIndex(void) {
-	return createHashTable(getKey, compare, delete, 1207);
+GNodeIndex* createGNodeIndex(void(*delete)(void*)) {
+	if (delete)	return createHashTable(getKey, compare, delete, 1207);
+	return createHashTable(getKey, compare, defaultDelete, 1207);
 }
 
 // addToGnodeIndex adds GNode and DataConnect pair to a GNodeIndex.

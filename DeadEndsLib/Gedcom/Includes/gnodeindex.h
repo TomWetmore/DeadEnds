@@ -2,7 +2,7 @@
 // Library/Gedcom
 //
 // Created by Thomas Wetmore on 6 October 2024.
-// Last changed on 8 October 2024.
+// Last changed on 10 October 2024.
 
 #ifndef gnodeindex_h
 #define gnodeindex_h
@@ -18,7 +18,7 @@ typedef struct GNodeIndexEl {
 
 typedef HashTable GNodeIndex;
 
-GNodeIndex* createGNodeIndex(void);
+GNodeIndex* createGNodeIndex(void(*delete)(void*));
 GNodeIndexEl* createGNodeIndexEl(GNode* root, void* data);
 void addToGNodeIndex(GNodeIndex*, GNode*, void* data);
 void showGNodeIndex(GNodeIndex*, void(*show)(void*));

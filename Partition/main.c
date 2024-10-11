@@ -3,7 +3,7 @@
 //  Partition
 //
 // Created by Thomas Wetmore on 4 October 2024.
-// Last changed on 8 October 2024.
+// Last changed on 10 October 2024.
 
 #include <stdio.h>
 #include "import.h"
@@ -20,19 +20,19 @@ static void getEnvironment(String*);
 static void usage(void);
 static void goAway(ErrorLog*);
 static List* getPartitions(GNodeList*, GNodeIndex*, ErrorLog*);
-static List* createPartition(GNode*, GNodeList*, GNodeIndex*, ErrorLog*);
+static List* createPartition(GNode*, GNodeList*, GNodeIndex*, StringSet*, ErrorLog*);
 static GNodeIndex* createIndexOfGNodes(GNodeList*);
 static GNodeList* removeNonPersons(GNodeList*);
 static void showConnects(List*, GNodeIndex*);
-static bool debugging = true;
+static bool debugging = false;
 
 // main is the main program of the partition program. It reads a Gedcom file into a GNodeList and
-// creates a GNodeIndex to act as the database. It partitions the persons into closed partitions
-// of persons and families. It computes the numbers of ancestors and descendents of all persons.
+// creates a GNodeIndex to act as database. It partitions the persons into closed partitions of
+// persons and families. It also computes the numbers of ancestors and descendents of all persons.
 int main(int argc, char** argv) {
 	String gedcomFile = null;
 	String searchPath = null;
-	printf("%s: Partition begin.\n", getMillisecondsString());
+	printf("Partition: %s: begin.\n", getMillisecondsString());
 
 	// Get the Gedcom file to process.
 	getArguments(argc, argv, &gedcomFile);
@@ -70,28 +70,48 @@ int main(int argc, char** argv) {
 	FORLIST(partitions, el)
 		showConnects((List*) el, index);
 	ENDLIST
+
+	// Find the most connected person.
+	int max = 0;
+	GNode* topGun = null;
+	FORLIST(roots, el)
+		GNode* gnode = ((GNodeListEl*) el)->node;
+		GNodeIndexEl* element = searchHashTable(index, gnode->key);
+		if (!element) FATAL();
+		ConnectData* data = element->data;
+		int score = data->numAncestors + data->numDescendents;
+		if (score > max) {
+			max = score;
+			topGun = gnode;
+		}
+	ENDLIST
+	printf("Person: %s %s %d\n", topGun->key, topGun->child->value, max);
+	printf("Partition: %s: done.\n", getMillisecondsString());
 }
 
-// showConnects is a debug function that shows the connect dataq of each person in a partition.
-static void showConnects(List* partition, GNodeIndex* index) {
+// showConnects is a debug function that shows the connect data of each person in a list.
+static void showConnects(List* list, GNodeIndex* index) {
 	printf("\nPartition:\n");
-	FORLIST(partition, el)
+	FORLIST(list, el)
 		GNode* root = el;
 		GNodeIndexEl* element = searchHashTable(index, root->key);
-		if (!element)  FATAL();
+		if (!element) FATAL(); // Can't happen.
 		ConnectData* data = element->data;
 		printf("%s: %d : %d : %d\n", root->key, data->numAncestors, data->numDescendents, data->numVisits);
 	ENDLIST
 }
 
-// createIndexOfRecords creates a GNodeIndex from a GNodeList. It serves as the database. Its
-// elements hold the ConnectData structures.
+// deleteData is the delete function use by GNodeIndex to delete the connect data areas.
+static void deleteData(void* data) {
+	stdfree(data);
+}
+
+// createIndexOfRecords creates a GNodeIndex from a GNodeList. Its elements have the ConnectData.
 static GNodeIndex* createIndexOfGNodes(GNodeList* list) {
-	GNodeIndex* index = createGNodeIndex();
+	GNodeIndex* index = createGNodeIndex(deleteData);
 	FORLIST(list, el)
 		GNode* root = ((GNodeListEl*) el)->node;
-		String key = root->key;
-		if (key) {
+		if (root->key) {
 			ConnectData* data = createConnectData();
 			addToGNodeIndex(index, root, data);
 		}
@@ -99,41 +119,40 @@ static GNodeIndex* createIndexOfGNodes(GNodeList* list) {
 	return index;
 }
 
-// getPartitions partitions a list of Gedcom records into a list of lists of GNodes.
-static StringSet* visited = null;
+// getPartitions partitions a list of Gedcom records into a list of lists of GNodes. Each
+// partition is a closed set of person records.
 static List* getPartitions(GNodeList* gnodes, GNodeIndex* index, ErrorLog* log) {
-	visited = createStringSet(); // Visited GNode keys.
-	List* partitions = createList(null, null, null, false); // List of partitions.
+	StringSet* visited = createStringSet(); // Visited GNode keys.
+	List* partitions = createList(null, null, null, false); // List of partitions to return.
 	FORLIST(gnodes, el)
 		GNode* root = ((GNodeListEl*) el)->node;
 		String key = root->key;
-		if (key && !isInSet(visited, key)) {
-			appendToList(partitions, createPartition(root, gnodes, index, log));
+		if (key && !isInSet(visited, key)) { // root starts a new partition.
+			appendToList(partitions, createPartition(root, gnodes, index, visited, log));
 		}
 	ENDLIST
-	//printf("THERE ARE %d PARTITIONS\n", lengthList(partitions));
+	deleteStringSet(visited, false);
 	return partitions;
 }
 
-// createPartition creates a partition by finding the closed Gedcom graph that contains the
-// argument GNode. A partition is a list of GNodes. Its elements must not be deleted if the
-// partition is deleted.
-static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index, ErrorLog* log) {
+// createPartition creates a partition by finding the closed set of Gedcom persons and families
+// that contains the root GNode argument. A partition is a list of GNodes.
+static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index,
+							 StringSet* visited, ErrorLog* log) {
 	List* partition = createList(null, null, null, false);
 	List* queue = createList(null, null, null, false); // GNodes to process.
-	prependToList(queue, root); // Init queue with first GNode to be in partition.
+	prependToList(queue, root); // Init queue with first node.
 
-	// Iterate the queue until it empties.
+	// Iterate until the queue is empty.
 	while (lengthList(queue) > 0) {
 		GNode* root = getAndRemoveLastListElement(queue); // Get next record to process.
 		String key = root->key;
 		if (!key) continue; // Can this happen?
-		// NOTE: visited could be an argument, removing need for a static global variable.
-		if (isInSet(visited, key)) continue; // Skip if already seen.
-		addToSet(visited, key); // Add key to the visited set.
-		if (recordType(root) == GRPerson) appendToList(partition, root); // Add to partition.
+		if (isInSet(visited, key)) continue; // Skip if seen.
+		addToSet(visited, key);
+		if (recordType(root) == GRPerson) appendToList(partition, root); // Add persons only.
 
-		// If GNode is a person root add its FAMS and FAMC GNodes.
+		// If root is a person add its FAMS and FAMC nodes.
 		if (recordType(root) == GRPerson) {
 			for (GNode* child = root->child; child; child = child->sibling) {
 				String tag = child->tag;
@@ -147,8 +166,7 @@ static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index, 
 					prependToList(queue, node);
 				}
 			}
-
-		// If GNode is a family root add its HUSB, WIFE and CHIL GNodes.
+		// If root is a family add its HUSB, WIFE, and CHIL nodes.
 		} else if (recordType(root) == GRFamily) {
 			for (GNode* child = root->child; child; child = child->sibling) {
 				String tag = child->tag;
@@ -168,7 +186,7 @@ static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index, 
 	return partition;
 }
 
-// getFileArguments gets the file names from the command line. It is mandatory.
+// getFileArguments gets the file names from the command line.
 static void getArguments(int argc, char* argv[], String* gedcomFile) {
 	int ch;
 	while ((ch = getopt(argc, argv, "g:")) != -1) {
@@ -194,12 +212,12 @@ static void getEnvironment(String* gedcomPath) {
 	if (!*gedcomPath) *gedcomPath = ".";
 }
 
-// usage prints the RunScript usage message.
+// usage prints the Partition usage message.
 static void usage(void) {
-	fprintf(stderr, "usage: Partition -g gedcomfile\n");
+	fprintf(stderr, "usage: partition -g gedcomfile\n");
 }
 
-// goAway prints the error log and quites.
+// goAway prints the error log and quits.
 static void goAway(ErrorLog* log) {
 	printf("Partition: cancelled due to errors\n");
 	showErrorLog(log);;
