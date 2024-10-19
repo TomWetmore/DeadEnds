@@ -9,8 +9,8 @@
 #include "validate.h"
 #include "utils.h"
 
-static bool timing = false;
-bool importDebugging = false;
+static bool timing = true;
+bool importDebugging = true;
 
 // importFromFiles imports a list of Gedcom files into a List of Databases, one per file. If errors
 // are found in a file the file's Database is not created and the ErrorLog will hold the errors.
