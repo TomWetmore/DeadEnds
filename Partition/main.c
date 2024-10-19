@@ -1,9 +1,8 @@
-//
 //  main.c
 //  Partition
 //
 // Created by Thomas Wetmore on 4 October 2024.
-// Last changed on 10 October 2024.
+// Last changed on 12 October 2024.
 
 #include <stdio.h>
 #include "import.h"
@@ -27,8 +26,8 @@ static void showConnects(List*, GNodeIndex*);
 static bool debugging = false;
 
 // main is the main program of the partition program. It reads a Gedcom file into a GNodeList and
-// creates a GNodeIndex to act as database. It partitions the persons into closed partitions of
-// persons and families. It also computes the numbers of ancestors and descendents of all persons.
+// creates a GNodeIndex to serve as database. It partitions the records into closed partitions of
+// persons and families. It computes the numbers of ancestors and descendents of all persons.
 int main(int argc, char** argv) {
 	String gedcomFile = null;
 	String searchPath = null;
@@ -77,7 +76,6 @@ int main(int argc, char** argv) {
 	FORLIST(roots, el)
 		GNode* gnode = ((GNodeListEl*) el)->node;
 		GNodeIndexEl* element = searchHashTable(index, gnode->key);
-		if (!element) FATAL();
 		ConnectData* data = element->data;
 		int score = data->numAncestors + data->numDescendents;
 		if (score > max) {
@@ -95,9 +93,9 @@ static void showConnects(List* list, GNodeIndex* index) {
 	FORLIST(list, el)
 		GNode* root = el;
 		GNodeIndexEl* element = searchHashTable(index, root->key);
-		if (!element) FATAL(); // Can't happen.
 		ConnectData* data = element->data;
-		printf("%s: %d : %d : %d\n", root->key, data->numAncestors, data->numDescendents, data->numVisits);
+		printf("%s: %s: %d: %d\n", root->key, root->child->value, data->numAncestors,
+			   data->numDescendents);
 	ENDLIST
 }
 
@@ -136,7 +134,7 @@ static List* getPartitions(GNodeList* gnodes, GNodeIndex* index, ErrorLog* log) 
 }
 
 // createPartition creates a partition by finding the closed set of Gedcom persons and families
-// that contains the root GNode argument. A partition is a list of GNodes.
+// that contains the GNode argument. A partition is a list of GNodes.
 static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index,
 							 StringSet* visited, ErrorLog* log) {
 	List* partition = createList(null, null, null, false);
@@ -145,9 +143,8 @@ static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index,
 
 	// Iterate until the queue is empty.
 	while (lengthList(queue) > 0) {
-		GNode* root = getAndRemoveLastListElement(queue); // Get next record to process.
+		GNode* root = getAndRemoveLastListElement(queue);
 		String key = root->key;
-		if (!key) continue; // Can this happen?
 		if (isInSet(visited, key)) continue; // Skip if seen.
 		addToSet(visited, key);
 		if (recordType(root) == GRPerson) appendToList(partition, root); // Add persons only.
@@ -159,7 +156,7 @@ static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index,
 				if (eqstr(tag, "FAMS") || eqstr(tag, "FAMC")) {
 					String value = child->value;
 					GNode* node = searchRecordIndex(index, value);
-					if (!node) {
+					if (!node) { // Can't happen.
 						addErrorToLog(log, createError(linkageError, "file", 0, "Couldn't find a family"));
 						continue;
 					}
@@ -173,7 +170,7 @@ static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index,
 				if (eqstr(tag, "HUSB") || eqstr(tag, "WIFE") || eqstr(tag, "CHIL")) {
 					String value = child->value;
 					GNode* node = searchRecordIndex(index, value);
-					if (!node) {
+					if (!node) { // Can't happen.
 						addErrorToLog(log, createError(linkageError, "", 0, "Couldn't find a person"));
 						continue;
 					}
@@ -186,7 +183,7 @@ static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index,
 	return partition;
 }
 
-// getFileArguments gets the file names from the command line.
+// getArguments gets the Gedcom file name from the command line.
 static void getArguments(int argc, char* argv[], String* gedcomFile) {
 	int ch;
 	while ((ch = getopt(argc, argv, "g:")) != -1) {
@@ -206,7 +203,7 @@ static void getArguments(int argc, char* argv[], String* gedcomFile) {
 	}
 }
 
-// getEnvironment checks for the DE_GEDCOM_PATH env variable.
+// getEnvironment checks for the DE_GEDCOM_PATH environment variable.
 static void getEnvironment(String* gedcomPath) {
 	*gedcomPath = getenv("DE_GEDCOM_PATH");
 	if (!*gedcomPath) *gedcomPath = ".";

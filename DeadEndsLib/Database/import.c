@@ -50,6 +50,11 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 		deleteGNodeList(rootList, true);
 		return null;
 	}
+	// If the first record is a header remember it.
+	GNode* header = getFirstListElement(rootList);
+	if (nestr(header->tag, "HEAD")) {
+		header = null;
+	}
 	// Create the record indexes and root lists.
 	RecordIndex* personIndex = createRecordIndex();
 	RecordIndex* familyIndex = createRecordIndex();
@@ -74,6 +79,7 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 	deleteGNodeList(rootList, false);
 	// Create the Database and add the indexes.
 	Database* database = createDatabase(path);
+	database->header = header;
 	database->recordIndex = recordIndex;
 	database->personIndex = personIndex;
 	database->familyIndex = familyIndex;

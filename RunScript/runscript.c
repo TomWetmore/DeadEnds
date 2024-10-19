@@ -3,14 +3,14 @@
 // main.c is the DeadEnds RunScript program. It has three steps.
 //  1. Create a Database from a Gedcom file.
 //  2. Parse a DeadEnds script file into its internal form.
-//  3. Runs the script on the Ddatabase and writes any output to stdout.
+//  3. Run the script on the Database and write any output to stdout.
 //
 // usage: runscript -g gedcomfile -s scriptfile
 //
 // If DE_GEDCOM_PATH and/or DE_SCRIPTS_PATH are defined, they may be used to find the files.
 //
 // Created by Thomas Wetmore on 21 July 2024
-// Last changed on 3 October 2024.
+// Last changed on 12 October 2024.
 
 #include "runscript.h"
 
@@ -18,7 +18,6 @@
 static void usage(void);
 static void getArguments(int, char**, String*, String*);
 static void getEnvironment(String*, String*);
-//static void getDatabase(void);
 static void runScript(Database*, String);
 
 // main is the main program of the RunScript program.

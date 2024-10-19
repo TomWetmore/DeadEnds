@@ -69,8 +69,8 @@ extern const PValue falsePValue;
 
 // Input and output modes.
 // DEPRECATED.
-#define FILEMODE   0    //  Input from a file.
-#define STRINGMODE 1    //  Input or output from or to a string.
+//#define FILEMODE   0    //  Input from a file.
+//#define STRINGMODE 1    //  Input or output from or to a string.
 #define UNBUFFERED 2    //  Output unbuffered to a file.
 #define BUFFERED   3    //  Output buffered to a file.
 #define PAGEMODE   4    //  Output page buffered to a file.

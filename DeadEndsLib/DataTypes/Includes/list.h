@@ -4,7 +4,7 @@
 // automatically and can be sorted or unsorted. Sorted lists require a compare function.
 //
 // Created by Thomas Wetmore on 22 November 2022.
-// Last changed on 27 April 2024.
+// Last changed on 13 October 2024.
 
 #ifndef list_h
 #define list_h
@@ -50,6 +50,9 @@ bool removeFromList(List*, int);
 bool removeFirstListElement(List*);
 bool removeLastListElement(List*);
 void iterateList(List*, void(*perform)(void*));
+
+bool isFirstElementInList(List*, void*);
+bool isLastElementInList(List*, void*);
 
 void* getFromList(List*, int);
 void* getFirstListElement(List*);

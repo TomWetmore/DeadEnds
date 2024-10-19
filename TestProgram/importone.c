@@ -3,13 +3,13 @@
 // importone.c has the test function that tries to create a Database for the rest of the tests.
 //
 // Created by Thomas Wetmore on 21 June 2024.
-// Last changed on 22 July 2024.
+// Last changed on 15 October 2024.
 
 #include "standard.h"
 #include "import.h"
 #include "utils.h"
 
-// importTest tests the new import organization.
+// importDatabaseTest tests the new import organization.
  Database* importDatabaseTest(ErrorLog* log, int testNumber) {
 	printf("%d: START OF IMPORT DATABASE TEST: %s %s\n", testNumber, "modified.ged", getMillisecondsString());
 	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/modified.ged";

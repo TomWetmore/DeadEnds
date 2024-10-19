@@ -3,7 +3,7 @@
 //  test.c holds test functions used during development.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 30 July 2024.
+//  Last changed on 15 October 2024.
 
 #include <stdio.h>
 #include "standard.h"
@@ -41,6 +41,7 @@ extern bool validateDatabase(Database*, ErrorLog*);
 static void countNodesBeforeTest(Database*, int);
 extern void testGedcomStrings(int);
 extern void testWriteDatabase(String file, Database*);
+extern void testGedPaths(Database*, int);
 
 extern Database* importDatabaseTest(ErrorLog*, int);
 
@@ -50,19 +51,19 @@ int main(void) {
 	int testNumber = 0;
 	Database* database = importDatabaseTest(errorLog, ++testNumber);
 	//testGedcomStrings(++testNumber);
-	bool validated = false;
+	bool validated = database ? true : false;
 	showErrorLog(errorLog);
 
-	if (database) listTest(database, ++testNumber);
-	if (database) forHashTableTest(database, ++testNumber);
-	if (database) showHashTableTest(database->personIndex, ++testNumber);
-	if (database) indexNamesTest(database, ++testNumber);
-	if (database) testSequence(database, ++testNumber);
-	validated = true;
-	if (database) forTraverseTest(database, ++testNumber);
-	if (database && validated) parseAndRunProgramTest(database, ++testNumber);
-	if (database && validated) countNodesBeforeTest(database, ++testNumber);
-	testWriteDatabase("/Users/ttw4/output.ged", database);
+	//if (database) listTest(database, ++testNumber);
+	//if (database) forHashTableTest(database, ++testNumber);
+	//if (database) showHashTableTest(database->personIndex, ++testNumber);
+	//if (database) indexNamesTest(database, ++testNumber);
+	//if (database) testSequence(database, ++testNumber);
+	if (validated) testGedPaths(database, ++testNumber);
+	//if (validated) forTraverseTest(database, ++testNumber);
+	//if (validated) parseAndRunProgramTest(database, ++testNumber);
+	//if (validated) countNodesBeforeTest(database, ++testNumber);
+	//if (validated) testWriteDatabase("/Users/ttw4/output.ged", database);
 	return 0;
 }
 

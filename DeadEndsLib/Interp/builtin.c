@@ -3,7 +3,7 @@
 // builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 19 August 2024.
+// Last changed on 18 December 2024.
 
 #include "standard.h"
 #include "gnode.h"    // GNode.
@@ -630,47 +630,46 @@ PValue __children(PNode *pnode, Context *context, bool* errflg)
 	return PVALUE(PVSequence, uSequence, children);
 }
 
-//  __version -- Return the version of the DeadEnds program.
-//--------------------------------------------------------------------------------------------------
-PValue __version(PNode *pnode, Context *context, bool* errflg)
-{
+// __version returns the version of the DeadEnds program.
+PValue __version(PNode*vpnode, Context* context, bool* errflg) {
 	extern String version;
 	return PVALUE(PVString, uString, version);
 }
 
-//  __noop -- Used for builtins that have been removed (e.g., lock, unlock).
-//--------------------------------------------------------------------------------------------------
+// __noop is used for builtins that have been removed (e.g., lock, unlock).
 PValue __noop(PNode *pnode, Context *context, bool* errflg) { return nullPValue; }
 
-//  __createnode -- Create a Gedcom node.
-//    usage: createnode(STRING, STRING) -> NODE
-//--------------------------------------------------------------------------------------------------
-PValue __createnode (PNode *node, Context *context, bool *eflg)
-{
-	PNode *tagNode = node->arguments, *valNode = node->arguments->next;
-	PValue tagValue = evaluate(tagNode, context, eflg);
+// __createnode creates a Gedcom node.
+// usage: createnode(STRING key[, STRING value]) -> NODE, where value can be omitted.
+PValue __createnode(PNode* node, Context* context, bool* eflg) {
+	PNode *arg1 = node->arguments, *arg2 = arg1->next;
+	// Get the tag.
+	PValue tagValue = evaluate(arg1, context, eflg);
 	if (tagValue.type != PVString) {
 		scriptError(node, "first argument to createnode must be a key string");
 		*eflg = true;
 		return nullPValue;
 	}
 	String tag = tagValue.value.uString;
-	PValue valValue = evaluate(valNode, context, eflg);
-	if (valValue.type != PVNull && valValue.type != PVString) {
-		scriptError(node, "the second argument to create node must be an optional string");
-		*eflg = true;
-		return nullPValue;
+	String value = null;
+	// Get the value if there.
+	if (arg2) {
+		PValue valValue = evaluate(arg2, context, eflg);
+		if (valValue.type != PVNull && valValue.type != PVString) {
+			scriptError(node, "the second argument to create node must be an optional string");
+			*eflg = true;
+			return nullPValue;
+		}
+		value = valValue.value.uString;
 	}
-	String val  = valValue.value.uString;
-	return PVALUE(PVGNode, uGNode, createGNode(null, tag, val, null));
+	return PVALUE(PVGNode, uGNode, createGNode(null, tag, value, null));
 }
 
-//  __addnode -- Add a node to a Gedcom tree
-//    usage: addnode(NODE this, NODE parent, NODE prevsib) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __addnode (PNode *node, Context *context, bool *eflg)
-{
-	PNode *arg1 = node->arguments, *arg2 = arg1->next, *arg3 = arg2->next;;
+// __addnode adds a node to a Gedcom tree.
+// usage: addnode(NODE this, NODE parent[, NODE prevsib]) -> VOID, where prevsib may omitted.
+PValue __addnode(PNode* node, Context* context, bool* eflg) {
+	// Get node to add.
+	PNode* arg1 = node->arguments, *arg2 = arg1->next, *arg3 = arg2->next;;
 	PValue this = evaluate(arg1, context, eflg);
 	if (*eflg || !isGNodeType(this.type)) {
 		*eflg = true;
@@ -678,6 +677,7 @@ PValue __addnode (PNode *node, Context *context, bool *eflg)
 		return nullPValue;
 	}
 	GNode *thisNode = this.value.uGNode;
+	// Get parent of node.
 	PValue parent = evaluate(arg2, context, eflg);
 	if (*eflg || !isGNodeType(parent.type)) {
 		*eflg = true;
@@ -685,13 +685,17 @@ PValue __addnode (PNode *node, Context *context, bool *eflg)
 		return nullPValue;
 	}
 	GNode *parentNode = parent.value.uGNode;
-	PValue prev = evaluate(arg3, context, eflg);
-	if (*eflg || !isGNodeType(prev.type)) {
-		*eflg = true;
-		scriptError(node, "the third argument to addnode must be an existing node");
-		return nullPValue;
+	// Get previous sibling if there is one.
+	GNode* prevNode = null;
+	if (arg3) { // Previous sibling may be omitted.
+		PValue prev = evaluate(arg3, context, eflg);
+		if (*eflg || !isGNodeType(prev.type)) {
+			*eflg = true;
+			scriptError(node, "the third argument to addnode must be an existing node");
+			return nullPValue;
+		}
+		prevNode = prev.value.uGNode;
 	}
-	GNode *prevNode = prev.value.uGNode;
 	thisNode->parent = parentNode;
 	GNode *nextNode = null;
 	if (prevNode == null) {

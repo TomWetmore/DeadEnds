@@ -1,11 +1,11 @@
 // DeadEnds
 //
-// database.c holds the functions that provide an in-RAM database for Gedcom records. Each record
-// is a GNode tree. The backing store is a Gedcom file. When DeadEnds starts the Gedcom file is
-// read and used to build an internal database.
+// database.c has functions that provide an in-RAM database for Gedcom records. Each record is a
+// GNode tree. The backing store is a Gedcom file. When DeadEnds starts the Gedcom file is read
+// and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 28 July 2024.
+// Last changed 12 October 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -60,6 +60,15 @@ void writeDatabase(String fileName, Database* database) {
 	FORLIST(database->familyRoots, element)
 		writeGNodeRecord(file, (GNode*) element, false);
 	ENDLIST
+	FORHASHTABLE(database->sourceIndex, element)
+		writeGNodeRecord(file, ((RecordIndexEl*) element)->root, false);
+	ENDHASHTABLE
+//	FORHASHTABLE(database->eventIndex, element)
+//		writeGNodeRecord(file, ((RecordIndexEl*) element)->root, false);
+//	ENDHASHTABLE
+	FORHASHTABLE(database->otherIndex, element)
+		writeGNodeRecord(file, ((RecordIndexEl*) element)->root, false);
+	ENDHASHTABLE
 	fclose(file);
 }
 
