@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-c -g -Wall
+CFLAGS=-c -g -Wall -O0
 INCLUDES=-I./Includes -I../DataTypes/Includes
 AR=ar
 ARFLAGS=-cr

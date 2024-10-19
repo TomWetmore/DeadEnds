@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-c -g -Wall -Wno-unused-function
+CFLAGS=-c -g -Wall -Wno-unused-function -O0
 INCLUDES=-I./Includes -I../Utils/Includes
 AR=ar
 ARFLAGS=-cr

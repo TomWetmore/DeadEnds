@@ -1,7 +1,7 @@
 #.PRECIOUS: grammar.c
 
 CC=clang
-CFLAGS=-c -g -Wall
+CFLAGS=-c -g -Wall -O0
 INCLUDES=-I. -I./Includes -I../DataTypes/Includes -I../Gedcom/Includes -I../Interp/Includes -I../Database/Includes -I../Utils/Includes
 AR=ar
 ARFLAGS=-cr

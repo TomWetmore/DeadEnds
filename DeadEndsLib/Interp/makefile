@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-c -g -Wall -Wno-unused-but-set-variable -Wno-missing-braces
+CFLAGS=-c -g -Wall -Wno-unused-but-set-variable -Wno-missing-braces -O0
 INCLUDES=-I./Includes -I../Utils/Includes -I../DataTypes/Includes -I../Gedcom/Includes -I../Database/Includes
 AR=ar
 ARFLAGS=-cr
