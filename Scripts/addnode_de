@@ -1,0 +1,31 @@
+/* Purpose of this script is to test createnode, addnode, deletenode, writeindi, writefam */
+
+proc main () {
+	set(birt, createnode("BIRT"))
+	set(date, createnode("DATE", "18 December 1949"))
+	set(plac, createnode("PLAC", "New London, Connecticut, United States"))
+	addnode(date, birt)
+	addnode(plac, birt, date)
+	call showtree(birt)
+	"PART TWO" nl()
+	set(root, createevent("DEAT", "31 Dec 2011", "New London, Connecticut"))
+	call showtree(root)
+}
+
+func createevent(type, date, plac) {
+	"type: " type nl()
+	"date: " date nl()
+	"plac: " plac nl()
+	set(root, createnode(type))
+	set(daten, createnode("DATE", date))
+	set(placn, createnode("PLAC", plac))
+	addnode(daten, root)
+	addnode(placn, root, daten)
+	return(root)
+}
+
+proc showtree(root) {
+	traverse(root, node, level) {
+		d(level) " " tag(node) " " value(node) nl()
+	}
+}

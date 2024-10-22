@@ -5,7 +5,7 @@
 // or it may call a specific function.
 //
 // Created by Thomas Wetmore on 9 December 2022.
-// Last changed on 3 May 2024.
+// Last changed on 21 October 2024.
 
 #include <stdarg.h>
 #include "symboltable.h"
@@ -763,7 +763,7 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
 	}
 	if (argument || parameter) { // Check for arg/param mismatch.
 		printf("``%s'': mismatched args and params\n", pnode->procName);
-		deleteHashTable(newSymbolTable);
+		deleteContext(newContext);
 		return InterpError;
 	}
 	if (debugging) {

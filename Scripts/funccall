@@ -1,0 +1,8 @@
+proc main () {
+	set(a, funct("TEST"))
+	a nl()
+}
+
+func funct(arg) {
+	return(arg)
+}

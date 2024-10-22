@@ -4,7 +4,7 @@
 // DeadEnds scripts.
 //
 // Created by Thomas Wetmore on 15 December 2022.
-// Last changed on 27 April 2024.
+// Last changed on 21 October 2024.
 
 #include "pvalue.h"
 #include "standard.h"
@@ -345,30 +345,7 @@ PValue negPValue(PValue value, bool* eflg) {
 // showPValue shows the value of a PValue for debugging.
 void showPValue(PValue pvalue)
 {
-//    PValue *pvalue = ((Symbol*) element)->value;
-//
-//    if (!isPValue(pvalue)) {
-//        printf("*Not PValue*");
-//        return;
-//    }
-//    PVType type = pvalue.pvType;
-//    printf("<%s,", ptypes[type]);
-//    VUnion u = pvalue.pvValue;
-//    switch (type) {
-//        case PVInt: printf("%ld>\n", u.uInt); break;
-//        case PVFloat: printf("%f>\n", u.uFloat); break;
-//        case PVString: printf("%s>\n", u.uString); break;
-//        case PVBool: printf("%s>\n", u.uBool ? "true" : "false"); break;
-//        case PVPerson:
-//        case PVFamily:
-//        case PVSource:
-//        case PVEvent:
-//        case PVOther:
-//        case PVGNode: printf("%s>\n", gnodeToString(u.uGNode, gnodeLevel(u.uGNode)));
-//        case PVAny: printf("%p>\n", u.uWord); break;
-//        case PVNull: printf("null>\n"); break;
-//        default: printf("%p>\n", u.uWord); break;
-//    }
+	printf("%s\n", pvalueToString(pvalue, true));
 }
 
 // pvalueToString returns a String representation of a PValue. Caller must free the String.

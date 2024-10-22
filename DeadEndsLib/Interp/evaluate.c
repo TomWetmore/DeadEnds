@@ -9,7 +9,7 @@
 // identifiers to PValue pointers.
 
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 25 April 2024.
+//  Last changed on 21 October 2024.
 
 #include "evaluate.h"
 #include "standard.h"
@@ -54,6 +54,7 @@ PValue evaluateIdent(PNode* pnode, Context* context, bool* errflg) {
         printf("evaluateIden: %d: %s\n", pnode->lineNumber, pnode->identifier);
     String ident = pnode->identifier;
     ASSERT(ident);
+	if (debugging) showSymbolTable(context->symbolTable);
     return getValueOfSymbol(context->symbolTable, ident);
 }
 
@@ -83,12 +84,13 @@ bool evaluateConditional(PNode* pnode, Context* context, bool* errflg) {
 // evaluateBuiltin evaluates a built-in function call by calling its C code function.
 PValue evaluateBuiltin(PNode* pnode, Context* context, bool* errflg) {
 	if (builtInDebugging) printf("%s %2.3f\n", pnode->stringOne, getMilliseconds());
-    return (*(BIFunc)pnode->builtinFunc)(pnode, context, errflg);
+    return (*(BIFunc) pnode->builtinFunc)(pnode, context, errflg);
 }
 
 // evaluateUserFunc evaluates a user defined function.
 PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg) {
     String name = pnode->funcName;
+	if (debugging) printf("evaulateUserFunc: %s\n", name);
     *errflg = true;
     PNode *func;
     if ((func = (PNode*) searchFunctionTable(functionTable, name)) == null) {
@@ -96,7 +98,8 @@ PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg) {
         return nullPValue;
     }
     SymbolTable *newtab = createSymbolTable();
-    if (debugging) printf("evaluateUserFunc: creating symbol table %p for %s\n", newtab, name);
+	Context* newContext = createContext(newtab, context->database);
+    if (debugging) printf("evaluateUserFunc: creating symbol table for user function %s.\n", name);
 
     // Evaluate the arguments.
     PNode *arg = pnode->arguments;
@@ -107,19 +110,21 @@ PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg) {
             scriptError(pnode, "could not evaluate an argument expression");
             return nullPValue;
         }
+		if (debugging) printf("Assigning %s to %s\n", pvalueToString(value, true), parm->identifier);
         assignValueToSymbol(newtab, parm->identifier, value);
         arg = arg->next;
         parm = parm->next;
     }
     if (arg || parm) {
         scriptError(pnode, "there are different numbers of arguments and parameters");
-        deleteHashTable(newtab);
+        deleteContext(newContext);
         return nullPValue;
     }
+	if (debugging) showSymbolTable(newtab);
     //  Iterpret the function's body.
     PValue value;
-    InterpType irc = interpret((PNode*) func->funcBody, context, &value);
-    deleteHashTable(newtab);
+    InterpType irc = interpret((PNode*) func->funcBody, newContext, &value);
+    deleteContext(newContext);
     switch (irc) {
         case InterpReturn:
         case InterpOkay:

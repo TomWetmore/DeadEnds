@@ -83,9 +83,6 @@ void* getFromList(List* list, int index) {
 
 // getFirstListElement returns the first element from a List; it is not removed from the List.
 void* getFirstListElement(List* list) {
-	printf("getFirstListElement called with list of length %d\n", lengthList(list));
-	void* thing = getFirstBlockElement(&(list->block));
-	printf("was able to get the thing in getFirstListElement\n");
 	return getFirstBlockElement(&(list->block));
 }
 

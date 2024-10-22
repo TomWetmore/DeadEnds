@@ -3,7 +3,7 @@
 // pnode.c holds the functions that manage PNodes (program nodes).
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 28 July 2024.
+// Last changed on 21 October 2024.
 
 #include "pnode.h"
 #include "standard.h"
@@ -200,8 +200,7 @@ PNode* funcCallPNode(String name, PNode* alist) {
         node->builtinFunc = builtIns[md].func;
         return node;
     }
-    printf("%s: undefined function.\n", name);
-    Perrors++; // Is undefined.
+	// Function is undefined; assume it will be later.
     PNode *node = allocPNode(PNFuncCall);
     node->funcName = name;
     node->parameters = alist;

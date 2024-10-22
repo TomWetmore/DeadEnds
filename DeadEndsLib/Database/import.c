@@ -3,14 +3,14 @@
 // import.c has functions that import Gedcom files into internal structures.
 //
 // Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 10 August 2024.
+// Last changed on 21 October 2024.
 
 #include "import.h"
 #include "validate.h"
 #include "utils.h"
 
 static bool timing = true;
-bool importDebugging = true;
+bool importDebugging = false;
 
 // importFromFiles imports a list of Gedcom files into a List of Databases, one per file. If errors
 // are found in a file the file's Database is not created and the ErrorLog will hold the errors.
@@ -51,7 +51,7 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 		return null;
 	}
 	// If the first record is a header remember it.
-	GNode* header = getFirstListElement(rootList);
+	GNode* header = ((GNodeListEl*) getFirstListElement(rootList))->node;
 	if (nestr(header->tag, "HEAD")) {
 		header = null;
 	}
