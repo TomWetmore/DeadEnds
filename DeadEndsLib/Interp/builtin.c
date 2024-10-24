@@ -3,7 +3,7 @@
 // builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 18 December 2024.
+// Last changed on 23 October 2024.
 
 #include "standard.h"
 #include "gnode.h"    // GNode.
@@ -29,10 +29,8 @@ const PValue spacePValue = PVALUE(PVString, uString, " ");
 const PValue quotePValue = PVALUE(PVString, uString, "\"");
 const PValue newlinePValue = PVALUE(PVString, uString, "\n");
 
-// isZeroVUnion
-//--------------------------------------------------------------------------------------------------
-bool isZeroVUnion(PVType type, VUnion vunion)
-{
+// isZeroVUnion returns if VUnion value is a numeric zero.
+bool isZeroVUnion(PVType type, VUnion vunion) {
 	switch (type) {
 		case PVInt: return vunion.uInt == 0;
 		case PVFloat: return vunion.uFloat == 0;
@@ -172,7 +170,7 @@ PValue __strsoundex(PNode* expr, Context* context, bool* eflg) {
 }
 
 // __set performs the DeadEnds script assignment statement.
-//  usage: set(IDEN, ANY) -> VOID
+// usage: set(IDEN, ANY) -> VOID
 PValue __set(PNode* pnode, Context* context, bool* eflg) {
 	PNode *iden = pnode->arguments;
 	PNode *expr = iden->next;
@@ -275,11 +273,10 @@ PValue __roman(PNode* node, Context* context, bool* eflg) {
 	return PVALUE(PVString, uString, strsave(scratch));
 }
 
-//  __strcmp -- Compare two strings and return their relationship.
-//     usage: strcmp(STRING, STRING) -> INT
-//     usage: nestr(STRING, STRING) -> BOOL
-//--------------------------------------------------------------------------------------------------b
-PValue __strcmp (PNode *pnode, Context *context, bool *eflg)
+// __strcmp -- Compare two strings and return their relationship.
+// usage: strcmp(STRING, STRING) -> INT
+// usage: nestr(STRING, STRING) -> BOOL
+PValue __strcmp (PNode* pnode, Context* context, bool* eflg)
 {
 	PNode *arg = pnode->arguments;
 	PValue pvalue = evaluate(arg, context, eflg);
@@ -415,10 +412,9 @@ PValue __capitalize(PNode *node, Context *context, bool* eflg)
 	return PVALUE(PVString, uString, capitalize(val.value.uString));
 }
 
-///*===================================
-// * __print -- Print to stdout window
-// *   usage: print([STRING]+,) -> VOID
-// *=================================*/
+
+// __print prints a list of expresseion values to the stdout window.
+// usage: print([STRING]+,) -> VOID
 //WORD __print (node, stab, eflg)
 //INTERP node; TABLE stab; bool *eflg;
 //{
@@ -433,18 +429,22 @@ PValue __capitalize(PNode *node, Context *context, bool* eflg)
 //    return NULL;
 //}
 
-//  __root -- Return root GNode of record the argument GNode is in.
-//    usage: root(NODE) -> NODE
-//--------------------------------------------------------------------------------------------------
-PValue __root (PNode *pnode, Context *context, bool *errflg)
-{
+// __root returns the root node of record the argument node is in.
+// usage: root(NODE) -> NODE
+PValue __root (PNode* pnode, Context* context, bool* errflg) {
 	GNode *gnode = evaluateGNode(pnode, context, errflg);
 	if (*errflg) {
 		scriptError(pnode, "The first argument to root must be a Gedcom node.");
 		return nullPValue;
 	}
-	while (gnode->parent) {
+	int count = 0;
+	while (gnode->parent && count++ < 100) {
 		gnode = gnode->parent;
+	}
+	if (count >= 100) {
+		*errflg = true;
+		scriptError(pnode, "Recursion counter error.");
+		return nullPValue;
 	}
 	return PVALUE(PVGNode, uGNode, gnode);
 }

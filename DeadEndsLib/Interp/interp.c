@@ -5,7 +5,7 @@
 // or it may call a specific function.
 //
 // Created by Thomas Wetmore on 9 December 2022.
-// Last changed on 21 October 2024.
+// Last changed on 23 October 2024.
 
 #include <stdarg.h>
 #include "symboltable.h"
@@ -34,8 +34,6 @@ bool programDebugging = false;
 // Interface between the lexer, parser, and interpreter.
 FILE *Poutfp = null;  // Output file.
 int Perrors = 0;      // Number of errors.
-
-//String ierror = (String) "Error: file \"%s\": line %d: ";
 
 // initializeInterpreter initializes the interpreter.
 void initializeInterpreter(Database* database) {

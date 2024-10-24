@@ -1,9 +1,9 @@
 // DeadEnds
 //
-// gedcom.c
+// gedcom.c has basic Gedcom functions.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 30 May 2024.
+// Last changed on 22 October 2024.
 
 #include "gedcom.h"
 
@@ -11,7 +11,6 @@
 RecordType recordType(GNode* root) {
     ASSERT(root);
     String tag = root->tag;
-	//printf("%s ", tag);
     if (eqstr(tag, "INDI")) return GRPerson;
     if (eqstr(tag, "FAM"))  return GRFamily;
     if (eqstr(tag, "SOUR")) return GRSource;
@@ -39,7 +38,7 @@ String sexTypeToString(SexType sex) {
 	return "X";
 }
 
-//
+// sexTypeFromString returns the SexType of a String.
 SexType sexTypeFromString(String s) {
 	if (eqstr("M", s)) return sexMale;
 	if (eqstr("F", s)) return sexFemale;
@@ -47,6 +46,7 @@ SexType sexTypeFromString(String s) {
 	return sexError;
 }
 
+// validSexString validates a sex String value to be M, F, or U.
 bool validSexString(String s) {
 	if (!s) return false;
 	return sexTypeFromString(s) != sexError;

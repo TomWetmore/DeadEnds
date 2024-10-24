@@ -1,0 +1,11 @@
+proc main () {
+	set(a, indi("@I1@"))
+	name(a) nl()
+	set(b, parents(a))
+	tag(b) nl()
+	set(c, husband(b))
+	set(d, wife(b))
+
+	name(c) nl()
+	name(d) nl()
+}

@@ -3,7 +3,7 @@
 //  gnode.c has many functions for the GNode data type.
 //
 //  Created by Thomas Wetmore on 12 November 2022.
-//  Last changed on 17 July 2024.
+//  Last changed on 22 October 2024.
 
 #include "standard.h"
 #include "gnode.h"
@@ -16,16 +16,16 @@
 #include "readnode.h"
 #include "database.h"
 
-// tagTable is a StringTable that holds a single copy of all keys used in the GNodes.
+// tagTable is the StringTable that holds a single copy of all tags used in the GNodes.
 static StringTable *tagTable = null;
 
-// numNodeAllocs returns the number of GNodes that have been allocated in the heap. Debugging.
+// numNodeAllocs returns the number of GNodes that have been allocatedp. Debugging.
 static int nodeAllocs = 0;
 int numNodeAllocs(void) {
 	return nodeAllocs;
 }
 
-// numNodeFrees returns the number of GNodes that have been freed to the heap. Debugging.
+// numNodeFrees returns the number of GNodes that have been freed. Debugging.
 static int nodeFrees = 0;
 int numNodeFrees(void) {
 	return nodeFrees;
@@ -72,13 +72,14 @@ void freeGNodes(GNode* node) {
 	}
 }
 
-// gnodeLevel returns the level of a GNode; counts parent links.
+// gnodeLevel returns the level of a GNode by counting parent links.
 int gnodeLevel(GNode* node) {
 	int level = 0;
-	while (node->parent) {
+	while (node->parent && level < 100) {
 		level++;
 		node = node->parent;
 	}
+	if (level >= 100) return 0; // Infinite loop protection.
 	return level;
 }
 
@@ -240,14 +241,6 @@ String shortenPlace(String place) {
 	//if ((val = (String) valueof(placabbvs, plac))) return val;
 	return place;
 }
-
-// allDigits checks if a String is all digits. (No longer called.)
-//static bool allDigits(String s) {
-//	int c;
-//	while ((c = *s++))
-//		if (c < '0' || c > '9') return false;
-//	return true;
-//}
 
 // copyNode copies a GNode.
 GNode* copyNode(GNode* node) {

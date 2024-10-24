@@ -10,7 +10,7 @@
 #include "utils.h"
 
 static bool timing = true;
-bool importDebugging = false;
+bool importDebugging = true;
 
 // importFromFiles imports a list of Gedcom files into a List of Databases, one per file. If errors
 // are found in a file the file's Database is not created and the ErrorLog will hold the errors.
@@ -112,8 +112,7 @@ Database* gedcomFileToDatabase(String path, ErrorLog* log) {
 }
 
 // checkKeysAndReferences checks record keys and their references. Creates a table of all keys
-// and checks for duplicates. Checks that all keys found as values refer to records. Returns
-// the set of all keys detected.
+// and checks for duplicates. Checks that all keys found as values refer to records.
 void checkKeysAndReferences(GNodeList* records, String name, ErrorLog* log) {
 	StringSet* keySet = createStringSet();
 	FORLIST(records, element)
@@ -132,7 +131,7 @@ void checkKeysAndReferences(GNodeList* records, String name, ErrorLog* log) {
 		}
 		addToSet(keySet, key);
 	ENDLIST
-	// Check that keys used as values are in the set.
+	// Check that keys used as values are in the key set.
 	int numReferences = 0; // Debug and sanity.
 	int nodesTraversed = 0; // Debug and sanity.
 	int recordsVisited = 0; // Debug and sanity.
@@ -152,7 +151,7 @@ void checkKeysAndReferences(GNodeList* records, String name, ErrorLog* log) {
 								el->line + countNodesBefore(node),
 								"invalid key value");
 					addErrorToLog(log, error);
-					printf("Didn't find key: %s\n", node->value);
+					// printf("Didn't find key: %s\n", node->value); // DEBUG
 				}
 		ENDTRAVERSE
 	ENDLIST
@@ -166,4 +165,3 @@ void checkKeysAndReferences(GNodeList* records, String name, ErrorLog* log) {
 	}
 	deleteStringSet(keySet, false);
 }
-

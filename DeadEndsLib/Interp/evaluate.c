@@ -9,7 +9,7 @@
 // identifiers to PValue pointers.
 
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 21 October 2024.
+//  Last changed on 23 October 2024.
 
 #include "evaluate.h"
 #include "standard.h"
@@ -33,9 +33,10 @@ static bool pvalueToBoolean(PValue pvalue);
 // begins in this function. Based on PNode type, more specialied functions may be called.
 PValue evaluate(PNode* pnode, Context* context, bool* errflg) {
     ASSERT(pnode && context);
-    if (programDebugging) {
-        printf("evaluate:%d ", pnode->lineNumber); showPNode(pnode);
-    }
+	if (programDebugging) {
+		printf("evaluate:%d ", pnode->lineNumber);
+		showPNode(pnode);
+	}
     if (pnode->type == PNIdent) return evaluateIdent(pnode, context, errflg);
     if (pnode->type == PNBltinCall) return evaluateBuiltin(pnode, context, errflg);
     if (pnode->type == PNFuncCall) return evaluateUserFunc(pnode, context, errflg);
@@ -47,7 +48,7 @@ PValue evaluate(PNode* pnode, Context* context, bool* errflg) {
     return nullPValue;
 }
 
-//  evaluateIdent evaluates an identifier by looking it up in the symbol tables.
+// evaluateIdent evaluates an identifier by looking up its value in the symbol tables.
 PValue evaluateIdent(PNode* pnode, Context* context, bool* errflg) {
     ASSERT((pnode->type == PNIdent) && context);
     if (programDebugging)

@@ -1,8 +1,10 @@
-//  main.c
-//  Partition
+// Partition
+//
+// main.c is the main program of the partition command. The program reads a Gedcom file and then
+// partitions it into closed sets of persons and families.
 //
 // Created by Thomas Wetmore on 4 October 2024.
-// Last changed on 12 October 2024.
+// Last changed on 22 October 2024.
 
 #include <stdio.h>
 #include "import.h"
@@ -24,6 +26,7 @@ static GNodeIndex* createIndexOfGNodes(GNodeList*);
 static GNodeList* removeNonPersons(GNodeList*);
 static void showConnects(List*, GNodeIndex*);
 static bool debugging = false;
+static bool timing = true;
 
 // main is the main program of the partition program. It reads a Gedcom file into a GNodeList and
 // creates a GNodeIndex to serve as database. It partitions the records into closed partitions of
@@ -31,9 +34,9 @@ static bool debugging = false;
 int main(int argc, char** argv) {
 	String gedcomFile = null;
 	String searchPath = null;
-	printf("Partition: %s: begin.\n", getMillisecondsString());
+	if (timing) printf("%s: Partition: begin.\n", getMillisecondsString());
 
-	// Get the Gedcom file to process.
+	// Get the Gedcom file.
 	getArguments(argc, argv, &gedcomFile);
 	getEnvironment(&searchPath);
 	gedcomFile = resolveFile(gedcomFile, searchPath);
@@ -43,27 +46,27 @@ int main(int argc, char** argv) {
 	File* file = openFile(gedcomFile, "r");
 	ErrorLog* log = createErrorLog();
 	GNodeList* roots = getGNodeTreesFromFile(file, log); // All GNode roots parsed from file.
-	printf("Partition: %s: read gedcom file.\n", getMillisecondsString());
+	if (timing) printf("%s: Partition: read gedcom file.\n", getMillisecondsString());
 	if (lengthList(log) > 0) goAway(log);
 	closeFile(file);
 
 	// Validate record keys read from the Gedcom file.
 	checkKeysAndReferences(roots, file->name, log);
-	printf("Partition: %s: validated keys.\n", getMillisecondsString());
+	if (timing) printf("%s: Partition: validated keys.\n", getMillisecondsString());
 	if (lengthList(log)) goAway(log);
-	GNodeIndex* index = createIndexOfGNodes(roots); // Index of all GNodes with ConnectData.
+	GNodeIndex* index = createIndexOfGNodes(roots); // Index of all GNodes.
 	roots = removeNonPersons(roots);
 
 	// Create the partitions.
 	List* partitions = getPartitions(roots, index, log);
-	printf("Partition: %s: created partition.\n", getMillisecondsString());
+	if (timing) printf("%s: Partition: created partitions.\n", getMillisecondsString());
 
 	// Get number of ancestors and descendents of all person.
 	FORLIST(partitions, el)
 		List* partition = (List*) el;
 		getConnections(partition, index);
 	ENDLIST
-	printf("Partition: %s: computed ancestor and descendent numbers.\n", getMillisecondsString());
+	printf("%s: Partition: computed connectedness numbers.\n", getMillisecondsString());
 
 	// DEBUG: SHOW THE CONNECTIONS OF EACH PARTITION
 	FORLIST(partitions, el)
@@ -84,7 +87,7 @@ int main(int argc, char** argv) {
 		}
 	ENDLIST
 	printf("Person: %s %s %d\n", topGun->key, topGun->child->value, max);
-	printf("Partition: %s: done.\n", getMillisecondsString());
+	if (timing) printf("%s: Partition: done.\n", getMillisecondsString());
 }
 
 // showConnects is a debug function that shows the connect data of each person in a list.

@@ -3,7 +3,7 @@
 // gedcom.h is the header file for Gedcom related data types and operations.
 //
 // Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 31 August 2024.
+// Last changed on 22 October 2024.
 
 #ifndef gedcom_h
 #define gedcom_h
@@ -34,7 +34,7 @@ RecordType recordType(GNode *root);  // Return the type of a Gedcom record tree.
 
 int compareRecordKeys(String, String);  // gedcom.c
 
-// FORCHILDREN / ENDCHILDREN is a macro pair that iterates the children in a family.
+// FORCHILDREN / ENDCHILDREN is a macro pair that iterates children in a family.
 #define FORCHILDREN(fam, childd, key, num, database) \
     {\
     GNode* __node = findTag(fam->child, "CHIL");\

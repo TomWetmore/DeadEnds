@@ -1,0 +1,31 @@
+proc main () {
+	set(a, indi("@I1@"))
+	key(a) " " tag(a) " " value(a) nl()
+	name(a) nl()
+	set(b, parents(a))
+	"SHOULD BE A FAMILY" nl()
+	key(b) " " tag(b) " " value(b) nl()
+	name(husband(b)) nl()
+	name(wife(parents(a))) nl()
+	name(wife(fnode(parents(a)))) nl()
+
+	"TEST THE xxxxindi builtins" nl()
+	set(i, firstindi())
+	key(i) " " tag(i) nl()
+	set(i, nextindi(i))
+	key(i) " " tag(i) nl()
+	set(i, lastindi())
+	key(i) " " tag(i) nl()
+	set(i, previndi(i))
+	key(i) " " tag(i) nl()
+
+	set(f, firstfam())
+	key(f) " " tag(f) nl()
+	set(f, nextfam(f))
+	key(f) " " tag(f) nl()
+	set(f, lastfam(f))
+	key(f) " " tag(f) nl()
+	set(f, prevfam(f))
+	key(f) " " tag(f) nl()
+
+}

@@ -300,7 +300,7 @@ PValue __nspouses(PNode* node, Context* context, bool* eflg) {
 PValue __parents(PNode* pnode, Context* context, bool* eflg) {
 	GNode* indi = evaluatePerson(pnode->arguments, context, eflg);
 	if (*eflg || !indi) return nullPValue;
-	GNode* fam = FAMC(indi);
+	GNode* fam = personToFamilyAsChild(indi, context->database);
 	return fam ? PVALUE(PVFamily, uGNode, fam) : nullPValue;
 }
 
@@ -398,7 +398,7 @@ PValue __nextindi(PNode* pnode, Context* context, bool* eflg) {
 	return PVALUE(PVPerson, uGNode, getListElement(personRoots, index + 1));
 }
 
-// previndi return the previous person in the database.
+// previndi returns the previous person in the database.
 // usage: previndi(INDI) -> INDI
 PValue __previndi(PNode* pnode, Context* context, bool* eflg) {
 	GNode* indi = evaluatePerson(pnode->arguments, context, eflg); // Following person.

@@ -1,9 +1,9 @@
 // DeadEnds
 //
-// functable.c -- Table of built-in functions in the DeadEnds scripting language.
+// functable.c has the table of built-in functions in the DeadEnds scripting language.
 //
 // Created by Thomas Wetmore on 10 January 2023.
-// Last changed on 19 October 2024.
+// Last changed on 23 October 2024.
 
 #include "standard.h"
 #include "symboltable.h"
@@ -88,6 +88,7 @@ extern PValue __key(PNode*, Context*, bool*);
 extern PValue __keysort(PNode*, Context*, bool*);
 extern PValue __lastchild(PNode*, Context*, bool*);
 extern PValue __lastindi(PNode*, Context*, bool*);
+extern PValue __lastfam(PNode*, Context*, bool*);
 extern PValue __le(PNode*, Context*, bool*);
 extern PValue __length(PNode*, Context*, bool*);
 extern PValue __lengthset(PNode*, Context*, bool*);
@@ -234,9 +235,9 @@ BuiltIn builtIns[] = {
     "father",       1,    1,    __father,
     "female",       1,    1,    __female,
     "firstchild",   1,    1,    __firstchild,
-//  "firstfam",     1,    1,    __firstfam,
+	"firstfam",     0,    0,    __firstfam,
     "firstindi",    0,    0,    __firstindi,
-//  "fnode",        1,    1,    __fnode,
+	"fnode",        1,    1,    __fnode,
     "fullname",     4,    4,    __fullname,
     "ge",           2,    2,    __ge,
     "gengedcom",    1,    1,    __gengedcom,
@@ -265,6 +266,7 @@ BuiltIn builtIns[] = {
     "key",          1,    2,    __key,
     "keysort",      1,    1,    __keysort,
     "lastchild",    1,    1,    __lastchild,
+	"lastfam",      0,    0,    __lastfam,
 	"lastindi",     0,    0,    __lastindi,
     "le",           2,    2,    __le,
     "length",       1,    1,    __length,
@@ -290,7 +292,7 @@ BuiltIn builtIns[] = {
     "neg",          1,    1,    __neg,
 	"nestr",        2,    2,    __strcmp,
 	"newfile",      2,    2,    __newfile,
-//  "nextfam",      1,    1,    __nextfam,
+	"nextfam",      1,    1,    __nextfam,
     "nextindi",     1,    1,    __nextindi,
     "nextsib",      1,    1,    __nextsib,
 	"nfamilies",    1,    1,    __nfamilies,
@@ -303,13 +305,13 @@ BuiltIn builtIns[] = {
 	"pagemode",     2,    2,    __pagemode,
 	"pageout",      0,    0,    __pageout,
     "parent",       1,    1,    __parent,
-//  "parents",      1,    1,    __parents,
+	"parents",      1,    1,    __parents,
     "parentset",    1,    1,    __parentset,
     "place",        1,    1,    __place,
     "pn",           2,    2,    __pn,  // Outputs pronouns
     "pop",          1,    1,    __pop,
 	"pos",          2,    2,    __pos,
-//  "prevfam",      1,    1,    __prevfam,
+	"prevfam",      1,    1,    __prevfam,
 	"previndi",     1,    1,    __previndi,
 	"prevsib",      1,    1,    __prevsib,
 //  "print",        1,   32,    __print,

@@ -3,8 +3,7 @@
 // intrpfamily.c
 //
 // Created by Thomas Wetmore on 17 March 2023.
-// Last changed on 6 May 2024.
-//
+// Last changed on 23 October 2024.
 
 #include "standard.h"
 #include "pnode.h"
@@ -23,11 +22,9 @@ PValue __marriage(PNode* pnode, Context* context, bool* errflg) {
 	return event ? PVALUE(PVEvent, uGNode, event) : nullPValue;
 }
 
-// __husband -- Find the first husband of a family.
+// __husband returns the first husband of a family.
 // usage: husband(FAM) -> INDI
-//--------------------------------------------------------------------------------------------------
-PValue __husband(PNode *pnode, Context *context, bool* errflg)
-{
+PValue __husband(PNode* pnode, Context* context, bool* errflg) {
 	ASSERT(pnode && context);
 	GNode* fam = evaluateFamily(pnode->arguments, context, errflg);
 	if (*errflg || !fam) return nullPValue;
@@ -36,11 +33,9 @@ PValue __husband(PNode *pnode, Context *context, bool* errflg)
 	return PVALUE(PVPerson, uGNode, husband);
 }
 
-//__wife -- Find the first wife of a family.
-//    usage: wife(FAM) -> INDI
-//--------------------------------------------------------------------------------------------------
-PValue __wife(PNode *pnode, Context *context, bool* errflg)
-{
+// __wife returns the first wife of a family.
+// usage: wife(FAM) -> INDI
+PValue __wife(PNode* pnode, Context* context, bool* errflg) {
 	ASSERT(pnode && context);
 	GNode* fam = evaluateFamily(pnode->arguments, context, errflg);
 	if (*errflg || !fam) return nullPValue;
@@ -49,11 +44,9 @@ PValue __wife(PNode *pnode, Context *context, bool* errflg)
 	return PVALUE(PVPerson, uGNode, wife);
 }
 
-//  __nchildren -- Find the number of children in a family.
-//    usage: nchildren(FAM) -> INT
-//--------------------------------------------------------------------------------------------------
-PValue __nchildren (PNode *pnode, Context *context, bool* eflg)
-{
+// __nchildren returns the number of children in a family.
+// usage: nchildren(FAM) -> INT
+PValue __nchildren (PNode* pnode, Context* context, bool* eflg) {
 	ASSERT(pnode && context);
 	GNode* fam = evaluateFamily(pnode->arguments, context, eflg);
 	if (*eflg || !fam) return nullPValue;
@@ -67,11 +60,9 @@ PValue __nchildren (PNode *pnode, Context *context, bool* eflg)
 }
 
 
-//  __firstchild -- Return the first child of a family.
-//    usage: firstchild(FAM) -> INDI
-//--------------------------------------------------------------------------------------------------
-PValue __firstchild(PNode *pnode, Context *context, bool* eflg)
-{
+// __firstchild returns the first child of a family.
+// usage: firstchild(FAM) -> INDI
+PValue __firstchild(PNode* pnode, Context* context, bool* eflg) {
 	ASSERT(pnode && context);
 	GNode* fam = evaluateFamily(pnode->arguments, context, eflg);
 	if (*eflg || !fam) return nullPValue;
@@ -80,11 +71,9 @@ PValue __firstchild(PNode *pnode, Context *context, bool* eflg)
 	return PVALUE(PVPerson, uGNode, child);
 }
 
-//  __lastchild -- Return the last child of a family.
-//    usage: lastchild(FAM) -> INDI
-//--------------------------------------------------------------------------------------------------
-PValue __lastchild(PNode *pnode, Context *context, bool* eflg)
-{
+// __lastchild returns the last child of a family.
+// usage: lastchild(FAM) -> INDI
+PValue __lastchild(PNode *pnode, Context *context, bool* eflg) {
 	ASSERT(pnode && context);
 	GNode* fam = evaluateFamily(pnode->arguments, context, eflg);
 	if (*eflg || !fam) return nullPValue;
@@ -93,26 +82,26 @@ PValue __lastchild(PNode *pnode, Context *context, bool* eflg)
 	return PVALUE(PVPerson, uGNode, child);
 }
 
-///*================================
-// * __fnode -- Return root of family
-// *   usage: fnode(FAM) -> NODE
-// *==============================*/
-//WORD __fnode (node, Context *context, eflg)
-//INTERP node; TABLE stab; bool *eflg;
-//{
-//    return (WORD) eval_fam(ielist(node), context, eflg, NULL);
-//}
+// __fnode returns the root node of a family.
+// usage: fnode(FAM) -> NODE
+PValue __fnode(PNode* pnode, Context* context, bool* eflg) {
+	GNode *gnode = evaluateFamily(pnode->arguments, context, eflg);
+	if (*eflg || !gnode || nestr("FAM", gnode->tag)) {
+		*eflg = true;
+		scriptError(pnode, "the argument to fnode must be a family.");
+		return nullPValue;
+	}
+	return PVALUE(PVFamily, uGNode, gnode);
+}
 
-//  __fam -- Convert a key to FAM root node.
-//    usage: fam(STRING) -> FAM
-//--------------------------------------------------------------------------------------------------
-PValue __fam(PNode *pnode, Context *context, bool* eflg)
-{
+// __fam converts family key to the family.
+// usage: fam(STRING) -> FAM
+PValue __fam(PNode* pnode, Context* context, bool* eflg) {
 	ASSERT(pnode && context);
 	// The argument must be a string.
 	PValue value = evaluate(pnode->arguments, context, eflg);
 	if (value.type != PVString) {
-		printf("the argument must be a string\n");
+		scriptError(pnode, "the argument must be a string\n");
 		*eflg = true;
 		return nullPValue;
 	}
@@ -121,96 +110,85 @@ PValue __fam(PNode *pnode, Context *context, bool* eflg)
 	//  Search the database for the family with the key.
 	GNode* family = keyToFamily(key, context->database);
 	if (!family) {
-		printf("Could not find a family with key %s.\n", key);
+		scriptError(pnode, "Could not find a family with key %s.\n", key);
 		return nullPValue;
 	}
 	return PVALUE(PVFamily, uGNode, family);
 }
 
-/*=============================================
- * firstfam -- Return first family in database.
- *   usage: firstfam() -> FAM
- *===========================================*/
-//WORD __firstfam (node, Context *context, eflg)
-//INTERP node; TABLE stab; BOOLEAN *eflg;
-//{
-//    NODE fam;
-//    static char key[10];
-//    STRING record;
-//    INT len, i = 0;
-//    *eflg = FALSE;
-//    while (TRUE) {
-//        sprintf(key, "F%d", ++i);
-//        if (!(record = retrieve_record(key, &len)))
-//            return NULL;
-//        if (!(fam = stringToGNodeTree(record))) {
-//            stdfree(record);
-//            continue;
-//        }
-//        stdfree(record);
-//        free_nodes(fam);/*yes*/
-//        return (WORD) fam_to_cacheel(fam);
-//    }
-//}
-/*===========================================
- * nextfam -- Return next family in database.
- *   usage: nextfam(FAM) -> FAM
- *=========================================*/
-//WORD __nextfam (node, Context *context, eflg)
-//INTERP node; TABLE stab; BOOLEAN *eflg;
-//{
-//    NODE fam = eval_fam(ielist(node), context, eflg, NULL);
-//    static char key[10];
-//    STRING record;
-//    INT len, i;
-//    if (*eflg) return NULL;
-//    strcpy(key, fam_to_key(fam));
-//    i = atoi(&key[1]);
-//    while (TRUE) {
-//        sprintf(key, "F%d", ++i);
-//        if (!(record = retrieve_record(key, &len)))
-//            return NULL;
-//        if (!(fam = stringToGNodeTree(record))) {
-//            stdfree(record);
-//            continue;
-//        }
-//        stdfree(record);
-//        free_nodes(fam);/*yes*/
-//        return (WORD) fam_to_cacheel(fam);
-//    }
-//}
-/*===============================================
- * prevfam -- Return previous family in database.
- *   usage: prevfam(FAM) -> FAM
- *=============================================*/
-//WORD __prevfam (node, Context *context, eflg)
-//INTERP node; TABLE stab; BOOLEAN *eflg;
-//{
-//    NODE fam = eval_fam(ielist(node), context, eflg, NULL);
-//    static char key[10];
-//    STRING record;
-//    INT len, i;
-//    if (*eflg) return NULL;
-//    strcpy(key, fam_to_key(fam));
-//    i = atoi(&key[1]);
-//    while (TRUE) {
-//        sprintf(key, "F%d", --i);
-//        if (!(record = retrieve_record(key, &len)))
-//            return NULL;
-//        if (!(fam = stringToGNodeTree(record))) {
-//            stdfree(record);
-//            continue;
-//        }
-//        stdfree(record);
-//        free_nodes(fam);/*yes*/
-//        return (WORD) fam_to_cacheel(fam);
-//    }
-//}
-/*============================================
- * lastfam -- Return last family in database.
- *   usage: lastfam() -> FAM
- *==========================================*/
-//WORD __lastfam (node, Context *context, eflg)
-//INTERP node; TABLE stab; BOOLEAN *eflg;
-//{
-//}
+// firstfam returns the first family in the database in key order.
+// usage: firstfam() -> FAM
+PValue __firstfam(PNode* pnode, Context* context, bool* eflg) {
+	List *familyRoots = context->database->familyRoots;
+	if (!familyRoots || lengthList(familyRoots) == 0) {
+		*eflg = true;
+		scriptError(pnode, "There must be families in the database to call firstfam.");
+		return nullPValue;
+	}
+	sortList(familyRoots);
+	GNode *root = getListElement(familyRoots, 0);
+	return PVALUE(PVFamily, uGNode, root);
+}
+
+// nextfam returns the next family in the database in key order.
+// usage: nextfam(FAM) -> FAM
+PValue __nextfam(PNode* pnode, Context* context, bool* eflg) {
+	GNode* fam = evaluateFamily(pnode->arguments, context, eflg); // Current family.
+	if (*eflg || !fam) {
+		*eflg = true;
+		scriptError(pnode, "The argument to nextfam must be a family.");
+		return nullPValue;
+	}
+	List *familyRoots = context->database->familyRoots;
+	sortList(familyRoots);
+	int index;
+	GNode* cur = findInList(familyRoots, fam->key, &index);
+	if (fam != cur || index < 0 || index >= lengthList(familyRoots)) {
+		*eflg = true;
+		scriptError(pnode, "The argument family doesn't have a valid index; call maintenance.");
+		return nullPValue;
+	}
+	if (index == lengthList(familyRoots) - 1) { // At last person.
+		return nullPValue;
+	}
+	return PVALUE(PVFamily, uGNode, getListElement(familyRoots, index + 1));
+}
+
+// prevfam returns the previous family in the database.
+// usage: prevfam(FAM) -> FAM
+PValue __prevfam(PNode* pnode, Context* context, bool* eflg) {
+	GNode* fam = evaluateFamily(pnode->arguments, context, eflg); // Following person.
+	if (*eflg || !fam) {
+		*eflg = true;
+		scriptError(pnode, "The argument to prevfam must be a family.");
+		return nullPValue;
+	}
+	List *familyRoots = context->database->familyRoots;
+	sortList(familyRoots);
+	int index;
+	GNode* cur = findInList(familyRoots, fam->key, &index);
+	if (fam != cur || index < 0 || index >= lengthList(familyRoots)) {
+		*eflg = true;
+		scriptError(pnode, "The argument person doesn't have a valid index; call maintenance.");
+		return nullPValue;
+	}
+	if (index == 0) { // At first family.
+		return nullPValue;
+	}
+	return PVALUE(PVFamily, uGNode, (GNode*) getListElement(familyRoots, index - 1));
+}
+
+
+// lastfam returns the last family in the database.
+// usage: lastfam() -> FAM
+PValue __lastfam(PNode* pnode, Context* context, bool* eflg) {
+	List *familyRoots = context->database->familyRoots;
+	if (!familyRoots || lengthList(familyRoots) == 0) {
+		*eflg = true;
+		scriptError(pnode, "There must be families in the database to call lastfam.");
+		return nullPValue;
+	}
+	sortList(familyRoots);
+	return PVALUE(PVFamily, uGNode, (GNode*) getListElement(familyRoots, lengthList(familyRoots) - 1));
+}
+

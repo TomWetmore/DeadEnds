@@ -1,11 +1,10 @@
 // DeadEnds
 //
-// gedpath.c has the functions that implement the Gedcom path features. A Gedcom path is a linked
-// list of GedPath structs that represent a path from the root of a GNode tree to one or more
-// GNodes in the tree.
+// gedpath.c has the functions that implement Gedcom paths. A Gedcom path is a linked list of
+// structs that represents a path from a GNode to one or more GNodes in the tree below.
 //
 // Created by Thomas Wetmore on 13 October 2024.
-// Last changed on 17 October 2024.
+// Last changed on 22 October 2024.
 
 #include "gedpath.h"
 #include "gnode.h"
@@ -77,7 +76,7 @@ GedPath* createGedPath(void) {
 	return node;
 }
 
-// showGedPath is a debug function prints a GedPath.
+// showGedPath is a debug function that prints a GedPath.
 void showGedPath(GedPath* path) {
 	while (path) {
 		printf("%s", path->tag ? path->tag : "any");
@@ -88,17 +87,23 @@ void showGedPath(GedPath* path) {
 }
 
 // showGNodePath prints the path from the root of a GNode tree to a given node in the tree.
-// Recursion is used get the path in the right order and to get the levels for the nodes.
-// Intended for debugging.
-// TODO: Add recursion protection.
+// Intended for debubbing the GedPath feature.
 int showGNodePath(GNode* node, int level) {
-	// Basis case: at the root.
+	// Base case: at the root.
 	if (!node->parent) {
 		printf("%d %s %s\n", level, node->tag, node->value ? node-> value : "");
 		return level + 1;
 	}
-	// Recursive case: in the interior, includes leaves.
+	// Recursive case: below the root.
 	level = showGNodePath(node->parent, level);
 	printf("%d %s %s\n", level, node->tag, node->value ? node->value : "");
 	return level + 1;
+}
+
+// deleteGedPath returns the memory used by a GedPath list.
+void deleteGedPath(GedPath* path) {
+	if (!path) return;
+	deleteGedPath(path->next);
+	if (path->tag) free(path->tag);
+	free(path);
 }
