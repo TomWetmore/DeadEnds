@@ -3,43 +3,28 @@
 // path.c has functions to manipulate UNIX file paths.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 26 July                 2024.
+// Last changed on 28 October 2024.
 
 #include <unistd.h>
 #include "standard.h"
 
-#define MAXPATHBUFFER 1024
+#define MAXPATHBUFFER 4096
 
-// filePath finds a file in a sequence of paths.
+// resolveFile tries to find a file within a sequence of paths.
 String resolveFile(String name, String path) {
 	if (!name || *name == 0) return null;
-	if (!path || *path == 0) return name;
-	if (*name == '/' || *name == '.') return name; // Bug: . could be part of name.
-	if (strlen(name) + strlen(path) >= MAXPATHBUFFER) return null;
-	unsigned char buf1[MAXPATHBUFFER];
-	strcpy((String) buf1, path);
-	String p = (String) buf1; // Convert :'s to 0's.
-	int c;
-	while ((c = *p)) {
-		if (c == ':') *p = 0;
-		p++;
+	if (!path || *path == 0) return strdup(name);
+	if (strchr(name, '/') != null) return strdup(name);
+	char buf1[MAXPATHBUFFER];
+	strcpy(buf1, path);
+	char buf2[MAXPATHBUFFER];
+	char* p = strtok(buf1, ":");
+	while (p) {
+		snprintf(buf2, sizeof(buf2), "%s/%s", p, name);
+		if (access(buf2, F_OK) == 0) return strdup(buf2);
+		p = strtok(null, ":");
 	}
-	*(++p) = 0; // Extra 0.
-	p = (String) buf1;
-	unsigned char buf2[MAXPATHBUFFER]; // Full file names.
-	String q;
-	while (*p) {
-		q = (String) buf2;
-		strcpy(q, p);
-		q += strlen(q);
-		strcpy(q++, "/");
-		strcpy(q, name);
-		if (access((const char*) buf2, 0) == 0)
-			return strsave((String) buf2); // Memory leak.
-		p += strlen(p);
-		p++;
-	}
-	return name;
+	return null;
 }
 
 // fopenPath attempta to open a file using a path variable.

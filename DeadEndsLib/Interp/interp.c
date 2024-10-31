@@ -252,7 +252,7 @@ InterpType interpret(PNode* programNode, Context* context, PValue* returnValue) 
 					default: return returnCode;
 				}
 				break;
-			case PNWhile: // Wwhile loop.
+			case PNWhile: // While loop.
 				switch (returnCode = interpWhileStatement(programNode, context, returnValue)) {
 					case InterpOkay: break;
 					case InterpError: return InterpError;

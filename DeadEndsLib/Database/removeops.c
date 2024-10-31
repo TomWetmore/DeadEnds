@@ -1,10 +1,9 @@
+// DeadEnds
 //
-//  DeadEnds
+// removeops.c has functions that perform remove operations on records in Databases.
 //
-//  removeoperations.c -- Function that perform remove operations on records in Databases.
-//
-//  Created by Thomas Wetmore on 2 January 2024.
-//  Last changed on 3 January 2024
+// Created by Thomas Wetmore on 2 January 2024.
+// Last changed on 24 October 2024.
 //
 
 #include "stdlib.h"
@@ -12,11 +11,8 @@
 #include "gnode.h"
 #include "gedcom.h"
 
-
-//  removeChildFromFamily -- Remove an existing child from an existing family in a Database.
-//-------------------------------------------------------------------------------------------------
-bool removeChildFromFamily (GNode *child, GNode *family, Database *database)
-{
+// removeChildFromFamily removes an existing child from an existing family in a Database.
+bool removeChildFromFamily(GNode* child, GNode* family, Database* database) {
     // Find the CHIL node in the family that links to the person.
     GNode *frefn, *husb, *wife, *chil, *rest;
     splitFamily(family, &frefn, &husb, &wife, &chil, &rest);
@@ -65,11 +61,9 @@ bool removeChildFromFamily (GNode *child, GNode *family, Database *database)
     return true;
 }
 
-//  removeSpouseFromFamily -- Remove an existing spouse from an existing family.
-//-------------------------------------------------------------------------------------------------
-bool removeSpouseFromFamily (GNode *spouse, GNode *family, Error *error)
-{
-	// Split the person and get its sex type..
+// removeSpouseFromFamily removes an existing spouse from an existing family.
+bool removeSpouseFromFamily(GNode* spouse, GNode* family, Error* error) {
+	// Split the person and get its sex type.
 	GNode *names, *irefns, *sex, *body, *famcs, *famss;
 	splitPerson(spouse, &names, &irefns, &sex, &body, &famcs, &famss);
 	SexType sext = sex ? valueToSex(sex) : sexUnknown;

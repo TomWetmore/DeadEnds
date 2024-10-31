@@ -3,7 +3,7 @@
 // intrpperson.c has the built-in script functions that deal with persons.
 //
 // Created by Thomas Wetmore on 17 March 2023.
-// Last changed on 13 June 2024.
+// Last changed on 23 October 2024.
 
 #include "standard.h"
 #include "pnode.h"

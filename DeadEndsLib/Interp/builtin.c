@@ -595,29 +595,17 @@ PValue __copyfile (PNode *node, Context *context, bool *eflg) {
 	return nullPValue;
 }
 
-//  __nl -- Newline function
-//    usage: nl() -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __nl(PNode *pnode, Context *context, bool* errflg)
-{
-	return newlinePValue;
-}
+// __nl is the newline function.
+// usage: nl() -> STRING
+PValue __nl(PNode* pnode, Context* context, bool* errflg) { return newlinePValue; }
 
-//  __space -- Space function
-//    usage: sp() -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __space(PNode *pnode, Context *context, bool* errflg)
-{
-	return spacePValue;
-}
+// __space is the space function.
+// usage: sp() -> STRING
+PValue __space(PNode* pnode, Context* context, bool* errflg) { return spacePValue; }
 
-//  __qt -- Double quote function
-//    usage: qt() -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __qt(PNode *pnode, Context *context, bool* errflg)
-{
-	return quotePValue;
-}
+// __qt is the double quote function
+// usage: qt() -> STRING
+PValue __qt(PNode *pnode, Context *context, bool* errflg) { return quotePValue; }
 
 //  __children -- Return the sequence of children of a family
 //--------------------------------------------------------------------------------------------------
