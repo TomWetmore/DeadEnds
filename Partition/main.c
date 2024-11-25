@@ -4,7 +4,7 @@
 // partitions it into closed sets of persons and families.
 //
 // Created by Thomas Wetmore on 4 October 2024.
-// Last changed on 22 October 2024.
+// Last changed on 25 November 2024.
 
 #include <stdio.h>
 #include "import.h"
@@ -45,13 +45,14 @@ int main(int argc, char** argv) {
 	// Read the file and get the list of all records.
 	File* file = openFile(gedcomFile, "r");
 	ErrorLog* log = createErrorLog();
-	GNodeList* roots = getGNodeTreesFromFile(file, log); // All GNode roots parsed from file.
+	IntegerTable* keymap = createIntegerTable(4097);
+	GNodeList* roots = getGNodeTreesFromFile(file, keymap, log); // All GNode roots parsed from file.
 	if (timing) printf("%s: Partition: read gedcom file.\n", getMillisecondsString());
 	if (lengthList(log) > 0) goAway(log);
 	closeFile(file);
 
 	// Validate record keys read from the Gedcom file.
-	checkKeysAndReferences(roots, file->name, log);
+	checkKeysAndReferences(roots, file->name, keymap, log);
 	if (timing) printf("%s: Partition: validated keys.\n", getMillisecondsString());
 	if (lengthList(log)) goAway(log);
 	GNodeIndex* index = createIndexOfGNodes(roots); // Index of all GNodes.

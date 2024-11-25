@@ -3,7 +3,7 @@
 // standard.h -- Useful things.
 //
 // Created by Thomas Wetmore on 1 November 2022.
-// Last changed on 3 October 2024.
+// Last changed on 14 November 2024.
 
 #ifndef standard_h
 #define standard_h
@@ -38,6 +38,8 @@ String lower(String);  // Convert a string to lower case.
 String upper(String);  // Convert a string to upper case.
 String capitalize(String);
 
+void basicDelete(void*);
+
 #define MAXLINELEN 4096  // Maximum length allowed for Gedcom lines when reading files.
 
 #define unused(x) (void)(x)
@@ -57,7 +59,7 @@ void* _alloc(size_t, String, int);
 void _free(void* ptr, String, int);
 bool isLetter(int);  // Is character is an Ascii letter?
 String trim(String, int); // Trim String to size.
-void __logAllocations(bool);  // Turn allocation logging on and off.
+void _logAllocations(bool);  // Turn allocation logging on and off.
 
 #ifdef DEBUGALLOCS // Debugging allocs and free.
 	#define stdalloc(l) _alloc(l, __FILE__, __LINE__)

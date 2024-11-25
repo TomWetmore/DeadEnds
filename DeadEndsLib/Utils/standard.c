@@ -212,3 +212,7 @@ bool allwhite (String p)
     while (*p) if (!iswhite(*p++)) return false;
     return true;
 }
+
+void basicDelete(void* element) {
+	stdfree(element);
+}

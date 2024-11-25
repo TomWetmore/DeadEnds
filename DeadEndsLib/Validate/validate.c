@@ -3,7 +3,7 @@
 // validate.c has the functions that validate Gedcom records.
 //
 // Created by Thomas Wetmore on 12 April 2023.
-// Last changed on 31 July 2024.
+// Last changed on 24 November 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -16,7 +16,6 @@
 static bool validateSource(GNode*, Database*, ErrorLog*);
 static bool validateEvent(GNode*, Database*, ErrorLog*);
 static bool validateOther(GNode*, Database*, ErrorLog*);
-static bool validateRefns(Database *database, ErrorLog*);
 
 int numValidations = 0; // DEBUG.
 
@@ -36,11 +35,11 @@ bool validateSourceIndex(Database* database, ErrorLog* errorLog) {
 }
 
 // validateEventIndex validates the events in a Database's event index.
-bool validateEventIndex(Database* database, ErrorLog* errorLog) {
+bool validateEventIndex(Database* db, ErrorLog* elog) {
 	bool isOkay = true;
-	FORHASHTABLE(database->eventIndex, element)
+	FORHASHTABLE(db->eventIndex, element)
 		GNode* event = ((RecordIndexEl*) element)->root;
-		if (!validateEvent(event, database, errorLog)) isOkay = false;
+		if (!validateEvent(event, db, elog)) isOkay = false;
 	ENDHASHTABLE
 	return isOkay;
 }
@@ -55,41 +54,40 @@ bool validateOtherIndex(Database* database, ErrorLog* errorLog) {
 	return isOkay;
 }
 
-static bool validateEvent(GNode* event, Database* database, ErrorLog* errorLog) {return true;}
-static bool validateOther(GNode* other, Database* database, ErrorLog* errorLog) {return true;}
+// TODO: Write these.
+static bool validateEvent(GNode* event, Database* db, ErrorLog* errorLog) {return true;}
+static bool validateOther(GNode* other, Database* db, ErrorLog* errorLog) {return true;}
 
-#define LN(root, database, node) rootLine(root, database) + countNodesBefore(node)
 
 // validateReferences creates the reference index while validating the 1 REFN nodes in a Database.
-void validateReferences(Database *database, ErrorLog* errorLog) {
-	String fname = database->lastSegment;
+void validateReferences(Database *db, ErrorLog* errorLog) {
+	String fname = db->lastSegment;
 	RefnIndex* refnIndex = createRefnIndex();
-	FORHASHTABLE(database->recordIndex, element)
+	FORHASHTABLE(db->recordIndex, element)
 		GNode* root = ((RecordIndexEl*) element)->root;
 		GNode* refn = findTag(root->child, "REFN");
 		while (refn) {
-			String refString = refn->value;
-			if (refString == null || strlen(refString) == 0) {
-				Error* error = createError(gedcomError, fname, LN(root, database, refn),
-									   "Missing REFN value");
-			addErrorToLog(errorLog, error);
-		} else if (!addToRefnIndex (refnIndex, refString, root->key)) {
-			Error *error = createError(gedcomError, fname, LN(root, database, refn),
-									   "REFN value already defined");
-			addErrorToLog(errorLog, error);
+			String value = refn->value;
+			if (value == null || strlen(value) == 0) {
+				Error* err = createError(gedcomError, fname, LN(root, db, refn),
+										   "Missing REFN value");
+				addErrorToLog(errorLog, err);
+			} else if (!addToRefnIndex (refnIndex, value, root->key)) {
+				Error *err = createError(gedcomError, fname, LN(root, db, refn),
+										   "REFN value already defined");
+				addErrorToLog(errorLog, err);
+			}
+			refn = refn->sibling;
+			if (refn && nestr(refn->tag, "REFN")) refn = null;
 		}
-		refn = refn->sibling;
-		if (refn && nestr(refn->tag, "REFN")) refn = null;
-	}
 	ENDHASHTABLE
-	database->refnIndex = refnIndex;
+	db->refnIndex = refnIndex;
 	return;
 }
 
 // rootLine returns the line number where a root node was located in its Gedcom file.
 // Searches for the RecordIndexEl by the root's key and return the line property.
-int rootLine(GNode* root, Database* database) {
-	RecordIndexEl *el = searchHashTable(database->recordIndex, root->key);
-	return el ? el->line : 0;
+int rootLine(GNode* root, IntegerTable* keymap) {
+	return root->key ? searchIntegerTable(keymap, root->key) : 0;
 }
 

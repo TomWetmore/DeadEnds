@@ -12,5 +12,5 @@ testprogram: test.o testsequence.o testgedcomstrings.o testwritedatabase.o impor
 	$(CC) $(CFLAGS) $(INCLUDES) $<
 
 clean:
-	rm *.o testprogram
+	rm -f *.o testprogram
 

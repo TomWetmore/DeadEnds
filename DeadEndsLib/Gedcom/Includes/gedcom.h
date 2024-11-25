@@ -3,7 +3,7 @@
 // gedcom.h is the header file for Gedcom related data types and operations.
 //
 // Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 22 October 2024.
+// Last changed on 8 November 2024.
 
 #ifndef gedcom_h
 #define gedcom_h
@@ -12,6 +12,9 @@ typedef struct GNode GNode; // Forward ref.
 #include "standard.h"
 #include "gnode.h"
 #include "list.h"
+
+// LN returns the line in the original Gedcom file where a GNode came from.
+#define LN(root, database, node) rootLine(root, database) + countNodesBefore(node)
 
 // SexType is an enumeration of sex types.
 typedef enum SexType {

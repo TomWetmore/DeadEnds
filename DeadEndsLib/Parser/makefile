@@ -19,4 +19,4 @@ lib$(LIBNAME).a: $(OFILES)
 #	cp -f y.tab.c $@
 
 clean:
-	rm *.o *.a
+	rm -f *.o *.a

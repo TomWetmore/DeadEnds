@@ -3,7 +3,7 @@
 // block.c holds the functions that implement the Block data type.
 //
 // Created by Thomas Wetmore on 9 March 2024
-// Last changed on 5 May 2024.
+// Last changed on 18 November 2024.
 
 #include "block.h"
 #include "sort.h"
@@ -237,7 +237,8 @@ bool isSorted(Block *block, String(*getKey)(void*), int(*compare)(String, String
 	String key = getKey(elements[0]);
 	for (int i = 1; i < block->length; i++) {
 		String next = getKey(elements[i]);
-		if (strcmp(key, next) > 0) return false;
+		//if (strcmp(key, next) > 0) return false;
+		if (compare(key, next) > 0) return false;
 		key = next;
 	}
 	return true;

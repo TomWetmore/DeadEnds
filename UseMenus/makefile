@@ -9,7 +9,7 @@ usemenus: main.o personmenu.o
 	$(CC) -o usemenus main.o personmenu.o $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
 clean:
-	rm *.o usemenus
+	rm -f *.o usemenus
 
 %.o: %.c
 	echo echo $(INCLUDES)

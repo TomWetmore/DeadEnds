@@ -5,7 +5,7 @@
 // randomized Gedcom file to standard output.
 //
 // Created by Thomas Wetmore on 14 July 2024.
-// Last changed on 31 October 2024.
+// Last changed on 25 November 2024.
 
 #include "randomizekeys.h"
 
@@ -30,16 +30,17 @@ int main(int argc, char** argv) {
 	ErrorLog* log = createErrorLog();
 
 	// Parse the Gedcom file and build a GNodeList of its records.
-	GNodeList* roots = getGNodeTreesFromFile(file, log);
+	IntegerTable* keymap = createIntegerTable(4097);
+	GNodeList* roots = getGNodeTreesFromFile(file, keymap, log);
 	printf("ramdomize keys: %s: read gedcom file.\n", getMillisecondsString());
 	if (lengthList(log) > 0) goAway(log);
 	closeFile(file);
 
 	// Validate the keys.
-	checkKeysAndReferences(roots, file->name, log);
+	checkKeysAndReferences(roots, file->name, keymap, log);
 	printf("ramdomize keys: %s: validated keys.\n", getMillisecondsString());
 	if (lengthList(log)) {
-		deleteGNodeList(roots, true);
+		deleteGNodeList(roots, basicDelete);
 		goAway(log);
 	}
 
@@ -128,3 +129,4 @@ static void goAway(ErrorLog* log) {
 	showErrorLog(log);;
 	exit(1);
 }
+

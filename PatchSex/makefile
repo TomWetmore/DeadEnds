@@ -9,7 +9,7 @@ patchsex: patchsex.o
 	$(CC) -o patchsex patchsex.o  $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
 clean:
-	rm *.o patchsex
+	rm -f *.o patchsex
 
 %.o: %.c
 	echo echo $(INCLUDES)

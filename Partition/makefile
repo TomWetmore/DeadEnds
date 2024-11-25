@@ -9,7 +9,7 @@ partition: main.o connect.o
 	$(CC) -o partition main.o connect.o  $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
 clean:
-	rm *.o partition
+	rm -f *.o partition
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) $<

@@ -9,7 +9,7 @@ randomizekeys: randomizekeys.o
 	$(CC) -o randomizekeys randomizekeys.o  $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
 clean:
-	rm *.o randomizekeys
+	rm -f *.o randomizekeys
 
 %.o: %.c
 	echo echo $(INCLUDES)

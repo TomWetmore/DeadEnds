@@ -5,7 +5,7 @@
 // and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 12 October 2024.
+// Last changed 17 November 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -158,7 +158,7 @@ void showTableSizes(Database *database) {
 
 // getNameIndexForDatabase indexes all person names in a database.
 void getNameIndexForDatabase(Database* database) {
-	int numNamesFound = 0; // For debugging.
+	int numNamesFound = 0; // Debugging.
 	NameIndex* nameIndex = createNameIndex();
 	FORHASHTABLE(database->personIndex, element) // Loop over all persons.
 		RecordIndexEl* el = element;
@@ -175,14 +175,6 @@ void getNameIndexForDatabase(Database* database) {
 	database->nameIndex = nameIndex;
 	if (indexNameDebugging) printf("the number of names encountered is %d.\n", numNamesFound);
 }
-
-// keyLineNumber returns the line in the Gedcome file where the record with the given key began.
-// If the key does not exist returns 0.
-//static int keyLineNumber (Database *database, String key) {
-//	RecordIndexEl* el = (RecordIndexEl*) searchHashTable(database->recordIndex, key);
-//	if (!el) return 0;
-//	return el->line;
-//}
 
 // getRecord gets a record from the database given a key.
 GNode* getRecord(String key, Database* database) {
@@ -203,6 +195,5 @@ void summarizeDatabase(Database* database) {
 		int numNames, numRecords;
 		getNameIndexStats(database->nameIndex, &numNames, &numRecords);
 		printf("\tName index: %d name keys in %d records.\n", numNames, numRecords);
-
 	}
 }

@@ -11,7 +11,7 @@
 #include "utils.h"
 #include "file.h"
 
-static void patchSexLine(GNode*, int);
+static void patchSexLine(GNode*);
 
 // main is the main program of the patchsex tool. It processes a Gedcom file looking for persons
 // with missing or erroneous SEX lines. If fixes them and then writes the file back out.
@@ -20,7 +20,8 @@ int main(void) {
 	String fileName = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/07022024.ged";
 	File* file = openFile(fileName, "r");
 	ErrorLog* log = createErrorLog();
-	GNodeList* roots = getGNodeTreesFromFile(file, log);
+	IntegerTable* keymap = createIntegerTable(4097);
+	GNodeList* roots = getGNodeTreesFromFile(file, keymap, log);
 	if (lengthList(log) > 0) {
 		printf("patchsex: cancelled due to errors\n");
 		showErrorLog(log);
@@ -37,8 +38,8 @@ int main(void) {
 	FORLIST(roots, element)
 		GNodeListEl* el = (GNodeListEl*) element;
 		GNode* root = el->node;
-		int line = el->line;
-		if (recordType(root) == GRPerson) patchSexLine(root, line);
+		//int line = el->line;
+		if (recordType(root) == GRPerson) patchSexLine(root);
 	ENDLIST
 	// Write the possibly modified list of records out to a file.
 	File* outfile = openFile("/Users/ttw4/Desktop/DeadEnds/Gedfiles/modified.ged", "w");
@@ -49,7 +50,7 @@ int main(void) {
 
 // patchSexLine adds a SEX line to an INDI record if it does not have one. It has the side
 // effect of "normalizing" the record.
-static void patchSexLine(GNode* indi, int line) {
+static void patchSexLine(GNode* indi) {
 	GNode *name, *refn, *sex, *body, *famc, *fams;
 	bool added = false;
 	splitPerson(indi, &name, &refn, &sex, &body, &famc, &fams);

@@ -9,7 +9,7 @@ runscript: runscript.o
 	$(CC) -o runscript runscript.o  $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
 clean:
-	rm *.o runscript
+	rm -f *.o runscript
 
 %.o: %.c
 	echo echo $(INCLUDES)

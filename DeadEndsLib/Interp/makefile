@@ -15,4 +15,4 @@ lib$(LIBNAME).a: $(OFILES)
 	$(CC) $(CFLAGS) $(INCLUDES) $<
 
 clean:
-	rm *.o *.a
+	rm -f *.o *.a

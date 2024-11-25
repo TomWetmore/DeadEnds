@@ -4,13 +4,13 @@
 // to integers.
 //
 // Created by Thomas Wetmore on 23 April 2023.
-// Last changed on 22 August 2024.
+// Last changed on 21 November 2024.
 
 #ifndef integertable_h
 #define integertable_h
 #include "hashtable.h"
 
-// IntegerTable is a hash table that maps Strings to integers.
+// IntegerTable is a HashTable that maps Strings to integers.
 typedef HashTable IntegerTable;
 
 // IntegerElement is an element in an IntegerTable.
@@ -24,5 +24,6 @@ IntegerTable *createIntegerTable(int numBuckets);
 void insertInIntegerTable(IntegerTable*, String key, int value);
 int searchIntegerTable(IntegerTable*, String key);
 void incrIntegerTable(IntegerTable*, String key);
+void showIntegerTable(IntegerTable*); // For debugging.
 
 #endif // integertable_h
