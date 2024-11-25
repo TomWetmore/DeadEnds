@@ -2,7 +2,10 @@
 // mergedatabase.c has functions to merge Databases.
 //
 // Created by Thomas Wetmore on 17 November 2024
-// Last changed on 17 November 2024.
+// Last changed on 25 November 2024.
+
+#include "standard.h"
+#include "database.h"
 
 
 // mergeDatabase merges Database two into Database one.

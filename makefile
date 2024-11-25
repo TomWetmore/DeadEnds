@@ -7,6 +7,7 @@ all:
 	cd TestProgram; make
 	cd RandomizeKeys; make
 	cd Partition; make
+	cd MultiBases; make
 
 clean:
 	cd DeadEndsLib; make clean
@@ -17,3 +18,4 @@ clean:
 	cd TestProgram; make clean
 	cd RandomizeKeys; make clean
 	cd Partition; make clean
+	cd MultiBases; make clean
