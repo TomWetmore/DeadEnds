@@ -1,9 +1,9 @@
 // DeadEnds
 //
-// standard.h -- Useful things.
+// standard.h defines useful things.
 //
 // Created by Thomas Wetmore on 1 November 2022.
-// Last changed on 14 November 2024.
+// Last changed on 16 November 2024.
 
 #ifndef standard_h
 #define standard_h
@@ -22,7 +22,7 @@ typedef char* String;
 
 //#define DEBUGALLOCS // EMPTY
 #define MAXSTRINGSIZE 512
-#define NAN 313131  // Poor man's implementation of NAN for integers.
+#define NAN 1313131313  // Poor man's implementation of NAN for integers.
 
 // CharacterType -- Characters are partitioned into different types.
 typedef enum { Letter = 300, Digit, White, Other } CharType;
@@ -40,7 +40,7 @@ String capitalize(String);
 
 void basicDelete(void*);
 
-#define MAXLINELEN 4096  // Maximum length allowed for Gedcom lines when reading files.
+#define MAXLINELEN 4096  // Max length for Gedcom lines when reading files.
 
 #define unused(x) (void)(x)
 

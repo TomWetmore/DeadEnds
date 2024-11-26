@@ -1,0 +1,112 @@
+Key functions in importing Gedcom files into DeadEnds Databases
+---------------------------------------------------------------
+List* gedcomFilesToDatabases(*paths, *errlog) -- Import a List of Gedcom files to a List of Databases.
+	1. Create a list of databases.
+	2. Call gedcomFileToDatabase on each file and add returned Database to the list.
+	3. Return the list of databases.
+	** Databases with errors are not created.
+
+Database* gedcomFileToDatabase(path, *errlog) -- Create and return a database from a single Gedcom file.
+	1. Open the Gedcom file.
+	2. Create the keymap table to track where each record begins.
+	3. Call getGNodeTreesFromFile to get the list of roots from the file.
+	4. Close the file.
+	5. Calls checkKeysAndReferences to check that the keys in the trees are "closed".
+	6. Create the database.
+	7. Validate the persons and families in the database.
+	8. Create the name index.
+	9. Validate the user references.
+	10. Return the database.
+	** If an error occurs at any point update the error log, clean up, and return null.
+
+GNodeList* getGNodeTreesFromFile(*file, *keymap, *errlog) -- Get the GNodeList of all records in a Gedcom file.
+	n. Called by gedcomFileToDatabase; can be called by functions that don't need full databases.
+	1. Call getGNodeListFromFile to get the list of all Gedcom lines as nodes; has levels.
+	2. Call getGNodeTreesFromNodeList to convert the list of nodes to a list of node trees.
+	** If an error occurs update the error log and return null.
+
+GNodeList* getGNodeListFromFile(*file, *keymap, *errlog) -- Get the GNodeList of all nodes in a file.
+	1. Create the GNodeList.
+        2. Iteratively call fileToLine to get each lineno, level, key, tag, and value from the file. Then:
+		a. Create a node for the line from the key, tag and value (to be only copy anywhere!).
+		b. Create a GNodeListEl with the node and level.
+		c. If the node has a key add a mapping from the key to the lineno to the keymap.
+		d. If any errors occur add them to the log
+	3. Return the GNodeList if there were no errors; null otherwise.
+
+GNodeList* getGNodeTreesFromNodeList(*nodes, name, *keymap, *errlog) -- Convert a list of all nodes to trees.
+	1. Set up state machine variables.
+	2. Set machine state to Initial (others are Main and Error).
+	3. Iterate the list of nodes doing::
+		a. Set the previous variables to the current variables.
+		b. Get the new current variables.
+		c. Depending on state do:
+			1. Initial: 
+				a. If level is 0 set the first root node and go to Main; else to Error.
+			2. Main:
+				In cases a, b, c, & d, stay in Main and modify the loop variables as described.
+				a. if level is 0:
+					1. add root (of tree just built) to list of trees.
+					2. set current node as root of next tree.
+				b. if level is same as last node (can't be 0):
+					1. make current node the sib of the prev.
+				c. if level is one more than last node:
+					1. make current node the child of the prev.
+				d. if the level is less that the prev node:
+					1. make current node a sib of an ancestor of the prev.
+					2. infinite loop check is done when looking for ancestor.
+				e. else level is more than one larger than last:
+					1. add error and go to Error.
+			3. Error.
+				1. if level is 0 go to Main; else remain in Error.
+	4. If in Main at end of iteration (should be) add last tree root to list.
+	5. Return the list of trees.
+
+void checkKeysAndReferences(*trees, name, *keymap, *errlog) -- Check all root keys and their references for closure.
+	1. Create a set to hold all keys seen.
+	2. Check each tree root:
+		a. If it doesn't have a key but should add an error to the log.
+		b. If it has a key that has been seen before add an error to the log.
+		c. Add the key to the set of seen keys.
+	3. Check all occurrences of keys as values doing the following::
+		a. add to numReferences (debugging).
+		b. if the key is not in the set of seen keys add an error to the log.
+	4. Delete the seen set.
+
+GNodeListEl* createGNodeListEl(GNode* gnode, void* data) -- Creates and returns a GNodeListEl
+	1. Allocates the memory for a GNode*, void* pair).
+	2. Puts the arguments, as-is, into the memory.
+	3. Returns the new element.
+
+static void delete(void* element) -- the delete function for GNodeListEls
+	n. If frees only the element, not what the element might point to.
+
+GNodeList* createGNodeList(void) -- creates and returns a new GNodeList with the above getKey function.
+	NOTE: THE DELETE FUNCTION IS NOT CORRECT FOR THE LATEST REDESIGN
+
+void appendToGNodeList(GNodeList* list, GNode* gnode, void* data) -- adds a new element to a GNodeList.
+	n. Just a pass through to appendToList.
+
+void deleteGNodeList(GNodeList* list, void(*delete)(void*)) -- deletes a GNodeList
+	n. User must pass in a delete function.
+
+static void deleteEl(void* el) { stdfree(el); } -- generic deleter for GNodeList elements
+	n. CONSOLIDATE THE DELETE FUNCTIONS SOMEHOW
+
+GNodeList* getGNodeTreesFromString(String, String name, ErrorLog*) -- returns a list of records from a String.
+	n. Interface is out of date due to recent changes.
+	1. Call getGNodeListFromString to get the GNodeList of all GNodes in the string
+	2. Call getGNodeTreesFromNodeList to get the GNodeList of records from the list of GNodes.
+	3. If there were errors clean up and return null; else returns the list of records.
+	n. Cleanup is out of date due to recent changes.
+
+GNodeList* getGNodeListFromString(String string, ErrorLog* errorLog) -- returns the full list of GNodes from a String.
+	n. Interface is out of date due to recent changes.
+	1. Create a GNodeList to hold the GNodes.
+	2. Iteratively call stringToLine to get each linenumber, level, key, tag, and value from the string. For each:
+		a. Create a GNode for the list.
+		b. Create a GNodeListEl from the GNode and the level.
+		c. SHOULD ADD AN ENTRY TO THE KEYMAP BUT DON'T.
+		d. If errors occur clean up and return null.
+	3. Return the GNodeList if there were no errors; null otherwise.
+}

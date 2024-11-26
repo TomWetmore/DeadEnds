@@ -3,7 +3,7 @@
 // validate.c has the functions that validate Gedcom records.
 //
 // Created by Thomas Wetmore on 12 April 2023.
-// Last changed on 24 November 2024.
+// Last changed on 26 November 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -60,28 +60,28 @@ static bool validateOther(GNode* other, Database* db, ErrorLog* errorLog) {retur
 
 
 // validateReferences creates the reference index while validating the 1 REFN nodes in a Database.
-void validateReferences(Database *db, ErrorLog* errorLog) {
-	String fname = db->lastSegment;
+void validateReferences(Database *dbase, IntegerTable* keymap, ErrorLog* elog) {
+	String fname = dbase->lastSegment;
 	RefnIndex* refnIndex = createRefnIndex();
-	FORHASHTABLE(db->recordIndex, element)
+	FORHASHTABLE(dbase->recordIndex, element)
 		GNode* root = ((RecordIndexEl*) element)->root;
 		GNode* refn = findTag(root->child, "REFN");
 		while (refn) {
 			String value = refn->value;
 			if (value == null || strlen(value) == 0) {
-				Error* err = createError(gedcomError, fname, LN(root, db, refn),
+				Error* err = createError(gedcomError, fname, LN(root, keymap, refn),
 										   "Missing REFN value");
-				addErrorToLog(errorLog, err);
+				addErrorToLog(elog, err);
 			} else if (!addToRefnIndex (refnIndex, value, root->key)) {
-				Error *err = createError(gedcomError, fname, LN(root, db, refn),
+				Error *err = createError(gedcomError, fname, LN(root, keymap, refn),
 										   "REFN value already defined");
-				addErrorToLog(errorLog, err);
+				addErrorToLog(elog, err);
 			}
 			refn = refn->sibling;
 			if (refn && nestr(refn->tag, "REFN")) refn = null;
 		}
 	ENDHASHTABLE
-	db->refnIndex = refnIndex;
+	dbase->refnIndex = refnIndex;
 	return;
 }
 

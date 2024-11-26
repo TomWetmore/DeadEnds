@@ -4,15 +4,16 @@
 // to integers.
 //
 // Created by Thomas Wetmore on 23 April 2023.
-// Last changed on 22 August 2024.
+// Last changed on 26 November 2024.
 
 #include "integertable.h"
 
-String integerGetKey(void* element) { return ((IntegerElement*) element)->key; }
+static String getKey(void* element) { return ((IntegerElement*) element)->key; }
 
 // createIntegerTable creates and returns an IntegerTable.
 IntegerTable* createIntegerTable(int numBuckets) {
-    return createHashTable(integerGetKey, null, null, numBuckets);
+	// basicDelete deletes the element but not objects the element points to.
+    return createHashTable(getKey, null, basicDelete, numBuckets);
 }
 
 // searchIntegerTable searches for a key in an IntegerTable and return its integer value.

@@ -3,7 +3,7 @@
 // standard.c hold some standard utiltiy functions.
 //
 // Creates by Thomas Wetmore on 7 November 2022.
-// Last changed on 18 October 2024.
+// Last changed on 25 November 2024.
 
 #include <stdlib.h>
 #include "standard.h"
@@ -163,29 +163,20 @@ String capitalize(String str) {
 	return p;
 }
 
-// toupper -- Convert a letter to uppercase.  Must change with Unicode.
-//--------------------------------------------------------------------------------------------------
-//int toupper(int c)
-//{
+// toupper converts a letter to uppercase.  Must change with Unicode.
+//int toupper(int c) {
 //	if (c < 'a' || c > 'z') return c;
 //	return c + 'A' - 'a';
 //}
 
-// tolower -- Convert letter to lowercase. Must change with Unicode.
-//--------------------------------------------------------------------------------------------------
-//int tolower(int c)
-//// int c;
-//{
+// tolower converts a letter to lowercase. Must change with Unicode.
+//int tolower(int c) {
 //	if (c < 'A' || c > 'Z') return c;
 //	return c + 'a' - 'A';
 //}
 
-// trim -- Trim a String if it is 'too long'.
-//--------------------------------------------------------------------------------------------------
-String trim(String string, int maxLength)
-// String string -- String that may have to be trimmed.
-// int maxLength -- Maximum desired length of string.
-{
+// trim trims a String if it is too long.
+String trim(String string, int maxLength) {
 	static char scratch[MAXLINELEN+1];
 	if (!string || strlen(string) > MAXLINELEN) return null;
 	if (maxLength < 0) maxLength = 0;
@@ -195,24 +186,20 @@ String trim(String string, int maxLength)
 	return scratch;
 }
 
-// striptrail -- Strip trailing white space.
-//--------------------------------------------------------------------------------------------------
-void striptrail(String p)
-// String p -- (in, out) Strips trailing white space from this string.
-{
+// striptrail strips trailing white space from a String.
+void striptrail(String p) {
     char* q = p + strlen(p) - 1;
     while (iswhite(*q) && q >= p) *q-- = 0;
 }
 
-// allwhite -- Checks whether a string is made up of all white space.
-//--------------------------------------------------------------------------------------------------
-bool allwhite (String p)
-// String p -- Checks whether this string is all white space.
-{
+// allwhite checks whether a string is made up of all white space.
+bool allwhite(String p) {
     while (*p) if (!iswhite(*p++)) return false;
     return true;
 }
 
+// basicDelete is used as the delete function in data types where the elements but none of
+// their fields are freed when the datatype is deleted.
 void basicDelete(void* element) {
 	stdfree(element);
 }

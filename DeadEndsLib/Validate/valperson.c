@@ -3,7 +3,7 @@
 // valperson.c contains functions that validate person records in a Database.
 //
 // Created by Thomas Wetmore on 17 December 2023.
-// Last changed on 22 November 2024.
+// Last changed on 26 November 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -43,6 +43,7 @@ static bool validatePerson(RecordIndexEl* personEl, Database* dbase, IntegerTabl
 	String fname = dbase->lastSegment;
 	GNode* person = personEl->root;
 	int line = searchIntegerTable(keyMap, person->key); // Used in error messages.
+	ASSERT(line != NAN);
 	normalizePerson(person);
 	int errorCount = 0;
 	static char s[512]; // For error strings.
@@ -90,7 +91,7 @@ static bool validatePerson(RecordIndexEl* personEl, Database* dbase, IntegerTabl
 		} else if (sex == sexFemale) {
 			parent = familyToWife(family, dbase);
 		} else {
-			int lineNumber = rootLine(person, dbase);
+			int lineNumber = rootLine(person, keyMap);
 			sprintf(s, "INDI %s (line %d) with FAMS %s (line %d) link has no sex value.",
 					person->key,
 					lineNumber,
@@ -103,11 +104,11 @@ static bool validatePerson(RecordIndexEl* personEl, Database* dbase, IntegerTabl
 		if (person != parent) {
 			sprintf(s, "FAM %s (line %d) should have %s link to INDI %s (line %d).",
 					key,
-					rootLine(family, dbase),
+					rootLine(family, keyMap),
 					sex == sexMale ? "HUSB" : "WIFE",
 					person->key,
 					line);
-			addErrorToLog(elog, createError(linkageError, fname, rootLine(family, dbase), s));
+			addErrorToLog(elog, createError(linkageError, fname, rootLine(family, keyMap), s));
 			errorCount++;
 		}
 a:;

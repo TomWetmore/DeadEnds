@@ -4,7 +4,7 @@
 // to integers.
 //
 // Created by Thomas Wetmore on 23 April 2023.
-// Last changed on 21 November 2024.
+// Last changed on 26 November 2024.
 
 #ifndef integertable_h
 #define integertable_h
@@ -22,7 +22,7 @@ typedef struct IntegerElement {
 // User interface.
 IntegerTable *createIntegerTable(int numBuckets);
 void insertInIntegerTable(IntegerTable*, String key, int value);
-int searchIntegerTable(IntegerTable*, String key);
+int searchIntegerTable(IntegerTable*, String key); // Returns NAN if key not there.
 void incrIntegerTable(IntegerTable*, String key);
 void showIntegerTable(IntegerTable*); // For debugging.
 

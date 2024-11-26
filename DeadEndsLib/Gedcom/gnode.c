@@ -379,17 +379,18 @@ static int countNodesInTree(GNode *node) {
 }
 
 // countNodesBefore returns the number of GNodes that occur before this one in depth first,
-// left-to-rignt order; used in generating error messages. Sweet algorithm.
+// left-to-rignt order; used in generating error messages. This should be the number of lines
+// in a Gedcom file from the root to the node. Sweet algorithm.
 int countNodesBefore(GNode* node) {
 	if (!node) return 0;
 	int count = 0;
-	while (node->parent) { // Interate node and ancestors.
+	while (node->parent) { // Iterate node and ancestors.
 		GNode *parent = node->parent;
 		GNode *child = parent->child;
 		while (child && child != node) { // Count trees of previous sibs.
 			count += countNodesInTree(child);
-			if (count > 100000) {
-				printf("Recursing forever?????\n");
+			if (count > 1000000) { // How big can a Gedcom record actually get
+				printf("Infinite loop in countNodesBefore...\n");
 				ASSERT(false);
 			}
 			child = child->sibling;
