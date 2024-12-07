@@ -3,7 +3,7 @@
 // valfamily.c has the functions that validate family records.
 //
 // Created by Thomas Wetmore on 18 December 2023.
-// Last changed on 26 November 2024.
+// Last changed on 3 December 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -13,45 +13,44 @@
 #include "errors.h"
 #include "splitjoin.h"
 
-static bool validateFamily(RecordIndexEl*, Database*, IntegerTable*, ErrorLog*);
+static bool validateFamily(GNode*, String name, RecordIndex*, IntegerTable*, ErrorLog*);
 extern bool importDebugging;
 
-// validateFamilyIndex validates the family records in a database.
-void validateFamilies(Database *dbase, IntegerTable* keymap, ErrorLog *elog) {
+// validateFamilies validates the family records in a database.
+void validateFamilies(RecordIndex* index, String name, IntegerTable* keymap, ErrorLog *elog) {
 	int numFamiliesValidated = 0;
-	FORHASHTABLE(dbase->familyIndex, element)
-		validateFamily(element, dbase, keymap, elog);
-		numFamiliesValidated++;
+	FORHASHTABLE(index, element)
+		GNode* root = (GNode*) element;
+		if (recordType(root) == GRFamily) {
+			validateFamily(root, name, index, keymap, elog);
+			numFamiliesValidated++;
+		}
 	ENDHASHTABLE
 	if (importDebugging) printf("The number of families validated is %d.\n", numFamiliesValidated);
 }
 
 // validateFamily validates a family; it checks that all HUSBs, WIFEs and CHILs refer to existing
 // persons, and that the return links exist.
-static bool validateFamily(RecordIndexEl* famel, Database *dbase, IntegerTable* keymap, ErrorLog* elog) {
-	GNode* family = famel->root;
+static bool validateFamily(GNode* family, String name, RecordIndex* index, IntegerTable* keymap,
+						   ErrorLog* elog) {
 	normalizeFamily(family);
-	String segment = dbase->lastSegment;
 	int errorCount = 0;
 	static char s[4096];
 
-	// All HUSB, WIFE and CHIL must link to persons.
-	//printf("ALL FAM KEYS FROM FORHUSBS\n"); // DEBUG
-	FORHUSBS(family, husband, key, dbase)
+	// HUSB, WIFE and CHIL nodes must point to persons.
+	FORHUSBS(family, husband, key, index)
 		if (!husband) {
 			//printf("%s ", family->key); // DEBUG
 			int lineNumber = rootLine(family, keymap);
 			sprintf(s, "FAM %s (line %d): HUSB %s (line %d) does not exist.",
-					family->key,
-					lineNumber,
-					key,
+					family->key, lineNumber, key,
 					lineNumber + countNodesBefore(__node));
-			addErrorToLog(elog, createError(linkageError, segment, 0, s));
+			addErrorToLog(elog, createError(linkageError, name, 0, s));
 			errorCount++;
 		}
 	ENDHUSBS
 	//printf("\nALL FAM KEYS FROM FORWIVES\n"); // DEBUG
-	FORWIFES(family, wife, key, dbase)
+	FORWIFES(family, wife, key, index)
 		//printf("%s ", family->key); // DEBUG
 		if (!wife) {
 			int lineNumber = rootLine(family, keymap);
@@ -60,12 +59,12 @@ static bool validateFamily(RecordIndexEl* famel, Database *dbase, IntegerTable* 
 					lineNumber,
 					key,
 					lineNumber + countNodesBefore(__node));
-			addErrorToLog(elog, createError(linkageError, segment, 0, s));
+			addErrorToLog(elog, createError(linkageError, name, 0, s));
 			errorCount++;
 		}
 	ENDWIFES
 	//printf("\nALL FAM KEYS FROM FORCHILDREN\n"); // DEBUG
-	FORCHILDREN(family, child, key, n, dbase)
+	FORCHILDREN(family, child, key, n, index)
 	if (!child) {
 			//printf("%s ", family->key); // DEBUG
 			int lineNumber = rootLine(family, keymap);
@@ -74,7 +73,7 @@ static bool validateFamily(RecordIndexEl* famel, Database *dbase, IntegerTable* 
 					lineNumber,
 					key,
 					lineNumber + countNodesBefore(__node));
-			addErrorToLog(elog, createError(linkageError, segment, lineNumber, s));
+			addErrorToLog(elog, createError(linkageError, name, lineNumber, s));
 			errorCount++;
 		}
 	ENDCHILDREN
@@ -82,31 +81,31 @@ static bool validateFamily(RecordIndexEl* famel, Database *dbase, IntegerTable* 
 	// If there were errors above then the following code should not run.
 	if (errorCount) return false;
 
-	FORHUSBS(family, husband, hkey, dbase)
+	FORHUSBS(family, husband, hkey, index)
 		// Husband must have one FAMS link back to this family.
 		int numOccurences = 0;
-		FORFAMSS(husband, fam, fkey, dbase)
+		FORFAMSS(husband, fam, fkey, index)
 			if (family == fam) numOccurences++;
 		ENDFAMSS
 		if (numOccurences != 1) {
-			addErrorToLog(elog, createError(linkageError, segment, 111, "GET ERROR MESSAGE"));
+			addErrorToLog(elog, createError(linkageError, name, 111, "GET ERROR MESSAGE"));
 			errorCount++;
 		}
 	ENDHUSBS
 
 	//  For each WIFE line in the family (multiples in non-traditional cases)...
-	FORWIFES(family, wife, wkey, dbase) {
+	FORWIFES(family, wife, wkey, index) {
 		int numOccurences = 0;
-		FORFAMSS(wife, fam, fkey, dbase)
+		FORFAMSS(wife, fam, fkey, index)
 			if (family == fam) numOccurences++;
 		ENDFAMSS
 		ASSERT(numOccurences == 1);
 	} ENDWIFES
 
 	//  For each CHIL node in the family.
-	FORCHILDREN(family, child, chilKey, n, dbase)
+	FORCHILDREN(family, child, chilKey, n, index)
 		int numOccurences = 0;
-		FORFAMCS(child, fam, key, dbase)
+		FORFAMCS(child, fam, key, index)
 			if (family == fam) numOccurences++;
 		ENDFAMCS
 		ASSERT(numOccurences == 1);
@@ -116,7 +115,7 @@ static bool validateFamily(RecordIndexEl* famel, Database *dbase, IntegerTable* 
 	bool hasWife = WIFE(family) != null;
 	bool hasChild = CHIL(family) != null;
 	if (!(hasHusb || hasWife || hasChild)) {
-		addErrorToLog(elog, createError(linkageError, segment, 0, "Family has no HUSB, WIFE or CHIL links"));
+		addErrorToLog(elog, createError(linkageError, name, 0, "Family has no HUSB, WIFE or CHIL links"));
 	}
 	//printf("validate family: %s\n", family->gKey);
 	//  Validate existance of at least one of HUSB, WIFE, CHIL.

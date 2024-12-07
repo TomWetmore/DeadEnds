@@ -3,7 +3,7 @@
 // gedcom.h is the header file for Gedcom related data types and operations.
 //
 // Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 8 November 2024.
+// Last changed on 30 November 2024.
 
 #ifndef gedcom_h
 #define gedcom_h
@@ -38,18 +38,18 @@ RecordType recordType(GNode *root);  // Return the type of a Gedcom record tree.
 int compareRecordKeys(String, String);  // gedcom.c
 
 // FORCHILDREN / ENDCHILDREN is a macro pair that iterates children in a family.
-#define FORCHILDREN(fam, childd, key, num, database) \
-    {\
-    GNode* __node = findTag(fam->child, "CHIL");\
-    GNode* childd;\
-    int num = 0;\
-    String key = null;\
-    while (__node) {\
-        key = __node->value;\
-        childd = keyToPerson(__node->value, database);\
-        ASSERT(childd);\
-        num++;\
-        {
+#define FORCHILDREN(fam, childd, key, num, index) \
+	{\
+	GNode* __node = findTag(fam->child, "CHIL");\
+	GNode* childd;\
+	int num = 0;\
+	String key = null;\
+	while (__node) {\
+		key = __node->value;\
+		childd = keyToPerson(__node->value, index);\
+		ASSERT(childd);\
+		num++;\
+		{
 
 #define ENDCHILDREN \
         }\
@@ -58,15 +58,15 @@ int compareRecordKeys(String, String);  // gedcom.c
     }}
 
 // FORFAMCS / ENDFAMCS iterates the FAMC nodes in a person record.
-#define FORFAMCS(person, family, key, database)\
+#define FORFAMCS(person, family, key, index)\
 {\
-    GNode *__node = FAMC(person);\
-    GNode *family;\
-    String key;\
-    while (__node) {\
-        key = __node->value;\
-        family = keyToFamily(key, database);\
-        {
+	GNode *__node = FAMC(person);\
+	GNode *family;\
+	String key;\
+	while (__node) {\
+		key = __node->value;\
+		family = keyToFamily(key, index);\
+		{
 
 #define ENDFAMCS\
         }\
@@ -76,15 +76,15 @@ int compareRecordKeys(String, String);  // gedcom.c
 }
 
 // FORFAMSS / ENDFAMS iterates the FAMS nodes in a person record.
-#define FORFAMSS(person, family, key, database)\
+#define FORFAMSS(person, family, key, index)\
 {\
-    GNode *__node = FAMS(person);\
-    GNode *family;\
-    String key;\
-    while (__node) {\
-        key = __node->value;\
-        family = keyToFamily(key, database);\
-        {
+	GNode *__node = FAMS(person);\
+	GNode *family;\
+	String key;\
+	while (__node) {\
+		key = __node->value;\
+		family = keyToFamily(key, index);\
+		{
 
 #define ENDFAMSS\
         }\
@@ -114,15 +114,15 @@ int compareRecordKeys(String, String);  // gedcom.c
 }
 
 // FORHUSBS / ENDHUSBS iterates over the HUSB nodes in a family.
-#define FORHUSBS(fam, husb, key, database)\
+#define FORHUSBS(fam, husb, key, index)\
 {\
-    GNode* __node = findTag(fam->child, "HUSB");\
-    GNode* husb = null;\
-    String key = null;\
-    while (__node) {\
-        key = __node->value;\
-		husb = key ? keyToPerson(key, database) : null;\
-        {
+	GNode* __node = findTag(fam->child, "HUSB");\
+	GNode* husb = null;\
+	String key = null;\
+	while (__node) {\
+		key = __node->value;\
+		husb = key ? keyToPerson(key, index) : null;\
+		{
 
 #define ENDHUSBS\
         }\
@@ -132,15 +132,15 @@ int compareRecordKeys(String, String);  // gedcom.c
 }
 
 // FORWIFES / ENDWIFES iterates over the WIFE nodes in a family.
-#define FORWIFES(fam, wife, key, database)\
+#define FORWIFES(fam, wife, key, index)\
 {\
-    GNode* __node = findTag(fam->child, "WIFE");\
-    GNode* wife = null;\
-    String key = null;\
-    while (__node) {\
-        key = __node->value;\
-		wife = key ? keyToPerson(key, database) : null;\
-        {
+	GNode* __node = findTag(fam->child, "WIFE");\
+	GNode* wife = null;\
+	String key = null;\
+	while (__node) {\
+		key = __node->value;\
+		wife = key ? keyToPerson(key, index) : null;\
+		{
 
 #define ENDWIFES\
         }\

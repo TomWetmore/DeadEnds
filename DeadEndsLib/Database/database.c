@@ -5,7 +5,7 @@
 // and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 17 November 2024.
+// Last changed 4 December 2024.
 
 #include "database.h"
 #include "gnode.h"
@@ -27,8 +27,6 @@ Database *createDatabase(String filePath) {
 	database->filePath = strsave(filePath);
 	database->lastSegment = strsave(lastPathSegment(filePath));
 	database->recordIndex = null;
-	database->personIndex = null;
-	database->familyIndex = null;
 	database->nameIndex = null;
 	database->refnIndex = null;
 	database->personRoots = createRootList(); // null?
@@ -36,11 +34,9 @@ Database *createDatabase(String filePath) {
 	return database;
 }
 
-//  deleteDatabase deletes a database.
+// deleteDatabase deletes a Database.
 void deleteDatabase(Database* database) {
 	if (database->recordIndex) deleteRecordIndex(database->recordIndex);
-	if (database->personIndex) deleteRecordIndex(database->personIndex);
-	if (database->familyIndex) deleteRecordIndex(database->familyIndex);
 	if (database->nameIndex) deleteNameIndex(database->nameIndex);
 	if (database->refnIndex) deleteRefnIndex(database->refnIndex);
 	if (database->personRoots) deleteList(database->personRoots);
@@ -51,23 +47,11 @@ void deleteDatabase(Database* database) {
 void writeDatabase(String fileName, Database* database) {
 	FILE* file = fopen(fileName, "w");
 	if (file == null) {
-		printf("Can't open file to write database to\n");
+		printf("Can't open file to write the database\n");
 		return;
 	}
-	FORLIST(database->personRoots, element)
+	FORHASHTABLE(database->recordIndex, element)
 		writeGNodeRecord(file, (GNode*) element, false);
-	ENDLIST
-	FORLIST(database->familyRoots, element)
-		writeGNodeRecord(file, (GNode*) element, false);
-	ENDLIST
-	FORHASHTABLE(database->sourceIndex, element)
-		writeGNodeRecord(file, ((RecordIndexEl*) element)->root, false);
-	ENDHASHTABLE
-//	FORHASHTABLE(database->eventIndex, element)
-//		writeGNodeRecord(file, ((RecordIndexEl*) element)->root, false);
-//	ENDHASHTABLE
-	FORHASHTABLE(database->otherIndex, element)
-		writeGNodeRecord(file, ((RecordIndexEl*) element)->root, false);
 	ENDHASHTABLE
 	fclose(file);
 }
@@ -76,8 +60,7 @@ void writeDatabase(String fileName, Database* database) {
 static int numberRecordsOfType(Database* database, RecordType recType) {
 	int numRecords = 0;
 	FORHASHTABLE(database->recordIndex, element)
-	RecordIndexEl* el = (RecordIndexEl*) element;
-	if (recordType(el->root) == recType) numRecords++;
+		if (recordType((GNode*) element) == recType) numRecords++;
 	ENDHASHTABLE
 	return numRecords;
 }
@@ -113,56 +96,44 @@ bool isEmptyDatabase(Database* database) {
 }
 
 // keyToRecordOfType returns the root of the GNode tree with given key and record type.
-static GNode* keyToRecordOfType(String key, Database* database, RecordType recType) {
-	RecordIndexEl* el = (RecordIndexEl*) searchHashTable(database->recordIndex, key);
-	if (el == null) return null;
-	GNode* node = el->root;
-	if (recordType(node) != recType) return null;
-	return node;
+static GNode* keyToRecordOfType(String key, RecordIndex* index, RecordType recType) {
+	GNode* gnode = searchRecordIndex(index, key);
+	if (!gnode) return null;
+	if (recordType(gnode) != recType) return null;
+	return gnode;
 }
 
 // keyToPerson gets a person record from a database.
-GNode* keyToPerson(String key, Database* database) {
-	return keyToRecordOfType(key, database, GRPerson);
+GNode* keyToPerson(String key, RecordIndex* index) {
+	return keyToRecordOfType(key, index, GRPerson);
 }
 
 // keyToFamily gets a family record from a database.
-GNode* keyToFamily(String key, Database* database) {
-	return keyToRecordOfType(key, database, GRFamily);
+GNode* keyToFamily(String key, RecordIndex* index) {
+	return keyToRecordOfType(key, index, GRFamily);
 }
 
 // keyToSource gets a source record from a database.
-GNode* keyToSource(String key, Database* database) {
-	return keyToRecordOfType(key, database, GRSource);
+GNode* keyToSource(String key, RecordIndex* index) {
+	return keyToRecordOfType(key, index, GRSource);
 }
 
 // keyToEvent gets an event record from a database.
-GNode* keyToEvent(String key, Database* database) {
-	return keyToRecordOfType(key, database, GREvent);
+GNode* keyToEvent(String key, RecordIndex* index) {
+	return keyToRecordOfType(key, index, GREvent);
 }
 
 // keyToOther gets an other record from a database.
-GNode* keyToOther(String key, Database* database) {
-	return keyToRecordOfType(key, database, GROther);
+GNode* keyToOther(String key, RecordIndex* index) {
+	return keyToRecordOfType(key, index, GROther);
 }
 
-// showTableSizes is a debug function that shows the sizes of the database tables.
-void showTableSizes(Database *database) {
-	printf("Size of recordIndex: %d\n", sizeHashTable(database->recordIndex));
-	printf("Size of personIndex: %d\n", sizeHashTable(database->personIndex));
-	printf("Size of familyIndex: %d\n", sizeHashTable(database->familyIndex));
-	printf("Size of sourceIndex: %d\n", sizeHashTable(database->sourceIndex));
-	printf("Size of eventIndex:  %d\n", sizeHashTable(database->eventIndex));
-	printf("Size of otherIndex:  %d\n", sizeHashTable(database->otherIndex));
-}
-
-// getNameIndexForDatabase indexes all person names in a database.
-void getNameIndexForDatabase(Database* database) {
+// getNameIndexFromPersons indexes all person names in a database.
+NameIndex* getNameIndexFromPersons(RootList* persons) {
 	int numNamesFound = 0; // Debugging.
 	NameIndex* nameIndex = createNameIndex();
-	FORHASHTABLE(database->personIndex, element) // Loop over all persons.
-		RecordIndexEl* el = element;
-		GNode* root = el->root;
+	FORLIST(persons, element) // Loop over persons.
+		GNode* root = (GNode*) element;
 		String recordKey = root->key; // Key of record, used as is in name index.
 		for (GNode* name = NAME(root); name && eqstr(name->tag, "NAME"); name = name->sibling) {
 			if (name->value) {
@@ -171,10 +142,30 @@ void getNameIndexForDatabase(Database* database) {
 				insertInNameIndex(nameIndex, nameKey, recordKey);
 			}
 		}
-	ENDHASHTABLE
-	database->nameIndex = nameIndex;
+	ENDLIST
 	if (indexNameDebugging) printf("the number of names encountered is %d.\n", numNamesFound);
+	return nameIndex;
 }
+
+// getNameIndexFromRecordIndex indexes all person names in a RecordIndex and returns the NameIndex.
+NameIndex* getNameIndexFromRecordIndex(RecordIndex* index) {
+	int numNamesFound = 0; // Debugging.
+	NameIndex* nameIndex = createNameIndex();
+	FORHASHTABLE(index, element) // Loop over all persons.
+		GNode* root = (GNode*) element;
+		String recordKey = root->key; // Key of record, used as is in name index.
+		for (GNode* name = NAME(root); name && eqstr(name->tag, "NAME"); name = name->sibling) {
+			if (name->value) {
+				numNamesFound++; // Debugging.
+				String nameKey = nameToNameKey(name->value); // MNOTE: points to static memory.
+				insertInNameIndex(nameIndex, nameKey, recordKey);
+			}
+		}
+	ENDHASHTABLE
+	if (indexNameDebugging) printf("the number of names encountered is %d.\n", numNamesFound);
+	return nameIndex;
+}
+
 
 // getRecord gets a record from the database given a key.
 GNode* getRecord(String key, Database* database) {
@@ -184,16 +175,18 @@ GNode* getRecord(String key, Database* database) {
 // summarizeDatabase writes a short summary of a Database to standard output.
 void summarizeDatabase(Database* database) {
 	if (!database) {
-		printf("No database to summarize.\n");
+		printf("Database does not exist.\n");
 		return;
 	}
 	printf("Summary of database: %s.\n", database->filePath);
-	if (database->personIndex) printf("\tPerson index: %d records.\n", sizeHashTable(database->personIndex));
-	if (database->familyIndex) printf("\tFamily index: %d records.\n", sizeHashTable(database->familyIndex));
-	if (database->recordIndex) printf("\tRecord index: %d records.\n", sizeHashTable(database->recordIndex));
+	if (database->recordIndex) {
+		printf("\tThe record index has %d records.\n", sizeHashTable(database->recordIndex));
+		printf("\tThere are %d persons and %d families in the database.\n",
+			   numberPersons(database), numberFamilies(database));
+	}
 	if (database->nameIndex) {
 		int numNames, numRecords;
 		getNameIndexStats(database->nameIndex, &numNames, &numRecords);
-		printf("\tName index: %d name keys in %d records.\n", numNames, numRecords);
+		printf("\tName index: %d name keys and %d record keys.\n", numNames, numRecords);
 	}
 }

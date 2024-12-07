@@ -3,7 +3,7 @@
 // import.c has functions that import Gedcom files into internal structures.
 //
 // Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 26 November 2024.
+// Last changed on 6 December 2024.
 
 #include "import.h"
 #include "validate.h"
@@ -12,108 +12,38 @@
 static bool timing = true;
 bool importDebugging = false;
 
-// gedcomFilesToDatabases imports a list of Gedcom files into a List of Databases, one per file.
+// getDatabasesFromFiles imports a list of Gedcom files into a List of Databases, one per file.
 // If errors are found in a file its Database is not created and the errors are logged.
-List* gedcomFilesToDatabases(List* filePaths, ErrorLog* errorLog) {
-	List* databases = createList(null, null, null, false); // TODO: No delete function.
+static void deletedbase(void* element) { deleteDatabase((Database*) element); }
+List* getDatabasesFromFiles(List* filePaths, int vcodes, ErrorLog* errorLog) {
+	List* databases = createList(null, null, deletedbase, false);
 	Database* database = null;
 	FORLIST(filePaths, path)
-		if ((database = gedcomFileToDatabase(path, errorLog)))
+		if ((database = getDatabaseFromFile(path, vcodes, errorLog)))
 			appendToList(databases, database);
 	ENDLIST
 	return databases;
 }
 
-// gedcomFileToDatabase returns the Database of a single Gedcom file. Returns null if no Database
-// is created. errorLog holds any Errors found.
-Database* gedcomFileToDatabase(String path, ErrorLog* log) {
-	if (timing) printf("%s: start of gedcomFileToDatabase.\n", getMillisecondsString());
-	// Open the Gedcom file.
-	File* file = openFile(path, "r");
-	if (!file) {
-		addErrorToLog(log, createError(systemError, path, 0, "Could not open file."));
-		return null;
-	}
-	// Get the GNode records from the file. The error log will hold any Errors. keymap maps keys
-	// to line numbers. The keys must not not be freed when the key map is deleted.
-	IntegerTable* keymap = createIntegerTable(4097);
-	GNodeList* roots = getGNodeTreesFromFile(file, keymap, log);
-	closeFile(file);
-	if (roots == null) {
-		if (importDebugging) printf("%s: errors processing last file.\n", getMillisecondsString());
-		//deleteIntegerTable(keymap, stdfree); // TODO: Delete the keymap
-		return null;
-	}
-	if (timing) printf("%s: got list of records.\n", getMillisecondsString());
-	if (importDebugging) printf("rootList contains %d records.\n", lengthList(roots));
-	if (lengthList(log)) {
-		deleteGNodeList(roots, null); // TODO: Clean up. This situation can't happen.
-		return null;
-	}
-	// Check all keys and their references.
-	checkKeysAndReferences(roots, file->name, keymap, log);
-	if (timing) printf("%s: checked keys.\n", getMillisecondsString());
-	if (lengthList(log)) {
-		deleteGNodeList(roots, null); // TODO: NEED TO GET A GOOD DELETE FUNCTION IN HERE.
-		return null;
-	}
-	// If the first record is a header remember it.
-	GNode* header = ((GNodeListEl*) getFirstListElement(roots))->node;
-	if (nestr(header->tag, "HEAD")) {
-		header = null;
-	}
-	// Create the record indexes and root lists.
-	RecordIndex* personIndex = createRecordIndex();
-	RecordIndex* familyIndex = createRecordIndex();
-	RecordIndex* recordIndex = createRecordIndex();
-	RecordIndex* sourceIndex = createRecordIndex();
+// getDatabaseFromFile returns the Database of a single Gedcom file. Returns null if no Database
+// is created, and errorLog holds the Errors found.
+Database* getDatabaseFromFile(String path, int vcodes, ErrorLog* elog) {
 	RootList* personRoots = createRootList();
 	RootList* familyRoots = createRootList();
-	FORLIST(roots, element)
-		GNodeListEl* el = (GNodeListEl*) element;
-		GNode* root = el->node;
-		if (root->key) addToRecordIndex(recordIndex, root->key, root);
-		if (recordType(root) == GRPerson) {
-			addToRecordIndex(personIndex, root->key, root);
-			insertInRootList(personRoots, root);
-		} else if (recordType(root) == GRFamily) {
-			addToRecordIndex(familyIndex, root->key, root);
-			insertInRootList(familyRoots, root);
-		} else if (recordType(root) == GRSource) {
-			addToRecordIndex(sourceIndex, root->key, root);
-		}
-	ENDLIST
-	deleteGNodeList(roots, false);
-	// Create the Database and add the indexes.
+	IntegerTable* keymap = createIntegerTable(4097); // Map keys to lines; for error messages.
+	RecordIndex* recordIndex = getRecordIndexFromFile(path, personRoots, familyRoots, keymap, elog);
+	if (lengthList(elog)) return null; // TODO: Freeup structures.
 	Database* database = createDatabase(path);
-	database->header = header;
 	database->recordIndex = recordIndex;
-	database->personIndex = personIndex;
-	database->familyIndex = familyIndex;
-	database->sourceIndex = sourceIndex;
 	database->personRoots = personRoots;
 	database->familyRoots = familyRoots;
-	if (importDebugging) summarizeDatabase(database);
-	if (timing) printf("%s: database created.\n", getMillisecondsString());
-	// Validate persons and families.
-	validatePersons(database, keymap, log);
-	if (timing) printf("%s: validated %d persons.\n", getMillisecondsString(),
-					   sizeHashTable(database->personIndex));
-	validateFamilies(database, keymap, log);
-	if (timing) printf("%s: validated %d families.\n", getMillisecondsString(),
-					   sizeHashTable(database->familyIndex));
-	if (lengthList(log)) {
-		deleteDatabase(database);
-		return null;
-	}
 	// Create the name index.
-	getNameIndexForDatabase(database);
-	if (timing) printf("%s: indexed names.\n", getMillisecondsString());
+	database->nameIndex = getNameIndexFromPersons(personRoots);
+	if (timing) printf("%s: indexed names.\n", getMsecondsStr());
 	// Create the REFN index and validate it.
-	validateReferences(database, keymap, log);
-	if (timing) printf("%s: indexed REFNs.\n", getMillisecondsString());
-	if (timing) printf("%s: end of gedcomFileToDatabase.\n", getMillisecondsString());
-	if (lengthList(log)) {
+	if (timing) printf("%s: indexed REFNs.\n", getMsecondsStr());
+	if (timing) printf("%s: end of gedcomFileToDatabase.\n", getMsecondsStr());
+	if (lengthList(elog)) {
 		deleteDatabase(database);
 		return null;
 	}
@@ -170,4 +100,58 @@ void checkKeysAndReferences(GNodeList* records, String name, IntegerTable* keyma
 		printf("The number of nodes counted is %d.\n", nodesCounted);
 	}
 	deleteStringSet(keySet, false);
+}
+
+// getRecordIndexFromFile reads a Gedcom file into a RecordIndex. If personRoots and/or
+// familyRoots are not null they will be filled.
+RecordIndex* getRecordIndexFromFile(String path, RootList* personRoots, RootList* familyRoots,
+									IntegerTable* keymap, ErrorLog* elog) {
+	if (timing) printf("%s: getRecordIndexFromFile: start.\n", getMsecondsStr());
+	File* file = openFile(path, "r"); // Open the file.
+	if (!file) {
+		addErrorToLog(elog, createError(systemError, path, 0, "Could not open file."));
+		return null;
+	}
+	if (!keymap) keymap = createIntegerTable(4097); // MNOTE: HOW TO GET FREED!
+	GNodeList* roots = getGNodeTreesFromFile(file, keymap, elog); // Get the records from file.
+	closeFile(file);
+	if (roots == null) {
+		if (importDebugging) printf("%s: errors processing last file.\n", getMsecondsStr());
+		//deleteIntegerTable(keymap, stdfree); // TODO: function not written yet.
+		return null;
+	}
+	if (timing) printf("%s: got list of records.\n", getMsecondsStr());
+	if (importDebugging) printf("rootList contains %d records.\n", lengthList(roots));
+	if (lengthList(elog)) {
+		deleteGNodeList(roots, null); // TODO: Clean up. This situation can't happen.
+		return null;
+	}
+	// Check all keys and their references.
+	checkKeysAndReferences(roots, file->name, keymap, elog);
+	if (timing) printf("%s: getRecordIndexFromFile: checked keys.\n", getMsecondsStr());
+	if (lengthList(elog)) {
+		deleteGNodeList(roots, null); // TODO: NEED TO GET A GOOD DELETE FUNCTION IN HERE.
+		return null;
+	}
+	// Create the RecordIndex and optional RootLists.
+	RecordIndex* recordIndex = createRecordIndex();
+	FORLIST(roots, element)
+		GNode* root = ((GNodeListEl*) element)->node;
+		if (root->key) addToRecordIndex(recordIndex, root);
+		RecordType rtype = recordType(root);
+		if (personRoots && rtype == GRPerson) insertInRootList(personRoots, root);
+		if (familyRoots && rtype == GRFamily) insertInRootList(familyRoots, root);
+	ENDLIST
+	deleteGNodeList(roots, false);
+
+	if (timing) printf("%s: getRecordIndexFromFile: record index created.\n",
+					   getMsecondsStr());
+	// Validate persons and families.
+	validatePersons(recordIndex, file->name, keymap, elog);
+	validateFamilies(recordIndex, file->name, keymap, elog);
+	//alidateReferences(recordIndex, file->name, keymap, elog);
+	RefnIndex* refnIndex = getReferenceIndex(recordIndex, file->name, keymap, elog);
+	if (timing) printf("%s: getRecordIndexFromFile: persons & families validated: returning.\n",
+					   getMsecondsStr());
+	return recordIndex;
 }

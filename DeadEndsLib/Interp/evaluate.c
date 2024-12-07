@@ -84,7 +84,7 @@ bool evaluateConditional(PNode* pnode, Context* context, bool* errflg) {
 
 // evaluateBuiltin evaluates a built-in function call by calling its C code function.
 PValue evaluateBuiltin(PNode* pnode, Context* context, bool* errflg) {
-	if (builtInDebugging) printf("%s %2.3f\n", pnode->stringOne, getMilliseconds());
+	if (builtInDebugging) printf("%s %2.3f\n", pnode->stringOne, getMseconds());
     return (*(BIFunc) pnode->builtinFunc)(pnode, context, errflg);
 }
 

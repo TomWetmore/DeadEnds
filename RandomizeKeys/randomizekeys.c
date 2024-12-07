@@ -20,7 +20,7 @@ static bool debugging = true;
 int main(int argc, char** argv) {
 	String gedcomFile = null;
 	String searchPath = null;
-	printf("%s: RandomizeKeys begin.\n", getMillisecondsString());
+	printf("%s: RandomizeKeys begin.\n", getMsecondsStr());
 	getArguments(argc, argv, &gedcomFile);
 	getEnvironment(&searchPath);
 	gedcomFile = resolveFile(gedcomFile, searchPath);
@@ -32,13 +32,13 @@ int main(int argc, char** argv) {
 	// Parse the Gedcom file and build a GNodeList of its records.
 	IntegerTable* keymap = createIntegerTable(4097);
 	GNodeList* roots = getGNodeTreesFromFile(file, keymap, log);
-	printf("ramdomize keys: %s: read gedcom file.\n", getMillisecondsString());
+	printf("ramdomize keys: %s: read gedcom file.\n", getMsecondsStr());
 	if (lengthList(log) > 0) goAway(log);
 	closeFile(file);
 
 	// Validate the keys.
 	checkKeysAndReferences(roots, file->name, keymap, log);
-	printf("ramdomize keys: %s: validated keys.\n", getMillisecondsString());
+	printf("ramdomize keys: %s: validated keys.\n", getMsecondsStr());
 	if (lengthList(log)) {
 		deleteGNodeList(roots, basicDelete);
 		goAway(log);
@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
 		String newKey = generateRecordKey(r);
 		addToStringTable(keyTable, key, newKey);
 	ENDLIST
-	printf("ramdomize keys: %s: created remap table.\n", getMillisecondsString());
+	printf("ramdomize keys: %s: created remap table.\n", getMsecondsStr());
 
 	// Change the keys throughout the list.
 	FORLIST(roots, element)
@@ -78,14 +78,14 @@ int main(int argc, char** argv) {
 			}
 		ENDTRAVERSE
 	ENDLIST
-	printf("ramdomize keys: %s: rekeyed records.\n", getMillisecondsString());
+	printf("ramdomize keys: %s: rekeyed records.\n", getMsecondsStr());
 
 	// Write the modified GNodeList to standard out.
 	FORLIST(roots, element)
 		GNodeListEl* el = (GNodeListEl*) element;
 		writeGNodeRecord(stdout, el->node, false);
 	ENDLIST
-	printf("randomize keys: %s: wrote gedcom file.\n", getMillisecondsString());
+	printf("randomize keys: %s: wrote gedcom file.\n", getMsecondsStr());
 	return 0;
 }
 

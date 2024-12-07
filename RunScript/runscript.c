@@ -10,7 +10,7 @@
 // If DE_GEDCOM_PATH and/or DE_SCRIPTS_PATH are defined, they may be used to find the files.
 //
 // Created by Thomas Wetmore on 21 July 2024
-// Last changed on 12 October 2024.
+// Last changed on 7 December 2024.
 
 #include "runscript.h"
 
@@ -23,7 +23,7 @@ static void runScript(Database*, String);
 // main is the main program of the RunScript program.
 int main(int argc, char* argv[]) {
 	// Get the files.
-	fprintf(stderr, "%s: RunScript started.\n", getMillisecondsString());
+	fprintf(stderr, "%s: RunScript started.\n", getMsecondsStr());
 	String gedcomFile = null;
 	String scriptFile = null;
 	String gedcomPath = null;
@@ -33,17 +33,17 @@ int main(int argc, char* argv[]) {
 	// Build the Database from the Gedcom file.
 		gedcomFile = resolveFile(gedcomFile, gedcomPath);
 		ErrorLog* errorLog = createErrorLog();
-		Database* database = gedcomFileToDatabase(gedcomFile, errorLog);
+		Database* database = getDatabaseFromFile(gedcomFile, 0, errorLog);
 		if (lengthList(errorLog)) {
 			showErrorLog(errorLog);
 			exit(1);
 		}
-		fprintf(stderr, "%s: Database created.\n", getMillisecondsString());
+		fprintf(stderr, "%s: Database created.\n", getMsecondsStr());
 	// Parse and run the script.
 	parseProgram(scriptFile, scriptPath);
-	fprintf(stderr, "%s: Script parsed.\n", getMillisecondsString());
+	fprintf(stderr, "%s: Script parsed.\n", getMsecondsStr());
 	runScript(database, scriptFile);
-	fprintf(stderr, "%s: RunScript done.\n", getMillisecondsString());
+	fprintf(stderr, "%s: RunScript done.\n", getMsecondsStr());
 }
 
 // getArguments gets the file names from the command line.

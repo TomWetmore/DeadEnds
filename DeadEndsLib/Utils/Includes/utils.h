@@ -12,8 +12,8 @@
 #include <stdio.h>
 #include "standard.h"
 
-double getMilliseconds(void);
-String getMillisecondsString(void);
+double getMseconds(void);
+String getMsecondsStr(void);
 String substring(String, int, int);
 String rightjustify (String, int);
 

@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-c -g -Wall -O0
+CFLAGS=-c -g -Wall -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unused-function
 INCLUDES=-I./Includes -I../DataTypes/Includes
 AR=ar
 ARFLAGS=-cr

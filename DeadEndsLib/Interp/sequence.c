@@ -4,7 +4,7 @@
 // persons and other record types. It underlies the indiseq data type of DeadEnds Script.
 //
 // Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 18 August 2024.
+// Last changed on 30 November 2024.
 
 #include "standard.h"
 #include "sequence.h"
@@ -334,13 +334,14 @@ Sequence* parentSequence(Sequence* sequence) {
 	ASSERT(sequence && sequence->database);
 	if (!sequence) return null;
 	Database* database = sequence->database;
+	RecordIndex* index = database->recordIndex;
 	StringTable* table = createStringTable(numBucketsInSequenceTables); // Track of added parents.
 	Sequence* parents = createSequence(sequence->database);
 	String key;
 	FORSEQUENCE(sequence, el, count)
-		GNode* indi = keyToPerson(el->root->key, database);
-		GNode* fath = personToFather(indi, database);
-		GNode* moth = personToMother(indi, database);
+		GNode* indi = keyToPerson(el->root->key, index);
+		GNode* fath = personToFather(indi, index);
+		GNode* moth = personToMother(indi, index);
 		if (fath && !isInHashTable(table, key = personToKey(fath))) {
 			appendToSequence(parents, key, el->value);
 			addToStringTable(table, key, null);
@@ -359,11 +360,12 @@ Sequence* childSequence(Sequence* sequence) {
 	if (!sequence) return null;
 	StringTable* table = createStringTable(numBucketsInSequenceTables);
 	Database* database = sequence->database;
+	RecordIndex* index = sequence->database->recordIndex;
 	Sequence* children = createSequence(database);
 	FORSEQUENCE(sequence, el, num)
-		GNode* person = keyToPerson(el->root->key, database);
-		FORFAMSS(person, fam, key, database)
-			FORCHILDREN(fam, chil, childKey, num2, database)
+		GNode* person = keyToPerson(el->root->key, index);
+		FORFAMSS(person, fam, key, index)
+			FORCHILDREN(fam, chil, childKey, num2, index)
 				String key = personToKey(chil);
 				if (!isInHashTable(table, key)) {
 					appendToSequence(children, key, 0);
@@ -380,8 +382,9 @@ Sequence* childSequence(Sequence* sequence) {
 Sequence* personToChildren(GNode* person, Database* database) {
 	if (!person) return null;
 	Sequence* children = createSequence(database);
-	FORFAMSS(person, family, key, database)
-		FORCHILDREN(family, child, childKey, count, database)
+	RecordIndex* index = database->recordIndex;
+	FORFAMSS(person, family, key, index)
+		FORCHILDREN(family, child, childKey, count, index)
 			appendToSequence(children, personToKey(child), 0);
 		ENDCHILDREN
 	ENDFAMSS
@@ -396,8 +399,9 @@ Sequence* personToSpouses(GNode* person, Database* database) {
 	SexType sex = SEXV(person);
 	if (sex != sexMale && sex != sexFemale) return null;
 	Sequence* spouses = createSequence(database);
-	FORFAMSS(person, family, key, database)
-		GNode* spouse = (sex == sexMale) ? familyToWife(family, database) : familyToHusband(family, database);
+	RecordIndex* index = database->recordIndex;
+	FORFAMSS(person, family, key, index)
+		GNode* spouse = (sex == sexMale) ? familyToWife(family, index) : familyToHusband(family, index);
 		if (spouse) appendToSequence(spouses, personToKey(spouse), 0);
 	ENDFAMSS
 	if (lengthSequence(spouses)) return spouses;
@@ -409,8 +413,8 @@ Sequence* personToSpouses(GNode* person, Database* database) {
 Sequence* personToFathers(GNode* person, Database* database) {
 	if (!person) return null;
 	Sequence* fathers = createSequence(database);
-	FORFAMCS(person, family, key, database)  // For each family the person is a child in...
-		FORHUSBS(family, husb, husbKey, database)  // For each husband in that family...
+	FORFAMCS(person, family, key, database->recordIndex)  // For each family the person is a child in...
+		FORHUSBS(family, husb, husbKey, database->recordIndex)  // For each husband in that family...
 			appendToSequence(fathers, personToKey(husb), 0);  // Add him to the sequence.
 		ENDHUSBS
 	ENDFAMCS
@@ -422,9 +426,10 @@ Sequence* personToFathers(GNode* person, Database* database) {
 // personToMothers creates the Sequence of a person's mothers
 Sequence* personToMothers (GNode* indi, Database* database) {
 	if (!indi) return null;
+	RecordIndex* index = database->recordIndex;
 	Sequence* mothers = createSequence(database);
-	FORFAMCS(indi, fam, key, database)  // For each family the person is a child in...
-		FORWIFES(fam, wife, wifeKey, database)  // For each wife in that family...
+	FORFAMCS(indi, fam, key, index)  // For each family the person is a child in...
+		FORWIFES(fam, wife, wifeKey, index)  // For each wife in that family...
 			appendToSequence(mothers, personToKey(wife), 0);  // Add her to the sequence.
 		ENDWIFES
 	ENDFAMCS
@@ -439,11 +444,11 @@ Sequence* personToFamilies (GNode* person, bool fams, Database* database) {
 	if (!person) return null;
 	Sequence* families = createSequence(database);
 	if (fams) {
-		FORFAMSS(person, family, key, database)
+		FORFAMSS(person, family, key, database->recordIndex)
 			appendToSequence(families, key, 0);
 		ENDFAMSS
 	} else {
-		FORFAMCS(person, family, key, database)
+		FORFAMCS(person, family, key, database->recordIndex)
 			appendToSequence(families, key, 0);
 		ENDFAMCS
 	}
@@ -456,7 +461,7 @@ Sequence* personToFamilies (GNode* person, bool fams, Database* database) {
 Sequence* familyToChildren(GNode* family, Database* database) {
 	if (!family) return null;
 	Sequence* children = createSequence(database);
-	FORCHILDREN(family, chil, key, num, database) {
+	FORCHILDREN(family, chil, key, num, database->recordIndex) {
 		appendToSequence(children, personToKey(chil), 0);
 	} ENDCHILDREN
 	if (lengthSequence(children) > 0) return children;
@@ -468,7 +473,7 @@ Sequence* familyToChildren(GNode* family, Database* database) {
 Sequence* familyToFathers(GNode* fam, Database* database) {
 	if (!fam) return null;
 	Sequence* seq = createSequence(database);
-	FORHUSBS(fam, husb, key, database)
+	FORHUSBS(fam, husb, key, database->recordIndex)
 		appendToSequence(seq, personToKey(husb), 0);
 	ENDHUSBS
 	if (lengthSequence(seq)) return seq;
@@ -479,8 +484,9 @@ Sequence* familyToFathers(GNode* fam, Database* database) {
 // familyToMothers creates the Sequence of a family's mothers/wives.
 Sequence* familyToMothers(GNode* fam, Database* database) {
 	if (!fam) return null;
+	RecordIndex* index = database->recordIndex;
 	Sequence* seq = createSequence(database);
-	FORWIFES(fam, wife, key, database)
+	FORWIFES(fam, wife, key, index)
 		appendToSequence(seq, personToKey(wife), 0);
 	ENDWIFES
 	if (lengthSequence(seq)) return seq;
@@ -492,6 +498,7 @@ Sequence* familyToMothers(GNode* fam, Database* database) {
 // If close is true persons in the input Sequence are added to the sibling Sequence.
 Sequence* siblingSequence(Sequence* sequence, bool close) {
 	Database* database = sequence->database;
+	RecordIndex* index = database->recordIndex;
 	StringTable* tab = createStringTable(numBucketsInSequenceTables);
 	Sequence* familySequence = createSequence(database);
 	Sequence* siblingSequence = createSequence(database);
@@ -499,8 +506,8 @@ Sequence* siblingSequence(Sequence* sequence, bool close) {
 		//  TODO: THIS ONLY USES THE FIRST FAMC FAMILY, WHICH IN 99.9% OF THE CASES IS OKAY.
 		//  BUT TO BE CONSISTENT WITH OTHER SITUATIONS WHERE THERE ARE MULTIPLE FAMC NODES,
 		//  IT MIGHT BE BETTER TO GO THROUGH THEM ALL.
-		GNode* person = keyToPerson(element->root->key, database);
-		GNode* famc = personToFamilyAsChild(person, database);
+		GNode* person = keyToPerson(element->root->key, index);
+		GNode* famc = personToFamilyAsChild(person, index);
 		if (famc) {
 			appendToSequence(familySequence, familyToKey(famc), 0);
 		}
@@ -508,8 +515,8 @@ Sequence* siblingSequence(Sequence* sequence, bool close) {
 	}
 	ENDSEQUENCE
 	FORSEQUENCE(familySequence, el, num)
-		GNode* fam = keyToFamily(el->root->key, database);
-		FORCHILDREN(fam, chil, chilKey, num2, database)
+		GNode* fam = keyToFamily(el->root->key, index);
+		FORCHILDREN(fam, chil, chilKey, num2, index)
 			String key = personToKey(chil);
 			if (!isInHashTable(tab, key)) {
 				appendToSequence(siblingSequence, key, 0);
@@ -529,6 +536,7 @@ Sequence* siblingSequence(Sequence* sequence, bool close) {
 Sequence* ancestorSequence(Sequence* startSequence, bool close) {
 	ASSERT(startSequence);
 	Database* database = startSequence->database;
+	RecordIndex* index = database->recordIndex;
 	StringTable* ancestorKeys = createStringTable(numBucketsInSequenceTables);
 	List* ancestorQueue = createList(null, null, null, false); // Keys to process.
 	Sequence* ancestorSequence = createSequence(database);
@@ -546,9 +554,9 @@ Sequence* ancestorSequence(Sequence* startSequence, bool close) {
 	while (!isEmptyList(ancestorQueue)) { // Process queue.
 		String key = (String) dequeueList(ancestorQueue);
 		String parentKey;
-		GNode* person = keyToPerson(key, database);
-		GNode* father = personToFather(person, database);
-		GNode* mother = personToMother(person, database);
+		GNode* person = keyToPerson(key, index);
+		GNode* father = personToFather(person, index);
+		GNode* mother = personToMother(person, index);
 		if (father && !isInHashTable(ancestorKeys, parentKey = father->key)) {
 			appendToSequence(ancestorSequence, parentKey, 0);
 			enqueueList(ancestorQueue, strsave(parentKey));
@@ -571,6 +579,7 @@ Sequence* ancestorSequence(Sequence* startSequence, bool close) {
 Sequence* descendentSequence(Sequence* startSequence, bool close) {
 	if (!startSequence) return null;
 	Database* database = startSequence->database;
+	RecordIndex* index = database->recordIndex;
 	String key, descendentKey;
 	StringTable* descendentKeys = createStringTable(numBucketsInSequenceTables); // Persons processed.
 	StringTable* familyKeys = createStringTable(numBucketsInSequenceTables);  // Families processed.
@@ -586,11 +595,11 @@ Sequence* descendentSequence(Sequence* startSequence, bool close) {
 	ENDSEQUENCE
 	while (!isEmptyList(descendentQueue)) { // Loop descendentQueue.
 		key = (String) dequeueList(descendentQueue);
-		GNode* person = keyToPerson(key, database);
-		FORFAMSS(person, family, key, database) {
+		GNode* person = keyToPerson(key, index);
+		FORFAMSS(person, family, key, index) {
 			if (isInHashTable(familyKeys, key)) goto a;
 			addToStringTable(familyKeys, strsave(key), null);
-			FORCHILDREN(family, child, chilKey, num, database)
+			FORCHILDREN(family, child, chilKey, num, index)
 				if (!isInHashTable(descendentKeys, descendentKey = personToKey(child))) {
 					appendToSequence(descendentSequence, descendentKey, 0);
 					enqueueList(descendentQueue, strsave(descendentKey));
@@ -610,11 +619,12 @@ Sequence* descendentSequence(Sequence* startSequence, bool close) {
 Sequence* spouseSequence(Sequence *sequence) {
 	if (!sequence) return null;
 	Database* database = sequence->database;
+	RecordIndex* index = database->recordIndex;
 	StringTable* table = createStringTable(numBucketsInSequenceTables);
 	Sequence* spouses = createSequence(database);
 	FORSEQUENCE(sequence, el, num)
-		GNode* person = keyToPerson(el->root->key, database);
-		FORSPOUSES(person, spouse, fam, num1, database)
+		GNode* person = keyToPerson(el->root->key, index);
+		FORSPOUSES(person, spouse, fam, num1, index)
 			String key = personToKey(spouse);
 			if (!isInHashTable(table, key)) {
 				appendToSequence(spouses, key, el->value);
@@ -637,7 +647,8 @@ static Sequence *personSequence; // Person in the sequence to be generated in a 
 static Sequence *familySequence; // Families that interconnect persons in the person sequence.
 void sequenceToGedcom(Sequence *sequence, FILE *fp) {
 	if (!sequence) return;
-	Database *database = sequence->database;
+	Database* database = sequence->database;
+	RecordIndex* index = database->recordIndex;
 	if (!fp) fp = stdout;
 	personSequence = sequence;  // Yuck. External access to these two sequences are required.
 	familySequence = createSequence(database);
@@ -650,10 +661,10 @@ void sequenceToGedcom(Sequence *sequence, FILE *fp) {
 	ENDSEQUENCE
 	//  Loop through each person in the sequence.
 	FORSEQUENCE(sequence, element, num)
-		GNode *person = keyToPerson(element->root->key, database);  // Get the person.
+		GNode *person = keyToPerson(element->root->key, index);  // Get the person.
 		SexType sex = SEXV(person);  //  And the person's sex.
 		//  Check the person's parent families to see if any FAMC families should be output.
-		FORFAMCS(person, family, key, database)
+		FORFAMCS(person, family, key, index)
 			if (isInHashTable(familyTable, family->key)) goto a;
 			normalizeFamily(family);
 			GNode *husband = HUSB(family);
@@ -669,7 +680,7 @@ void sequenceToGedcom(Sequence *sequence, FILE *fp) {
 				goto a;
 			}
 			//  Check whether any of the children in this family are in the sequence.
-			FORCHILDREN(family, child, chilKey, count, database)
+			FORCHILDREN(family, child, chilKey, count, index)
 				String childKey = personToKey(child);
 				if (isInHashTable(personTable, childKey)) {
 					appendToSequence(familySequence, familyToKey(family), 0);
@@ -680,9 +691,9 @@ void sequenceToGedcom(Sequence *sequence, FILE *fp) {
 		ENDFAMCS
 
 		//  Check the person's as parent families to see if they should output.
-	a:	FORFAMSS(person, family, key, database)
+	a:	FORFAMSS(person, family, key, index)
 			if (isInHashTable(familyTable, familyToKey(family))) goto b;
-			GNode *spouse = familyToSpouse(family, oppositeSex(sex), database);
+			GNode *spouse = familyToSpouse(family, oppositeSex(sex), index);
 			if (spouse && isInHashTable(personTable, personToKey(spouse))) {
 				appendToSequence(familySequence, familyToKey(family), 0);
 				addToStringTable(familyTable, familyToKey(family), null);
@@ -691,11 +702,11 @@ void sequenceToGedcom(Sequence *sequence, FILE *fp) {
 	ENDSEQUENCE
 
 	FORSEQUENCE(personSequence, element, count)
-		writeLimitedPerson(keyToPerson(element->root->key, database));
+		writeLimitedPerson(keyToPerson(element->root->key, index));
 	ENDSEQUENCE
 
 	FORSEQUENCE(familySequence, element, count)
-		writeLimitedFamily(keyToFamily(element->root->key, database));
+		writeLimitedFamily(keyToFamily(element->root->key, index));
 	ENDSEQUENCE
 	deleteSequence(familySequence);
 	deleteHashTable(personTable);

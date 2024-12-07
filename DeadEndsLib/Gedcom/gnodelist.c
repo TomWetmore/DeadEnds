@@ -52,14 +52,12 @@ void deleteGNodeList(GNodeList* list, void (*delete)(void*)) {
 	deleteList(list);
 }
 
-// getGNodeTreesFromFile gets the GNodeList of all GNode records from a Gedcom file, including
-// HEAD and TRLR. If successful the list is returned; otherwise null is returned and the ErrorLog
-// holds the errors. Uses getNodeListFromFile to first get the list of all GNodes, one node per
-// line, and gthen getNodeTreesFromNodeList to build the trees from the nodes. If errors occur
-// null is returned.
+// getGNodeTreesFromFile returns the GNodeList of all GNode records from a Gedcom file, including
+// HEAD and TRLR. If there are errors returns null with errors in the ErrorLog.
 static void deleteEl(void* el) { stdfree(el); }
 GNodeList* getGNodeTreesFromFile(File* file, IntegerTable* keymap, ErrorLog* elog) {
 	int nerrors = lengthList(elog);
+	// getGNodeListFromFile gets the full list of all GNodes in the file.
 	GNodeList* nodes = getGNodeListFromFile(file, keymap, elog);
 	if (nerrors != lengthList(elog)) {
 		if (nodes) {
@@ -68,7 +66,8 @@ GNodeList* getGNodeTreesFromFile(File* file, IntegerTable* keymap, ErrorLog* elo
 		}
 		return null;
 	}
-	GNodeList* roots = getGNodeTreesFromNodeList(nodes, file->name, keymap, elog);
+	// getGNodeTreesFromNodeList process the GNodeList of a GNodes into a GNodeList of GNode trees.
+	GNodeList* roots = getGNodeTreesFromNodeList(nodes, file->name, elog);
 	if (nerrors != lengthList(elog)) {
 		deleteGNodeList(nodes, deleteEl);
 		deleteHashTable(keymap);
@@ -78,27 +77,25 @@ GNodeList* getGNodeTreesFromFile(File* file, IntegerTable* keymap, ErrorLog* elo
 	return roots;
 }
 
-// getGNodeListFromFile uses fileToLine and extractFields to create a GNodeList of all the GNodes
-// from a Gedcom file. Errors are added to the ErrorLog.
+// getGNodeListFromFile uses fileToLine to get the GNodeList of all GNodes in a Gedcom file. If
+// the keymap is not null it is set to map record keys to the lines where defined. Syntax errors
+// are added to the ErrorLog. The file is fully processed regardless of errors. However, if errors
+// were found the list of nodes is deleted and null is returned.
 GNodeList* getGNodeListFromFile(File* file, IntegerTable* keymap, ErrorLog* elog) {
-	if (file == null) {
-		addErrorToLog(elog, createError(systemError, "unknown", 0, "no file name"));
-		return null;
-	}
+	ASSERT(file && file->fp && elog);
+	FILE* fp = file->fp;
 	GNodeList* nodeList = createGNodeList();
 	int level;
 	int line = 0;
 	String key, tag, value;
 	String errstr;
-	FILE* fp = file->fp;
 
-	// Read lines from file and create their GNodes.
+	// Read lines and create nodes.
 	ReadReturn rc = fileToLine(fp, &line, &level, &key, &tag, &value, &errstr);
 	while (rc != ReadAtEnd) {
 		if (rc == ReadOkay) {
 			GNode* gnode = createGNode(key, tag, value, null);
 			GNodeListEl* el = createGNodeListEl(gnode, (void*)(long) level);
-			// Use gnode->key (instead of key) to get the key from heap.
 			if (key && keymap) insertInIntegerTable(keymap, gnode->key, line);
 			appendToList(nodeList, el);
 		} else {
@@ -121,8 +118,7 @@ GNodeList* getGNodeTreesFromString(String string, String name, ErrorLog* errorLo
 		if (nodeList) deleteGNodeList(nodeList, null);
 		return null;
 	}
-	// TODO: null argument below should be a key line map; requires some API changes.
-	GNodeList* rootList = getGNodeTreesFromNodeList(nodeList, name, null, errorLog);
+	GNodeList* rootList = getGNodeTreesFromNodeList(nodeList, name, errorLog);
 	if (numErrors != lengthList(errorLog)) {
 		deleteGNodeList(nodeList, null); // TODO: GET DELETE DONE RIGHT.
 		if (rootList) deleteGNodeList(rootList, null); // TODO: GET DELETE DONE RIGHT.
@@ -166,24 +162,25 @@ void showGNodeList(GNodeList* nodeList) {
 	ENDLIST
 }
 
-// getNodeTreesFromNodeList iterates a GNodeList of GNodes to make a GNodeList of GNode trees;
-// it uses a state machine to track levels and errors.
-GNodeList* getGNodeTreesFromNodeList(GNodeList *gnodes, String name, IntegerTable* keymap, ErrorLog *elog) {
+// getNodeTreesFromNodeList processes a list of all GNodes from a Gedcom source into a GNodeList
+// of all GNode record trees. It uses a state machine to track levels and errors, so the auxiliary
+// field in the original GNodes must be level numbers.
+// MNOTE: the input GNodeList is not deleted.
+GNodeList* getGNodeTreesFromNodeList(GNodeList *gnodes, String name, ErrorLog *elog) {
 	enum State { InitialState, MainState, ErrorState } state = InitialState;
 	GNodeListEl* el = null;
-	GNodeList* roots = createGNodeList();
-	GNode* rnode = null; // current root
-	GNode* cnode = null; // current node
-	GNode* pnode; // previous node
-	int clevel = 0; // cnode level
-	int plevel = 0; // pnode level
+	GNodeList* roots = createGNodeList(); // Holds list of roots.
+	GNode* rnode = null; // cur root node
+	GNode* cnode = null; // cur node
+	GNode* pnode; // prev node
+	int clevel = 0; // cur node's level
+	int plevel = 0; // prev node's level
 	Block* block = &(gnodes->block);
-	void** els = block->elements;
-	int rline = 0; // begin line of rnode.
+	void** els = block->elements; // Starting elements as simple array.
 	for (int i = 0; i < block->length; i++) {
 		el = els[i];
 		pnode = cnode;
-		cnode = el->node;
+		cnode = el->node; // TODO: how is this possibe; how is the type of el known?
 		plevel = clevel;
 		clevel = level(el);
 		switch (state) {
@@ -194,7 +191,7 @@ GNodeList* getGNodeTreesFromNodeList(GNodeList *gnodes, String name, IntegerTabl
 				state = MainState;
 				break;
 			}
-			addErrorToLog(elog, createError(syntaxError, name, 1, "Illegal line level."));
+			addErrorToLog(elog, createError(syntaxError, name, i, "Illegal line level."));
 			state = ErrorState;
 			continue;
 
@@ -203,7 +200,6 @@ GNodeList* getGNodeTreesFromNodeList(GNodeList *gnodes, String name, IntegerTabl
 				appendToGNodeList(roots, rnode, null);
 				rnode = cnode; // Set current root.
 				String key = cnode->key;
-				rline = key ? searchIntegerTable(keymap, key) : 0;
 				continue;
 			}
 			if (clevel == plevel) { // found sibling
@@ -216,10 +212,10 @@ GNodeList* getGNodeTreesFromNodeList(GNodeList *gnodes, String name, IntegerTabl
 				pnode->child = cnode;
 				continue;
 			}
-			if (clevel < plevel) { // found uncle.
+			if (clevel < plevel) { // found uncle (who must have prev sib).
 				int count = 0;
 				while (clevel < plevel) {
-					if (count++ > 25 || !pnode->parent) { printf("CATCH FIRE!!\n"); exit(4); }
+					if (count++ > 50 || !pnode->parent) ASSERT(false); // infinite loop?
 					pnode = pnode->parent;
 					plevel--;
 				}
@@ -228,8 +224,7 @@ GNodeList* getGNodeTreesFromNodeList(GNodeList *gnodes, String name, IntegerTabl
 				continue;
 			}
 			// Anything else is an error.
-			int line = rline + countNodesBefore(pnode);
-			addErrorToLog(elog, createError(syntaxError, name, line, "Illegal level number."));
+			addErrorToLog(elog, createError(syntaxError, name, i, "Illegal level number."));
 			appendToGNodeList(roots, rnode, null);
 			state = ErrorState;
 			continue;

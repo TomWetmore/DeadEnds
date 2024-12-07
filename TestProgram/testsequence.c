@@ -15,7 +15,7 @@ static Sequence* tomAndLusAncestorsClosed(Database*);
 
 // testSequence is the starting function to test the Sequence type.
 void testSequence(Database* database, int testNumber) {
-	printf("%d: TEST SEQUENCE: %2.3f\n", testNumber, getMilliseconds());
+	printf("%d: TEST SEQUENCE: %2.3f\n", testNumber, getMseconds());
 
 	// Create a Sequence.
 	Sequence* sequence = createSequence(database);
@@ -196,7 +196,7 @@ void testSequence(Database* database, int testNumber) {
 	showSequence(tomDiffLu, "difference of Tom's and Lu's ancestors");
 	showSequence(luDiffTom, "Difference of Lu's and Tom's ancestors");
 
-	printf("END TEST SEQUENCE: %2.3f\n", getMilliseconds());
+	printf("END TEST SEQUENCE: %2.3f\n", getMseconds());
 //	Sequence *personToFamilies(GNode *person, bool, Database*);
 //	Sequence *refn_to_indiseq(String refn);
 //	void renameElementInSequence(Sequence* sequence, String key);

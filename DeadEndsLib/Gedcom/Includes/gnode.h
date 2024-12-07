@@ -1,14 +1,16 @@
 // DeadEnds Project
 //
-// gnode.h -- GNode datatype. GNodes represent lines in a Gedcom file. GNodes are heap objects.
+// gnode.h defines theGNode datatype. GNodes represent lines in a Gedcom file. GNodes are heap
+// objects.
 //
 // Created by Thomas Wetmore on 4 November 2022.
-// Last changed on 30 April 2024.
+// Last changed on 30 November 2024.
 
 #ifndef gnode_h
 #define gnode_h
 
 typedef struct HashTable HashTable;  // Forward reference.
+#define RecordIndex HashTable
 typedef struct Database Database;
 typedef enum SexType SexType;
 
@@ -16,6 +18,7 @@ typedef enum SexType SexType;
 #include "gedcom.h"
 #include "hashtable.h"
 #include "database.h"
+#include "recordindex.h"
 
 // GNode is the structure that holds a Gedcom line in its tree node form. Root nodes have keys.
 typedef struct GNode GNode;
@@ -28,16 +31,6 @@ struct GNode {
 	GNode *sibling; // Next sibling node of this node, if any.
 };
 
-//String fileof = (String) "The file is as positioned at EOF.";
-//String reremp = (String) "Line %d: This line is empty; EOF?";
-//String rerlng = (String) "Line %d: This line is too long.";
-//String rernlv = (String) "Line %d: This line has no level number.";
-//String rerinc = (String) "Line %d: This line is incomplete.";
-//String rerbln = (String) "Line %d: This line has a bad link.";
-//String rernwt = (String) "Line %d: This line needs white space before tag.";
-//String rerilv = (String) "Line %d: This line has an illegal level.";
-//String rerwlv = (String) "The record begins at wrong level.";
-
 // Application programming interface to this type.
 GNode* createGNode(String key, String tag, String value, GNode* parent);
 void freeGNode(GNode*);
@@ -47,7 +40,7 @@ int gnodeLevel(GNode* node);
 String gnodeToString(GNode*, int level);
 String gnodesToString(GNode*);
 int treeStringLength(int, GNode*);
-GNode* personToFamilyAsChild(GNode *person, Database*);
+GNode* personToFamilyAsChild(GNode *person, RecordIndex*);
 
 String personToEvent(GNode*, String, String, int, bool);
 String eventToString(GNode*, bool);

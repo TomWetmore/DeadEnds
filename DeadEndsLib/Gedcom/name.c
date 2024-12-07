@@ -209,7 +209,7 @@ String* personKeysFromName(String name, Database* database, int* pcount) {
 	int count = 0;
 	List* list = listOfSet(keySet);
 	FORLIST(list, recordKey)
-		GNode* person = keyToPerson((String) recordKey, database);
+		GNode* person = keyToPerson((String) recordKey, database->recordIndex);
 		for (GNode* node = NAME(person); node && eqstr(node->tag, "NAME"); node = node->sibling) {
 			if (!exactMatch(name, node->value)) continue; // exactMatch doesn't mean 'exact.'
 			appendToBlock(&recordKeys, recordKey);

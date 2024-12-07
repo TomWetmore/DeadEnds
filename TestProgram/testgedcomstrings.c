@@ -14,7 +14,7 @@ char* readFileIntoString(const char *filename);
 
 // testGedcomStrings tests the stringToGnodeTree and showGNodeTree functions.
 void testGedcomStrings(int testNumber) {
-	printf("%d: START OF TEST GEDCOM STRINGS TEST %s\n", testNumber, getMillisecondsString());
+	printf("%d: START OF TEST GEDCOM STRINGS TEST %s\n", testNumber, getMsecondsStr());
 	String file = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/ttw.ged";
 	String record = readFileIntoString(file);
 	ErrorLog* errlog = createErrorLog();

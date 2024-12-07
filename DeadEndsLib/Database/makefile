@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-c -g -Wall -Wno-unused-function -Wno-unused-but-set-variable -O0
+CFLAGS=-c -g -Wall -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable
 INCLUDES=-I./Includes -I../DataTypes/Includes -I../Gedcom/Includes -I../Utils/Includes -I../Validate/Includes
 AR=ar
 ARFLAGS=-cr

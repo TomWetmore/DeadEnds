@@ -9,7 +9,7 @@
 #include "utils.h"
 
 void testWriteDatabase(String fileName, Database* database) {
-	printf("START WRITE DATABASE TEST: %2.3f\n", getMilliseconds());
+	printf("START WRITE DATABASE TEST: %2.3f\n", getMseconds());
 	writeDatabase(fileName, database);
-	printf("END WRITE DATABASE TESTS: %2.3f\n", getMilliseconds());
+	printf("END WRITE DATABASE TESTS: %2.3f\n", getMseconds());
 }

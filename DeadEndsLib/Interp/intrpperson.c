@@ -197,7 +197,7 @@ PValue __burial(PNode* pnode, Context* context, bool* errflg) {
 PValue __father(PNode* pnode, Context* context, bool* errflg) {
     GNode* person = evaluatePerson(pnode->arguments, context, errflg); // Person.
     if (*errflg || !person) return nullPValue;
-    GNode* father = personToFather(person, context->database);
+    GNode* father = personToFather(person, context->database->recordIndex);
     return father ? PVALUE(PVPerson, uGNode, father) : nullPValue;
 }
 
@@ -206,7 +206,7 @@ PValue __father(PNode* pnode, Context* context, bool* errflg) {
 PValue __mother(PNode* pnode, Context* context, bool* errflg) {
     GNode* person = evaluatePerson(pnode->arguments, context, errflg); // Person.
     if (*errflg || !person) return nullPValue;
-    GNode* mother = personToMother(person, context->database);
+    GNode* mother = personToMother(person, context->database->recordIndex);
     return mother ? PVALUE(PVPerson, uGNode, mother) : nullPValue;
 }
 
@@ -215,7 +215,7 @@ PValue __mother(PNode* pnode, Context* context, bool* errflg) {
 PValue __nextsib(PNode* pnode, Context* context, bool* errflg) {
     GNode* indi = evaluatePerson(pnode->arguments, context, errflg); // Person.
     if (*errflg || !indi) return nullPValue;
-    GNode* sib = personToNextSibling(indi, context->database);
+    GNode* sib = personToNextSibling(indi, context->database->recordIndex);
     if (!sib) return nullPValue;
     return PVALUE(PVPerson, uGNode, sib);
 }
@@ -225,7 +225,7 @@ PValue __nextsib(PNode* pnode, Context* context, bool* errflg) {
 PValue __prevsib(PNode* pnode, Context* context, bool* eflg) {
     GNode* indi = evaluatePerson(pnode->arguments, context, eflg);
     if (*eflg || !indi) return nullPValue;
-    GNode* sib = personToPreviousSibling(indi, context->database);
+    GNode* sib = personToPreviousSibling(indi, context->database->recordIndex);
     if (!sib) return nullPValue;
     return PVALUE(PVPerson, uGNode, sib);
 }
@@ -300,7 +300,7 @@ PValue __nspouses(PNode* node, Context* context, bool* eflg) {
 PValue __parents(PNode* pnode, Context* context, bool* eflg) {
 	GNode* indi = evaluatePerson(pnode->arguments, context, eflg);
 	if (*eflg || !indi) return nullPValue;
-	GNode* fam = personToFamilyAsChild(indi, context->database);
+	GNode* fam = personToFamilyAsChild(indi, context->database->recordIndex);
 	return fam ? PVALUE(PVFamily, uGNode, fam) : nullPValue;
 }
 
@@ -348,7 +348,7 @@ PValue __indi(PNode* pnode, Context* context, bool* errflg) {
         return nullPValue;
     }
     String key = value.value.uString;
-    GNode* person = keyToPerson(key, context->database);
+    GNode* person = keyToPerson(key, context->database->recordIndex);
     if (person == null) {
         scriptError(pnode, "could not find a person with the key '%s'", key);
         return nullPValue;

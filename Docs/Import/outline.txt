@@ -1,30 +1,41 @@
-Key functions in importing Gedcom files into DeadEnds Databases
+ Key functions in importing Gedcom files into DeadEnds Databases
 ---------------------------------------------------------------
 List* gedcomFilesToDatabases(*paths, *errlog) -- Import a List of Gedcom files to a List of Databases.
 	1. Create a list of databases.
-	2. Call gedcomFileToDatabase on each file and add returned Database to the list.
+	2. Call {gedcomFileToDatabase} on each file and add returned Database to the list.
 	3. Return the list of databases.
 	** Databases with errors are not created.
-
-Database* gedcomFileToDatabase(path, *errlog) -- Create and return a database from a single Gedcom file.
+Database* gedcomFileToDatabase(String path, int validCodes, ErrorLog* elog) {
+	1. Create the keymap.
+	2. Call {gedcomFileToGNodeTreeList} to get the validated Gedcom trees from the file.
+.......................................
+	Redesign under consideration. Shouldn't we validate the persons and families (and other things)
+	before creating the database? So that would mean at this point to validate the persons and the
+	families BEFORE creating the database. But those functions now require the database. So they would
+	have to change to take, say, a RecordIndex of all records. Maybe something like this:
+	a. create the record index.
+	b. validate the persons and families, etc., using the record index instead of the database.
+	c. try to create the name index, try to create the refeerence index.
+	d. Create and return the Database.
+.......................................
+	3. Create the database.
+	4. Validate the persons and families in the database.
+	5. Create the name index.
+	6. Validate the user referenes.
+	7. Return the database
+	** If an error occurs update the error log, clean up, and return null.
+GNodeList* gedcomFileToGNodeTreeList(String path, *keymap, *elog) -- Return the list of validated GNode trees.
 	1. Open the Gedcom file.
-	2. Create the keymap table to track where each record begins.
-	3. Call getGNodeTreesFromFile to get the list of roots from the file.
-	4. Close the file.
-	5. Calls checkKeysAndReferences to check that the keys in the trees are "closed".
-	6. Create the database.
-	7. Validate the persons and families in the database.
-	8. Create the name index.
-	9. Validate the user references.
-	10. Return the database.
-	** If an error occurs at any point update the error log, clean up, and return null.
-
+	2. Call getGNodeTreesFromFile to get the full list of (unvalidated) GNode trees from the file
+	3. Close the file.
+	4. closeFile(file);
+	5. Call checkKeysAndReferences to check all key values.
+	6. Return the list.
+	** If an error occurs update the error log, clean up, and return null.
 GNodeList* getGNodeTreesFromFile(*file, *keymap, *errlog) -- Get the GNodeList of all records in a Gedcom file.
-	n. Called by gedcomFileToDatabase; can be called by functions that don't need full databases.
 	1. Call getGNodeListFromFile to get the list of all Gedcom lines as nodes; has levels.
 	2. Call getGNodeTreesFromNodeList to convert the list of nodes to a list of node trees.
 	** If an error occurs update the error log and return null.
-
 GNodeList* getGNodeListFromFile(*file, *keymap, *errlog) -- Get the GNodeList of all nodes in a file.
 	1. Create the GNodeList.
         2. Iteratively call fileToLine to get each lineno, level, key, tag, and value from the file. Then:
@@ -34,32 +45,32 @@ GNodeList* getGNodeListFromFile(*file, *keymap, *errlog) -- Get the GNodeList of
 		d. If any errors occur add them to the log
 	3. Return the GNodeList if there were no errors; null otherwise.
 
-GNodeList* getGNodeTreesFromNodeList(*nodes, name, *keymap, *errlog) -- Convert a list of all nodes to trees.
-	1. Set up state machine variables.
-	2. Set machine state to Initial (others are Main and Error).
+GNodeList* getGNodeTreesFromNodeList(*nodes, name, *elog) -- Get list of all trees from list of all nodes.
+	1. Init state machine variables.
+	2. Set state to Initial (others are Main and Error).
 	3. Iterate the list of nodes doing::
-		a. Set the previous variables to the current variables.
-		b. Get the new current variables.
+		a. Set the prev variables to curr variables.
+		b. Get the curr variables.
 		c. Depending on state do:
-			1. Initial: 
-				a. If level is 0 set the first root node and go to Main; else to Error.
+			1. Initial:
+				a. If level 0 set the first root node and goto Main; else goto Error.
 			2. Main:
-				In cases a, b, c, & d, stay in Main and modify the loop variables as described.
+				In cases a, b, c, & d, stay in Main.
 				a. if level is 0:
 					1. add root (of tree just built) to list of trees.
-					2. set current node as root of next tree.
-				b. if level is same as last node (can't be 0):
-					1. make current node the sib of the prev.
+					2. set curr node as root of next tree.
+				b. if level is same as prev (can't be 0):
+					1. make curr node the sib of the prev.
 				c. if level is one more than last node:
-					1. make current node the child of the prev.
+					1. make curr node the child of the prev.
 				d. if the level is less that the prev node:
-					1. make current node a sib of an ancestor of the prev.
-					2. infinite loop check is done when looking for ancestor.
+					1. make curr node the sib of an ancestor of the prev.
+					2. infinite loop check done when looking for ancestor.
 				e. else level is more than one larger than last:
 					1. add error and go to Error.
 			3. Error.
-				1. if level is 0 go to Main; else remain in Error.
-	4. If in Main at end of iteration (should be) add last tree root to list.
+				1. if level 0 goto Main; else remain in Error.
+	4. If in Main at end add last tree to list of trees.
 	5. Return the list of trees.
 
 void checkKeysAndReferences(*trees, name, *keymap, *errlog) -- Check all root keys and their references for closure.
@@ -72,27 +83,31 @@ void checkKeysAndReferences(*trees, name, *keymap, *errlog) -- Check all root ke
 		a. add to numReferences (debugging).
 		b. if the key is not in the set of seen keys add an error to the log.
 	4. Delete the seen set.
-
-GNodeListEl* createGNodeListEl(GNode* gnode, void* data) -- Creates and returns a GNodeListEl
-	1. Allocates the memory for a GNode*, void* pair).
-	2. Puts the arguments, as-is, into the memory.
-	3. Returns the new element.
-
-static void delete(void* element) -- the delete function for GNodeListEls
-	n. If frees only the element, not what the element might point to.
-
-GNodeList* createGNodeList(void) -- creates and returns a new GNodeList with the above getKey function.
-	NOTE: THE DELETE FUNCTION IS NOT CORRECT FOR THE LATEST REDESIGN
-
-void appendToGNodeList(GNodeList* list, GNode* gnode, void* data) -- adds a new element to a GNodeList.
-	n. Just a pass through to appendToList.
-
-void deleteGNodeList(GNodeList* list, void(*delete)(void*)) -- deletes a GNodeList
-	n. User must pass in a delete function.
-
-static void deleteEl(void* el) { stdfree(el); } -- generic deleter for GNodeList elements
-	n. CONSOLIDATE THE DELETE FUNCTIONS SOMEHOW
-
+--------------------------------------------------------
+List* gedcomFilesToDatabases(*paths, *errlog) -- Import a List of Gedcom files to a List of Databases.
+    Database* gedcomFileToDatabase(path, *errlog) -- Create and return a database from a single Gedcom file.
+        ... create the keymap ...
+        GNodeList* gedcomFileToGNodeTreeList(path, *keymap, *elog) -- Get the validated GNode trees from the file.
+            GNodeList* getGNodeTreesFromFile(*file, *keymap, *errlog) -- Get the GNodeList of all records in a Gedcom file.
+                GNodeList* getGNodeListFromFile(*file, *keymap, *errlog) -- Get the GNodeList of all nodes in a file.
+                    ReadReturn fileToLine(*fp, *pline, *plev, *pkey, *ptag, *pval, *err) -- get next line from file
+                         ReadReturn extractFields(String p, *plev, *pkey, *ptag, *pval, *err)
+                GNodeList* getGNodeTreesFromNodeList(*nodes, name, *keymap, *errlog) -- Convert a list of all nodes to trees.
+            ... validate the tree list ...
+        ... create the database ...
+------------------------------
+List* stringsToDatabases -- create a list of databases from a list of strings.
+	Database* stringToDatabase -- Create and returns a database from a single string.
+		... create the keymap ...
+		GNodeList* stringToGNodeTreeList(path, *keymap, *elog) -- Get the validated GNode trees from the string
+			GNodeList* getGNodeTreesFromString(string, *keymap, *elog) -- returns a list of records from a String.
+				GNodeList* getGNodeListFromString(string, *keymap, *elog) -- returns the full list of GNodes from a String.
+					ReadReturn stringToLine(*ps, *line, *level, *key, *tag, *val, *err) {
+						 ReadReturn extractFields(String p, *plev, *pkey, *ptag, *pval, *err)
+				GNodeList* getGNodeTreesFromNodeList(*nodes, name, *keymap, *elog) -- Convert a list of all nodes to trees.
+			... validate the tree list ...
+		... create the database ...
+------------------------------
 GNodeList* getGNodeTreesFromString(String, String name, ErrorLog*) -- returns a list of records from a String.
 	n. Interface is out of date due to recent changes.
 	1. Call getGNodeListFromString to get the GNodeList of all GNodes in the string
@@ -110,3 +125,140 @@ GNodeList* getGNodeListFromString(String string, ErrorLog* errorLog) -- returns 
 		d. If errors occur clean up and return null.
 	3. Return the GNodeList if there were no errors; null otherwise.
 }
+NOVEMBER 28, 2024 --CURRENT LOCATIONS OF THE FILES.
+----->GNODE/READNODE.C<-----
+ReadReturn fileToLine(FILE*, *pline, *plevel, *pkey, *ptag, *pvalue, *errstr)
+ReadReturn stringToLine(String*, *line, *level, *key, *tag, *value, *errstr)
+//GNode* stringToGNodeTree(String, ErrorLog*) -- COMMENTED OUT
+static ReadReturn extractFields(String p, *plevel, *pkey, *ptag, *pvalue, *errstr)
+
+----->GEDCOM/WRITENODE.C<-----
+static String swriteGNodes(int level, GNode*, String);
+static String swriteGNode(int level, GNode*, String);
+static int nodeStringLength(int, GNode*);
+bool gnodesToFile(level, GNode*, fileName, indent)
+void writeGNode(FILE*, level, GNode*, indent)
+void writeGNodeRecord(FILE*, GNode*, indent)
+void writeGNodes(FILE*, level, GNode*, indent, kids, sibs)
+String gnodesToString(GNode*) -- Returns a GNode tree converted to a String.
+String gnodeToString(GNode* gnode, int level) -- Returns a GNode as a string without newline
+static String swriteGNode(level, GNode*, String p) -- Writes a GNode to a string and returns pos in string of next GNode.
+static String swriteGNodes(level, GNode*, String p) -- Writes a GNode tree or forest to a String. Recurses.
+int treeStringLength(level, GNode*) -- Returns the string length of a GNode.
+static int nodeStringLength(int level, GNode* gnode) -- Returns a GNode's string length; counts the \n but not final 0.
+
+----->GEDCOM/GNODELIST.C<-----
+	Basic GNodeList and GNodeListEl functions ---
+GNodeList* createGNodeList(void) -- creates a new GNodeList.
+GNodeListEl* createGNodeListEl(GNode*, *data) -- creates a GNodeList element
+static String getKey(void* element) -- the getKey function for GNodeLists.
+static void delete(void* element) -- the delete function for GNodeLists
+void appendToGNodeList(GNodeList*, GNode*, void*) -- adds a new element to a GNodeList.
+void deleteGNodeList(GNodeList*, void (*delete)(void*)) -- deletes a GNodeList using given delete function.
+void showGNodeList(GNodeList*) -- shows the contents of a GNodeList for debugging
+	GNodeList functions involving reading files ---
+GNodeList* getGNodeTreesFromFile(File*, keymap, *elog) -- gets all GNode records from a file; no validation
+GNodeList* getGNodeListFromFile(File*, keymap, *elog) -- uses fileToLine and extractFields to create GNodeList from a file
+GNodeList* getGNodeTreesFromNodeList(GNodeList*, name, *keymap, *elog) -- converts GNodeList of lines to GNodeList of trees
+	GNodeList functions involving reading strings ---
+GNodeList* getGNodeTreesFromString(String, name, *elog) -- reads a String with Gedcom records and returns them as a GNodeList.
+GNodeList* getGNodeListFromString(String, *elog) -- reads a String with Gedcom records and creates and converts them into GNodeList
+
+	GNodeList functions involving writing GNodeLists ---
+void writeGNodeTreesToFile(GNodeList*, File*) writes a GNodeList to a File in Gedcom format.
+
+----->DATABASE/IMPORT.C<-----
+List* gedcomFilesToDatabases(List* paths, *elog) - returns a list of databases created from a list of files
+Database* gedcomFileToDatabase(String path, *elog) - returns the database of a single Gedcom file
+GNodeList* gedcomFileToGNodeTreeList(String path, *keymap, *elog) -- returns the list of validated GNode trees read from Gedcom file
+
+	functions involving validation ===
+void checkKeysAndReferences(GNodeList*, String name, *keymap, *elog) -- checks record keys and their references
+
+
+----------------------
+NOTE ON REDESIGN OF DECEMBER 2024
+----------------------
+
+//getRecordIndexFromFile -- I think it's a good idea to provide a RecordIndex as well as a Database. How validated should it be?
+//							  -- validated keys, persons & families? There could be options as to how vaidated.
+//							  -- computed name index and refn indexes? Could be options for these too.
+//		... Create the keymap ...
+//		getGNodeTreesFromFile -- Gets a ????????? of all records from a Gedcom file.
+//			getGNodeListFromFile -- Gets a GNodeList of all nodes from a Gedcom file (nothing below shown here).
+//			getGNodeTreesFromList -- Gets the GNodeList of all ROOTS from a GNodeList of all NODES.
+//			... at this point we have the "records" as a GNodeList of Root nodes ...
+//		... validate the keys
+//		... validate the persons and families
+//		... return the record index
+
+
+Database* getDatabaseFromFile
+
+    getRecordIndexFromFile -- I think it's a good idea to provide a RecordIndex as well as a Database. How validated should it be?
+                              -- validated keys, persons & families? There could be options as to how vaidated.
+                              -- computed name index and refn indexes? Could be options for these too.
+        ... Create the keymap ...
+        getGNodeTreesFromFile -- Gets a ????????? of all records from a Gedcom file.
+            getGNodeListFromFile -- Gets a GNodeList of all nodes from a Gedcom file (nothing below shown here).
+            getGNodeTreesFromList -- Gets the GNodeList of all ROOTS from a GNodeList of all NODES.
+            ... at this point we have the "records" as a GNodeList of Root nodes ...
+        ... validate the keys
+        ... validate the persons and families
+        ... return the record index
+    ... where and when do we create the person and family root lists?
+    ... Comute the name index and the reference index.
+    ... Create and return the Database.
+
+
+
+List* gedcomFilesToDatabases(*paths, *errlog) -- Import a List of Gedcom files to a List of Databases.
+    Database* gedcomFileToDatabase(path, *errlog) -- Create and return a database from a single Gedcom file.
+        ... create the keymap ...
+        GNodeList* gedcomFileToGNodeTreeList(path, *keymap, *elog) -- Get the validated GNode trees from the file.
+            GNodeList* getGNodeTreesFromFile(*file, *keymap, *errlog) -- Get the GNodeList of all records in a Gedcom file.
+            ... validate the tree list ...
+        ... create the database ...
+
+
+
+
+-----------------------------------
+DIVISION OF LABOR BETWEEN GETDATABASEFROMFILE AND GETRECORDINDEXFROMFILE.
+
+Database* getDatabaseFromFile(String path, int actions, ErrorLog* elog) {
+    1. Create the personRoots and familyRoots lists.
+    2. Create the keymap to map keys to lines.
+    3. Call {getRecordIndexFromFile} to get the record index.
+    4. If there were errors return null.
+    5. Create the database, setting the recordIndex, personRoots and familyRoots.
+    6. Create the name index.
+    7. Create the REFN index. (THIS IS NOT YET BEING DONE.)
+   (8. IN FUTURE: PROCESS BITSET OF ACTION CODES.)
+    8. If there were errors delete the database and return null.
+    9. return the database.
+
+RecordIndex* getRecordIndexFromFile(String path, RootList* proots, RootList* froots, IntegerTable* keymap, ErrorLog* elog) {
+    1. Open the file and return with error if not opened.
+    2. If the keymap argument is null create it here. (NOTE: IN THIS CASE IT IS NEVER FREED).
+    3. Call {getGNodeTreesFromFile} to get the list of records.
+    4. Close the file
+    5. If there are no records or there are errors return null.
+    6. Call {checkKeysAndReferences} to be sure keys are closed. If errors return null.
+    7. Call {createRecordIndex} to create an empty record index.
+    8. For each record in the list of records:
+        a. If it has a key add it to the record index
+        b. If it is a person and proots is not null add it to proots.
+        c. If it is a family and froots is not null add it to froots.
+    9. Delete the list of records (NOTE: THIS GETS RID OF THE HEADER. FIX THIS.)
+   10. Validate the persons.
+   11. Validate the families.
+   12. Get the reference index. (NOTE: THIS DOESN'T MAKE SENSE TO DO HERE. FIX THIS.)
+   13. Return the record index as well as the modified proots and froots.
+
+Notes:
+1. Where keymap gets created is an issue. If these two routines are used together it should be
+   created in the getDatabaseFromFile. But if getRecordIndexFrom File is called directly, it
+   is still needed.  For now if it is null when getRecordIndexFromFile is called it is created there.
+   But in this case it is not freed.
+2. Need to have a set of ACTIONS that can be performed in gedcomFileToDatabase.

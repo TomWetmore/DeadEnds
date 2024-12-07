@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-c -g -Wall -Wno-unused-function
+CFLAGS=-c -g -Wall -Wno-unused-function -Wno-unused-variable
 INCLUDES=-I./Includes -I../DeadEndsLib/Utils/Includes -I../DeadEndsLib/DataTypes/Includes -I../DeadEndsLib/Database/Includes -I../DeadEndsLib/Gedcom/Includes	
 AR=ar
 ARFLAGS=-cr

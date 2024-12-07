@@ -4,7 +4,7 @@
 // record keys that have the names.
 //
 // Created by Thomas Wetmore on 26 November 2022.
-// Last changed on 18 August 2024.
+// Last changed on 6 December 2024.
 
 #include "nameindex.h"
 #include "name.h"
@@ -132,7 +132,14 @@ static NameIndexEl* createNameIndexEl(String nameKey) {
 	return el;
 }
 
-// getNameIndexStats returns statistics about the NameIndex. For testing and debugging.
+// showNameIndexStats show the statistic of a NameIndex; for testing and debugging.
+void showNameIndexStats(NameIndex* index) {
+	int numNameKeys, numRecordKeys;
+	getNameIndexStats(index, &numNameKeys, &numRecordKeys);
+	fprintf(stderr, "Summary of Name Index: %d numkeys from %d names.\n", numNameKeys, numRecordKeys);
+}
+
+// getNameIndexStats returns statistics about the NameIndex; for testing and debugging.
 void getNameIndexStats(NameIndex* index, int* pnumNameKeys, int* pnumRecordKeys) {
 	int numNameKeys = 0;
 	int numRecordKeys = 0;

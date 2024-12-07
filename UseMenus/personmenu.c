@@ -2,8 +2,8 @@
 //  personmenu.c
 //  UseMenus
 //
-//  Created by Thomas Wetmore on 5 August 2024.
-// Last changed on 10 August 2024.
+// Created by Thomas Wetmore on 5 August 2024.
+// Last changed on 7 December 2024.
 
 /*
  At this level what do we want the personMenu to do?
@@ -38,6 +38,7 @@ BrowseReturn personMenu(Database* database, GNode** pindi1, GNode** pindi2, GNod
 	GNode* person = *pindi1;
 	//Sequence* sequence = null;
 	char scratch[100];
+	RecordIndex* index = database->recordIndex;
 
 	addstrings[0] = "Create a family with this person as a child.";
 	addstrings[1] =  "Create a family with this person as a spouse/parent.";
@@ -57,13 +58,13 @@ BrowseReturn personMenu(Database* database, GNode** pindi1, GNode** pindi2, GNod
 				//message(ntprnt);
 			break;
 		case 'f': // Browse to person's father.
-			if (!(node = personToFather(person, database)))
+			if (!(node = personToFather(person, index)))
 				message("This person has no father in the database.");
 			else
 				person = node;
 			break;
 		case 'm':// Browse to person's mother */
-			if (!(node = personToMother(person, database)))
+			if (!(node = personToMother(person, index)))
 				message("This person has no mother in the database.");
 			else
 				person = node;
@@ -88,19 +89,19 @@ BrowseReturn personMenu(Database* database, GNode** pindi1, GNode** pindi2, GNod
 			*pindi1 = person;
 			return browsePedigree;
 		case 'o': // Browse to older sib.
-			if (!(node = personToPreviousSibling(person, database)))
+			if (!(node = personToPreviousSibling(person, index)))
 				message("This person has no next sibling in the database.");
 			else
 				person = node;
 			break;
 		case 'y':	/* Browse to younger sib */
-			if (!(node = personToNextSibling(person, database)))
+			if (!(node = personToNextSibling(person, index)))
 				message("This person has no previous sibling in the database.");
 			else
 				person = node;
 			break;
 		case 'u':	/* Browse to parents' family */
-			if (!(*pfam1 = personToFamilyAsChild(person, database)))
+			if (!(*pfam1 = personToFamilyAsChild(person, index)))
 				message("This person is not a child in any family.");
 			else
 				return  browseFamily;

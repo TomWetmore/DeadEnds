@@ -4,7 +4,7 @@
 // customiziing the compare, delete and getKey functions.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 31 August 2024.
+// Last changed on 5 December 2024.
 
 #include "standard.h"
 #include "hashtable.h"
@@ -134,7 +134,7 @@ void addToHashTable(HashTable* table, void* element, bool replace) { //PH;
 		return;
 	}
 	if (found) {
-		printf("Duplicate key: %s found when adding to hash table\n", table->getKey(element)); // DEBUG
+		//printf("Duplicate key: %s found when adding to hash table\n", table->getKey(element)); // DEBUG
 		return; // Element exists, but don't replace.
 	}
 	bucket = table->buckets[hash]; // Add it; be sure Bucket exists.

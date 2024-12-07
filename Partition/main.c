@@ -34,7 +34,7 @@ static bool timing = true;
 int main(int argc, char** argv) {
 	String gedcomFile = null;
 	String searchPath = null;
-	if (timing) printf("%s: Partition: begin.\n", getMillisecondsString());
+	if (timing) printf("%s: Partition: begin.\n", getMsecondsStr());
 
 	// Get the Gedcom file.
 	getArguments(argc, argv, &gedcomFile);
@@ -47,27 +47,27 @@ int main(int argc, char** argv) {
 	ErrorLog* log = createErrorLog();
 	IntegerTable* keymap = createIntegerTable(4097);
 	GNodeList* roots = getGNodeTreesFromFile(file, keymap, log); // All GNode roots parsed from file.
-	if (timing) printf("%s: Partition: read gedcom file.\n", getMillisecondsString());
+	if (timing) printf("%s: Partition: read gedcom file.\n", getMsecondsStr());
 	if (lengthList(log) > 0) goAway(log);
 	closeFile(file);
 
 	// Validate record keys read from the Gedcom file.
 	checkKeysAndReferences(roots, file->name, keymap, log);
-	if (timing) printf("%s: Partition: validated keys.\n", getMillisecondsString());
+	if (timing) printf("%s: Partition: validated keys.\n", getMsecondsStr());
 	if (lengthList(log)) goAway(log);
 	GNodeIndex* index = createIndexOfGNodes(roots); // Index of all GNodes.
 	roots = removeNonPersons(roots);
 
 	// Create the partitions.
 	List* partitions = getPartitions(roots, index, log);
-	if (timing) printf("%s: Partition: created partitions.\n", getMillisecondsString());
+	if (timing) printf("%s: Partition: created partitions.\n", getMsecondsStr());
 
 	// Get number of ancestors and descendents of all person.
 	FORLIST(partitions, el)
 		List* partition = (List*) el;
 		getConnections(partition, index);
 	ENDLIST
-	printf("%s: Partition: computed connectedness numbers.\n", getMillisecondsString());
+	printf("%s: Partition: computed connectedness numbers.\n", getMsecondsStr());
 
 	// DEBUG: SHOW THE CONNECTIONS OF EACH PARTITION
 	FORLIST(partitions, el)
@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
 		}
 	ENDLIST
 	printf("Person: %s %s %d\n", topGun->key, topGun->child->value, max);
-	if (timing) printf("%s: Partition: done.\n", getMillisecondsString());
+	if (timing) printf("%s: Partition: done.\n", getMsecondsStr());
 }
 
 // showConnects is a debug function that shows the connect data of each person in a list.

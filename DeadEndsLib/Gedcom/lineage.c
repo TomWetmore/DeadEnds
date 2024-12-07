@@ -12,27 +12,27 @@
 static bool debugging = false;
 
 // personToFather returns the father of a person, the first HUSB in the first FAMC in the person.
-GNode* personToFather(GNode* node, Database* database) {
-	return familyToHusband(personToFamilyAsChild(node, database), database);
+GNode* personToFather(GNode* node, RecordIndex* index) {
+	return familyToHusband(personToFamilyAsChild(node, index), index);
 }
 
 // personToMother returns the mother of a person, the first WIFE in the first FAMC in the person.
-GNode* personToMother(GNode* node, Database* database) {
-	return familyToWife(personToFamilyAsChild(node, database), database);
+GNode* personToMother(GNode* node, RecordIndex* index) {
+	return familyToWife(personToFamilyAsChild(node, index), index);
 }
 
 // personToPreviousSibling returns the previous sibling of a person, the previous CHIL in the
 // first FAMC in the person.
-GNode* personToPreviousSibling(GNode* indi, Database* database) {
+GNode* personToPreviousSibling(GNode* indi, RecordIndex* index) {
 	if (!indi) return null;
-	GNode* famc = personToFamilyAsChild(indi, database);
+	GNode* famc = personToFamilyAsChild(indi, index);
 	if (!famc) return null;
 	GNode* prev = null;
 	GNode* node = CHIL(famc);
 	while (node && eqstr("CHIL", node->tag)) {
 		if (eqstr(indi->key, node->value)) {
 			if (!prev) return null;
-			return keyToPerson(prev->value, database);
+			return keyToPerson(prev->value, index);
 		}
 		prev = node;
 		node = node->sibling;
@@ -42,9 +42,9 @@ GNode* personToPreviousSibling(GNode* indi, Database* database) {
 
 // personToNextSibling returns the next sibling of a person, the next CHIL in the first FAMC
 // in the person.
-GNode* personToNextSibling(GNode* indi, Database* database) {
+GNode* personToNextSibling(GNode* indi, RecordIndex* index) {
 	if (!indi) return null;
-	GNode* fam = personToFamilyAsChild(indi, database);
+	GNode* fam = personToFamilyAsChild(indi, index);
 	if (!fam) return null;
 	GNode* node = CHIL(fam);
 	while (node && eqstr("CHIL", node->tag)) {
@@ -54,27 +54,37 @@ GNode* personToNextSibling(GNode* indi, Database* database) {
 	if (!node) return null;
 	node = node->sibling;
 	if (!node || nestr("CHIL", node->tag)) return null;
-	return keyToPerson(node->value, database);
+	return keyToPerson(node->value, index);
 }
 
 // familyToHusband -return the first husband of a family, the first HUSB in the family.
-GNode* familyToHusband(GNode* node, Database* database) {
+GNode* familyToHusband(GNode* node, RecordIndex* index) {
 	if (!node) return null;
 	if (!(node = findTag(node->child, "HUSB"))) return null;
-	return keyToPerson(node->value, database);
+	return keyToPerson(node->value, index);
+}
+GNode* newFamilyToHusband(GNode* node, RecordIndex* index) {
+	if (!node) return null;
+	if (!(node = findTag(node->child, "HUSB"))) return null;
+	return keyToPerson(node->value, index);
 }
 
 // familyToWife returns the first wife of a family, the first WIFE in the family.
-GNode* familyToWife(GNode* node, Database* database) {
+GNode* familyToWife(GNode* node, RecordIndex* index) {
 	if (!node) return null;
 	if (!(node = findTag(node->child, "WIFE"))) return null;
-	return keyToPerson(node->value, database);
+	return keyToPerson(node->value, index);
+}
+GNode* newFamilyToWife(GNode* node, RecordIndex* index) {
+	if (!node) return null;
+	if (!(node = findTag(node->child, "WIFE"))) return null;
+	return keyToPerson(node->value, index);
 }
 
 // familyToSpouse return the first spouse with given sex from a family.
-GNode* familyToSpouse(GNode* family, SexType sex, Database* database) {
+GNode* familyToSpouse(GNode* family, SexType sex, RecordIndex* index) {
 	if (sex != sexMale && sex != sexFemale) return null;
-	return (sex == sexMale) ? familyToHusband(family, database) : familyToWife(family, database);
+	return (sex == sexMale) ? familyToHusband(family, index) : familyToWife(family, index);
 }
 
 // personToSpouse -- Return the first spouse from the ...
@@ -88,14 +98,14 @@ GNode *personToSpouse(GNode *person, GNode *family)
 }
 
 // familyToFirstChild returns the first child of a family, the first CHIL in the family.
-GNode* familyToFirstChild(GNode* node, Database* database) {
+GNode* familyToFirstChild(GNode* node, RecordIndex* index) {
 	if (!node) return null;
 	if (!(node = CHIL(node))) return null;
-	return keyToPerson(node->value, database);
+	return keyToPerson(node->value, index);
 }
 
 // familyToLastChild return the last child of a family, the last CHIL in the family.
-GNode* familyToLastChild(GNode* node, Database* database) {
+GNode* familyToLastChild(GNode* node, RecordIndex* index) {
 	if (!node) return null;
 	if (!(node = CHIL(node))) return null;
 	GNode* chil = null;
@@ -103,14 +113,14 @@ GNode* familyToLastChild(GNode* node, Database* database) {
 		if (eqstr(node->tag, "CHIL")) chil = node;
 		node = node->sibling;
 	}
-	return keyToPerson(chil->value, database);
+	return keyToPerson(chil->value, index);
 }
 
 // numberOfSpouses returns the number of spouses of a person.
 int numberOfSpouses(GNode* person, Database* database) {
 	if (!person) return 0;
 	int nspouses = 0;
-	FORSPOUSES(person, spouse, family, count, database)
+	FORSPOUSES(person, spouse, family, count, database->recordIndex)
 		if (spouse) nspouses++;
 	ENDSPOUSES
 	return nspouses;
@@ -129,10 +139,10 @@ int numberOfFamilies(GNode* person) {
 }
 
 // personToFamilyAsChild returns the first family a person is in as a child.
-GNode* personToFamilyAsChild(GNode* person, Database* database) {
+GNode* personToFamilyAsChild(GNode* person, RecordIndex* index) {
 	if (!person) return null;
 	if (!(person = FAMC(person))) return null;
-	return keyToFamily(person->value, database);
+	return keyToFamily(person->value, index);
 }
 
 // personToName returns the name of a person, the value of the first NAME in the person. length

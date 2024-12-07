@@ -3,7 +3,7 @@
 // valperson.c contains functions that validate person records in a Database.
 //
 // Created by Thomas Wetmore on 17 December 2023.
-// Last changed on 26 November 2024.
+// Last changed on 30 November 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -17,19 +17,20 @@
 
 #define LC(line, node) (line + countNodesBefore(node))
 
-static bool validatePerson(RecordIndexEl*, Database*, IntegerTable*, ErrorLog*);
+static bool validatePerson(GNode*, String name, RecordIndex*, IntegerTable*, ErrorLog*);
 static bool hasValidNameGNode(GNode* root, GNode** pname);
 static bool hasValidSexGNode(GNode* root, GNode** psex);
-extern bool importDebugging;
+static bool importDebugging = true;
 
 // validatePersons validates the persons in a Database.
-void validatePersons(Database* database, IntegerTable* keyMap, ErrorLog* errlog) {
+void validatePersons(RecordIndex* index, String name, IntegerTable* keymap, ErrorLog* elog) {
 	int numPersonsValidated = 0;
-	if (importDebugging)
-		printf("Before validating, there are %d persons.\n", sizeHashTable(database->personIndex));
-	FORHASHTABLE(database->personIndex, element)
-		validatePerson(element, database, keyMap, errlog);
-		numPersonsValidated++;
+	FORHASHTABLE(index, element)
+		GNode* root = (GNode*) element;
+		if (recordType(root) == GRPerson) {
+			validatePerson(root, name, index, keymap, elog);
+			numPersonsValidated++;
+		}
 	ENDHASHTABLE
 	if (importDebugging) printf("Number of persons validated is %d.\n", numPersonsValidated);
 }
@@ -38,82 +39,77 @@ void validatePersons(Database* database, IntegerTable* keyMap, ErrorLog* errlog)
 // with valid values. All FAMC and FAMS links must link to families that link back to the person.
 //
 // Notes on generating errors. A String buffer, s, exists. The personEl argument links to both
-// the the root node and the location of the root node in the original Gedcom file.
-static bool validatePerson(RecordIndexEl* personEl, Database* dbase, IntegerTable* keyMap, ErrorLog* elog) {
-	String fname = dbase->lastSegment;
-	GNode* person = personEl->root;
-	int line = searchIntegerTable(keyMap, person->key); // Used in error messages.
+// the root node and the location of the root node in the original Gedcom file.
+static bool validatePerson(GNode* person, String name, RecordIndex* index, IntegerTable* keymap,
+						   ErrorLog* elog) {
+	int line = searchIntegerTable(keymap, person->key); // Used in error messages.
 	ASSERT(line != NAN);
 	normalizePerson(person);
 	int errorCount = 0;
 	static char s[512]; // For error strings.
 	// Warning: use of __node is fragile because it uses internal details of the macros.
-	FORFAMCS(person, family, key, dbase) // Check FAMC links to families.
+	FORFAMCS(person, family, key, index) // Check FAMC links to families.
 		if (!family) {
 			sprintf(s, "INDI %s (line %d): FAMC %s (line %d) does not exist.",
-					person->key,
-					line,
-					key,
-					line + countNodesBefore(__node));
-			addErrorToLog(elog, createError(linkageError, fname, line, s));
+					person->key, line, key, line + countNodesBefore(__node));
+			addErrorToLog(elog, createError(linkageError, name, line, s));
 			errorCount++;
 		}
 	ENDFAMCS
-	FORFAMSS(person, family, key, dbase) // Check FAMS links to families.
+	FORFAMSS(person, family, key, index) // Check FAMS links to families.
 		if (!family) {
 				//int lineNumber = rootLine(person, database);
 				sprintf(s, "INDI %s (line %d): FAMS %s (line %d) does not exist.",
 						person->key, line, key, LC(line, __node));
-				addErrorToLog(elog, createError(linkageError, fname, line, s));
+				addErrorToLog(elog, createError(linkageError, name, line, s));
 			errorCount++;
 		}
 	ENDFAMSS
 	if (errorCount) return false;
-	FORFAMCS(person, family, key, dbase) // Check FAMC links back to person.
+	FORFAMCS(person, family, key, index) // Check FAMC links back to person.
 		int numOccurrences = 0;
-		FORCHILDREN(family, child, chilKey, count, dbase) // Find child that links to person.
+		FORCHILDREN(family, child, chilKey, count, index) // Find child that links to person.
 			if (person == child) numOccurrences++;
 		ENDCHILDREN
 		if (numOccurrences == 0) {
-			addErrorToLog(elog, createError(linkageError, fname, 0, "Child not found"));
+			addErrorToLog(elog, createError(linkageError, name, 0, "Child not found"));
 			errorCount++;
 		} else if (numOccurrences > 1) {
-			addErrorToLog(elog, createError(linkageError, fname, 0, "Too many children found"));
+			addErrorToLog(elog, createError(linkageError, name, 0, "Too many children found"));
 			errorCount++;
 		}
 	ENDFAMCS
 	if (errorCount) return false;
 	SexType sex = SEXV(person);
-	FORFAMSS(person, family, key, dbase) // Check FAMS links back to person.
+	FORFAMSS(person, family, key, index) // Check FAMS links back to person.
 		GNode *parent = null;
 		if (sex == sexMale) {
-			parent = familyToHusband(family, dbase);
+			parent = familyToHusband(family, index);
 		} else if (sex == sexFemale) {
-			parent = familyToWife(family, dbase);
+			parent = familyToWife(family, index);
 		} else {
-			int lineNumber = rootLine(person, keyMap);
+			int lineNumber = rootLine(person, keymap);
 			sprintf(s, "INDI %s (line %d) with FAMS %s (line %d) link has no sex value.",
 					person->key,
 					lineNumber,
 					key,
 					lineNumber + countNodesBefore(__node));
-			addErrorToLog(elog, createError(linkageError, fname, 0, s));
+			addErrorToLog(elog, createError(linkageError, name, 0, s));
 			errorCount++;
 			goto a;
 		}
 		if (person != parent) {
 			sprintf(s, "FAM %s (line %d) should have %s link to INDI %s (line %d).",
 					key,
-					rootLine(family, keyMap),
+					rootLine(family, keymap),
 					sex == sexMale ? "HUSB" : "WIFE",
 					person->key,
 					line);
-			addErrorToLog(elog, createError(linkageError, fname, rootLine(family, keyMap), s));
+			addErrorToLog(elog, createError(linkageError, name, rootLine(family, keymap), s));
 			errorCount++;
 		}
 a:;
 	ENDFAMSS
-
 
 	//  Validate NAME and SEX lines.
 	GNode* nnode = null;
@@ -121,10 +117,10 @@ a:;
 		if (nnode) {
 			sprintf(s, "INDI %s (line %d) has invalid NAME line (line %d).",
 					person->key, line, LC(line, nnode));
-			addErrorToLog(elog, createError(linkageError, fname, LC(line, nnode), s));
+			addErrorToLog(elog, createError(linkageError, name, LC(line, nnode), s));
 		} else {
 			sprintf(s, "INDI %s (line %d) has no NAME line.", person->key, line);
-			addErrorToLog(elog, createError(linkageError, fname, line, s));
+			addErrorToLog(elog, createError(linkageError, name, line, s));
 		}
 	}
 	nnode = null;
@@ -132,10 +128,10 @@ a:;
 		if (nnode) {
 			sprintf(s, "INDI %s (line %d) has invalid SEX line (line %d).\n", person->key, line,
 					LC(line, nnode));
-			addErrorToLog(elog, createError(linkageError, fname, LC(line, nnode), s));
+			addErrorToLog(elog, createError(linkageError, name, LC(line, nnode), s));
 		} else {
 			sprintf(s, "INDI %s has no SEX line.\n", person->key);
-			addErrorToLog(elog, createError(linkageError, fname, line, s));
+			addErrorToLog(elog, createError(linkageError, name, line, s));
 		}
 	}
 	return errorCount == 0;

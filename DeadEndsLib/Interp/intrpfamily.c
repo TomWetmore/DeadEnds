@@ -28,7 +28,7 @@ PValue __husband(PNode* pnode, Context* context, bool* errflg) {
 	ASSERT(pnode && context);
 	GNode* fam = evaluateFamily(pnode->arguments, context, errflg);
 	if (*errflg || !fam) return nullPValue;
-	GNode* husband = familyToHusband(fam, context->database);
+	GNode* husband = familyToHusband(fam, context->database->recordIndex);
 	if (!husband) return nullPValue;
 	return PVALUE(PVPerson, uGNode, husband);
 }
@@ -39,7 +39,7 @@ PValue __wife(PNode* pnode, Context* context, bool* errflg) {
 	ASSERT(pnode && context);
 	GNode* fam = evaluateFamily(pnode->arguments, context, errflg);
 	if (*errflg || !fam) return nullPValue;
-	GNode* wife = familyToWife(fam, context->database);
+	GNode* wife = familyToWife(fam, context->database->recordIndex);
 	if (!wife) return nullPValue;
 	return PVALUE(PVPerson, uGNode, wife);
 }
@@ -65,7 +65,7 @@ PValue __firstchild(PNode* pnode, Context* context, bool* eflg) {
 	ASSERT(pnode && context);
 	GNode* fam = evaluateFamily(pnode->arguments, context, eflg);
 	if (*eflg || !fam) return nullPValue;
-	GNode* child = familyToFirstChild(fam, context->database);
+	GNode* child = familyToFirstChild(fam, context->database->recordIndex);
 	if (!child) return nullPValue;
 	return PVALUE(PVPerson, uGNode, child);
 }
@@ -76,7 +76,7 @@ PValue __lastchild(PNode* pnode, Context* context, bool* eflg) {
 	ASSERT(pnode && context);
 	GNode* fam = evaluateFamily(pnode->arguments, context, eflg);
 	if (*eflg || !fam) return nullPValue;
-	GNode* child = familyToLastChild(fam, context->database);
+	GNode* child = familyToLastChild(fam, context->database->recordIndex);
 	if (!child) return nullPValue;
 	return PVALUE(PVPerson, uGNode, child);
 }
@@ -104,7 +104,7 @@ PValue __fam(PNode* pnode, Context* context, bool* eflg) {
 		return nullPValue;
 	}
 	String key = value.value.uString;
-	GNode* family = keyToFamily(key, context->database); // Find family with key.
+	GNode* family = keyToFamily(key, context->database->recordIndex); // Find family with key.
 	if (!family) {
 		scriptError(pnode, "Could not find a family with key %s.\n", key);
 		return nullPValue;

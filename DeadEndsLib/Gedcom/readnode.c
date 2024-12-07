@@ -13,7 +13,7 @@
 #include "file.h"
 
 extern bool importDebugging;
-static bool extractDebugging = true;
+static bool extractDebugging = false;
 
 // Variables that maintain state between functions.
 String xfileName;

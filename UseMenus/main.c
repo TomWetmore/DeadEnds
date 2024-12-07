@@ -3,7 +3,7 @@
 // UseMenus
 //
 // Created by Thomas Wetmore on 31 July 2024.
-// Last changed on 18 August 2024.
+// Last changed on 6 December 2024.
 
 #include <stdio.h>
 #include "menu.h"
@@ -14,6 +14,7 @@
 #include "import.h"
 #include "name.h"
 #include "sequence.h"
+#include "validate.h"
 
 static void getEnvironment(String*);
 static void getArguments(int, char**, String*);
@@ -27,7 +28,7 @@ static bool timing = true;
 // main is the main program for the DeadEnds command line program.
 int main(int argc, char** argv) {
 	// Get the files.
-	if (timing) fprintf(stderr, "%s: UseMenus started.\n", getMillisecondsString());
+	if (timing) fprintf(stderr, "%s: UseMenus started.\n", getMsecondsStr());
 	String gedcomFile = null;
 	String gedcomPath = null;
 	// Check for environment variables.
@@ -42,13 +43,14 @@ int main(int argc, char** argv) {
 	gedcomFile = resolveFile(gedcomFile, gedcomPath);
 	if (debugging) fprintf(stderr, "resolved gedcomFile = %s\n", gedcomFile);
 	ErrorLog* errorLog = createErrorLog();
-	Database* database = gedcomFileToDatabase(gedcomFile, errorLog);
+	int vcodes = VCclosedKeys | VClineageLinking | VCnamesAndSex;
+	Database* database = getDatabaseFromFile(gedcomFile, vcodes, errorLog);
 	if (lengthList(errorLog)) {
 		showErrorLog(errorLog);
 		exit(1);
 	}
 	if (debugging) summarizeDatabase(database);
-	if (timing) fprintf(stderr, "%s: Database created.\n", getMillisecondsString());
+	if (timing) fprintf(stderr, "%s: Database created.\n", getMsecondsStr());
 	//Menu* loadMenu = createLoadDatabaseMenu();
 	//menuMachine(loadMenu);
 	// FOLLOWING EXPERIMENTS TO FIND THE CODE TO PICK A PERSON USING NAMES
@@ -61,7 +63,7 @@ int main(int argc, char** argv) {
 	printf("\n");
 	// Get the names of the persons.
 	for (int i = 0; i < count; i++) {
-		GNode* name = (NAME(keyToPerson(keys[i], database)));
+		GNode* name = (NAME(keyToPerson(keys[i], database->recordIndex)));
 		String namstr = name->value ? nameString(name->value) : "no name";
 		printf("%s\n", namstr);
 	}

@@ -3,15 +3,15 @@
 // utils.c
 //
 // Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 16 August 2024.
+// Last changed on 6 December 2024.
 
 #include <sys/time.h>
 #include <string.h>
 #include "standard.h"
 #include "utils.h"
 
-// getMilliseconds gets the current time in milliseconds modulo 10 seconds.
-double getMilliseconds(void) {
+// getMseconds gets the current time in milliseconds modulo 10 seconds.
+double getMseconds(void) {
     struct timeval time;
     void* tz;
     (void) gettimeofday(&time, &tz);
@@ -20,9 +20,9 @@ double getMilliseconds(void) {
     return seconds + milliseconds / 1000.;
 }
 
-// getMillisecondsString gets the current time in milliseconds as a static String.
-String getMillisecondsString(void) {
-	double millis = getMilliseconds();
+// getMsecondsStr gets the current time in milliseconds in a static String.
+String getMsecondsStr(void) {
+	double millis = getMseconds();
 	static char buffer[10];;
 	sprintf(buffer, "%2.3f", millis);
 	return buffer;

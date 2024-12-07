@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-c -g -Wall -Wno-unused-but-set-variable
+CFLAGS=-c -g -Wall -Wno-unused-but-set-variable -Wno-unused-variable -Wno-unused-function
 INCLUDES=-I./Includes -I../Utils/Includes -I../DataTypes/Includes -I../Database/Includes
 AR=ar
 ARFLAGS=-cr

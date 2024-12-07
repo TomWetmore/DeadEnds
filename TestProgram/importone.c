@@ -11,16 +11,17 @@
 
 // importDatabaseTest tests the new import organization.
  Database* importDatabaseTest(ErrorLog* log, int testNumber) {
-	printf("%d: START OF IMPORT DATABASE TEST: %s %s\n", testNumber, "modified.ged", getMillisecondsString());
+	printf("%d: START OF IMPORT DATABASE TEST: %s %s\n", testNumber, "modified.ged", getMsecondsStr());
 	String gedcomFile = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/modified.ged";
 	String lastSegment = lastPathSegment(gedcomFile);
 	printf("lastPathSegment: %s\n", lastSegment);
-	Database* database = gedcomFileToDatabase(gedcomFile, log);
+	int vcodes = 31; // First five bits sest.
+	Database* database = getDatabaseFromFile(gedcomFile, vcodes, log);
 	if (lengthList(log)) {
 		printf("Import cancelled because of errors:\n");
 		showErrorLog(log);
 	}
 	summarizeDatabase(database);
-	printf("%d: END OF CREATE DATABASE TEST: %s\n", testNumber, getMillisecondsString());
+	printf("%d: END OF CREATE DATABASE TEST: %s\n", testNumber, getMsecondsStr());
 	return database;
 }

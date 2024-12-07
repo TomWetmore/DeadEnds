@@ -3,7 +3,7 @@
 // validate.c has the functions that validate Gedcom records.
 //
 // Created by Thomas Wetmore on 12 April 2023.
-// Last changed on 26 November 2024.
+// Last changed on 6 December 2024.
 
 #include "validate.h"
 #include "gnode.h"
@@ -19,52 +19,28 @@ static bool validateOther(GNode*, Database*, ErrorLog*);
 
 int numValidations = 0; // DEBUG.
 
-// validateSource validates a source record.
-static bool validateSource(GNode* source, Database* database, ErrorLog* errorLog) {
-	return true; // Write me.
-}
+// validateSource validates a source record. TODO: Write me.
+static bool validateSource(GNode* source, Database* database, ErrorLog* elog) { return true; }
 
-// validateSourceIndex validates the sources in a Database's source index.
-bool validateSourceIndex(Database* database, ErrorLog* errorLog) {
-	bool isOkay = true;
-	FORHASHTABLE(database->sourceIndex, element)
-		GNode* source = ((RecordIndexEl*) element)->root;
-		if (!validateSource(source, database, errorLog)) isOkay = false;
-	ENDHASHTABLE
-	return isOkay;
-}
+// validateSourceIndex validates the sources in a Database's source index. TODO: Write me.
+bool validateSourceIndex(Database* database, ErrorLog* elog) { return true; }
 
-// validateEventIndex validates the events in a Database's event index.
-bool validateEventIndex(Database* db, ErrorLog* elog) {
-	bool isOkay = true;
-	FORHASHTABLE(db->eventIndex, element)
-		GNode* event = ((RecordIndexEl*) element)->root;
-		if (!validateEvent(event, db, elog)) isOkay = false;
-	ENDHASHTABLE
-	return isOkay;
-}
+// validateEventIndex validates the events in a Database's event index. TODO: Write me.
+bool validateEventIndex(Database* db, ErrorLog* elog) { return true; }
 
-// validateOtherIndex validates the records in a Database's other index.
-bool validateOtherIndex(Database* database, ErrorLog* errorLog) {
-	bool isOkay = true;
-	FORHASHTABLE(database->otherIndex, element)
-		GNode* other = ((RecordIndexEl*) element)->root;
-		if (!validateOther(other, database, errorLog)) isOkay = false;
-	ENDHASHTABLE
-	return isOkay;
-}
+// validateOtherIndex validates the records in a Database's other index. TODO: Write me.
+bool validateOtherIndex(Database* database, ErrorLog* elog) { return true; }
 
 // TODO: Write these.
-static bool validateEvent(GNode* event, Database* db, ErrorLog* errorLog) {return true;}
-static bool validateOther(GNode* other, Database* db, ErrorLog* errorLog) {return true;}
+static bool validateEvent(GNode* event, Database* db, ErrorLog* elog) {return true;}
+static bool validateOther(GNode* other, Database* db, ErrorLog* elog) {return true;}
 
-
-// validateReferences creates the reference index while validating the 1 REFN nodes in a Database.
-void validateReferences(Database *dbase, IntegerTable* keymap, ErrorLog* elog) {
-	String fname = dbase->lastSegment;
+// getReferenceIndex creates the reference index while validating the 1 REFN nodes in a Database.
+// TODO: This file isn't the right location for this function.
+RefnIndex* getReferenceIndex(RecordIndex *index, String fname, IntegerTable* keymap, ErrorLog* elog) {
 	RefnIndex* refnIndex = createRefnIndex();
-	FORHASHTABLE(dbase->recordIndex, element)
-		GNode* root = ((RecordIndexEl*) element)->root;
+	FORHASHTABLE(index, element)
+		GNode* root = (GNode*) element;
 		GNode* refn = findTag(root->child, "REFN");
 		while (refn) {
 			String value = refn->value;
@@ -81,13 +57,11 @@ void validateReferences(Database *dbase, IntegerTable* keymap, ErrorLog* elog) {
 			if (refn && nestr(refn->tag, "REFN")) refn = null;
 		}
 	ENDHASHTABLE
-	dbase->refnIndex = refnIndex;
-	return;
+	return refnIndex;
 }
 
 // rootLine returns the line number where a root node was located in its Gedcom file.
-// Searches for the RecordIndexEl by the root's key and return the line property.
+// TODO: Should this function exist.
 int rootLine(GNode* root, IntegerTable* keymap) {
 	return root->key ? searchIntegerTable(keymap, root->key) : 0;
 }
-

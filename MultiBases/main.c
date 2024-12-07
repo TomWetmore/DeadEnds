@@ -5,7 +5,7 @@
 // will experiment with Database merging.
 //
 // Created by Thomas Wetmore on 16 November 2024.
-// Last changed on 17 November 2024.
+// Last changed on 7 December 2024.
 
 #include "standard.h"
 #include "utils.h"
@@ -23,7 +23,7 @@ static List* resolveFileNames(List*, String);
 
 // main is the main program of the MultiBases test program.
 int main(int argc, char *argv[]) {
-	printf("%s: MultiBases started.\n", getMillisecondsString());
+	printf("%s: MultiBases started.\n", getMsecondsStr());
 
 	// Get the Gedcom file search path.
 	String gedcomPath = getGedcomPath();
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 	// Get the List of Databases from the List of Gedcom files.
 	ErrorLog* errorLog = createErrorLog();
-	List* databases = gedcomFilesToDatabases(resolvedNames, errorLog);
+	List* databases = getDatabasesFromFiles(resolvedNames, 0, errorLog);
 
 	// Show the results.
 	printf("The number of databases created was %d\n", lengthList(databases));
