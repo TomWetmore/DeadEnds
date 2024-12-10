@@ -3,7 +3,7 @@
 // stringset.c
 //
 // Created by Thomas Wetmore on 20 April 2024.
-// Last changed on 14 July 2024.
+// Last changed on 9 December 2024.
 
 #include "stringset.h"
 
@@ -34,4 +34,11 @@ void deleteStringSet(StringSet* set, bool del) {
 		set->list.delete = null;
 		deleteSet(set);
 	}
+}
+
+// showStringSet shows the Strings in a StringSet on a single line.
+static String toString(void* el) { return (String) el; }
+void showStringSet(StringSet* set) {
+	showSet(set, toString);
+
 }

@@ -3,7 +3,7 @@
 //  test.c holds test functions used during development.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 6 December 2024.
+//  Last changed on 7 December 2024.
 
 #include <stdio.h>
 #include "standard.h"
@@ -190,7 +190,7 @@ static void showHashTableTest(RecordIndex* index, int testNumber) {
 // indexNamesTest tests the indexNames function.
 static void indexNamesTest(Database* database, int testNumber) {
 	printf("\n%d: START OF INDEX NAMES TEST\n", testNumber);
-	showNameIndexStats(getNameIndexFromPersons(database->personRoots));
+	showNameIndexStats(getNameIndex(database->personRoots));
 	printf("END OF INDEX NAMES TEST\n");
 }
 

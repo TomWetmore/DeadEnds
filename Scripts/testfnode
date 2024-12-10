@@ -23,7 +23,7 @@ proc main () {
 	key(f) " " tag(f) nl()
 	set(f, nextfam(f))
 	key(f) " " tag(f) nl()
-	set(f, lastfam(f))
+	set(f, lastfam())
 	key(f) " " tag(f) nl()
 	set(f, prevfam(f))
 	key(f) " " tag(f) nl()

@@ -21,4 +21,16 @@ void addToRecordIndex(RecordIndex*, GNode* root);
 GNode* searchRecordIndex(RecordIndex*, String);
 void showRecordIndex(RecordIndex*);
 
+#define FORRECORDINDEX(table, element, type) {\
+		int __i = 0, __j = 0;\
+		HashTable *__table = table;\
+		GNode* gnode = null;\
+		GNode* __gnode = (GNode*) firstInHashTable(__table, &__i, &__j);\
+		for(; __gnode; __gnode = (GNode*) nextInHashTable(__table, &__i, &__j)) {\
+		if (recordType(__gnode) != type) continue;\
+			gnode = __gnode;
+#define ENDRECORDINDEX }}
+
 #endif // recordindex_h
+
+

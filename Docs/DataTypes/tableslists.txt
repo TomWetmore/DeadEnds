@@ -1,4 +1,8 @@
 ------------------
+NOTES:
+1. The elements of GNodeIndex and GNodeList are identical, a (GNode*, void*) tuple. Could use a single
+   structure type for both.
+------------------
 HASHTABLES
 ------------------
 
@@ -12,6 +16,13 @@ typedef struct NameIndexEl {
     String nameKey;
     Set* recordKeys;
 } NameIndexEl;
+
+GNODEINDEX:
+typedef HashTable GNodeIndex;
+typedef struct GNodeIndexEl {
+	GNode* root;
+	void* data;
+} GNodeIndexEl;
 
 ------------------
 LISTS
@@ -27,7 +38,6 @@ typedef struct GNodeListEl {
     GNode *node;
     void* data;
 } GNodeListEl;
-
 
 ------------------
 OTHER STRUCTURES

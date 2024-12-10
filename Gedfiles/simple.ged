@@ -1,44 +1,52 @@
+0 HEAD
+1 NOTE Very short; being used to debug the partition program
+
 0 @F1@ FAM
 1 HUSB @I1@
 1 WIFE @I2@
-1 MARR
-2 DATE 1970
-2 PLAC New York, New York
 1 CHIL @I3@
 1 CHIL @I4@
 1 CHIL @I5@
+
 0 @I1@ INDI
 1 NAME Thomas Trask /Wetmore/ IV
 1 SEX M
-1 BIRT
-2 DATE 1949
-2 PLAC New London, Connecticut
 1 FAMS @F1@
+
 0 @I2@ INDI
 1 NAME Luann Frances /Grenda/
 1 SEX F
-1 BIRT
-2 DATE 1949
-2 PLAC Pittsburgh, Pennsylvania
 1 FAMS @F1@
+
 0 @I3@ INDI
 1 NAME Anna Vivian /Wetmore/
 1 SEX F
-1 BIRT
-2 DATE 1974
-2 PLAC Fairbanks, Alaska
 1 FAMC @F1@
+
 0 @I4@ INDI
 1 NAME Marie Margaret /Wetmore/
 1 SEX F
-1 BIRT
-2 DATE 1979
-2 PLAC Putnam, Connecticut
 1 FAMC @F1@
+
 0 @I5@ INDI
 1 NAME Thomas Trask /Wetmore/ V
 1 SEX M
-1 BIRT
-2 DATE 1982
-2 PLAC Newburyport, Massachusetts
 1 FAMC @F1@
+
+0 @I6@ INDI
+1 NAME Thomas Trask /Wetmore/ III
+1 SEX M
+1 FAMS @F2@
+
+0 @I7@ INDI
+1 NAME JoAn Marie /Hancock/
+1 SEX F
+1 FAMS @F2@
+
+0 @F2@ FAM
+1 HUSB @I6@
+1 WIFE @I7@
+
+0 TRLR
+
+

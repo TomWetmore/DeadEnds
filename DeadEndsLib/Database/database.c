@@ -25,7 +25,7 @@ bool indexNameDebugging = false;
 Database *createDatabase(String filePath) {
 	Database *database = (Database*) stdalloc(sizeof(Database));
 	database->filePath = strsave(filePath);
-	database->lastSegment = strsave(lastPathSegment(filePath));
+	database->name = strsave(lastPathSegment(filePath));
 	database->recordIndex = null;
 	database->nameIndex = null;
 	database->refnIndex = null;
@@ -127,45 +127,6 @@ GNode* keyToEvent(String key, RecordIndex* index) {
 GNode* keyToOther(String key, RecordIndex* index) {
 	return keyToRecordOfType(key, index, GROther);
 }
-
-// getNameIndexFromPersons indexes all person names in a database.
-NameIndex* getNameIndexFromPersons(RootList* persons) {
-	int numNamesFound = 0; // Debugging.
-	NameIndex* nameIndex = createNameIndex();
-	FORLIST(persons, element) // Loop over persons.
-		GNode* root = (GNode*) element;
-		String recordKey = root->key; // Key of record, used as is in name index.
-		for (GNode* name = NAME(root); name && eqstr(name->tag, "NAME"); name = name->sibling) {
-			if (name->value) {
-				numNamesFound++; // For debugging.
-				String nameKey = nameToNameKey(name->value); // MNOTE: points to static memory.
-				insertInNameIndex(nameIndex, nameKey, recordKey);
-			}
-		}
-	ENDLIST
-	if (indexNameDebugging) printf("the number of names encountered is %d.\n", numNamesFound);
-	return nameIndex;
-}
-
-// getNameIndexFromRecordIndex indexes all person names in a RecordIndex and returns the NameIndex.
-NameIndex* getNameIndexFromRecordIndex(RecordIndex* index) {
-	int numNamesFound = 0; // Debugging.
-	NameIndex* nameIndex = createNameIndex();
-	FORHASHTABLE(index, element) // Loop over all persons.
-		GNode* root = (GNode*) element;
-		String recordKey = root->key; // Key of record, used as is in name index.
-		for (GNode* name = NAME(root); name && eqstr(name->tag, "NAME"); name = name->sibling) {
-			if (name->value) {
-				numNamesFound++; // Debugging.
-				String nameKey = nameToNameKey(name->value); // MNOTE: points to static memory.
-				insertInNameIndex(nameIndex, nameKey, recordKey);
-			}
-		}
-	ENDHASHTABLE
-	if (indexNameDebugging) printf("the number of names encountered is %d.\n", numNamesFound);
-	return nameIndex;
-}
-
 
 // getRecord gets a record from the database given a key.
 GNode* getRecord(String key, Database* database) {

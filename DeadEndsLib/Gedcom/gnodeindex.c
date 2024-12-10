@@ -9,7 +9,7 @@
 // A GNodeIndex is suited for special purpose indexes of Gedcom records/roots.
 //
 // Created by Thomas Wetmore on 6 October 2024.
-// Last changed on 31 October 2024.
+// Last changed on 10 December 2024.
 
 #include <stdio.h>
 #include "gnodeindex.h"
@@ -43,14 +43,19 @@ void addToGNodeIndex(GNodeIndex* index, GNode* gnode, void* data) {
 	addToHashTable(index, createGNodeIndexEl(gnode, data), false);
 }
 
+// searchGNodeIndex searches a GNodeIndex for the GNode with the given key.
+GNode* searchGNodeIndex(GNodeIndex* index, String key) {
+	GNodeIndexEl* el = searchHashTable(index, key);
+	if (!el || !el->root) return null;
+	return el->root;
+}
+
 // showGNodeIndex shows a GNodeIndex; for debugging.
 void showGNodeIndex(GNodeIndex* index, void(*show)(void*)) {
-	if (show) {
-		printf("GNodeIndex:\n");
-		FORHASHTABLE(index, el)
-			GNodeIndexEl* element = el;
-			printf("\t%s: ", element->root->key);
-			(*show)(element->data);
-		ENDHASHTABLE
-	}
+	printf("GNodeIndex:\n");
+	FORHASHTABLE(index, el)
+		GNodeIndexEl* element = el;
+		printf("\t%s: ", element->root->key);
+		if (show) (*show)(element->data);
+	ENDHASHTABLE
 }

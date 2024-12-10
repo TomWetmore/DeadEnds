@@ -4,7 +4,7 @@
 // record keys that have the names.
 //
 // Created by Thomas Wetmore on 26 November 2022.
-// Last changed on 6 December 2024.
+// Last changed on 7 December 2024.
 
 #include "nameindex.h"
 #include "name.h"
@@ -45,6 +45,25 @@ NameIndex *createNameIndex(void) {
 // deleteNameIndex deletes a name index.
 void deleteNameIndex(NameIndex *nameIndex) {
 	deleteHashTable(nameIndex);
+}
+
+// getNameIndex returns the NameIndex of all persons in a RootList.
+NameIndex* getNameIndex(RootList* persons) {
+	int numNamesFound = 0; // Debugging.
+	NameIndex* nameIndex = createNameIndex();
+	FORLIST(persons, element) // Loop over persons.
+		GNode* root = (GNode*) element;
+		String recordKey = root->key; // Key of record, used as is in name index.
+		for (GNode* name = NAME(root); name && eqstr(name->tag, "NAME"); name = name->sibling) {
+			if (name->value) {
+				numNamesFound++; // For debugging.
+				String nameKey = nameToNameKey(name->value); // MNOTE: points to static memory.
+				insertInNameIndex(nameIndex, nameKey, recordKey);
+			}
+		}
+	ENDLIST
+	if (nameIndexDebugging) printf("the number of names encountered is %d.\n", numNamesFound);
+	return nameIndex;
 }
 
 // insertInNameIndex adds a (name key, person key) relationship to a NameIndex.

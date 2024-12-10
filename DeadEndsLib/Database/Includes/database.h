@@ -3,7 +3,7 @@
 // database.h is the header file for the Database type.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed on 4 December 2024.
+// Last changed on 7 December 2024.
 
 #ifndef database_h
 #define database_h
@@ -17,20 +17,23 @@
 #include "errors.h"
 #include "rootlist.h"
 
-typedef HashTable RecordIndex;
+typedef HashTable RecordIndex; // Forward references.
 typedef HashTable NameIndex;
 typedef List RootList;
 
+// DBaseAction is a "Database action" that customizes Database processing.
+typedef void (*DBaseAction)(Database*, ErrorLog*);
+
 // Database is the structure that hold DeadEnds databases.
 typedef struct Database {
-	String filePath;  // Path to the Gedcom file this database was built from.
-	String lastSegment;  // Last segment of the path for error messages.
+	String filePath;  // Path to Gedcom file this Database was built from.
+	String name; // Use last segment of the path for the name of the Database.
 	GNode* header; // Root of header record.
 	RecordIndex* recordIndex; // Index of all keyed records.
-	NameIndex *nameIndex;  // Index of the names of the persons in this database.
-	RefnIndex *refnIndex;  // Index of the REFN values in this database.
-	RootList *personRoots;  // List of all person roots in the database.
-	RootList *familyRoots;  // List of all family roots in the database.
+	NameIndex *nameIndex; // Index of the names of the persons in this database.
+	RefnIndex *refnIndex; // Index of the REFN values in this database.
+	RootList *personRoots; // List of all person roots in the database.
+	RootList *familyRoots; // List of all family roots in the database.
 } Database;
 
 Database *createDatabase(String fileName); // Create an empty database.
@@ -51,7 +54,6 @@ GNode *keyToEvent(String key, RecordIndex*); // Get an event record from the dat
 GNode *keyToOther(String key, RecordIndex*); // Get an other record from the database.
 GNode *getRecord(String key, Database*);  // Get an arbitraray record from the database.
 bool storeRecord(Database*, GNode*, int lineno, ErrorLog*); // Add a record to the database.
-NameIndex* getNameIndexFromPersons(RootList*);
 void summarizeDatabase(Database*);
 
 String generateFamilyKey(Database*);

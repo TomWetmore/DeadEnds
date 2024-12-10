@@ -1,10 +1,10 @@
 // Partition
 //
-// main.c is the main program of the partition command. The program reads a Gedcom file and then
-// partitions it into closed sets of persons and families.
+// main.c is the main program of the partition program. It reads a Gedcom file and partitions it
+// into closed sets of persons and families.
 //
 // Created by Thomas Wetmore on 4 October 2024.
-// Last changed on 25 November 2024.
+// Last changed on 10 December 2024.
 
 #include <stdio.h>
 #include "import.h"
@@ -16,6 +16,8 @@
 #include "file.h"
 #include "connect.h"
 
+#define gms getMsecondsStr()
+
 static void getArguments(int, char**, String*);
 static void getEnvironment(String*);
 static void usage(void);
@@ -26,7 +28,9 @@ static GNodeIndex* createIndexOfGNodes(GNodeList*);
 static GNodeList* removeNonPersons(GNodeList*);
 static void showConnects(List*, GNodeIndex*);
 static bool debugging = false;
-static bool timing = true;
+static bool timing = false;
+//static bool brownnose = false;
+static void showqueue(List*); // Part of brownnose debugging.
 
 // main is the main program of the partition program. It reads a Gedcom file into a GNodeList and
 // creates a GNodeIndex to serve as database. It partitions the records into closed partitions of
@@ -39,35 +43,44 @@ int main(int argc, char** argv) {
 	// Get the Gedcom file.
 	getArguments(argc, argv, &gedcomFile);
 	getEnvironment(&searchPath);
-	gedcomFile = resolveFile(gedcomFile, searchPath);
-	if (debugging) printf("Resolved file: %s\n", gedcomFile);
+	String resolvedFile = resolveFile(gedcomFile, searchPath);
+	if (!resolvedFile) {
+		fprintf(stderr, "Could not open file %s.\n", gedcomFile);
+		exit(1);
+	}
+	if (debugging) printf("%s: partition: resolved file: %s\n", gms, resolvedFile);
 
 	// Read the file and get the list of all records.
-	File* file = openFile(gedcomFile, "r");
+	File* file = openFile(resolvedFile, "r");
 	ErrorLog* log = createErrorLog();
 	IntegerTable* keymap = createIntegerTable(4097);
 	GNodeList* roots = getGNodeTreesFromFile(file, keymap, log); // All GNode roots parsed from file.
-	if (timing) printf("%s: Partition: read gedcom file.\n", getMsecondsStr());
+	if (timing) printf("%s: Partition: read gedcom file.\n", gms);
+	if (debugging) printf("%s: Partition: there are %d roots in the roots list.\n", getMsecondsStr(), lengthList(roots));
 	if (lengthList(log) > 0) goAway(log);
 	closeFile(file);
 
 	// Validate record keys read from the Gedcom file.
 	checkKeysAndReferences(roots, file->name, keymap, log);
-	if (timing) printf("%s: Partition: validated keys.\n", getMsecondsStr());
+	if (timing) printf("%s: Partition: validated keys.\n", gms);
 	if (lengthList(log)) goAway(log);
 	GNodeIndex* index = createIndexOfGNodes(roots); // Index of all GNodes.
+	if (timing) printf("%s: Partition: createdIndexOfGNodes.\n", gms);
+	if (debugging) printf("%s: Partition: index has %d elements.\n", gms, sizeHashTable(index));
 	roots = removeNonPersons(roots);
+	if (timing) printf("%s: Partition: non-persons removed from roots.\n", gms);
+	if (debugging) printf("%s: Partition: roots now has %d elements.\n", gms, lengthList(roots));
 
 	// Create the partitions.
 	List* partitions = getPartitions(roots, index, log);
-	if (timing) printf("%s: Partition: created partitions.\n", getMsecondsStr());
+	if (timing) printf("%s: Partition: created partitions.\n", gms);
 
 	// Get number of ancestors and descendents of all person.
 	FORLIST(partitions, el)
 		List* partition = (List*) el;
 		getConnections(partition, index);
 	ENDLIST
-	printf("%s: Partition: computed connectedness numbers.\n", getMsecondsStr());
+	if (timing) printf("%s: Partition: computed connectedness numbers.\n", gms);
 
 	// DEBUG: SHOW THE CONNECTIONS OF EACH PARTITION
 	FORLIST(partitions, el)
@@ -88,7 +101,7 @@ int main(int argc, char** argv) {
 		}
 	ENDLIST
 	printf("Person: %s %s %d\n", topGun->key, topGun->child->value, max);
-	if (timing) printf("%s: Partition: done.\n", getMsecondsStr());
+	if (timing) printf("%s: Partition: done.\n", gms);
 }
 
 // showConnects is a debug function that shows the connect data of each person in a list.
@@ -124,6 +137,8 @@ static GNodeIndex* createIndexOfGNodes(GNodeList* list) {
 // getPartitions partitions a list of Gedcom records into a list of lists of GNodes. Each
 // partition is a closed set of person records.
 static List* getPartitions(GNodeList* gnodes, GNodeIndex* index, ErrorLog* log) {
+	if (debugging) printf("%s: Partition: getPartitions: |gnodes|: %d, |index|: %d.\n", gms,
+						  lengthList(gnodes), sizeHashTable(index));
 	StringSet* visited = createStringSet(); // Visited GNode keys.
 	List* partitions = createList(null, null, null, false); // List of partitions to return.
 	FORLIST(gnodes, el)
@@ -137,10 +152,14 @@ static List* getPartitions(GNodeList* gnodes, GNodeIndex* index, ErrorLog* log) 
 	return partitions;
 }
 
+static void brown(GNode* root, GNodeList* gnodes, GNodeIndex* index,
+				  StringSet* visited);
+
 // createPartition creates a partition by finding the closed set of Gedcom persons and families
 // that contains the GNode argument. A partition is a list of GNodes.
 static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index,
 							 StringSet* visited, ErrorLog* log) {
+	if (debugging) printf("%s: createPartition: start.\n", gms);
 	List* partition = createList(null, null, null, false);
 	List* queue = createList(null, null, null, false); // GNodes to process.
 	prependToList(queue, root); // Init queue with first node.
@@ -159,7 +178,7 @@ static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index,
 				String tag = child->tag;
 				if (eqstr(tag, "FAMS") || eqstr(tag, "FAMC")) {
 					String value = child->value;
-					GNode* node = searchRecordIndex(index, value);
+					GNode* node = searchGNodeIndex(index, value);
 					if (!node) { // Can't happen.
 						addErrorToLog(log, createError(linkageError, "file", 0, "Couldn't find a family"));
 						continue;
@@ -173,7 +192,7 @@ static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index,
 				String tag = child->tag;
 				if (eqstr(tag, "HUSB") || eqstr(tag, "WIFE") || eqstr(tag, "CHIL")) {
 					String value = child->value;
-					GNode* node = searchRecordIndex(index, value);
+					GNode* node = searchGNodeIndex(index, value);
 					if (!node) { // Can't happen.
 						addErrorToLog(log, createError(linkageError, "", 0, "Couldn't find a person"));
 						continue;
@@ -236,4 +255,12 @@ static GNodeList* removeNonPersons(GNodeList* list) {
 	ENDLIST
 	deleteList(list);
 	return newlist;
+}
+
+
+static void showqueue(List* queue) {
+	FORLIST(queue, element)
+		printf("%s ",  ((GNode*) element)->key);
+	ENDLIST
+	printf("\n");
 }

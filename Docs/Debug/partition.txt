@@ -1,0 +1,49 @@
+Debugging partition.
+
+Main program:
+ 1. Resolves the Gedcom file.
+ 2. Opens the file, create error log, create keymap.
+ 3. Calls {GNodeList* roots = getGNodeTreesFromFile(file, keymap, log)} to get the list of roots. The elements of roots are (GNode*, void*) tuples.
+ 4. Close the file and return if anything is in the error log.
+ 5. Call {checkKeysAndReferences(roots, file->name, keymap, log);} to be sure all keys are defined. Return if errors.
+ 6. Call {GNodeIndex* index = createIndexOfGNodes(roots); } to get the index of all GNode roots.
+ 7. Call {roots = removeNonPersons(roots);} to create a new GNodeList with just the person roots in it.
+ 8. Call {List* partitions = getPartitions(roots, index, log);} to get the partitions.
+ 9. Call {getConnections(partition, index);} on every partition in the list to find the numer of "connections" each person has.
+10. Print out things and be done.
+
+createIndexOfGNodes -- static GNodeIndex* createIndexOfGNodes(GNodeList* list)
+ 1. Call {GNodeIndex* index = createGNodeIndex(deleteData);} to create a GNodeIndex.
+ 2. Call {addToGNodeIndex(index, root, data);} for each element of the GNodeList (data is a ConnectData*).
+ 3. Return the newly created GNodeIndex*.
+
+getPartitions -- getPartitions(GNodeList* gnodes, GNodeIndex* index, ErrorLog* log) {
+ 1. Call {StringSet* visited = createStringSet();} to create the set visited keys.
+ 2. Call {List* partitions = createList(null, null, null, false);} to create the list to of partitions to return.
+ 3. Iterate the GNodeList of GNodes:
+ 4. For each one:
+    a. Get its key.
+    b. If the key is not in the visited set call {appendToList(partitions, createPartition(root, gnodes, index, visited, log));}
+ 5. Delete the visited set and return the list of partitions.
+
+createPartition -- static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index, StringSet* visited, ErrorLog* log)
+ 1. Call {List* partition = createList(null, null, null, false);} to create the List to be the next partition.
+ 2. Call (List* queue = createList(null, null, null, false);} to be the queue of GNodes to  process.
+ 3. Call {prependToList(queue, root);} to init the queue with the first root to be in the set.
+ 4. Iterate the queue until it is empty doing:
+    a. Call {GNode* root = getAndRemoveLastListElement(queue);} to remove a GNode (can be an INDI or FAM) from the queue.
+    b. If the key is on the visited list continue the loop to skip.
+    c. Call {addToSet(visited, key);} to add the key of current GNode to the set.
+    d. If the GNode is an INDI call {appendToList(partition, root);} to add the person to the current partition.
+    e. If the GNode is an INDI find the FAMS and FAMC nodes in the person. For each of those nodes:
+       1. Use the value (a key) to search for the FAM GNode in the index.
+       2. prepend that GNode to the queue.
+    f. If the GNode is a FAM find the HUSB, WIFE, and CHIL nodes in the family. For each of those nodes:
+       1. Use the value (a key) to search for the INDI GNode in the index.
+       2. prepend that GNode to the queue.
+ 5. Delete the queue and return the partition.
+
+removeNonPersons -- GNodeList* removeNonPersons(GNodeList* list) 
+ 1. Do {NodeList* newlist = createGNodeList();} to hold the new list of just persons.
+ 2. For each element of the list, if it is a person add it to the newlist.
+ 3. Delete list and return newlist.

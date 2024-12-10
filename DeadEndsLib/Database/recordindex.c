@@ -12,9 +12,11 @@
 #include "gedcom.h"
 
 #define numRecordIndexBuckets 2047
+#define brownnose true
 
 // compare is the compare function for record keys.
 static int compare(String left, String right) {
+	if (brownnose) printf("compare[RecordIndex] comparing %s and %s.\n", left, right);
 	return compareRecordKeys(left, right);
 }
 
