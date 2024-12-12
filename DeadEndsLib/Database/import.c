@@ -3,7 +3,7 @@
 // import.c has functions that import Gedcom files into internal structures.
 //
 // Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 8 December 2024.
+// Last changed on 11 December 2024.
 
 #include "import.h"
 #include "validate.h"
@@ -54,11 +54,11 @@ Database* getDatabaseFromFile(String path, int vcodes, ErrorLog* elog) {
 // checkKeysAndReferences checks record keys and their references. Creates a table of all keys
 // and checks for duplicates. Checks that all keys found as values refer to records.
 #define getline(key) (searchIntegerTable(keymap, key))
-void checkKeysAndReferences(GNodeList* records, String name, IntegerTable* keymap, ErrorLog* log) {
+//void checkKeysAndReferences(GNodeList* records, String name, IntegerTable* keymap, ErrorLog* log) {
+void checkKeysAndReferences(RootList* records, String name, IntegerTable* keymap, ErrorLog* log) {
 	StringSet* keySet = createStringSet();
 	FORLIST(records, element)
-		GNodeListEl* el = (GNodeListEl*) element;
-		GNode* root = el->node;
+		GNode* root = (GNode*) element;
 		String key = root->key;
 		if (!key) {
 			RecordType rtype = recordType(root);
@@ -79,15 +79,14 @@ void checkKeysAndReferences(GNodeList* records, String name, IntegerTable* keyma
 	int nodesCounted = 0;
 	FORLIST(records, element)
 		recordsVisited++;
-		GNodeListEl* el = (GNodeListEl*) element;
-		GNode* root = el->node;
+		GNode* root = (GNode*) element;
 		nodesCounted += countNodes(root);
 		FORTRAVERSE(root, node)
 			nodesTraversed++;
 			if (isKey(node->value)) numReferences++;
 			if (isKey(node->value) && !isInSet(keySet, node->value)) {
 				Error* error = createError(gedcomError, name,
-								getline(el->node->key) + countNodesBefore(node), "invalid key value");
+								getline(node->key) + countNodesBefore(node), "invalid key value");
 					addErrorToLog(log, error);
 				}
 		ENDTRAVERSE
@@ -114,7 +113,8 @@ RecordIndex* getRecordIndexFromFile(String path, RootList* personRoots, RootList
 		return null;
 	}
 	if (!keymap) keymap = createIntegerTable(4097); // MNOTE: HOW TO GET FREED!
-	GNodeList* roots = getGNodeTreesFromFile(file, keymap, elog); // Get the records from file.
+	//GNodeList* roots = getGNodeTreesFromFile(file, keymap, elog); // Get the records from file.
+	RootList* roots = getRootListFromFile(file, keymap, elog); // Get the records from file.
 	closeFile(file);
 	if (roots == null) {
 		if (importDebugging) printf("%s: errors processing last file.\n", getMsecondsStr());
@@ -137,7 +137,7 @@ RecordIndex* getRecordIndexFromFile(String path, RootList* personRoots, RootList
 	// Create the RecordIndex and optional RootLists.
 	RecordIndex* recordIndex = createRecordIndex();
 	FORLIST(roots, element)
-		GNode* root = ((GNodeListEl*) element)->node;
+		GNode* root = (GNode*) element;
 		if (root->key) addToRecordIndex(recordIndex, root);
 		RecordType rtype = recordType(root);
 		if (personRoots && rtype == GRPerson) insertInRootList(personRoots, root);

@@ -11,7 +11,8 @@ static int getNumAncestors(GNode*, GNodeIndex*);
 static int getNumDescendents(GNode*, GNodeIndex*);
 
 // getConnections finds the numbers of ancestors and descendents of the persons in a list. The
-// numbers are kept in ConnectData structs in the GNodeIndex.
+// numbers are kept in ConnectData structs in the GNodeIndex. list is a List of GNode* roots,
+// and index is an index of all all persons and families.
 void getConnections(List* list, GNodeIndex* index) {
 	FORLIST(list, el)
 		GNode* root = (GNode*) el;

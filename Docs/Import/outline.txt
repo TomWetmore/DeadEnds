@@ -35,9 +35,9 @@ III. RecordIndex* getRecordIndexFromFile(String path, RootList* personRoots, Roo
    11. Validate the families.
    12. Return the record index and personRoots and familyRoots.
 
-IV. GNodeList* getGNodeTreesFromFile(*file, *keymap, *errlog) -- Get the GNodeList of all records in a Gedcom file.
-    1. Call {getGNodeListFromFile} to get the list of all Gedcom lines as nodes; has levels.
-    2. Call {getGNodeTreesFromNodeList} to convert the list of nodes to a list of node trees.
+IV. RootList* getRootListFromFile(*file, *keymap, *errlog) -- Get the RootList of all records in a Gedcom file.
+    1. Call {getGNodeListFromFile} to get the GNodeList of all Gedcom lines as nodes; has levels.
+    2. Call {getRootListFromGNodeList} to convert the GNodeList of nodes to a RootList of node trees.
     3. Return the list of record roots.
     ** If an error occurs update the error log and return null.
 
@@ -50,7 +50,7 @@ V. GNodeList* getGNodeListFromFile(*file, *keymap, *errlog) -- Get the GNodeList
         d. If any errors occur add them to the log
     3. Return the GNodeList if there were no errors; null otherwise.
 
-VI. GNodeList* getGNodeTreesFromNodeList(*nodes, name, *elog) -- Get list of all trees from list of all nodes.
+VI. GNodeList* getRootListFromGNodeList(*nodes, name, *elog) -- Get RootList of all trees from GNodeList of all nodes.
     1. Init state machine variables.
     2. Set state to Initial (others are Main and Error).
     3. Iterate the list of nodes doing::

@@ -4,7 +4,7 @@
 // record keys to the roots of the GNode trees with those keys.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 5 December 2024.
+// Last changed on 11 December 2024.
 
 #include "recordindex.h"
 #include "list.h"
@@ -12,11 +12,10 @@
 #include "gedcom.h"
 
 #define numRecordIndexBuckets 2047
-#define brownnose true
+#define brownnose false
 
 // compare is the compare function for record keys.
 static int compare(String left, String right) {
-	if (brownnose) printf("compare[RecordIndex] comparing %s and %s.\n", left, right);
 	return compareRecordKeys(left, right);
 }
 

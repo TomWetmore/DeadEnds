@@ -16,6 +16,7 @@ typedef List RootList;
 
 RootList *createRootList(void);  // Create a root list.
 void insertInRootList(RootList*, GNode*);
+void showRootList(RootList*);
 
 
 #endif /* rootlist_h */

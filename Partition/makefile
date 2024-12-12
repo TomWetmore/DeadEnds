@@ -5,8 +5,8 @@ INCLUDES= -I$(LL)Database/Includes -I$(LL)DataTypes/Includes -I$(LL)Validate/Inc
 LIBLOCNS=-L$(LL)Database -L$(LL)DataTypes -L$(LL)Gedcom -L$(LL)Utils -L$(LL)Validate
 LIBS= -ldatabase -lvalidate -lgedcom -ldatatypes -lutils
 
-partition: main.o connect.o
-	$(CC) -o partition main.o connect.o  $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
+partition: main.o connect.o partition.o
+	$(CC) -o partition main.o connect.o partition.o $(INCLUDES) $(LIBLOCNS) $(LIBS) -lc
 
 clean:
 	rm -f *.o partition

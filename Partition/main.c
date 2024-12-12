@@ -4,7 +4,7 @@
 // into closed sets of persons and families.
 //
 // Created by Thomas Wetmore on 4 October 2024.
-// Last changed on 10 December 2024.
+// Last changed on 11 December 2024.
 
 #include <stdio.h>
 #include "import.h"
@@ -15,6 +15,7 @@
 #include "writenode.h"
 #include "file.h"
 #include "connect.h"
+#include "partition.h"
 
 #define gms getMsecondsStr()
 
@@ -22,19 +23,16 @@ static void getArguments(int, char**, String*);
 static void getEnvironment(String*);
 static void usage(void);
 static void goAway(ErrorLog*);
-static List* getPartitions(GNodeList*, GNodeIndex*, ErrorLog*);
-static List* createPartition(GNode*, GNodeList*, GNodeIndex*, StringSet*, ErrorLog*);
 static GNodeIndex* createIndexOfGNodes(GNodeList*);
 static GNodeList* removeNonPersons(GNodeList*);
 static void showConnects(List*, GNodeIndex*);
 static bool debugging = false;
-static bool timing = false;
-//static bool brownnose = false;
-static void showqueue(List*); // Part of brownnose debugging.
+static bool timing = true;
+static bool brownnose = false;
 
 // main is the main program of the partition program. It reads a Gedcom file into a GNodeList and
 // creates a GNodeIndex to serve as database. It partitions the records into closed partitions of
-// persons and families. It computes the numbers of ancestors and descendents of all persons.
+// persons. It computes the numbers of ancestors and descendents of all persons.
 int main(int argc, char** argv) {
 	String gedcomFile = null;
 	String searchPath = null;
@@ -50,13 +48,14 @@ int main(int argc, char** argv) {
 	}
 	if (debugging) printf("%s: partition: resolved file: %s\n", gms, resolvedFile);
 
-	// Read the file and get the list of all records.
+	// Read the Gedcom file and get the list of its records.
 	File* file = openFile(resolvedFile, "r");
 	ErrorLog* log = createErrorLog();
 	IntegerTable* keymap = createIntegerTable(4097);
-	GNodeList* roots = getGNodeTreesFromFile(file, keymap, log); // All GNode roots parsed from file.
+	RootList* roots = getRootListFromFile(file, keymap, log); // All roots parsed from file.
+	if (brownnose) showRootList(roots);
 	if (timing) printf("%s: Partition: read gedcom file.\n", gms);
-	if (debugging) printf("%s: Partition: there are %d roots in the roots list.\n", getMsecondsStr(), lengthList(roots));
+	if (debugging) printf("%s: Partition: |roots| = %d.\n", gms, lengthList(roots));
 	if (lengthList(log) > 0) goAway(log);
 	closeFile(file);
 
@@ -66,16 +65,16 @@ int main(int argc, char** argv) {
 	if (lengthList(log)) goAway(log);
 	GNodeIndex* index = createIndexOfGNodes(roots); // Index of all GNodes.
 	if (timing) printf("%s: Partition: createdIndexOfGNodes.\n", gms);
-	if (debugging) printf("%s: Partition: index has %d elements.\n", gms, sizeHashTable(index));
-	roots = removeNonPersons(roots);
+	if (debugging) printf("%s: Partition: |index| = %d.\n", gms, sizeHashTable(index));
+	RootList* persons = removeNonPersons(roots);
 	if (timing) printf("%s: Partition: non-persons removed from roots.\n", gms);
-	if (debugging) printf("%s: Partition: roots now has %d elements.\n", gms, lengthList(roots));
+	if (debugging) printf("%s: Partition: |persons| = %d.\n", gms, lengthList(persons));
 
 	// Create the partitions.
-	List* partitions = getPartitions(roots, index, log);
+	List* partitions = getPartitions(persons, index, log);
 	if (timing) printf("%s: Partition: created partitions.\n", gms);
 
-	// Get number of ancestors and descendents of all person.
+	// Get number of ancestors and descendents of all persons.
 	FORLIST(partitions, el)
 		List* partition = (List*) el;
 		getConnections(partition, index);
@@ -90,14 +89,14 @@ int main(int argc, char** argv) {
 	// Find the most connected person.
 	int max = 0;
 	GNode* topGun = null;
-	FORLIST(roots, el)
-		GNode* gnode = ((GNodeListEl*) el)->node;
-		GNodeIndexEl* element = searchHashTable(index, gnode->key);
+	FORLIST(persons, el)
+		GNode* person = (GNode*) el;
+		GNodeIndexEl* element = searchHashTable(index, person->key);
 		ConnectData* data = element->data;
 		int score = data->numAncestors + data->numDescendents;
 		if (score > max) {
 			max = score;
-			topGun = gnode;
+			topGun = person;
 		}
 	ENDLIST
 	printf("Person: %s %s %d\n", topGun->key, topGun->child->value, max);
@@ -122,88 +121,16 @@ static void deleteData(void* data) {
 }
 
 // createIndexOfRecords creates a GNodeIndex from a GNodeList. Its elements have the ConnectData.
-static GNodeIndex* createIndexOfGNodes(GNodeList* list) {
+static GNodeIndex* createIndexOfGNodes(RootList* list) {
 	GNodeIndex* index = createGNodeIndex(deleteData);
 	FORLIST(list, el)
-		GNode* root = ((GNodeListEl*) el)->node;
+		GNode* root = (GNode*) el;
 		if (root->key) {
 			ConnectData* data = createConnectData();
 			addToGNodeIndex(index, root, data);
 		}
 	ENDLIST
 	return index;
-}
-
-// getPartitions partitions a list of Gedcom records into a list of lists of GNodes. Each
-// partition is a closed set of person records.
-static List* getPartitions(GNodeList* gnodes, GNodeIndex* index, ErrorLog* log) {
-	if (debugging) printf("%s: Partition: getPartitions: |gnodes|: %d, |index|: %d.\n", gms,
-						  lengthList(gnodes), sizeHashTable(index));
-	StringSet* visited = createStringSet(); // Visited GNode keys.
-	List* partitions = createList(null, null, null, false); // List of partitions to return.
-	FORLIST(gnodes, el)
-		GNode* root = ((GNodeListEl*) el)->node;
-		String key = root->key;
-		if (key && !isInSet(visited, key)) { // root starts a new partition.
-			appendToList(partitions, createPartition(root, gnodes, index, visited, log));
-		}
-	ENDLIST
-	deleteStringSet(visited, false);
-	return partitions;
-}
-
-static void brown(GNode* root, GNodeList* gnodes, GNodeIndex* index,
-				  StringSet* visited);
-
-// createPartition creates a partition by finding the closed set of Gedcom persons and families
-// that contains the GNode argument. A partition is a list of GNodes.
-static List* createPartition(GNode* root, GNodeList* gnodes, GNodeIndex* index,
-							 StringSet* visited, ErrorLog* log) {
-	if (debugging) printf("%s: createPartition: start.\n", gms);
-	List* partition = createList(null, null, null, false);
-	List* queue = createList(null, null, null, false); // GNodes to process.
-	prependToList(queue, root); // Init queue with first node.
-
-	// Iterate until the queue is empty.
-	while (lengthList(queue) > 0) {
-		GNode* root = getAndRemoveLastListElement(queue);
-		String key = root->key;
-		if (isInSet(visited, key)) continue; // Skip if seen.
-		addToSet(visited, key);
-		if (recordType(root) == GRPerson) appendToList(partition, root); // Add persons only.
-
-		// If root is a person add its FAMS and FAMC nodes.
-		if (recordType(root) == GRPerson) {
-			for (GNode* child = root->child; child; child = child->sibling) {
-				String tag = child->tag;
-				if (eqstr(tag, "FAMS") || eqstr(tag, "FAMC")) {
-					String value = child->value;
-					GNode* node = searchGNodeIndex(index, value);
-					if (!node) { // Can't happen.
-						addErrorToLog(log, createError(linkageError, "file", 0, "Couldn't find a family"));
-						continue;
-					}
-					prependToList(queue, node);
-				}
-			}
-		// If root is a family add its HUSB, WIFE, and CHIL nodes.
-		} else if (recordType(root) == GRFamily) {
-			for (GNode* child = root->child; child; child = child->sibling) {
-				String tag = child->tag;
-				if (eqstr(tag, "HUSB") || eqstr(tag, "WIFE") || eqstr(tag, "CHIL")) {
-					String value = child->value;
-					GNode* node = searchGNodeIndex(index, value);
-					if (!node) { // Can't happen.
-						addErrorToLog(log, createError(linkageError, "", 0, "Couldn't find a person"));
-						continue;
-					}
-					prependToList(queue, node);
-				}
-			}
-		}
-	}
-	deleteList(queue);
-	return partition;
 }
 
 // getArguments gets the Gedcom file name from the command line.
@@ -244,13 +171,12 @@ static void goAway(ErrorLog* log) {
 	exit(1);
 }
 
-// removeNonPersons removes the non-person GNodes from a list of GNodes. The original List is
-// deleted and the new one is returned.
-static GNodeList* removeNonPersons(GNodeList* list) {
-	GNodeList* newlist = createGNodeList();
+// removeNonPersons removes the non-person records from a RootList of records. The original
+// RootList is deleted and the new one is returned.
+static RootList* removeNonPersons(RootList* list) {
+	RootList* newlist = createRootList();
 	FORLIST(list, el)
-		GNodeListEl* element = (GNodeListEl*) el;
-		if (recordType(element->node) == GRPerson)
+		if (recordType((GNode*) el) == GRPerson)
 			appendToList(newlist, el);
 	ENDLIST
 	deleteList(list);

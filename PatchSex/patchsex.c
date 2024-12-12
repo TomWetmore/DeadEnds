@@ -4,7 +4,7 @@
 // INDI records, and adds them in INDI records that do not have one.
 //
 // Created by Thomas Wetmore on 10 July 2024.
-// Last changed on 10 August 2024.
+// Last changed on 11 December 2024.
 
 #include "patchsex.h"
 #include "splitjoin.h"
@@ -21,7 +21,7 @@ int main(void) {
 	File* file = openFile(fileName, "r");
 	ErrorLog* log = createErrorLog();
 	IntegerTable* keymap = createIntegerTable(4097);
-	GNodeList* roots = getGNodeTreesFromFile(file, keymap, log);
+	GNodeList* roots = getRootListFromFile(file, keymap, log);
 	if (lengthList(log) > 0) {
 		printf("patchsex: cancelled due to errors\n");
 		showErrorLog(log);
@@ -36,9 +36,7 @@ int main(void) {
 	}
 	// Call patchSexLine on each INDI record form the file.
 	FORLIST(roots, element)
-		GNodeListEl* el = (GNodeListEl*) element;
-		GNode* root = el->node;
-		//int line = el->line;
+		GNode* root = (GNode*) element;
 		if (recordType(root) == GRPerson) patchSexLine(root);
 	ENDLIST
 	// Write the possibly modified list of records out to a file.
