@@ -12,6 +12,7 @@
 #include "gnode.h"
 #include "file.h"
 #include "integertable.h"
+#include "errors.h"
 
 // GNodeList is a List of GNodeListEls.
 typedef List GNodeList;
@@ -26,10 +27,8 @@ typedef struct GNodeListEl {
 GNodeListEl* createGNodeListEl(GNode*, void*);
 GNodeList* createGNodeList(void);
 void deleteGNodeList(GNodeList*, void(*delete)(void*));
-RootList* getRootListFromFile(File*, IntegerTable*, ErrorLog*);
 GNodeList* getGNodeListFromFile(File*, IntegerTable*, ErrorLog*);
 GNodeList* getGNodeListFromString(String, ErrorLog*);
-RootList* getRootListFromGNodeList(GNodeList*, String file, ErrorLog*);
 GNodeList* getGNodeTreesFromString(String, String, ErrorLog* errorLog);
 void writeGNodeTreesToFile(GNodeList*, File*);
 void appendToGNodeList(GNodeList*, GNode*, void*);
