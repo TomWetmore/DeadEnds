@@ -4,7 +4,7 @@
 // into closed sets of persons and families.
 //
 // Created by Thomas Wetmore on 4 October 2024.
-// Last changed on 11 December 2024.
+// Last changed on 12 December 2024.
 
 #include <stdio.h>
 #include "import.h"
@@ -30,9 +30,9 @@ static bool debugging = false;
 static bool timing = true;
 static bool brownnose = false;
 
-// main is the main program of the partition program. It reads a Gedcom file into a GNodeList and
-// creates a GNodeIndex to serve as database. It partitions the records into closed partitions of
-// persons. It computes the numbers of ancestors and descendents of all persons.
+// main is the main program of the partition program. It reads a Gedcom file into a RootLiat and
+// creates a GNodeIndex to serve as a record Index. It partitions the records into closed
+// partitions of persons. It computes the numbers of ancestors and descendents of all persons.
 int main(int argc, char** argv) {
 	String gedcomFile = null;
 	String searchPath = null;
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
 
 	// Create the partitions.
 	List* partitions = getPartitions(persons, index, log);
-	if (timing) printf("%s: Partition: created partitions.\n", gms);
+	if (timing) printf("%s: Partition: created %d partitions.\n", gms, lengthList(partitions));
 
 	// Get number of ancestors and descendents of all persons.
 	FORLIST(partitions, el)
@@ -82,7 +82,9 @@ int main(int argc, char** argv) {
 	if (timing) printf("%s: Partition: computed connectedness numbers.\n", gms);
 
 	// DEBUG: SHOW THE CONNECTIONS OF EACH PARTITION
+	int count = 1;
 	FORLIST(partitions, el)
+		printf("%4d: ", count++);
 		showConnects((List*) el, index);
 	ENDLIST
 
@@ -125,10 +127,8 @@ static GNodeIndex* createIndexOfGNodes(RootList* list) {
 	GNodeIndex* index = createGNodeIndex(deleteData);
 	FORLIST(list, el)
 		GNode* root = (GNode*) el;
-		if (root->key) {
-			ConnectData* data = createConnectData();
-			addToGNodeIndex(index, root, data);
-		}
+		if (root->key)
+			addToGNodeIndex(index, root, createConnectData());
 	ENDLIST
 	return index;
 }

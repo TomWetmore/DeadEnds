@@ -3,7 +3,7 @@
 // gnodelist.c implements the GNodeList data type.
 //
 // Created by Thomas Wetmore on 27 May 2024.
-// Last changed on 11 December 2024.
+// Last changed on 12 December 2024.
 
 #include "gnodelist.h"
 #include "readnode.h"
@@ -11,11 +11,9 @@
 #include "integertable.h"
 #include "file.h"
 
-#define level(e) ((int)(long)(e->data))
-
 static bool debugging = true;
 
-// createNodeListElement creates a GNodeList element. gnode is the GNode, and data is arbitrary.
+// createNodeListEl creates a GNodeList element. gnode is the GNode, and data is arbitrary.
 GNodeListEl* createGNodeListEl(GNode* gnode, void* data) {
 	GNodeListEl *element = (GNodeListEl*) malloc(sizeof(GNodeListEl));
 	element->node = gnode;
@@ -130,12 +128,3 @@ GNodeList* getGNodeListFromString(String string, ErrorLog* errorLog) {
 	deleteList(nodeList);
 	return null;
 }
-
-// showGNodeList shows the contents of a GNodeList. Debugging.
-void showGNodeList(GNodeList* nodeList) {
-	FORLIST(nodeList, element)
-		GNodeListEl *el = (GNodeListEl*) element;
-		printf("Node: "); showGNode(level(el), el->node);
-	ENDLIST
-}
-

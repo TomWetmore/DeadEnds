@@ -5,7 +5,7 @@
 // will experiment with Database merging.
 //
 // Created by Thomas Wetmore on 16 November 2024.
-// Last changed on 7 December 2024.
+// Last changed on 12 December 2024.
 
 #include "standard.h"
 #include "utils.h"
@@ -18,7 +18,7 @@ static bool debugging = true;
 static bool timing = true;
 static String getGedcomPath(void);
 static List* getFileNames(int, char**);
-static List* listFromStrings(String);
+static List* listFromStrings(String); // Should this be an 'official' List function?
 static List* resolveFileNames(List*, String);
 
 // main is the main program of the MultiBases test program.
@@ -29,17 +29,19 @@ int main(int argc, char *argv[]) {
 	String gedcomPath = getGedcomPath();
 	if (debugging) printf("gedcomPath is %s\n", gedcomPath);
 
-	// Get the list of Gedcom files to process into Databases.
-	List* names = getFileNames(argc, argv); // Get List of Gedcom files to process.
+	// Get the list of Gedcom files to turn into Databases.
+	List* names = getFileNames(argc, argv);
 	if (!names) {
-		fprintf(stderr, "Impossible; must be a bug to fix\n");
-		return 1;
+		fprintf(stderr, "MultiBases: Impossible; there must be a bug to fix\n");
+		exit(1);
 	}
-	List* resolvedNames = resolveFileNames(names, gedcomPath); // Resolve the Gedcom files.
+	// Try to resolve the file names. Continue processing if some don't resolve.
+	List* resolvedNames = resolveFileNames(names, gedcomPath);
 	deleteList(names);
 
 	// Get the List of Databases from the List of Gedcom files.
 	ErrorLog* errorLog = createErrorLog();
+	// Argument to be replaced with a List of DBaseActions.
 	List* databases = getDatabasesFromFiles(resolvedNames, 0, errorLog);
 
 	// Show the results.
@@ -48,10 +50,11 @@ int main(int argc, char *argv[]) {
 	if (lengthList(errorLog)) showErrorLog(errorLog);
 }
 
-// getGedcomPath gets the Gedcom file search path, looking for the value of DE_GEDCOM_PATH.
+// getGedcomPath gets the Gedcom file search path by looking for the DE_GEDCOM_PATH environment
+// variable. If the variable is not found "./" is returned.
 static String getGedcomPath(void) {
 	String path = getenv("DE_GEDCOM_PATH");
-	return path ? path : ".";
+	return path ? path : "./";
 }
 
 // getFileNames gets the list of Gedcom files to process. These are the files names given on

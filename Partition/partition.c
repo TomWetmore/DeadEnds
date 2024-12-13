@@ -4,7 +4,7 @@
 // RootLists of persons in closed sets based on FAMS, FAMC, HUSB, WIFE & CHIL relationships.
 //
 // Created by Thomas Wetmore on 11 December 2024.
-// Last changed on 11 December 2024.
+// Last changed on 12 December 2024.
 
 #include <stdio.h>
 #include "errors.h"
@@ -17,7 +17,7 @@
 static List* createPartition(GNode*, GNodeIndex*, StringSet*, ErrorLog*);
 static bool debugging = true;
 
-// getPartitions partitions a GNodeList of persons into a List of Lists of persons. Each
+// getPartitions partitions a RootList of persons into a List of RootLists of persons. Each
 // partition is a closed set of persons. Persons is the GNodeList of all persons from a
 // Gedcom source, and index is the GNodeIndex of the persons and families from the source.
 List* getPartitions(RootList* persons, GNodeIndex* index, ErrorLog* log) {
@@ -39,8 +39,8 @@ List* getPartitions(RootList* persons, GNodeIndex* index, ErrorLog* log) {
 // set of person keys that have been visited. A partition is a List of persons.
 static List* createPartition(GNode* person, GNodeIndex* index, StringSet* visited, ErrorLog* log) {
 	if (debugging) printf("%s: createPartition: start.\n", gms);
-	List* partition = createList(null, null, null, false); // The new partition.
-	List* queue = createList(null, null, null, false); // Persons and families to process.
+	RootList* partition = createRootList(); // The new partition.
+	List* queue = createList(null, null, null, false); // Queue of persons and families to add.
 	prependToList(queue, person); // Initialize queue with first person.
 
 	// Iterate until the queue is empty.

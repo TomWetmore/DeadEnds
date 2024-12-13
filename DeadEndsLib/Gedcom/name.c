@@ -193,7 +193,7 @@ static void squeeze(String in, String out) {
 // the elements in a static block. See MNOTE below.
 // MNOTE: This function uses a static Block to hold record keys. It is reused on every call.
 // MNOTE: Caller must save the returned Strings if they are to persist.
-String* personKeysFromName(String name, Database* database, int* pcount) {
+String* personKeysFromName(String name, RecordIndex* rindex, NameIndex* nindex, int* pcount) {
     static bool first = true;
 	static Block recordKeys; // See MNOTE above.
     if (first) {
@@ -202,14 +202,14 @@ String* personKeysFromName(String name, Database* database, int* pcount) {
     }
 	*pcount = 0;
 	// Get Set of person keys with names that match the pattern.
-    Set *keySet = searchNameIndex(database->nameIndex, name);
+    Set *keySet = searchNameIndex(nindex, name);
     if (!keySet || lengthSet(keySet) == 0) return null;
 	// Copy person keys with matching names to a Block.
     emptyBlock(&recordKeys, null);
 	int count = 0;
 	List* list = listOfSet(keySet);
 	FORLIST(list, recordKey)
-		GNode* person = keyToPerson((String) recordKey, database->recordIndex);
+		GNode* person = keyToPerson((String) recordKey, rindex);
 		for (GNode* node = NAME(person); node && eqstr(node->tag, "NAME"); node = node->sibling) {
 			if (!exactMatch(name, node->value)) continue; // exactMatch doesn't mean 'exact.'
 			appendToBlock(&recordKeys, recordKey);

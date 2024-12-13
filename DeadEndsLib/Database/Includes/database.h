@@ -3,7 +3,7 @@
 // database.h is the header file for the Database type.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed on 7 December 2024.
+// Last changed on 13 December 2024.
 
 #ifndef database_h
 #define database_h
@@ -52,7 +52,7 @@ GNode *keyToFamily(String key, RecordIndex*); // Get a family GNode from a Recor
 GNode *keyToSource(String key, RecordIndex*); // Get a source record from the database.
 GNode *keyToEvent(String key, RecordIndex*); // Get an event record from the database.
 GNode *keyToOther(String key, RecordIndex*); // Get an other record from the database.
-GNode *getRecord(String key, Database*);  // Get an arbitraray record from the database.
+GNode *getRecord(String key, RecordIndex*);  // Get an arbitraray record from the database.
 bool storeRecord(Database*, GNode*, int lineno, ErrorLog*); // Add a record to the database.
 void summarizeDatabase(Database*);
 

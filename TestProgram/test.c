@@ -61,7 +61,7 @@ int main(void) {
 	//if (database) forHashTableTest(database, ++testNumber);
 	//if (database) showHashTableTest(database->recordIndex, ++testNumber);
 	//if (database) indexNamesTest(database, ++testNumber);
-	//if (database) testSequence(database, ++testNumber);
+	if (database) testSequence(database, ++testNumber);
 	//if (validated) testGedPaths(database, ++testNumber);
 	//if (validated) forTraverseTest(database, ++testNumber);
 	//if (validated) parseAndRunProgramTest(database, ++testNumber);

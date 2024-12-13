@@ -13,7 +13,6 @@ void mergeDatabase(Database* one, Database* two) {
 
 }
 
-
 /*
 HOW SHOULD IT WORK?
 
@@ -23,7 +22,4 @@ HOW SHOULD IT WORK?
  4. keep all the keys associated with the first database (so change keys in the second when needed).
  5. when adding a record to the first database, make a complete copy so the second database can be
     deleted if so desired.
-
-
-
  */

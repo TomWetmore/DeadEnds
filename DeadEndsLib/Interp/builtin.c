@@ -3,7 +3,7 @@
 // builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 23 October 2024.
+// Last changed on 13 December 2024.
 
 #include "standard.h"
 #include "gnode.h"    // GNode.
@@ -607,13 +607,12 @@ PValue __space(PNode* pnode, Context* context, bool* errflg) { return spacePValu
 // usage: qt() -> STRING
 PValue __qt(PNode *pnode, Context *context, bool* errflg) { return quotePValue; }
 
-//  __children -- Return the sequence of children of a family
-//--------------------------------------------------------------------------------------------------
+//  __children returns the Sequence of children in a family
 PValue __children(PNode *pnode, Context *context, bool* errflg)
 {
 	GNode *family = evaluateFamily(pnode->arguments, context, errflg);
 	if (*errflg || !family) return nullPValue;
-	Sequence *children = familyToChildren(family, context->database);
+	Sequence *children = familyToChildren(family, context->database->recordIndex);
 	if (!children) return nullPValue;
 	return PVALUE(PVSequence, uSequence, children);
 }
@@ -741,7 +740,7 @@ PValue __getrecord (PNode *pnode, Context *context, bool *errflg) {
 		*errflg = true;
 		return nullPValue;
 	}
-	GNode* root = getRecord(key, context->database);
+	GNode* root = getRecord(key, context->database->recordIndex);
 	return root ? PVALUE(PVGNode, uGNode, root) : nullPValue;
 }
 

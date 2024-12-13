@@ -4,4 +4,4 @@
 // Created by Thomas Wetmore on 11 December 2024.
 // Last changed on 11 December 2024.
 
-extern List* getPartitions(GNodeList*, GNodeIndex*, ErrorLog*);
+extern List* getPartitions(RootList*, GNodeIndex*, ErrorLog*);

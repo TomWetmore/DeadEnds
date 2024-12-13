@@ -3,7 +3,7 @@
 // block.c holds the functions that implement the Block data type.
 //
 // Created by Thomas Wetmore on 9 March 2024
-// Last changed on 18 November 2024.
+// Last changed on 12 December 2024.
 
 #include "block.h"
 #include "sort.h"
@@ -24,7 +24,8 @@ void initBlock(Block* block) {
 	block->elements = (void*) malloc(INITIAL_SIZE_LIST_DATA_BLOCK*sizeof(void*));
 }
 
-// deleteBlock deallocates the elements of a Block, but not the Block itself.
+// deleteBlock deallocates the elements of a Block, but not the Block itself. If the Block has
+// a delete function, it is called on each element before the elements are freed.
 void deleteBlock(Block *block, void(*delete)(void*)) {
 	if (delete) {
 		for (int i = 0; i < block->length; i++) {

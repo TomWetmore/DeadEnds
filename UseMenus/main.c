@@ -1,9 +1,9 @@
+// DeadEnds UseMenus
 //
-// main.c
-// UseMenus
+// main.c is the main program of the UseMenus test program.
 //
 // Created by Thomas Wetmore on 31 July 2024.
-// Last changed on 6 December 2024.
+// Last changed on 13 December 2024.
 
 #include <stdio.h>
 #include "menu.h"
@@ -15,6 +15,8 @@
 #include "name.h"
 #include "sequence.h"
 #include "validate.h"
+
+#define gms getMsecondsStr()
 
 static void getEnvironment(String*);
 static void getArguments(int, char**, String*);
@@ -28,7 +30,7 @@ static bool timing = true;
 // main is the main program for the DeadEnds command line program.
 int main(int argc, char** argv) {
 	// Get the files.
-	if (timing) fprintf(stderr, "%s: UseMenus started.\n", getMsecondsStr());
+	if (timing) fprintf(stderr, "%s: UseMenus started.\n", gms);
 	String gedcomFile = null;
 	String gedcomPath = null;
 	// Check for environment variables.
@@ -50,12 +52,14 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 	if (debugging) summarizeDatabase(database);
-	if (timing) fprintf(stderr, "%s: Database created.\n", getMsecondsStr());
+	if (timing) fprintf(stderr, "%s: Database created.\n", gms);
 	//Menu* loadMenu = createLoadDatabaseMenu();
 	//menuMachine(loadMenu);
 	// FOLLOWING EXPERIMENTS TO FIND THE CODE TO PICK A PERSON USING NAMES
+	RecordIndex* index = database->recordIndex;
+	NameIndex* nindex = database->nameIndex;
 	int count = 0;
-	String* keys = personKeysFromName("Thomas Trask /Wetmore/", database, &count);
+	String* keys = personKeysFromName("Thomas Trask /Wetmore/", index, nindex, &count);
 	printf("personKeysFromName returned %d keys. They are:\n", count);
 	for (int i = 0; i < count; i++) {
 		printf("%s ", keys[i]);
@@ -63,20 +67,19 @@ int main(int argc, char** argv) {
 	printf("\n");
 	// Get the names of the persons.
 	for (int i = 0; i < count; i++) {
-		GNode* name = (NAME(keyToPerson(keys[i], database->recordIndex)));
+		GNode* name = (NAME(keyToPerson(keys[i], index)));
 		String namstr = name->value ? nameString(name->value) : "no name";
 		printf("%s\n", namstr);
 	}
 
 	// TRY IT ANOTHER WAY USING SEQUENCES
-	Sequence* seq = nameToSequence("Thomas Trask /Wetmore/", database);
+	Sequence* seq = nameToSequence("Thomas Trask /Wetmore/", index, nindex);
 	//Sequence* seq = nameToSequence("*/wetmore/", database);
 	showSequence(seq, "A TITLE FOR A SEQUENCE");
 	FORSEQUENCE(seq, element, n)
 	GNode* root = element->root;
 	printf("%d %s\n", n, element->name);
 	ENDSEQUENCE
-
 
 	int answer;
 	//AskReturn rcode = 0;

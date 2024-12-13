@@ -26,7 +26,7 @@ PValue __indiset(PNode* pnode, Context* context, bool* errorFlag) {
     }
     *errorFlag = false;
     assignValueToSymbol(context->symbolTable, argument->identifier,
-                        PVALUE(PVSequence, uSequence, createSequence(context->database)));
+                        PVALUE(PVSequence, uSequence, createSequence(context->database->recordIndex)));
     return nullPValue;
 }
 

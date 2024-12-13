@@ -129,9 +129,11 @@ GNode* keyToOther(String key, RecordIndex* index) {
 }
 
 // getRecord gets a record from the database given a key.
-GNode* getRecord(String key, Database* database) {
-	return searchRecordIndex(database->recordIndex, key);
+GNode* getRecord(String key, RecordIndex* index) {
+	return searchRecordIndex(index, key);
 }
+
+
 
 // summarizeDatabase writes a short summary of a Database to standard output.
 void summarizeDatabase(Database* database) {
