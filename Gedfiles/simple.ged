@@ -9,12 +9,18 @@
 1 CHIL @I5@
 
 0 @I1@ INDI
+1 NOTE This is line 12 in the file
 1 NAME Thomas Trask /Wetmore/ IV
+1 NAME Tomcat
 1 SEX M
+1 BIRT
+2 DATE 18 December 1949
+2 PLAC New London, New London, Connecticut, United States
+1 NOTE This is line 18 in the file
 1 FAMS @F1@
 
 0 @I2@ INDI
-1 NAME Luann Frances /Grenda/
+1 NAME Luann Frances /Grenda
 1 SEX F
 1 FAMS @F1@
 

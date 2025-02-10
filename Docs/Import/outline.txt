@@ -1,4 +1,4 @@
- The "Import Stack" as of 7 December 2024
+ The "Import Stack" as of 21 December 2024
 ---------------------------------------------------------------
 I. List* getDatabasesFromFiles(*paths, int vcodes, *errlog) -- Import List of Databases from Gedcom files
     1. Create a list of databases.
@@ -16,12 +16,14 @@ II. Database* getDatabaseFromFile(String path, int validCodes, ErrorLog* elog) {
     6. FUTURE: Run list of DBaseActions.
     7. If there were errors delete the database and return null.
     8. Return Database.
+NOTE: I thind the creating of the personRoots and familyRoots should be pulled up into getDatabaseFromFile. Getting the
+  RecordIndex doesn't seem to be place where these should be created.
 
 III. RecordIndex* getRecordIndexFromFile(String path, RootList* personRoots, RootList* familyRoots,
   IntegerTable* keymap, ErrorLog* elog) {
     1. Open file and return error if not found.
     2. If keymap is null create it here. (NOTE: in this case it is not freed).
-    3. Call {getGNodeTreesFromFile} to get the list of records.
+    3. Call {getRootListFromFile} to get the list of records.
     4. Close the file.
     5. If there are no records or there are errors return null.
     6. Call {checkKeysAndReferences} to check that the record keys are closed. If errors return null.
@@ -94,6 +96,6 @@ void checkKeysAndReferences(*trees, name, *keymap, *errlog) -- Check all root ke
 List* getDatabasesFromFiles(*paths, int vcodes, *errlog) -- Import List of Databases from Gedcom files
     Database* getDatabaseFromFile(String path, int validCodes, ErrorLog* elog) {
         RecordIndex* getRecordIndexFromFile(String path, RootList* personRoots, RootList* familyRoots,
-            GNodeList* getGNodeTreesFromFile(*file, *keymap, *errlog) -- Get the GNodeList of all records in a Gedcom file.
+            GNodeList* getRootListFromFile(*file, *keymap, *errlog) -- Get the GNodeList of all records in a Gedcom file.
                 GNodeList* getGNodeListFromFile(*file, *keymap, *errlog) -- Get the GNodeList of all nodes in a file.
-                GNodeList* getGNodeTreesFromNodeList(*nodes, name, *elog) -- Get list of all trees from list of all nodes.
+                GNodeList* getRootListFromNodeList(*nodes, name, *elog) -- Get list of all trees from list of all nodes.

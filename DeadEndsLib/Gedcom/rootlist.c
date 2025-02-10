@@ -66,7 +66,7 @@ RootList* getRootListFromFile(File* file, IntegerTable* keymap, ErrorLog* elog) 
 }
 
 // getNodeTreesFromNodeList processes the GNodeList of all GNodes from a Gedcom source into
-// a RootList of all GNode records. It uses a state machine to track levels and errors, so the
+// A RootList of all GNode records. It uses a state machine to track levels and errors, so the
 // data field in the GNodeList must be level numbers. The input GNodeLisit is not deleted.
 RootList* getRootListFromGNodeList(GNodeList *gnodes, String name, ErrorLog *elog) {
 	enum State { InitialState, MainState, ErrorState } state = InitialState;

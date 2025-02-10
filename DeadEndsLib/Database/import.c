@@ -3,7 +3,7 @@
 // import.c has functions that import Gedcom files into internal structures.
 //
 // Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 12 December 2024.
+// Last changed on 20 December 2024.
 
 #include "import.h"
 #include "validate.h"
@@ -114,7 +114,6 @@ RecordIndex* getRecordIndexFromFile(String path, RootList* personRoots, RootList
 		return null;
 	}
 	if (!keymap) keymap = createIntegerTable(4097); // MNOTE: HOW TO GET FREED!
-	//GNodeList* roots = getGNodeTreesFromFile(file, keymap, elog); // Get the records from file.
 	RootList* roots = getRootListFromFile(file, keymap, elog); // Get the records from file.
 	closeFile(file);
 	if (roots == null) {

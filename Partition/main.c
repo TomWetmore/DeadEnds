@@ -1,10 +1,10 @@
-// Partition
+// DeadEnds Partition
 //
 // main.c is the main program of the partition program. It reads a Gedcom file and partitions it
 // into closed sets of persons and families.
 //
 // Created by Thomas Wetmore on 4 October 2024.
-// Last changed on 12 December 2024.
+// Last changed on 13 December 2024.
 
 #include <stdio.h>
 #include "import.h"
@@ -26,11 +26,12 @@ static void goAway(ErrorLog*);
 static GNodeIndex* createIndexOfGNodes(GNodeList*);
 static GNodeList* removeNonPersons(GNodeList*);
 static void showConnects(List*, GNodeIndex*);
+static void showPartitions(List*, RecordIndex*);
 static bool debugging = false;
-static bool timing = true;
+static bool timing = false;
 static bool brownnose = false;
 
-// main is the main program of the partition program. It reads a Gedcom file into a RootLiat and
+// main is the main program of the partition program. It reads a Gedcom file into a RootList and
 // creates a GNodeIndex to serve as a record Index. It partitions the records into closed
 // partitions of persons. It computes the numbers of ancestors and descendents of all persons.
 int main(int argc, char** argv) {
@@ -81,12 +82,7 @@ int main(int argc, char** argv) {
 	ENDLIST
 	if (timing) printf("%s: Partition: computed connectedness numbers.\n", gms);
 
-	// DEBUG: SHOW THE CONNECTIONS OF EACH PARTITION
-	int count = 1;
-	FORLIST(partitions, el)
-		printf("%4d: ", count++);
-		showConnects((List*) el, index);
-	ENDLIST
+	showPartitions(partitions, index);
 
 	// Find the most connected person.
 	int max = 0;
@@ -181,6 +177,14 @@ static RootList* removeNonPersons(RootList* list) {
 	ENDLIST
 	deleteList(list);
 	return newlist;
+}
+
+static void showPartitions(List* partitions, RecordIndex* index) {
+	int count = 1;
+	FORLIST(partitions, el)
+		printf("%4d: ", count++);
+		showConnects((List*) el, index);
+	ENDLIST
 }
 
 

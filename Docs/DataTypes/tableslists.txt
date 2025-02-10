@@ -47,8 +47,8 @@ SEQUENCE:
 typedef struct Sequence {
     Block block;         Elements are SequenceEls.
     SortType sortType;  {SequenceNotSorted, SequenceKeySorted, SequenceNameSorted}
-    bool unique;         Duplicates have been removed.
-    Database *database;  Could this be changed to a RecordIndex?
+    bool unique;         Duplicates removed
+    RecordIndex *index;  Record index
 } Sequence;
 typedef struct SequenceEl {
     GNode* root;  Root of record; not freed.

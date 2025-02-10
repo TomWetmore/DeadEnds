@@ -4,7 +4,7 @@
 // RootLists of persons in closed sets based on FAMS, FAMC, HUSB, WIFE & CHIL relationships.
 //
 // Created by Thomas Wetmore on 11 December 2024.
-// Last changed on 12 December 2024.
+// Last changed on 14 December 2024.
 
 #include <stdio.h>
 #include "errors.h"
@@ -15,28 +15,28 @@
 
 #define gms getMsecondsStr()
 static List* createPartition(GNode*, GNodeIndex*, StringSet*, ErrorLog*);
-static bool debugging = true;
+static bool debugging = false;
 
 // getPartitions partitions a RootList of persons into a List of RootLists of persons. Each
-// partition is a closed set of persons. Persons is the GNodeList of all persons from a
+// partition is a closed set of persons. Persons is the RootList of all persons from a
 // Gedcom source, and index is the GNodeIndex of the persons and families from the source.
 List* getPartitions(RootList* persons, GNodeIndex* index, ErrorLog* log) {
-	if (debugging) printf("%s: Partition: getPartitions: |persons|: %d, |index|: %d.\n", gms,
+	if (debugging) printf("%s: getPartitions: start: |persons|: %d, |index|: %d.\n", gms,
 						  lengthList(persons), sizeHashTable(index));
 	StringSet* visited = createStringSet(); // Keys of persons and families already processed.
 	List* partitions = createList(null, null, null, false); // List of partitions returned.
 	FORLIST(persons, el)
 		GNode* person = (GNode*) el;
-		if (!isInSet(visited, person->key)) // Person starts the next partition.
-			appendToList(partitions, createPartition(person, index, visited, log)); // Get it.
+		if (!isInSet(visited, person->key)) // Get person who starts the next partition.
+			appendToList(partitions, createPartition(person, index, visited, log));
 	ENDLIST
 	deleteStringSet(visited, false);
 	return partitions;
 }
 
-// createPartition finds the closed set of persons related to the argument person. Root is a
-// person, index is the index of all persons and families from a Gedcom file, visited is the
-// set of person keys that have been visited. A partition is a List of persons.
+// createPartition finds the closed set of persons that the argument person belongs to. Root is
+// a person, index is the GNodeIndex of all persons and families from a Gedcom file, visited is
+// the StringSet of person keys that have been visited. A partition is a RootList of persons.
 static List* createPartition(GNode* person, GNodeIndex* index, StringSet* visited, ErrorLog* log) {
 	if (debugging) printf("%s: createPartition: start.\n", gms);
 	RootList* partition = createRootList(); // The new partition.
