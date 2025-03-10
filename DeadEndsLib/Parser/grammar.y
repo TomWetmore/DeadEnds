@@ -3,7 +3,7 @@
 //  interp.y is the yacc file for the DeadEnds script language.
 //
 //  Created by Thomas Wetmore on 8 December 2022.
-//  Last changed 29 July 2024.
+//  Last changed 7 March 2025.
 %{
 #include "lexer.h"
 #include "symboltable.h"
@@ -12,14 +12,14 @@
 #include "interp.h"
 #include <stdlib.h>
 
-// Global variables that form the channel between the lexer, parser and interpreter.
+// Global variables that form the interface between the lexer, parser and interpreter.
 extern SymbolTable *globalTable; // Global variables.
 extern FunctionTable *procedureTable;// User procedures.
 extern FunctionTable *functionTable; // User functions.
 extern List *pendingFiles; // Pending list of included files.
 extern int curLine; // Line number in current file.
 
-static PNode *this, *prev;
+static PNode *this, *prev, *tnode;;
 
 // Functions defined in the third section.
 static void join(PNode* list, PNode* last);
@@ -39,6 +39,7 @@ static void yyerror(String str);
 
 %start defns
 %type <pnode> idenso idens
+%type <pnode> proc func
 %type <pnode> state states
 %type <pnode> exprso exprs expr secondo
 %type <pnode> elsifso elsifs elsif elseo
@@ -47,12 +48,12 @@ static void yyerror(String str);
 %%
 
     // A DeadEnds program is a list of defns.
-    defns	:	defn
+    defns:	defn
     |	defns defn
     ;
 
     // A defn is a procedure, function, global or include.
-    defn 	:	proc
+    defn :	proc
     |	func
     |	IDEN '(' IDEN ')' {  // Interested in "global".
         if (eqstr("global", $1))
@@ -65,18 +66,22 @@ static void yyerror(String str);
     ;
 
     // A proc is "proc", name, params, and body. Add it to the proc table.
-    proc	:	PROC IDEN '(' idenso ')' '{' states '}' {
-        addToFunctionTable(procedureTable, $2, (Word)procDefPNode($2, $4, $7));
+    proc:	PROC m IDEN '(' idenso ')' '{' states '}' {
+		$$ = procDefPNode($3, $5, $8);
+		$$->lineNumber = (int) $2;
+        addToFunctionTable(procedureTable, $3, $$);
     }
     ;
 
     // A func is "func", name, parms, and a body with a return expr. Add it to the func table.
-    func	:	FUNC_TOK IDEN '(' idenso ')' '{' states '}' {
-        addToFunctionTable(functionTable, $2, (Word)funcDefPNode($2, $4, $7));
+    func:	FUNC_TOK m IDEN '(' idenso ')' '{' states '}' {
+		$$ = funcDefPNode($3, $5, $8);
+		$$->lineNumber = (int) $2;
+        addToFunctionTable(functionTable, $3, $$);
     }
     ;
     // idenso -- null if empty, or it is a list of IIDEN PNodes if not.
-    idenso	:	/* empty */ {
+    idenso:	/* empty */ {
         $$ = 0;
     }
     |	idens {
@@ -86,7 +91,7 @@ static void yyerror(String str);
 
     // Idens is a list of IIDEN PNodes.
     //--------------------------------------------------------------------------------------------------
-    idens	:	IDEN {
+    idens:	IDEN {
         $$ = iden_node($1);
     }
     |	IDEN ',' idens {
@@ -95,9 +100,8 @@ static void yyerror(String str);
     }
     ;
 
-    // States is a list of statement Pnodes.
-    //--------------------------------------------------------------------------------------------------
-    states	:	state {
+    // States is a list of statement PNodes.
+    states:	state {
         $$ = $1;
     }
     |	states  state {
@@ -106,8 +110,7 @@ static void yyerror(String str);
     }
     ;
     // State is a statement PNode.
-    //--------------------------------------------------------------------------------------------------
-    state	:	CHILDREN m '(' expr ',' IDEN ',' IDEN ')' '{' states '}' {
+    state:	CHILDREN m '(' expr ',' IDEN ',' IDEN ')' '{' states '}' {
         $$ = childrenPNode($4, $6, $8, $11);
         $$->lineNumber = (int)$2;
     }
@@ -210,14 +213,14 @@ static void yyerror(String str);
         $$ = $1;
     }
     ;
-    elsifso	:	    /* empty */ {
+    elsifso:	    /* empty */ {
         $$ = 0;
     }
     |	elsifs {
         $$ = $1;
     }
     ;
-    elsifs	:	elsif {
+    elsifs:	elsif {
         $$ = $1;
     }
     |	elsif  elsifs {
@@ -225,21 +228,23 @@ static void yyerror(String str);
         $$ = $1;
     }
     ;
-    elsif	:	ELSIF '(' expr secondo ')' '{' states '}' {
+    elsif:	ELSIF '(' expr secondo ')' '{' states '}' {
         $3->next = $4;
         $$ = ifPNode($3, $7, null);
     }
     ;
 
     // An elseo is an optional else clause.
-    elseo	:	/* empty */ {
+    elseo:	/* empty */ {
         $$ = 0;
     }
     |	ELSE '{' states '}' {
         $$ = $3;
     }
     ;
-    expr	:	IDEN {
+
+	// expr is an expression PNode.
+    expr:	IDEN {
         $$ = iden_node((String)$1);
         $$->arguments = null;
     }
@@ -257,14 +262,18 @@ static void yyerror(String str);
         $$ = fconsPNode($1);
     }
     ;
-    exprso	:	/* empty */ {
+
+	// exprso is an optional list of expression PNodes.
+    exprso:	/* empty */ {
         $$ = 0;
     }
     |	exprs {
         $$ = $1;
     }
     ;
-    exprs	:	expr {
+
+	// exprs is a non-empty list of expression PNodes.
+    exprs:	expr {
         $$ = $1;
     }
     |	expr ',' exprs {
@@ -272,14 +281,16 @@ static void yyerror(String str);
         $$ = $1;
     }
     ;
-    secondo	:	/* empty */ {
+    secondo:	/* empty */ {
         $$ = 0;
     }
     |	',' expr {
         $$ = $2;
     }
     ;
-    m	:	/* empty */ {
+
+	// m tracks the line number.
+    m:	/* empty */ {
         $$ = curLine;
     }
 

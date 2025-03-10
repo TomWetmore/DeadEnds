@@ -257,7 +257,7 @@ PNode* spousesPNode (PNode* pexpr, String svar, String fvar, String count, PNode
     return node;
 }
 
-// childrenPNode createa a children loop PNode that loops through the chidren in a family.
+// childrenPNode creates a children loop PNode that loops through the chidren of a family.
 // Called by yyparse() on rule reduction; fexpr is the family expression; cvar is the child
 // loop var; nvar is the counter; body is the root PNode of the loop body.
 PNode *childrenPNode (PNode *fexpr, String cvar, String nvar, PNode *body) {
@@ -270,15 +270,9 @@ PNode *childrenPNode (PNode *fexpr, String cvar, String nvar, PNode *body) {
     return node;
 }
 
-//  forindiPNode -- Create a forindi PNode to iterate every Person in the Database.
-//    usage: forindi(INDI_V, INT_V) { body }
-//    fields: pPersonIden, pCountIden, pLoopState
-//--------------------------------------------------------------------------------------------------
-PNode *forindiPNode (String ivar, String nvar, PNode *body)
-//  ivar -- Person identifier.
-//  nvar -- Counter identifier.
-//  body -- First PNode of the loop body.
-{
+// forindiPNode create a forindi PNode loop to iterate every person in a database. Called by yyparse on rule
+// reduction; ivar is the person identifier; nvar is the counter identifier; and body is the PNode loop body.
+PNode *forindiPNode (String ivar, String nvar, PNode *body) {
     PNode *node = allocPNode(PNIndis);
     node->personIden = ivar;
     node->countIden = nvar;
@@ -287,13 +281,9 @@ PNode *forindiPNode (String ivar, String nvar, PNode *body)
     return node;
 }
 
-//  forfamPNode -- Create a forfam program node loop to iterate every family in the database.
-//--------------------------------------------------------------------------------------------------
-PNode *forfamPNode (String fvar, String nvar, PNode *body)
-//  fvar -- Family identifier.
-//  nvar -- Counter identifier.
-//  body -- First PNode of the loop body.
-{
+// forfamPNode creates a forfam PNode loop to iterate every family in a database. Called by yyparse on rule
+// reduction; fvar is the family identifier; nvar is the counter identifier, and body is the PNode loop body.
+PNode *forfamPNode (String fvar, String nvar, PNode *body) {
     PNode *node = allocPNode(PNFams);
     node->familyIden = fvar;
     node->countIden = nvar;
@@ -302,13 +292,8 @@ PNode *forfamPNode (String fvar, String nvar, PNode *body)
     return node;
 }
 
-// forsourPNode -- Create a forsour PNode loop to iterate every Source in the Database.
-//--------------------------------------------------------------------------------------------------
-PNode *forsourPNode (String svar, String nvar, PNode *body)
-// svar -- Source identifier.
-// nvar -- Counter identifier.
-// body -- First PNode of the loop body.
-{
+// forsourPNode create a forsour PNode loop that iterates every source in a database.
+PNode *forsourPNode (String svar, String nvar, PNode *body) {
     PNode *node = allocPNode(PNSources);
     node->sourceIden = svar;
     node->countIden = nvar;
@@ -317,13 +302,8 @@ PNode *forsourPNode (String svar, String nvar, PNode *body)
     return node;
 }
 
-// forevenPNode -- Create foreven loop node
-//--------------------------------------------------------------------------------------------------
-PNode *forevenPNode(String evar, String nvar, PNode *body)
-// evar -- Event identifier.
-// nvar -- Counter identifier.
-// body -- First PNode of the loop body.
-{
+// forevenPNode creates a foreven PNode loop that iterates every event in a database.
+PNode *forevenPNode(String evar, String nvar, PNode *body) {
     PNode *node = allocPNode(PNEvents);
     node->eventIden = evar;
     node->countIden = nvar;
@@ -332,13 +312,8 @@ PNode *forevenPNode(String evar, String nvar, PNode *body)
     return node;
 }
 
-// forothrPNode -- Create forothr loop node
-//--------------------------------------------------------------------------------------------------
-PNode *forothrPNode (String ovar, String nvar, PNode *body)
-// ovar -- Other identifier.
-// nvar -- Counter identifier.
-// body -- First PNode of the loop body.
-{
+// forothrPNode creates a forothr PNode loop that iterates every other record in a database.
+PNode *forothrPNode (String ovar, String nvar, PNode *body) {
     PNode *node = allocPNode(PNOthers);
     node->otherIden = ovar;
     node->countIden = nvar;
@@ -347,14 +322,9 @@ PNode *forothrPNode (String ovar, String nvar, PNode *body)
     return node;
 }
 
-// forlistPNode -- Create a list loop PNode.
-// Usage:
-//--------------------------------------------------------------------------------------------------
+// forlistPNode creates a list PNode loop that iterates every element in a list.
 PNode *forlistPNode (PNode *lexpr, String evar, String nvar, PNode *body)
 // iexpr -- PNode expression that evaluates to a List.
-// evar -- Element identifier.
-// nvar -- Counter identifier.
-// body -- First PNode of the loop body.
 {
     PNode *node = allocPNode(PNList);
     node->listExpr = lexpr;
@@ -365,15 +335,8 @@ PNode *forlistPNode (PNode *lexpr, String evar, String nvar, PNode *body)
     return node;
 }
 
-// forindisetPNode -- Create an index loop PNode.
-//--------------------------------------------------------------------------------------------------
-PNode *forindisetPNode(PNode *iexpr, String ivar, String vvar, String nvar, PNode *body)
-// iexpr expr
-// ivar    person
-// vvar    value
-// nvar    counter
-// body    body
-{
+// forindisetPNode creates a squence loop.
+PNode *forindisetPNode(PNode *iexpr, String ivar, String vvar, String nvar, PNode *body) {
     PNode *node = allocPNode(PNSequence);
     node->sequenceExpr = iexpr;
     node->elementIden = ivar;
@@ -402,24 +365,14 @@ PNode *fornotesPNode (PNode *nexpr, String vvar, PNode *body)
 
 // iden_node -- Create an identifier PNode.
 // TODO: FIGURE OUTWHAT TO DO WITH THIS.
-//--------------------------------------------------------------------------------------------------
-PNode *iden_node(String identifier)
-// iden -- String to embed in a PNode.
-{
+PNode *iden_node(String identifier) {
     PNode *pnode = allocPNode(PNIdent);
     pnode->identifier = identifier;
     return pnode;
 }
 
-// fathersPNode -- Create fathers loop node.
-//--------------------------------------------------------------------------------------------------
-PNode *fathersPNode(PNode *pexpr, String pvar, String fvar, String nvar, PNode *body)
-//  pexpr -- Person PNode expression.
-//  pvar -- Father identifier.
-//  fvar -- Family identifier.
-//  nvar -- Count identifier.
-//  body -- First PNode of body.
-{
+// fathersPNode creates fathers loop node.
+PNode *fathersPNode(PNode *pexpr, String pvar, String fvar, String nvar, PNode *body) {
     PNode *node = allocPNode(PNFathers);
     node->personExpr = pexpr;
     node->fatherIden = pvar;
@@ -430,15 +383,8 @@ PNode *fathersPNode(PNode *pexpr, String pvar, String fvar, String nvar, PNode *
     return node;
 }
 
-// mothersPNode -- Create mothers loop node.
-//--------------------------------------------------------------------------------------------------
-PNode *mothersPNode(PNode *pexpr, String pvar, String fvar, String nvar, PNode *body)
-//  pexpr -- Person PNode expression.
-//  pvar -- Mother identifier.
-//  fvar -- Family identifier.
-//  nvar -- Count identifier.
-//  body -- First PNode of loop.
-{
+// mothersPNode creates a mothers loop node.
+PNode *mothersPNode(PNode *pexpr, String pvar, String fvar, String nvar, PNode *body) {
     PNode *node = allocPNode(PNMothers);
     node->personExpr = pexpr;
     node->motherIden = pvar;
@@ -449,14 +395,8 @@ PNode *mothersPNode(PNode *pexpr, String pvar, String fvar, String nvar, PNode *
     return node;
 }
 
-// parentsPNode -- Create parents loop node.
-//--------------------------------------------------------------------------------------------------
-PNode *parentsPNode(PNode *pexpr, String fvar, String nvar, PNode *body)
-//  pexpr -- Person PNode expression.
-//  fvar -- Family identifier.
-//  nvar -- Count identifier.
-//  body -- First PNode of loop.
-{
+// parentsPNode creates a parents loop node.
+PNode *parentsPNode(PNode *pexpr, String fvar, String nvar, PNode *body) {
     PNode *node = allocPNode(PNFamsAsChild);
     node->personExpr = pexpr;
     node->familyIden = fvar;
@@ -466,12 +406,8 @@ PNode *parentsPNode(PNode *pexpr, String fvar, String nvar, PNode *body)
     return node;
 }
 
-// setParents -- Set the parent node for a list of nodes.
-//--------------------------------------------------------------------------------------------------
-static void setParents (PNode *list, PNode *parent)
-//  list -- List of program nodes to be assigned a parent.
-//  parent -- Node to be made the parent.
-{
+// setParents sets the parent node for a list of nodes.
+static void setParents (PNode *list, PNode *parent) {
     while (list) {
         list->parent = parent;
         list = list->next;

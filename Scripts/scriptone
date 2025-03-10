@@ -3,6 +3,8 @@
 proc main () {
 	set(i, 0)
 	set(j, 1)
+
+	children(f1, c, n) { set(hi, add(2, 1)) }
 	call checktest("set", i, 0)
 	call checktest("set", j, 1)
 	set(i, add(j, 100))

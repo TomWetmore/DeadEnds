@@ -3,7 +3,7 @@
 // database.h is the header file for the Database type.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed on 13 December 2024.
+// Last changed on 21 February 2025.
 
 #ifndef database_h
 #define database_h
@@ -29,6 +29,7 @@ typedef struct Database {
 	String filePath;  // Path to Gedcom file this Database was built from.
 	String name; // Use last segment of the path for the name of the Database.
 	GNode* header; // Root of header record.
+	bool dirty; // Dirty flag.
 	RecordIndex* recordIndex; // Index of all keyed records.
 	NameIndex *nameIndex; // Index of the names of the persons in this database.
 	RefnIndex *refnIndex; // Index of the REFN values in this database.

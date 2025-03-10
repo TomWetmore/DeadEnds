@@ -8,6 +8,8 @@ all:
 	cd RandomizeKeys; make
 	cd Partition; make
 	cd MultiBases; make
+	cd GenerateSExpressions; make
+	cd TestDates; make
 
 clean:
 	cd DeadEndsLib; make clean
@@ -19,3 +21,5 @@ clean:
 	cd RandomizeKeys; make clean
 	cd Partition; make clean
 	cd MultiBases; make clean
+	cd GenerateSExpressions; make clean
+	cd TestDates; make clean
