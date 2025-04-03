@@ -39,3 +39,5 @@ This ensures each node is only processed once per call stack. Implement the same
 	•	In createPartition, ensure you are not redundantly adding the same nodes multiple times into the queue. Since you’re also storing each partition in a List, duplicate entries could cause more processing in the long run.
 
 Applying these steps, particularly the first two and checking searchHashTable efficiency, should help pinpoint further performance gains. Let me know if any of these ideas yield improvements or if more targeted solutions are needed based on any new observations.
+
+
