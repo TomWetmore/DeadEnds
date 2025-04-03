@@ -3,7 +3,7 @@
 // file.c
 //
 // Created by Thomas Wetmore on 1 July 2024.
-// Last changed on 7 July 2024.
+// Last changed on 2 April 2025.
 
 #include <stdio.h>
 #include "file.h"
@@ -25,6 +25,6 @@ File* openFile(String path, String mode) {
 void closeFile(File* file) {
 	if (file->fp) fclose(file->fp);
 	if (file->path) stdfree(file->path);
-	if (file->name) stdfree(file->name);
+	//if (file->name) stdfree(file->name); // TODO: Find a better fix some day.
 	stdfree(file);
 }

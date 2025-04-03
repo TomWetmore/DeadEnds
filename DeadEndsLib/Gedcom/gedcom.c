@@ -3,7 +3,7 @@
 // gedcom.c has basic Gedcom functions.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 22 October 2024.
+// Last changed on 3 April 2025.
 
 #include "gedcom.h"
 
@@ -50,4 +50,20 @@ SexType sexTypeFromString(String s) {
 bool validSexString(String s) {
 	if (!s) return false;
 	return sexTypeFromString(s) != sexError;
+}
+
+// keyToKey takes a "lazy" key (may omit @-signs and have lower case letters), and converts it to a real key.
+// NOTE: Returns static memory form the upper function
+String keyToKey(String userKey) {
+    static char buffer[MAXSTRINGSIZE];
+    if (strlen(userKey) > MAXSTRINGSIZE - 2) return userKey;
+    if (userKey[0] != '@') {
+        buffer[0] = '@';
+        buffer[1] = 0;
+        strcat(buffer, userKey);
+        strcat(buffer, "@");
+    } else {
+        strcpy(buffer, userKey);
+    }
+    return upper(buffer);
 }

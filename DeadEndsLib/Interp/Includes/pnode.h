@@ -4,7 +4,7 @@
 //  pnode.h -- Header file for the program node structure.
 //
 //  Created by Thomas Wetmore on 14 December 2022.
-//  Last changed on 16 November 2023.
+//  Last changed on 15 March 2025.
 //
 
 #ifndef pnode_h
@@ -16,15 +16,13 @@ typedef struct Context Context;
 #include "symboltable.h"
 #include "interp.h"  // Context.
 
-//  PNode -- Program Node. The parser builds an abstract syntax tree for each procedure and 
-//    function it parses. The nodes of the trees are program nodes. They represent both statements
-//    and expressions. The interpreter interprets the trees when running programs.
-//--------------------------------------------------------------------------------------------------
+// PNode is the type of program nodes. PNode trees are the abstract syntax trees of the DeadEnds scripting language.
+// The parser builds the trees for the procedures and functions it parses. The nodes represent both statements and
+// expressions.
 typedef struct PNode PNode;
 typedef struct HashTable SymbolTable;
 
-// Program node types.
-//--------------------------------------------------------------------------------------------------
+// PNType is the enumerated list of the PNode types.
 typedef enum PNType{
 	PNICons = 1, PNFCons, PNSCons, PNIdent, PNIf, PNWhile, PNBreak, PNContinue, PNReturn,
 	PNProcDef, PNProcCall, PNFuncDef, PNFuncCall, PNBltinCall, PNTraverse, PNNodes, PNFamilies,
@@ -32,13 +30,11 @@ typedef enum PNType{
 	PNTable, PNFathers, PNMothers, PNFamsAsChild, PNNotes
 } PNType;
 
-//  BIFunc -- Type of a function pointer that takes a program node, symbol table, and boolean
-//    and returns a program pvalue.
-//--------------------------------------------------------------------------------------------------
+// BIFunc is the type of a function pointer that takes a program node, symbol table, and boolean
+// and returns a program pvalue.
 typedef PValue (*BIFunc)(PNode *node, Context *context, bool* errflag);
 
-//  struct PNode -- The program node structure.
-//--------------------------------------------------------------------------------------------------
+// PNode is the structure of the program nodes.
 struct PNode {
 	// Fields found in all program nodes.
 	PNType type;        // Type of this program node.

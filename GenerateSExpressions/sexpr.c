@@ -1,9 +1,13 @@
 //
 //  sexpr.c
 //  GenerateSExpressions
+//  This file contains the printSExp recursive procedure that transforms PNode trees into S-Expressions that are
+//  written to standard output.
+//
+//  This step avoids writing a DeadEnds script parser in Swift DeadEnds.
 //
 //  Created by Thomas Wetmore on 4 March 2025.
-//  Last changed on 8 March 2025.
+//  Last changed on 10 March 2025.
 //
 
 #include <stdio.h>
@@ -11,8 +15,8 @@
 #include <string.h>
 #include "pnode.h"
 
-// printSExpr prints a PNode as an S-Expression. Currently the feature is needed to bridge scripts to the Swift
-// version of DeadEnds.
+// printSExpr prints a PNode as an S-Expression. This feature allows DeadEnds scripts to be parsed by the "DeadEnds
+// C world" and converted into S-expressions that are interpreted by the "DeadEnds Swift" world.
 void printSExpr(FILE *out, PNode *node, int *line, int depth) {
 	if (!node) {
 		return;
@@ -38,22 +42,37 @@ void printSExpr(FILE *out, PNode *node, int *line, int depth) {
 		fprintf(out, "%s", node->identifier);
 		break;
 	case PNIf:
-		fprintf(out, "(if ");
-		printSExpr(out, node->condExpr, line, depth + 1);
+		fprintf(out, "(if (");
+		printSExpr(out, node->condExpr, line, depth);
 		fprintf(out, ") {");
 		printSExpr(out, node->thenState, line, depth + 1);
 		fprintf(out, "}");
 		if (node->elseState) {
 			fprintf(out, "{");
 			printSExpr(out, node->elseState, line, depth + 1);
+			fprintf(out, "}");
 		}
-		fprintf(out, "}}");
+		fprintf(out, ")");
 		break;
 	case PNWhile:
-		fprintf(out, "(while ");
-		printSExpr(out, node->condExpr, line, depth + 1);
-		fprintf(out, "\n");
+		fprintf(out, "(while (");
+		printSExpr(out, node->condExpr, line, depth);
+		fprintf(out, ") {");
 		printSExpr(out, node->loopState, line, depth + 1);
+		fprintf(out, "})");
+		break;
+	case PNBreak:
+		fprintf(out, "(break)");
+		break;
+	case PNContinue:
+		fprintf(out, "(continue)");
+		break;
+	case PNReturn:
+		fprintf(out, "(return");
+		if (node->returnExpr) {
+			fprintf(out, " ");
+			printSExpr(out, node->returnExpr, line, depth);
+		}
 		fprintf(out, ")");
 		break;
 	case PNProcDef:

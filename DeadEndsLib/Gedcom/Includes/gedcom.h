@@ -3,7 +3,7 @@
 // gedcom.h is the header file for Gedcom related data types and operations.
 //
 // Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 30 November 2024.
+// Last changed on 3 April 2025.
 
 #ifndef gedcom_h
 #define gedcom_h
@@ -34,6 +34,7 @@ SexType sexTypeFromStribg(String);
 bool validSexString(String);
 
 RecordType recordType(GNode *root);  // Return the type of a Gedcom record tree.
+String keyToKey(String);
 
 int compareRecordKeys(String, String);  // gedcom.c
 

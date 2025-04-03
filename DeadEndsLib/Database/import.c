@@ -108,11 +108,11 @@ RecordIndex* getRecordIndexFromFile(String path, RootList* personRoots, RootList
 									IntegerTable* keymap, ErrorLog* elog) {
 	if (timing) printf("%s: getRecordIndexFromFile: started.\n", gms);
 	File* file = openFile(path, "r"); // Open the file.
-	String name = strsave(file->name);
 	if (!file) {
 		addErrorToLog(elog, createError(systemError, path, 0, "Could not open file."));
 		return null;
 	}
+    String name = strsave(file->name);
 	if (!keymap) keymap = createIntegerTable(4097); // MNOTE: HOW TO GET FREED!
 	RootList* roots = getRootListFromFile(file, keymap, elog); // Get the records from file.
 	closeFile(file);

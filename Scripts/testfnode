@@ -1,5 +1,12 @@
+indiseq(s)
 proc main () {
-	set(a, indi("@I1@"))
+
+	"Hello, world!" nl()
+	set(t, indi("i1"))
+	name(t) nl()
+
+	
+	/*set(a, indi("@I1@"))
 	key(a) " " tag(a) " " value(a) nl()
 	name(a) nl()
 	set(b, parents(a))
@@ -26,6 +33,6 @@ proc main () {
 	set(f, lastfam())
 	key(f) " " tag(f) nl()
 	set(f, prevfam(f))
-	key(f) " " tag(f) nl()
+	key(f) " " tag(f) nl()*/
 
 }

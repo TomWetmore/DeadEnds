@@ -3,7 +3,7 @@
 //  errors.c has code for handling DeadEnds errors.
 //
 //  Created by Thomas Wetmore on 4 July 2023.
-//  Last changed on 10 February 2025.
+//  Last changed on 2 April 2025.
 
 #include "errors.h"
 #include "list.h"
@@ -77,8 +77,8 @@ void addErrorToLog (ErrorLog* errorLog, Error* error) {
 void showError(Error* error) {
 	printf("error");
 	if (error->fileName) printf(" in %s", error->fileName);
-	if (error->lineNumber) printf(" line %d:", error->lineNumber);
-	if (error->message) printf(": %s.\n", error->message);
+	if (error->lineNumber) printf(" line %d", error->lineNumber);
+	if (error->message) printf(": %s\n", error->message);
 }
 
 // deleteErrorLog deletes an ErrorLog.

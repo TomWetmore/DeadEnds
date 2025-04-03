@@ -52,7 +52,7 @@ int main(void) {
 	ErrorLog* errorLog = createErrorLog();
 	int testNumber = 0;
 
-	String file = "/Users/ttw4/Desktop/DeadEnds/Gedfiles/modified.ged";
+	String file = "/Users/ttw4/Desktop/DeadEndsVSCode/Gedfiles/modified.ged";
 	//RecordIndex* index = getRecordIndexFromFile(file, null, null, null, errorLog);
 	Database* database = importDatabaseTest(errorLog, ++testNumber);
 	//testGedcomStrings(++testNumber);

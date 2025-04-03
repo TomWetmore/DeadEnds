@@ -3,16 +3,18 @@
 // generatekey.c has the functions to generate random keys.
 //
 // Created by Thomas Wetmore on 1 June 2024.
-// Last changed on 20 June 2024.
+// Last changed on 14 March 2025.
 
 #include "stdlib.h"
 #include "time.h"
 #include "gedcom.h"
 #include "stringtable.h"
 #include "stringset.h"
-#include "generatekey.h"
 
+// Locals.
+static StringSet* keysInUse = null; // Set of generated keys.
 static String generate(char type);
+static void initRecordKeyGenerator(void);
 
 // keyCharacters are the 36 characters that make up key values.
 static char keyCharacters[36] = {
@@ -22,7 +24,7 @@ static char keyCharacters[36] = {
 	'U', 'V', 'W', 'X', 'Y', 'Z',
 };
 
-// recordChar returns a character for each record type.
+// recordChar returns the character that starts the key for each record type.
 static char recordChar(RecordType recType) {
 	if (recType == GRPerson) return 'I';
 	if (recType == GRFamily) return 'F';
@@ -32,7 +34,7 @@ static char recordChar(RecordType recType) {
 }
 
 // generateRecordKey generates a new random Gedcom key ('cross-reference identifier').
-static StringSet* keysInUse = null;
+// This is the public interface.
 String generateRecordKey(RecordType recType) {
 	static bool first = true;
 	if (first) {
@@ -69,27 +71,8 @@ static String generate(char type) {
 		if (inUse(keyBuffer)) continue;
 		return strsave(keyBuffer);
 	}
-	exit(2); // Could not generate a key.
+	fprintf(stderr, "Fatal error: could not generate a record key.\n");
+	exit(2);
 	return null;
 }
 
-Set* inPreviousFiles;
-Set* inCurrentFile;
-StringTable* newKeys;
-
-bool keySeenBefore(String key) { return true; }
-bool keyInPreviousFiles(String key) {
-	return isInSet(inPreviousFiles, key);
-}
-bool keyInCurrentFile(String key) {
-	return isInSet(inCurrentFile, key);
-}
-
-void processKey(String key, bool defining) {
-	if (defining) {
-
-	} else {
-
-	}
-
-}

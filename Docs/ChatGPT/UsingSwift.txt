@@ -1,0 +1,26 @@
+ The Lifelines interface is based on ncurses. It consists of a few screens. The opening screen presents a set of single letter commands. For example, 'b' browses to a person, 'r' reads a script program and runs it, 'q' quits the program. There are many others.
+
+ The main screen lifelines usually displays is the person screen, which shows a summary of person, with name, birth info, death info, along with quick summary lines of spouses and children. User interation with this screen is is again with a long list of single letter commands. Several of them move to related persons, for example 'f' browses to the person's father which changes to screen to hold that person. There also commands to move to the family screen, which dislays a family rather than a person, showing marriage info, and child information.
+
+A command in the person and family screens allows one to edit a record. LL handles this by opening the user's chosen editor (e.g., vi, emacs), with the full record in Gedcom format. The user edits the record in this format and when done the changes go into the Lifelines database (a custom, persistent BTree database I wrote). The user is not allowed to edit the lineage-linking lines (FAMS, FAMC, HUSB, etc.); there are additional commands for all operations that change relationships. There are commands to create new persons, add children to families, delete relationships, delete persons and so on.
+
+By and large everything is done by issuing one letter commands from one of the screens. If LifeLines needs more information to complete a command there are a set of small windows Lifelines puts up to gather the informtion neeed.
+
+There are two person screen for handling merging and joining. There is a pedigree screen. There is a person list screen that is used when the user's browse command has turned up a lot of matches, and this screen is used to select from that list.
+
+
+
+
+
+ Please choose an operation:                                                                                          │
+│   b  Browse the persons in the database                                                                              │
+│   s  Search database                                                                                                 │
+│   a  Add information to the database                                                                                 │
+│   d  Delete information from the database                                                                            │
+│   p  Pick a report from list and run                                                                                 │
+│   r  Generate report by entering report name                                                                         │
+│   t  Modify character translation tables                                                                             │
+│   u  Miscellaneous utilities                                                                                         │
+│   x  Handle source, event and other records                                                                          │
+│   Q  Quit current database                                                                                           │
+│   q  Quit program
