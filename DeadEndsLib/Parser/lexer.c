@@ -151,29 +151,36 @@ static int getTokenLow(void) {
     // Handle string constants.
     if (c == '"') {
         p = tokbuf;
-        while ((c = inchar()) != 0 && c != '"' && c != '\\')
-            *p++ = c;
-        if (c == 0 || c == '"') {
-            *p = 0;
-            yylval.string = strsave(tokbuf);
-            return SCONS;
-        }
-        // Saw \ so this is an escaped character.
-        switch (c = inchar()) {
-            case 'n': *p++ = '\n'; break;
-            case 't': *p++ = '\t'; break;
-            case 'v': *p++ = '\v'; break;
-            case 'r': *p++ = '\r'; break;
-            case 'b': *p++ = '\b'; break;
-            case 'f': *p++ = '\f'; break;
-            case '"': *p++ = '"'; break;
-            case '\\': *p++ = '\\'; break;
-            case 0:
+        while (true) {
+            c = inchar();
+            if (c == 0 || c == '"') {
                 *p = 0;
                 yylval.string = strsave(tokbuf);
                 return SCONS;
-            default:
-                *p++ = c; break;
+            }
+            if (c == '\\') {
+                // Escape sequence
+                c = inchar();
+                switch (c) {
+                    case 'n': *p++ = '\n'; break;
+                    case 't': *p++ = '\t'; break;
+                    case 'v': *p++ = '\v'; break;
+                    case 'r': *p++ = '\r'; break;
+                    case 'b': *p++ = '\b'; break;
+                    case 'f': *p++ = '\f'; break;
+                    case '"': *p++ = '"'; break;
+                    case '\\': *p++ = '\\'; break;
+                    case 0:
+                        *p = 0;
+                        yylval.string = strsave(tokbuf);
+                        return SCONS;
+                    default:
+                        *p++ = c; break;
+                }
+            } else {
+                // Normal character
+                *p++ = c;
+            }
         }
     }
     if (c == 0) return 0;

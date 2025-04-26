@@ -5,7 +5,7 @@
 // and used to build an internal database.
 //
 // Created by Thomas Wetmore on 10 November 2022.
-// Last changed 21 February 2025.
+// Last changed 4 April 2025.
 
 #include "database.h"
 #include "gnode.h"
@@ -51,9 +51,11 @@ void writeDatabase(String fileName, Database* database) {
 		printf("Can't open file to write the database\n");
 		return;
 	}
+    writeGNodeRecord(file, database->header, false);
 	FORHASHTABLE(database->recordIndex, element)
 		writeGNodeRecord(file, (GNode*) element, false);
 	ENDHASHTABLE
+    fprintf(file, "0 TRLR\n");
 	fclose(file);
 }
 

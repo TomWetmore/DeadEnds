@@ -1,13 +1,16 @@
 //
 //  sexpr.c
-//  GenerateSExpressions
+//  gensexprs
 //  This file contains the printSExp recursive procedure that transforms PNode trees into S-Expressions that are
 //  written to standard output.
 //
 //  This step avoids writing a DeadEnds script parser in Swift DeadEnds.
 //
+//  In this implementation there is no internal SExpression data type. The PNode trees are written to standard
+//  output in S-Expression form.
+//
 //  Created by Thomas Wetmore on 4 March 2025.
-//  Last changed on 10 March 2025.
+//  Last changed on 9 April 2025.
 //
 
 #include <stdio.h>
@@ -15,12 +18,13 @@
 #include <string.h>
 #include "pnode.h"
 
+static bool addingLineNumbers = true;
+char lnBuffer[16];
+
 // printSExpr prints a PNode as an S-Expression. This feature allows DeadEnds scripts to be parsed by the "DeadEnds
 // C world" and converted into S-expressions that are interpreted by the "DeadEnds Swift" world.
 void printSExpr(FILE *out, PNode *node, int *line, int depth) {
-	if (!node) {
-		return;
-	}
+    if (!node) { return; }
 	int curline = node->lineNumber;
 	if (curline != *line) {
 		fprintf(out, "\n");
@@ -28,21 +32,23 @@ void printSExpr(FILE *out, PNode *node, int *line, int depth) {
 		for (int i = 0; i < depth; i++) { fprintf(out, "   "); }
 	}
 
+    if (addingLineNumbers) { sprintf(lnBuffer, "[%d]", curline); }
+
 	switch (node->type) {
 	case PNICons:
-		fprintf(out, "%ld", node->intCons);
+		fprintf(out, "%ld%s", node->intCons, lnBuffer);
 		break;
 	case PNFCons:
-		fprintf(out, "%f", node->floatCons);
+		fprintf(out, "%f%s", node->floatCons, lnBuffer);
 		break;
 	case PNSCons:
-		fprintf(out, "\"%s\"", node->stringCons);
+		fprintf(out, "\"%s\"%s", node->stringCons, lnBuffer);
 		break;
 	case PNIdent:
-		fprintf(out, "%s", node->identifier);
+		fprintf(out, "%s%s", node->identifier, lnBuffer);
 		break;
 	case PNIf:
-		fprintf(out, "(if (");
+		fprintf(out, "(if%s (", lnBuffer);
 		printSExpr(out, node->condExpr, line, depth);
 		fprintf(out, ") {");
 		printSExpr(out, node->thenState, line, depth + 1);
@@ -55,20 +61,20 @@ void printSExpr(FILE *out, PNode *node, int *line, int depth) {
 		fprintf(out, ")");
 		break;
 	case PNWhile:
-		fprintf(out, "(while (");
+        fprintf(out, "(while%s (", lnBuffer);
 		printSExpr(out, node->condExpr, line, depth);
 		fprintf(out, ") {");
 		printSExpr(out, node->loopState, line, depth + 1);
 		fprintf(out, "})");
 		break;
 	case PNBreak:
-		fprintf(out, "(break)");
+		fprintf(out, "(break%s)", lnBuffer);
 		break;
 	case PNContinue:
-		fprintf(out, "(continue)");
+		fprintf(out, "(continue%s)", lnBuffer);
 		break;
 	case PNReturn:
-		fprintf(out, "(return");
+		fprintf(out, "(return%s", lnBuffer);
 		if (node->returnExpr) {
 			fprintf(out, " ");
 			printSExpr(out, node->returnExpr, line, depth);
@@ -76,35 +82,35 @@ void printSExpr(FILE *out, PNode *node, int *line, int depth) {
 		fprintf(out, ")");
 		break;
 	case PNProcDef:
-		fprintf(out, "(proc %s (", node->procName);
+		fprintf(out, "(proc%s %s%s (", lnBuffer, node->procName, lnBuffer);
 		printSExpr(out, node->parameters, line, depth + 1);
-		fprintf(out, ") {\n");
+		fprintf(out, ") {\n"); // Close parameters; open body.
 		printSExpr(out, node->procBody, line, depth + 1);
-		fprintf(out, "}");
+		fprintf(out, "} )");
 		break;
 	case PNProcCall:
-		fprintf(out, "(call %s (", node->procName);
+		fprintf(out, "(call%s %s%s (", lnBuffer, node->procName, lnBuffer);
 		printSExpr(out, node->arguments, line, depth + 1);
 		fprintf(out, "))");
 		break;
 	case PNFuncDef:
-		fprintf(out, "(func %s", node->funcName);
+		fprintf(out, "(func%s %s%s", lnBuffer, node->funcName, lnBuffer);
 		printSExpr(out, node->parameters, line, depth + 1);
 		printSExpr(out, node->funcBody, line, depth + 1);
 		fprintf(out, ")");
 		break;
 	case PNFuncCall:
-		fprintf(out, "(fcall %s (", node->funcName);
+		fprintf(out, "(fcall%s %s%s (", lnBuffer, node->funcName, lnBuffer);
 		printSExpr(out, node->arguments, line, depth + 1);
 		fprintf(out, "))");
 		break;
 	case PNBltinCall:
-		fprintf(out, "(bltin %s (", node->builtinName);
+		fprintf(out, "(bltin%s %s%s (", lnBuffer, node->builtinName, lnBuffer);
 		printSExpr(out, node->arguments, line, depth + 1);
 		fprintf(out, "))");
 		break;
 	case PNChildren:
-		fprintf(out, "(children (");
+		fprintf(out, "(children%s (", lnBuffer);
 		printSExpr(out, node->familyExpr, line, depth);
 		fprintf(out, " %s %s) {", node->childIden, node->countIden);
 		printSExpr(out, node->loopState, line, depth + 1);
@@ -191,8 +197,9 @@ void printSExpr(FILE *out, PNode *node, int *line, int depth) {
 
 // **Update Wrapper Function**
 void printPNodeTreeAsSExpr(FILE *out, PNode *root) {
-
+    extern char lnBuffer[];
+    lnBuffer[0] = 0;
 	int line = root->lineNumber;
-	fprintf(out, "\n");
+	//fprintf(out, "\n");
 	printSExpr(out, root, &line, 1);
 }

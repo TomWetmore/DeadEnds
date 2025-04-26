@@ -1,22 +1,22 @@
 //
 //  main.c
-//  GenerateSExpressions
-//  This is the DeadEnds GenerateSExpressions program. The program parses a DeadEnds script file (and those it
-//  includes), which loads a globalTable, functionTable, and procedureTable. The function and procedure tables
-//  hold abstract syntax trees in the form of PNode trees. The program then write those PNode trees to standard
-//  output as S-Expressions. The program uses the DeadEndsLib to access to the script parser and PNode class.
+//  gensexprs
+//  This is the DeadEnds gensexprs program. It parses a DeadEnds script file (and those it includes), which loads
+//  procedureTable, functionTable, and globalTable. The function and procedure tables hold PNode trees the make
+//  up the absract syntax form of the procedure and function bodies. The program then write those PNode trees to
+//  standard output as S-Expressions. The program uses DeadEndsLib to access to the script parser and PNode class.
 //
 //  usage: gensexpr -s scriptfile
 //
 //  Created by Thomas Wetmore on 4 March 2025.
-//  Last changed on 21 March 2025.
+//  Last changed on 5 April 2025.
 //
 
 #include <stdio.h>
 #include "pnode.h"
 #include "functiontable.h"
 
-// Global tables filled by the parser.
+// Global tables filled by the by parseProgram() function.
 extern SymbolTable* globalTable; // Global variables.
 extern FunctionTable* functionTable; // User functions.
 extern FunctionTable* procedureTable; // User procedures.
@@ -28,17 +28,19 @@ static void getArguments(int, char**, String*);
 static void getEnvironment(String*);
 static void genSExpressions(void);
 
-// External functions (avoids a header file).
+// External functions (avoid header file).
 String getMsecondsStr(void);
 
-// main.c is the main program of  DeadEnds GenerateSExpressions program.
+// main.c is the main program of the DeadEnds gensexprs program.
 int main(int argc, char* argv[]) {
 	// Get the script file.
-	fprintf(stderr, "%s: CreateSExpressions started.\n", getMsecondsStr());
+	fprintf(stderr, "%s: crtsexpr started.\n", getMsecondsStr());
 	String scriptFile = null;
 	String scriptPath = null;
 	getArguments(argc, argv, &scriptFile);
 	getEnvironment(&scriptPath);
+    printf("scriptFile is %s\n", scriptFile);
+    printf("scriptPath is %s\n", scriptPath);
 	// Parse the script into PNode trees.
 	parseProgram(scriptFile, scriptPath);
 	fprintf(stderr, "%s: Script parsed.\n", getMsecondsStr());
@@ -95,7 +97,7 @@ static void genSExpressions(void) {
         Symbol* symbol = (Symbol*) element;
         printf("(global %s\n)\n", symbol->ident);
     ENDHASHTABLE
-    printf("\n}");
+    printf("\n}\n");
 }
 
 // usage prints the RunScript usage message.
