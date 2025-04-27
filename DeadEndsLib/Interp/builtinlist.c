@@ -166,10 +166,15 @@ PValue __setel (PNode* node, Context* context, bool* eflg) {
         return nullPValue;
     }
     int index = (int) pvalue.value.uInt;
-    if (index < 0 || index >= lengthList(list)) {
+    if (index < 0) {
         scriptError(node, "the index to setel is out of range");
         *eflg = true;
         return nullPValue;
+    }
+    // Extend the list with NULLs as needed
+    // Patched 27 April 2025 to get setel to work as it should.
+    while (index >= lengthList(list)) {
+        appendToList(list, (void*)&nullPValue);
     }
     pvalue = evaluate(arg->next, context, eflg); // Third arg is a PValue.
     if (*eflg) {
