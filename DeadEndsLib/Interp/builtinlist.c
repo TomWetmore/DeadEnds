@@ -174,7 +174,9 @@ PValue __setel (PNode* node, Context* context, bool* eflg) {
     // Extend the list with NULLs as needed
     // Patched 27 April 2025 to get setel to work as it should.
     while (index >= lengthList(list)) {
-        appendToList(list, (void*)&nullPValue);
+        PValue *filler = (PValue*) stdalloc(sizeof(PValue));
+        memcpy(filler, &nullPValue, sizeof(PValue));
+        appendToList(list, filler);
     }
     pvalue = evaluate(arg->next, context, eflg); // Third arg is a PValue.
     if (*eflg) {
