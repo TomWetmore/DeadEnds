@@ -3,7 +3,7 @@
 // functable.c has the table of built-in functions in the DeadEnds scripting language.
 //
 // Created by Thomas Wetmore on 10 January 2023.
-// Last changed on 23 October 2024.
+// Last changed on 26 April 2025.
 
 #include "standard.h"
 #include "symboltable.h"
@@ -324,7 +324,7 @@ BuiltIn builtIns[] = {
 	"root",         1,    1,    __root,  // Not needed as in LL; now walks up the Gedcom tree.
 	"row",          1,    1,    __row,
 	"save",         1,    1,    __save,
-//  "savenode",     1,    1,    __savenode,
+    "savenode",     1,    1,    __savenode,
     "set",          2,    2,    __set,
     "setel",        3,    3,    __setel,
     "sex",          1,    1,    __sex,
