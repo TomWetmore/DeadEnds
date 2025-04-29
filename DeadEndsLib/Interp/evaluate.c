@@ -1,15 +1,14 @@
-// DeadEnds
+//  DeadEnds
+//  evaluate.c contains the functions that evaluate PNode expressions during interpretation.
+//  PNodes form the abstract syntax trees of DeadEnds scripts. They represent functions,
+//  procedures, builtins, statements and expressions. PNodes for function calls and other
+//  expressions evaluate to PValues.
 //
-// evaluate.c contains the functions that evaluate PNode expressions during script interpretation.
-// PNodes form the abstract syntax graphs of DeadEnds scripts. They represent functions,
-// procedures, builtins, statements and expressions. PNodes for function calls and other
-// expressions evaluate to PValues.
-//
-// Builtin and user functions are evaluated. Procedures are interpreted. Symbol tables map
-// identifiers to PValue pointers.
+//  Builtin and user functions are evaluated. Procedures are interpreted. Symbol tables map
+//  identifiers to PValue pointers.
 
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 14 March 2025.
+//  Last changed on 29 April 2025.
 
 #include "evaluate.h"
 #include "standard.h"
@@ -140,7 +139,7 @@ PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg) {
     return nullPValue;
 }
 
-// evaluateBoolean evaluates an expression and converts it to a boolean PValue using C like rules
+// evaluateBoolean evaluates a PNode expression and converts it to a boolean PValue using C like rules.
 PValue evaluateBoolean(PNode* pnode, Context* context, bool* errflg) {
     PValue pvalue = evaluate(pnode, context, errflg);
     if (*errflg) return nullPValue;
@@ -158,7 +157,7 @@ PValue evaluateBoolean(PNode* pnode, Context* context, bool* errflg) {
         case PVGNode: return pvalue.value.uGNode ? truePValue : falsePValue;
         case PVSequence: return pvalue.value.uSequence ? truePValue : falsePValue;
         //case PVTable: return pvalue.pvValue.uTable ? truePValue : falsePValue;
-        //case PVList: return pvalue.pvValue.uList ? truePValue : falsePValue;
+        case PVList: return pvalue.value.uList ? truePValue : falsePValue;
         default: *errflg = true; return nullPValue;
     }
 }
@@ -178,7 +177,7 @@ static bool pvalueToBoolean(PValue pvalue) {
         case PVOther:
         case PVGNode: return pvalue.value.uGNode;
         case PVSequence: return pvalue.value.uSequence;
-            //case PVTable: return pvalue.pvValue.uTable ? truePValue : falsePValue;
+        //case PVTable: return pvalue.pvValue.uTable ? truePValue : falsePValue;
         case PVList: return pvalue.value.uList;
         default: return false;
     }

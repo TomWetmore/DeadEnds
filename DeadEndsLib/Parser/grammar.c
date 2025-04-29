@@ -31,7 +31,7 @@ static void join(PNode* list, PNode* last);
 static void yyerror(String str);
 
 #define YYSTYPE SemanticValue
-#line 35 "grammar.c"
+#line 35 "y.tab.c"
 #define ICONS 257
 #define FCONS 258
 #define SCONS 259
@@ -560,7 +560,7 @@ void yyerror(String str) {
 	printf("Syntax Error (%s): %s: line %d\n", str, curFileName, curLine);
 	Perrors++;
 }
-#line 556 "grammar.c"
+#line 556 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack(void)
 {
@@ -756,7 +756,7 @@ case 5:
 #line 58 "grammar.y"
 {  /* Interested in "global".*/
         if (eqstr("global", yyvsp[-3].identifier))
-            assignValueToSymbol(globalTable, yyvsp[-1].identifier, (PValue) {PVAny});
+            assignValueToSymbol(globalTable, yyvsp[-1].identifier, (PValue) {PVNull});
     }
 break;
 case 6:
@@ -1110,7 +1110,7 @@ case 56:
         yyval.integer = curLine;
     }
 break;
-#line 1106 "grammar.c"
+#line 1106 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

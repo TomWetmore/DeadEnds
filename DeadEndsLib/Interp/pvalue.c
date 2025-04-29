@@ -369,7 +369,6 @@ String pvalueToString(PValue pvalue, bool showType) {
 		case PVEvent:
 		case PVOther:
 		case PVGNode: sprintf(p, "%s", gnodeToString(value.uGNode, gnodeLevel(value.uGNode))); break;
-		case PVAny: sprintf(p, "any"); break;
 		case PVNull: sprintf(p, "null"); break;
 		default: sprintf(p, "not implemented");
 	}
