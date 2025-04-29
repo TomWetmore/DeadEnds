@@ -39,8 +39,8 @@ int main(int argc, char* argv[]) {
 	String scriptPath = null;
 	getArguments(argc, argv, &scriptFile);
 	getEnvironment(&scriptPath);
-    printf("scriptFile is %s\n", scriptFile);
-    printf("scriptPath is %s\n", scriptPath);
+    fprintf(stderr, "scriptFile is %s\n", scriptFile);
+    fprintf(stderr, "scriptPath is %s\n", scriptPath);
 	// Parse the script into PNode trees.
 	parseProgram(scriptFile, scriptPath);
 	fprintf(stderr, "%s: Script parsed.\n", getMsecondsStr());
@@ -76,9 +76,9 @@ static void getEnvironment(String* script) {
 
 // genSExpressions generates the S-Expressions from the PNode trees in the procedure and function tables.
 static void genSExpressions(void) {
-	printf("procedureTable holds %d procedures\n", sizeHashTable(procedureTable));
-	printf("functionTable holds %d functions\n", sizeHashTable(functionTable));
-    printf("globalTable holds %d variables\n", sizeHashTable(globalTable));
+	fprintf(stderr, "procedureTable holds %d procedures\n", sizeHashTable(procedureTable));
+	fprintf(stderr, "functionTable holds %d functions\n", sizeHashTable(functionTable));
+    fprintf(stderr, "globalTable holds %d variables\n", sizeHashTable(globalTable));
 
     printf("{\n");
 	FORHASHTABLE(procedureTable, element)
