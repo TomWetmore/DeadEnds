@@ -4,7 +4,7 @@
 // expressions in the DeadEnds script language. They are the values stored in symbol tables.
 //
 // Created by Thomas Wetmore on 15 December 2022.
-// Last changed on 6 June 2024.
+// Last changed on 29 April 2025.
 
 #ifndef pvalue_h
 #define pvalue_h
@@ -27,7 +27,7 @@ typedef struct GNode GNode;
 
 // PVType enumerates the types of PValues.
 typedef enum {
-	PVNull = 0, PVAny, PVInt, PVFloat, PVBool, PVString, PVGNode, PVPerson,
+	PVNull = 0, PVInt, PVFloat, PVBool, PVString, PVGNode, PVPerson,
 	PVFamily, PVSource, PVEvent, PVOther, PVList, PVTable, PVSequence
 } PVType;
 

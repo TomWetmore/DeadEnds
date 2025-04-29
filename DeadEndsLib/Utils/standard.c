@@ -70,7 +70,7 @@ void _free (void* ptr, String file, int line) {
 	free(ptr);
 }
 
-// strsave returns a copy of a String on the heap. If the string is null or empty null is returned.
+// strsave returns a copy of a String on the heap. If the string is null, null is returned.
 String strsave(String string) {
 	if (string == null) return null;
 	return strcpy(stdalloc(strlen(string) + 1), string);
