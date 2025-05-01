@@ -4,7 +4,7 @@
 // expressions in the DeadEnds script language. They are the values stored in symbol tables.
 //
 // Created by Thomas Wetmore on 15 December 2022.
-// Last changed on 29 April 2025.
+// Last changed on 30 April 2025.
 
 #ifndef pvalue_h
 #define pvalue_h
@@ -53,24 +53,21 @@ typedef struct PValue {
 } PValue;
 
 // User Interface to PValues.
+PValue createStringPValue(String);
 void showPValue(PValue value);
 bool isPValue(PValue value);
 bool isRecordType(PVType type); // PValue is a GNode root.
 bool isGNodeType(PVType type);  // PValue is any GNode.
-
-extern FILE *Poutfp;
-extern int Perrors;
-extern int nobuiltins;
 
 // Useful PValue constants.
 extern const PValue nullPValue;
 extern const PValue truePValue;
 extern const PValue falsePValue;
 
-// Input and output modes.
-// DEPRECATED.
-//#define FILEMODE   0    //  Input from a file.
-//#define STRINGMODE 1    //  Input or output from or to a string.
+extern FILE *Poutfp;
+extern int Perrors;
+extern int nobuiltins;
+
 #define UNBUFFERED 2    //  Output unbuffered to a file.
 #define BUFFERED   3    //  Output buffered to a file.
 #define PAGEMODE   4    //  Output page buffered to a file.

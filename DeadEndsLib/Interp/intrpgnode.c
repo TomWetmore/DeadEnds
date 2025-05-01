@@ -5,7 +5,7 @@
 //    nodes that hold gedcom nodes.
 //
 //  Created by Thomas Wetmore on 17 March 2023.
-//  Last changed on 22 October 2024.
+//  Last changed on 30 April 2025.
 //
 
 #include "standard.h"
@@ -22,7 +22,7 @@ PValue __key(PNode* pnode, Context* context, bool* eflg) {
     PValue value = evaluate(pnode->arguments, context, eflg);
     if (*eflg || !isRecordType(value.type)) return nullPValue;
     GNode* gnode = value.value.uGNode;
-    if (gnode && gnode->key) return PVALUE(PVString, uString, gnode->key);
+    if (gnode && gnode->key) return createStringPValue(gnode->key);
     return nullPValue;
 }
 
@@ -34,7 +34,7 @@ PValue __xref (PNode* pnode, Context* context, bool* eflg) {
     if (*eflg || !isGNodeType(value.type)) return nullPValue;
     GNode* gnode = value.value.uGNode;
     if (!gnode->key) return nullPValue;
-    return PVALUE(PVString, uString, strsave(gnode->key));
+    return createStringPValue(gnode->key);
 }
 
 // __tag returns the tag of a Gedcom node.
@@ -46,7 +46,7 @@ PValue __tag (PNode* pnode, Context* context, bool* errflg) {
         *errflg = true;
         return nullPValue;
     }
-    return PVALUE(PVString, uString, strsave(gnode->tag));
+    return createStringPValue(gnode->tag);
 }
 
 // __value returns the value of a gedcom node; it may be empty.
@@ -59,7 +59,7 @@ PValue __value (PNode* pnode, Context* context, bool* eflg) {
         return nullPValue;
     }
     if (!gnode->value) return nullPValue;
-    return PVALUE(PVString, uString, strsave(gnode->value));;
+    return createStringPValue(gnode->value);
 }
 
 // __parent returns the parent node of a gedcom node.

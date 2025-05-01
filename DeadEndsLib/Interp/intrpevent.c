@@ -3,7 +3,7 @@
 // intrpevent.c has the built-in functions for events, dates and places.
 //
 // Created by Thomas Wetmore on 17 March 2023.
-// Last changed on 31 August 2024.
+// Last changed on 30 April 2025.
 
 #include "standard.h"
 #include "pnode.h"
@@ -20,7 +20,7 @@ PValue __date(PNode *pnode, Context *context, bool *errflg) {
 	PValue pvalue = evaluate(pnode->arguments, context, errflg);
 	if (*errflg || !isGNodeType(pvalue.type)) return nullPValue;
 	String date = eventToDate(pvalue.value.uGNode, false);
-	if (date) return PVALUE(PVString, uString, strsave(date));
+	if (date) return createStringPValue(date);
 	return nullPValue;
 }
 
@@ -30,7 +30,7 @@ PValue __place(PNode *pnode, Context *context, bool *errflg) {
     PValue pvalue = evaluate(pnode->arguments, context, errflg);
     if (*errflg || !isGNodeType(pvalue.type)) return nullPValue;
     String place = eventToPlace(pvalue.value.uGNode, false);
-    if (place) return PVALUE(PVString, uString, strsave(place));
+    if (place) return createStringPValue(place);
     return nullPValue;
 }
 
@@ -39,34 +39,28 @@ PValue __place(PNode *pnode, Context *context, bool *errflg) {
 PValue __year(PNode *pnode, Context *context, bool* errflg) {
     PValue evnt = evaluate(pnode->arguments, context, errflg);
     if (*errflg || !isGNodeType(evnt.type)) return nullPValue;
-    return PVALUE(PVString, uString, strsave(eventToDate(evnt.value.uGNode, true)));
+    return createStringPValue(eventToDate(evnt.value.uGNode, true));
 }
 
 //  __long -- Return the long form of an event as a string.
 //    usage: long(EVENT) -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __long(PNode *pnode, Context *context, bool* errflg)
-{
+PValue __long(PNode *pnode, Context *context, bool* errflg) {
     PValue event = evaluate(pnode->arguments, context, errflg);
     if (*errflg || !isRecordType(event.type)) return nullPValue;
-    return PVALUE(PVString, uString, eventToString(event.value.uGNode, false));
+    return createStringPValue(eventToString(event.value.uGNode, false));
 }
 
 //  __short -- Return the long form of an event as a string.
 //    usage: short(EVENT) -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __short (PNode *pnode, Context *context, bool* errflg)
-{
+PValue __short (PNode *pnode, Context *context, bool* errflg) {
     PValue event = evaluate(pnode->arguments, context, errflg);
     if (*errflg || !isRecordType(event.type)) return nullPValue;
-    return PVALUE(PVString, uString, eventToString(event.value.uGNode, true));
+    return createStringPValue(eventToString(event.value.uGNode, true));
 }
 
 //  __dayformat -- Set day format for standard dates.
 //    usage: dayformat(INT) -> NULL
-//--------------------------------------------------------------------------------------------------
-PValue __dayformat (PNode *node, Context *context, bool* eflg)
-{
+PValue __dayformat (PNode *node, Context *context, bool* eflg) {
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVInt) return nullPValue;
     int code = (int) pvalue.value.uInt;
@@ -76,9 +70,7 @@ PValue __dayformat (PNode *node, Context *context, bool* eflg)
 
 //  __monthformat -- Set the month format for showing standard dates.
 //    usage: dayformat(INT) -> NULL
-//--------------------------------------------------------------------------------------------------
-PValue __monthformat(PNode *node, Context *context, bool* eflg)
-{
+PValue __monthformat(PNode *node, Context *context, bool* eflg) {
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVInt) return nullPValue;
     int code = (int) pvalue.value.uInt;
@@ -88,9 +80,7 @@ PValue __monthformat(PNode *node, Context *context, bool* eflg)
 
 //  __dateformat -- Set date format for standard date
 //    usage: dateformat(INT) -> NULL
-//--------------------------------------------------------------------------------------------------
-PValue __dateformat(PNode *node, Context *context, bool* eflg)
-{
+PValue __dateformat(PNode *node, Context *context, bool* eflg) {
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVInt) return nullPValue;
     int code = (int) pvalue.value.uInt;
@@ -100,23 +90,19 @@ PValue __dateformat(PNode *node, Context *context, bool* eflg)
 
 //  __stddate -- Return standard date format of event
 //    usage: stddate(EVENT) -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __stddate(PNode *node, Context *context, bool* eflg)
-{
+PValue __stddate(PNode *node, Context *context, bool* eflg) {
     extern String formatDate(String, int, int, int, int, bool);
 
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || !isGNodeType(pvalue.type)) return nullPValue;
     GNode* gnode = pvalue.value.uGNode;
     String date = formatDate(eventToDate(gnode, false), daycode, monthcode, 1, datecode, false);
-    return PVALUE(PVString, uString, strsave(date));
+    return createStringPValue(date);
 }
 
 //  __gettoday -- Create today's event
 //    usage: gettoday() --> EVENT
-//--------------------------------------------------------------------------------------------------
-PValue __gettoday(PNode *expr, Context *context, bool* eflg)
-{
+PValue __gettoday(PNode *expr, Context *context, bool* eflg) {
 	GNode *prnt = createGNode(null, "EVEN", null, null);
 	GNode *chil = createGNode(null, "DATE", get_date(), prnt);
 	prnt->child = chil;

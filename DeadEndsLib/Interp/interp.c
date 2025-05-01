@@ -5,7 +5,7 @@
 // or it may call a specific function.
 //
 // Created by Thomas Wetmore on 9 December 2022.
-// Last changed on 30 November 2024.
+// Last changed on 30 April 2025.
 
 #include <stdarg.h>
 #include "symboltable.h"
@@ -328,7 +328,6 @@ InterpType interpSpouses(PNode* pnode, Context* context, PValue *pval) {
 // interpFamilies interprets the families statement looping through the families a person is a spouse in.
 // usage: families(INDI, FAM_V, INDI_V, INT_V) {...}
 // fields: pPersonExpr, pFamilyIden, pSpouseIden, pCountIden, pLoopState
-//--------------------------------------------------------------------------------------------------
 InterpType interpFamilies(PNode* node, Context* context, PValue *pval) {
 	bool eflg = false;
 	GNode *indi = evaluatePerson(node->personExpr, context, &eflg);
@@ -459,7 +458,7 @@ InterpType interp_fornotes(PNode* node, Context* context, PValue *pval) {
 	}
 	if (!root) return InterpOkay;
 	FORTAGVALUES(root, "NOTE", sub, vstring) {
-		assignValueToSymbol(context->symbolTable, node->gnodeIden, PVALUE(PVString, uString, vstring));
+		assignValueToSymbol(context->symbolTable, node->gnodeIden, createStringPValue(vstring));
 		irc = interpret(node->loopState, context, pval);
 		switch (irc) {
 			case InterpContinue:

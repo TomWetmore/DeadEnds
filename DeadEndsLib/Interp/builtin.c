@@ -3,7 +3,7 @@
 // builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 13 December 2024.
+// Last changed on 30 April 2025.
 
 #include "standard.h"
 #include "gnode.h"    // GNode.
@@ -25,9 +25,6 @@
 const PValue nullPValue = {PVNull, PV()};
 const PValue truePValue = PVALUE(PVBool, uBool, true);
 const PValue falsePValue = PVALUE(PVBool, uBool, false);
-const PValue spacePValue = PVALUE(PVString, uString, " ");
-const PValue quotePValue = PVALUE(PVString, uString, "\"");
-const PValue newlinePValue = PVALUE(PVString, uString, "\n");
 
 // isZeroVUnion returns if VUnion value is a numeric zero.
 bool isZeroVUnion(PVType type, VUnion vunion) {
@@ -166,7 +163,7 @@ bool isZeroVUnion(PVType type, VUnion vunion) {
 PValue __strsoundex(PNode* expr, Context* context, bool* eflg) {
 	PValue pvalue = evaluate(expr->arguments, context, eflg);
 	if (*eflg || pvalue.type != PVString || !pvalue.value.uString) return nullPValue;
-	return PVALUE(PVString, uString, strsave(soundex(pvalue.value.uString)));
+	return createStringPValue(soundex(pvalue.value.uString));
 }
 
 // __set performs the DeadEnds script assignment statement.
@@ -187,10 +184,10 @@ PValue __d(PNode* expr, Context* context, bool* eflg) {
 	char scratch[20];
 	PValue value = evaluate(expr->arguments, context, eflg);
 	if (value.type == PVBool)
-		return PVALUE(PVString, uString, value.value.uBool ? "1" : "0");
+		return createStringPValue(value.value.uBool ? "1" : "0");
 	if (*eflg || value.type != PVInt) return nullPValue;
 	sprintf(scratch, "%ld", value.value.uInt);
-	return PVALUE(PVString, uString, strsave(scratch));
+	return createStringPValue(scratch);
 }
 
 // __f returns a string holding a floating point number.
@@ -200,7 +197,7 @@ PValue __f(PNode* expr, Context* context, bool* errflg) {
 	PValue value = evaluate(expr->arguments, context, errflg);
 	if (*errflg || value.type != PVFloat) return nullPValue;
 	sprintf(scratch, "%4f", value.value.uFloat);
-	return PVALUE(PVString, uString, strsave(scratch));
+	return createStringPValue(scratch);
 }
 
 // __alpha converts an integer between 1 and 26 to 'a' to 'z'. If out of range returns d(INT).
@@ -213,7 +210,7 @@ PValue __alpha(PNode* expr, Context* context, bool* eflg) {
 	if (lvalue < 1 || lvalue > 26) return __d(expr, context, eflg);
 	sprintf(scratch, "%c", 'a' + (int) lvalue - 1);
 	value.type = PVString;
-	return PVALUE(PVString, uString, strsave(scratch));
+	return  createStringPValue(scratch);
 }
 
 // __ord convert a small integer to an ordinal string. If out of range returns d(INT)
@@ -250,7 +247,7 @@ PValue __card (PNode* expr, Context* context, bool* eflg) {
 	if (*eflg || value.type != PVInt) return nullPValue;
 	long lvalue = value.value.uInt;
 	if (lvalue < 0 || lvalue > 20) return __d(expr, context, eflg);
-	return PVALUE(PVString, uString, cardinals[lvalue]);
+	return createStringPValue(cardinals[lvalue]);
 }
 
 // __roman convert an integer to Roman numeral. If out of range returns d(INT).
@@ -270,14 +267,13 @@ PValue __roman(PNode* node, Context* context, bool* eflg) {
 			num -= values[i];
 		}
 	}
-	return PVALUE(PVString, uString, strsave(scratch));
+	return createStringPValue(scratch);
 }
 
 // __strcmp -- Compare two strings and return their relationship.
 // usage: strcmp(STRING, STRING) -> INT
 // usage: nestr(STRING, STRING) -> BOOL
-PValue __strcmp (PNode* pnode, Context* context, bool* eflg)
-{
+PValue __strcmp (PNode* pnode, Context* context, bool* eflg) {
 	PNode *arg = pnode->arguments;
 	PValue pvalue = evaluate(arg, context, eflg);
 	if (pvalue.type != PVString) {
@@ -299,9 +295,7 @@ PValue __strcmp (PNode* pnode, Context* context, bool* eflg)
 
 //  __eqstr -- Compare two strings
 //    usage: eqstr(STRING, STRING) -> BOOL
-//--------------------------------------------------------------------------------------------------
-PValue __eqstr (PNode *node, Context *context, bool *eflg)
-{
+PValue __eqstr (PNode *node, Context *context, bool *eflg) {
 	PNode *arg = node->arguments;
 	PValue pvalue = evaluate(arg, context, eflg);
 	if (pvalue.type != PVString) {
@@ -322,32 +316,25 @@ PValue __eqstr (PNode *node, Context *context, bool *eflg)
 
 //  __strtoint -- Convert string to integer
 //    usage: strtoint(STRING) -> INT
-//--------------------------------------------------------------------------------------------------
-PValue __strtoint (PNode *node, Context *context, bool *eflg)
-{
+PValue __strtoint (PNode *node, Context *context, bool *eflg) {
 	PValue value = evaluate(node->arguments, context, eflg);
 	if (*eflg || value.type != PVString || !value.value.uString) return nullPValue;
 	return PVALUE(PVInt, uInt, atoi(value.value.uString));
 }
 
-
-
 //  __save -- Copy string
-//--------------------------------------------------------------------------------------------------
-PValue __save (PNode *pnode, Context *context, bool *errflg)
-{
+PValue __save (PNode *pnode, Context *context, bool *errflg) {
     String value = evaluateString(pnode->arguments, context, errflg);
 	if (*errflg || !value || *value == 0) {
 		scriptError(pnode, "The argument to save must be a string.");
 		*errflg = true;
 		return nullPValue;
 	}
-	return PVALUE(PVString, uString, strsave(value));
+	return createStringPValue(value);
 }
 
 //  __strlen -- Find length of string
 //    usage: strlen(STRING) -> INT
-//--------------------------------------------------------------------------------------------------
 PValue __strlen (PNode *node, Context *context, bool* eflg)
 {
 	PValue value = evaluate(node->arguments, context, eflg);
@@ -357,9 +344,7 @@ PValue __strlen (PNode *node, Context *context, bool* eflg)
 
 //  __concat -- Catenate potentially many strings.
 //    usage: concat(STRING [, STRING]+) -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __concat (PNode *pnode, Context *context, bool *errflg)
-{
+PValue __concat (PNode *pnode, Context *context, bool *errflg) {
 	PNode *arg = pnode->arguments;
 	if (arg == null) return nullPValue;
 	int len = 0, nstrs = 0;
@@ -379,37 +364,33 @@ PValue __concat (PNode *pnode, Context *context, bool *errflg)
 		stdfree(hold[i]);
 	}
 	*p = 0;
-	return PVALUE(PVString, uString, nstring);
+    PValue rvalue = createStringPValue(nstring); // Makes extra copy.
+    stdfree(nstring);
+    return rvalue;
 }
 
 //  __lower -- Convert string to lower case.
 //    usage: lower(STRING) -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __lower(PNode *node, Context *context, bool* eflg)
-{
+PValue __lower(PNode *node, Context *context, bool* eflg) {
 	PValue val = evaluate(node->arguments, context, eflg);
 	if (*eflg || val.type != PVString) return nullPValue;
-	return PVALUE(PVString, uString, lower(val.value.uString));
+	return createStringPValue(lower(val.value.uString));
 }
 
 //  __upper -- Convert string to upper case.
 //    usage: upper(STRING) -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __upper(PNode *node, Context *context, bool* eflg)
-{
+PValue __upper(PNode *node, Context *context, bool* eflg) {
 	PValue val = evaluate(node->arguments, context, eflg);
 	if (*eflg || val.type != PVString) return nullPValue;
-	return PVALUE(PVString, uString, upper(val.value.uString));
+	return createStringPValue(upper(val.value.uString));
 }
 
 //  __capitalize -- Capitalize a string.
 //    usage: capitalize(STRING) -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __capitalize(PNode *node, Context *context, bool* eflg)
-{
+PValue __capitalize(PNode *node, Context *context, bool* eflg) {
 	PValue val = evaluate(node->arguments, context, eflg);
 	if (*eflg || val.type != PVString) return nullPValue;
-	return PVALUE(PVString, uString, capitalize(val.value.uString));
+	return createStringPValue(capitalize(val.value.uString));
 }
 
 
@@ -597,15 +578,15 @@ PValue __copyfile (PNode *node, Context *context, bool *eflg) {
 
 // __nl is the newline function.
 // usage: nl() -> STRING
-PValue __nl(PNode* pnode, Context* context, bool* errflg) { return newlinePValue; }
+PValue __nl(PNode* pnode, Context* context, bool* errflg) { return createStringPValue("\n"); }
 
 // __space is the space function.
 // usage: sp() -> STRING
-PValue __space(PNode* pnode, Context* context, bool* errflg) { return spacePValue; }
+PValue __space(PNode* pnode, Context* context, bool* errflg) { return createStringPValue(" "); }
 
 // __qt is the double quote function
 // usage: qt() -> STRING
-PValue __qt(PNode *pnode, Context *context, bool* errflg) { return quotePValue; }
+PValue __qt(PNode *pnode, Context *context, bool* errflg) { return createStringPValue("\""); }
 
 //  __children returns the Sequence of children in a family
 PValue __children(PNode *pnode, Context *context, bool* errflg)
@@ -620,7 +601,7 @@ PValue __children(PNode *pnode, Context *context, bool* errflg)
 // __version returns the version of the DeadEnds program.
 PValue __version(PNode*vpnode, Context* context, bool* errflg) {
 	extern String version;
-	return PVALUE(PVString, uString, version);
+	return createStringPValue(version);
 }
 
 // __noop is used for builtins that have been removed (e.g., lock, unlock).

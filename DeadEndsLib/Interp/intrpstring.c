@@ -3,7 +3,7 @@
 //  CloneOne
 //
 //  Created by Thomas Wetmore on 14 February 2024.
-//  Last changed on 14 February 2024.
+//  Last changed on 30 April 2025.
 //
 
 #include <stdio.h>
@@ -35,7 +35,7 @@ PValue __substring (PNode *pnode, Context *context, bool *errflg)
 		scriptError(pnode, "The third argument to substring must be an integer.");
 		return nullPValue;
 	}
-	return PVALUE(PVString, uString, substring(full, lo, hi));
+	return createStringPValue(substring(full, lo, hi));
 }
 
 //  __trim -- Trim string if too long
@@ -57,7 +57,7 @@ PValue __trim (PNode *pnode, Context *context, bool *errflg)
 		scriptError(pnode, "The second argument to time must be an integer.");
 		return nullPValue;
 	}
-	return PVALUE(PVString, uString, strsave(trim(string, length)));
+	return createStringPValue(trim(string, length));
 }
 
 //  __rjustify -- Right justify a string value
@@ -79,5 +79,5 @@ PValue __rjustify (PNode *pnode, Context *context, bool *errflg)
 		scriptError(pnode, "The second argument to rjustify must be an integer.");
 		return nullPValue;
 	}
-	return PVALUE(PVString, uString, strsave(rightjustify(string, length)));
+	return createStringPValue(rightjustify(string, length));
 }

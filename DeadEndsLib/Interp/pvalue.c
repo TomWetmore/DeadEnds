@@ -34,6 +34,13 @@ PValue *allocPValue(PVType type, VUnion value) {
 	return ppvalue;
 }
 
+PValue createStringPValue(String s) {
+    PValue p;
+    p.type = PVString;
+    p.value.uString = s ? strsave(s) : null;
+    return p;
+}
+
 // freePValue frees an allocated PValue.
 void freePValue(PValue* ppvalue) {
 	switch (ppvalue->type) {
@@ -73,20 +80,20 @@ bool numericPValue(PValue value) {
 
 // coercePValue converts a PValue from one type to another.
 // THIS FUNCTION IS NOT CALLED.
-void coercePValue(PValue* pvalue, int newType, bool* eflg) {
-	int curType = pvalue->type;
-	if (curType == newType) return; // Nothing to do.
-	if (newType == PVFloat && curType == PVInt) { // PVInt to PVFloat.
-		pvalue->type = newType;
-		pvalue->value.uFloat = (float) pvalue->value.uInt;
-	}
-	if (newType == PVBool) { // Any to PVBool.
-		pvalue->type = newType;
-		pvalue->value.uBool = ((void*) pvalue->value.uGNode) != null;
-	}
-	printf("DID NOT COERCE FROM %d to %d\n", curType, newType);
-	return;
-}
+//void coercePValue(PValue* pvalue, int newType, bool* eflg) {
+//	int curType = pvalue->type;
+//	if (curType == newType) return; // Nothing to do.
+//	if (newType == PVFloat && curType == PVInt) { // PVInt to PVFloat.
+//		pvalue->type = newType;
+//		pvalue->value.uFloat = (float) pvalue->value.uInt;
+//	}
+//	if (newType == PVBool) { // Any to PVBool.
+//		pvalue->type = newType;
+//		pvalue->value.uBool = ((void*) pvalue->value.uGNode) != null;
+//	}
+//	printf("DID NOT COERCE FROM %d to %d\n", curType, newType);
+//	return;
+//}
 
 //  isPValue checks a PValue for validity by checking its type.
 bool isPValue(PValue pvalue) {
