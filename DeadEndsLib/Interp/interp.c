@@ -5,7 +5,7 @@
 // or it may call a specific function.
 //
 // Created by Thomas Wetmore on 9 December 2022.
-// Last changed on 30 April 2025.
+// Last changed on 2 May 2025.
 
 #include <stdarg.h>
 #include "symboltable.h"
@@ -797,51 +797,59 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
 InterpType interpTraverse(PNode* traverseNode, Context* context, PValue* returnValue) {
     ASSERT(traverseNode && context);
     bool errorFlag = false;
-    GNode* root = evaluateGNode(traverseNode->gnodeExpr, context, &errorFlag); // Root of traverse.
+    // Get the root node of the traversal.
+    GNode* root = evaluateGNode(traverseNode->gnodeExpr, context, &errorFlag);
     if (errorFlag || !root) {
         scriptError(traverseNode, "the first argument to traverse must be a Gedcom line");
         return InterpError;
     }
-    assignValueToSymbol(context->symbolTable, traverseNode->levelIden, PVALUE(PVInt, uInt, 0));
-    assignValueToSymbol(context->symbolTable, traverseNode->gnodeIden, PVALUE(PVGNode, uGNode, root));
-    // Normally getValueOfIden gets values of idens in the SymbolTables. But here we use
-    // searchHashTable to get direct access to the PValues to simplify updating them.
-    PValue* level = ((Symbol*) searchHashTable(context->symbolTable, traverseNode->levelIden))->value;
-    PValue* node = ((Symbol*) searchHashTable(context->symbolTable, traverseNode->gnodeIden))->value;
-    ASSERT(node && level);
-    GNode *snode, *nodeStack[MAXTRAVERSEDEPTH]; // Stack of GNodes.
-    InterpType irc;
-    InterpType returnIrc = InterpOkay;
-
+    // Set up the traversal stack.
+    GNode* nodeStack[MAXTRAVERSEDEPTH];
     int lev = 0;
-    nodeStack[lev] = snode = root; // Init stack.
+    nodeStack[lev] = root;
+    // Traverse the tree doing something.
+    InterpType returnIrc = InterpOkay;
     while (true) {
-        node->value.uGNode = snode; // Update symbol table.
-        level->value.uInt = lev;
-        switch (irc = interpret(traverseNode->loopState, context, returnValue)) { // Interpret.
-        case InterpContinue:
-        case InterpOkay: break;
-        case InterpBreak:
-            returnIrc = InterpOkay;
-            goto a;
-        default:
-            returnIrc = irc;
-            goto a;
+        // Assign loop variables.
+        assignValueToSymbol(context->symbolTable, traverseNode->levelIden, PVALUE(PVInt, uInt, lev));
+        assignValueToSymbol(context->symbolTable, traverseNode->gnodeIden, PVALUE(PVGNode, uGNode, nodeStack[lev]));
+        // Interpret loop body
+        InterpType irc = interpret(traverseNode->loopState, context, returnValue);
+        switch (irc) {
+            case InterpContinue:
+            case InterpOkay:
+                break;
+            case InterpBreak:
+                returnIrc = InterpOkay;
+                goto cleanup;
+            default:
+                returnIrc = irc;
+                goto cleanup;
         }
-        if (snode->child) { // Traverse child.
-            snode = nodeStack[++lev] = snode->child;
+        // Traverse to first child.
+        if (nodeStack[lev]->child) {
+            if (lev + 1 >= MAXTRAVERSEDEPTH) {
+                scriptError(traverseNode, "maximum traversal depth exceeded");
+                returnIrc = InterpError;
+                goto cleanup;
+            }
+            nodeStack[lev + 1] = nodeStack[lev]->child;
+            lev++;
             continue;
         }
-        if (snode->sibling) { // Traverse sibling.
-            snode = nodeStack[lev] = snode->sibling;
+        // Traverse to sibling.
+        if (nodeStack[lev]->sibling) {
+            nodeStack[lev] = nodeStack[lev]->sibling;
             continue;
         }
-        while (--lev >= 0 && !(nodeStack[lev])->sibling) // Pop
-            ;
+        // Backup to ancestor with unvisited sibling.
+        while (--lev >= 0 && !(nodeStack[lev]->sibling)) { }
         if (lev < 0) break;
-        snode = nodeStack[lev] = (nodeStack[lev])->sibling;
+        nodeStack[lev] = nodeStack[lev]->sibling;
     }
-    a:  removeFromHashTable(context->symbolTable, traverseNode->levelIden); // Remove loop idens.
+
+cleanup:
+    removeFromHashTable(context->symbolTable, traverseNode->levelIden);
     removeFromHashTable(context->symbolTable, traverseNode->gnodeIden);
     return returnIrc;
 }

@@ -5,7 +5,7 @@
 // MNOTE: Memory management is an issue to be dealt with carefully.
 //
 // Created by Thomas Wetmore on 16 April 2023.
-// Last changed on 29 April 2024.
+// Last changed on 2 May 2024.
 
 #include "interp.h"
 #include "list.h"
@@ -26,21 +26,23 @@ PValue __list(PNode* pnode, Context* context, bool* eflg) {
     return nullPValue;
 }
 
-// __push treats the list as a stack and pushes an element onto the front.
-// usage: push(LIST, ANY) -> VOID or enqueue(LIST, ANY) -> VOID
-PValue __push(PNode* node, Context* context, bool* eflg) {
+// __prepend handles all the cases that add to the front of a list.
+// usage: prepend(LIST, ANY) -> VOID
+// usage: push(LIST, ANY) -> VOID
+// usage: enqueue(LIST, ANY) -> VOID
+PValue __prepend(PNode* node, Context* context, bool* eflg) {
     PNode *arg = node->arguments; // First arg is a list.
     PValue pvalue = evaluate(arg, context, eflg);
     if (*eflg || pvalue.type != PVList) {
         *eflg = true;
-        scriptError(node, "the first first argument to push/enqueue must be a list");
+        scriptError(node, "the first argument to prepend/push/enqueue must be a list");
         return nullPValue;
     }
     List *list = pvalue.value.uList;
     ASSERT(list);
     pvalue = evaluate(arg->next, context, eflg); // Second arg is a PValue.
     if (*eflg) {
-        scriptError(node, "the second argument to push/enqueue must have a program value");
+        scriptError(node, "the second argument to prepend/push/enqueue must be a program value");
         return nullPValue;
     }
     PValue *ppvalue = stdalloc(sizeof(PValue));
@@ -49,19 +51,20 @@ PValue __push(PNode* node, Context* context, bool* eflg) {
     return nullPValue;
 }
 
-// __requeue adds an element to the back of a list.
+// __append handle the cases that add to the end of a list.
+// usage: append(LIST, ANY) -> VOID
 // usage: requeue(LIST, ANY) -> VOID
-PValue __requeue (PNode* node, Context* context, bool* eflg) {
+PValue __append(PNode* node, Context* context, bool* eflg) {
     PValue pvalue = evaluate(node->arguments, context, eflg); // First arg is a list.
     if (*eflg || pvalue.type != PVList) {
-        scriptError(node, "the first argument to requeue must be a list");
+        scriptError(node, "the first argument to append/requeue must be a list");
         *eflg = true;
         return nullPValue;
     }
     List *list = pvalue.value.uList;
     pvalue = evaluate(node->arguments->next, context, eflg); // Second arg is a PValue.
     if (*eflg) {
-        scriptError(node, "the second argument to requeue must be a program value");
+        scriptError(node, "the second argument to append/requeue must be a program value");
         return nullPValue;
     }
     PValue *ppvalue = (PValue*) malloc(sizeof(PValue));
@@ -70,28 +73,13 @@ PValue __requeue (PNode* node, Context* context, bool* eflg) {
     return nullPValue;
 }
 
-// __pop treats the list as a stack and pops an element from the front.
+// __removeFirst treats the list as a stack and pops an element from the front.
+// usage: removefirst(LIST) -> ANY
 // usage: pop(LIST) -> ANY
-PValue __oldpop(PNode* node, Context* context, bool* eflg) {
-    PValue pvalue = evaluate(node->arguments, context, eflg);
-    if (*eflg || pvalue.type != PVList) {
-        scriptError(node, "the argument to pop must be a list");
-        *eflg = true;
-        return nullPValue;
-    }
-    List *list = pvalue.value.uList;
-    ASSERT(list && lengthList(list) >= 0);
-    PValue *ppvalue = (PValue*) popList(list);
-    if (!ppvalue) return nullPValue;
-    memcpy(&pvalue, ppvalue, sizeof(PValue));
-    stdfree(ppvalue);
-    return pvalue;
-}
-
-PValue __pop(PNode* node, Context* context, bool* eflg) {
+PValue __removeFirst(PNode* node, Context* context, bool* eflg) {
     PValue arg = evaluate(node->arguments, context, eflg);
     if (*eflg || arg.type != PVList) {
-        scriptError(node, "the argument to pop must be a list");
+        scriptError(node, "the argument to pop/removefirst must be a list");
         *eflg = true;
         return nullPValue;
     }
@@ -104,25 +92,10 @@ PValue __pop(PNode* node, Context* context, bool* eflg) {
     return result;
 }
 
-// __dequeue treats the list as a queue and dequeues an element from the back.
-// usage dequeue(LIST) -> ANY
-PValue __olddequeue(PNode* node, Context* context, bool* eflg) {
-    PValue pvalue = evaluate(node->arguments, context, eflg);
-    if (*eflg || pvalue.type != PVList) {
-        scriptError(node, "the argument to pop must be a list");
-        *eflg = true;
-        return nullPValue;
-    }
-    List *list = pvalue.value.uList;
-    ASSERT(list && lengthList(list) >= 0);
-    PValue *ppvalue = (PValue*) dequeueList(list);
-    if (!ppvalue) return nullPValue;
-    memcpy(&pvalue, ppvalue, sizeof(PValue));
-    stdfree(ppvalue);
-    return pvalue;
-}
-
-PValue __dequeue(PNode* node, Context* context, bool* eflg) {
+// __removeLast treats the list as a queue and dequeues an element from the back.
+// usage: removelast(LIST) -> ANY
+// usage: dequeue(LIST) -> ANY
+PValue __removeLast(PNode* node, Context* context, bool* eflg) {
     PValue arg = evaluate(node->arguments, context, eflg);
     if (*eflg || arg.type != PVList) {
         scriptError(node, "the argument to dequeue must be a list");

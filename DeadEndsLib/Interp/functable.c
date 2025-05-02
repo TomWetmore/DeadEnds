@@ -16,6 +16,7 @@ extern PValue __addtoset(PNode*, Context*, bool*);
 extern PValue __alpha(PNode*, Context*, bool*);
 extern PValue __ancestorset(PNode*, Context*, bool*);
 extern PValue __and(PNode*, Context*, bool*);
+extern PValue __append(PNode*, Context*, bool*);
 extern PValue __baptism(PNode*, Context*, bool*);
 extern PValue __birth(PNode*, Context*, bool*);
 extern PValue __burial(PNode*, Context*, bool*);
@@ -42,7 +43,7 @@ extern PValue __death(PNode*, Context*, bool*);
 extern PValue __decr(PNode*, Context*, bool*);
 extern PValue __deletefromset(PNode*, Context*, bool*);
 extern PValue __deletenode(PNode*, Context*, bool*);
-extern PValue __dequeue(PNode*, Context*, bool*);
+//extern PValue __dequeue(PNode*, Context*, bool*);
 extern PValue __descendentset(PNode*, Context*, bool*);
 extern PValue __difference(PNode*, Context*, bool*);
 extern PValue __div(PNode*, Context*, bool*);
@@ -129,16 +130,19 @@ extern PValue __parents(PNode*, Context*, bool*);
 extern PValue __parentset(PNode*, Context*, bool*);
 extern PValue __place(PNode*, Context*, bool*);
 extern PValue __pn(PNode*, Context*, bool*);
-extern PValue __pop(PNode*, Context*, bool*);
+//extern PValue __pop(PNode*, Context*, bool*);
 extern PValue __pos(PNode*, Context*, bool*);
+extern PValue __prepend(PNode*, Context*, bool*);
 extern PValue __prevfam(PNode*, Context*, bool*);
 extern PValue __previndi(PNode*, Context*, bool*);
 extern PValue __prevsib(PNode*, Context*, bool*);
 extern PValue __print(PNode*, Context*, bool*);
-extern PValue __push(PNode*, Context*, bool*);
+//extern PValue __push(PNode*, Context*, bool*);
 extern PValue __qt(PNode*, Context*, bool*);
 extern PValue __reference(PNode*, Context*, bool*);
-extern PValue __requeue(PNode*, Context*, bool*);
+extern PValue __removeFirst(PNode*, Context*, bool*);
+extern PValue __removeLast(PNode*, Context*, bool*);
+//extern PValue __requeue(PNode*, Context*, bool*);
 extern PValue __rjustify(PNode*, Context*, bool*);
 extern PValue __roman(PNode*, Context*, bool*);
 extern PValue __root(PNode*, Context*, bool*); // New definition in DE.
@@ -188,6 +192,7 @@ BuiltIn builtIns[] = {
     "alpha",        1,   1,    __alpha,
     "ancestorset",  1,   1,    __ancestorset,
     "and",          2,  32,    __and,
+    "append",       2,   2,    __append,
     "baptism",      1,   1,    __baptism,
     "birth",        1,   1,    __birth,
     "burial",       1,   1,    __burial,
@@ -214,7 +219,7 @@ BuiltIn builtIns[] = {
     "decr",         1,    1,    __decr,
 	"deletefromset",3,    3,    __deletefromset,
 	"deletenode",   1,    1,    __deletenode,
-    "dequeue",      1,    1,    __dequeue,
+    "dequeue",      1,    1,    __removeLast,
 	"dereference",  1,    1,    __getrecord,
     "descendantset",1,    1,    __descendentset,
     "descendentset",1,    1,    __descendentset,
@@ -222,7 +227,7 @@ BuiltIn builtIns[] = {
     "difference",   2,    2,    __difference,
 	"div",          2,    2,    __div,
 	"empty",        1,    1,    __empty,
-    "enqueue",      2,    2,    __push,
+    "enqueue",      2,    2,    __prepend,
     "eq",           2,    2,    __eq,
     "eqstr",        2,    2,    __eqstr,
     "exp",          2,    2,    __exp,
@@ -309,16 +314,19 @@ BuiltIn builtIns[] = {
     "parentset",    1,    1,    __parentset,
     "place",        1,    1,    __place,
     "pn",           2,    2,    __pn,  // Outputs pronouns
-    "pop",          1,    1,    __pop,
+    "pop",          1,    1,    __removeFirst,
 	"pos",          2,    2,    __pos,
+    "prepend",      2,    2,    __prepend,
 	"prevfam",      1,    1,    __prevfam,
 	"previndi",     1,    1,    __previndi,
 	"prevsib",      1,    1,    __prevsib,
 //  "print",        1,   32,    __print,
-    "push",         2,    2,    __push,
+    "push",         2,    2,    __prepend,
     "qt",           0,    0,    __qt,
 	"reference",    1,    1,    __reference,
-	"requeue",      2,    2,    __requeue,
+    "removeFirst",  1,    1,    __removeFirst,
+    "removeLast",   1,    1,    __removeLast,
+	"requeue",      2,    2,    __append,
 	"rjustify",     2,    2,    __rjustify,
     "roman",        1,    1,    __roman,
 	"root",         1,    1,    __root,  // Not needed as in LL; now walks up the Gedcom tree.

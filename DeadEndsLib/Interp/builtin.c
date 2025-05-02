@@ -413,7 +413,8 @@ PValue __capitalize(PNode *node, Context *context, bool* eflg) {
 // __root returns the root node of record the argument node is in.
 // usage: root(NODE) -> NODE
 PValue __root (PNode* pnode, Context* context, bool* errflg) {
-	GNode *gnode = evaluateGNode(pnode, context, errflg);
+    PNode *arg = pnode->arguments;
+	GNode *gnode = evaluateGNode(arg, context, errflg);
 	if (*errflg) {
 		scriptError(pnode, "The first argument to root must be a Gedcom node.");
 		return nullPValue;
