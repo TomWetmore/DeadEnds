@@ -254,7 +254,7 @@ PValue __or (PNode *node, Context *context, bool* eflg) {
 }
 
 // __not is the builtin logical not operation.
-// usage: not(INT) -> INT
+// usage: not(BOOL) -> BOOL
 PValue __not (PNode *node, Context *context, bool *errflg) {
 	PValue value = evaluateBoolean(node->arguments, context, errflg);
 	if (*errflg || value.type != PVBool) return nullPValue;

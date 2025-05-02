@@ -43,7 +43,7 @@ SymbolTable* createSymbolTable(void) {
 
 // assignValueToSymbol assigns a value to a Symbol. If the Symbol isn't in the local table, check
 // the global table.
-void assignValueToSymbol(SymbolTable* symtab, String ident, PValue pvalue) {
+void oldassignValueToSymbol(SymbolTable* symtab, String ident, PValue pvalue) {
 	SymbolTable* table = symtab;
 	if (!isInHashTable(symtab, ident) && isInHashTable(globalTable, ident)) table = globalTable;
 	PValue* ppvalue = (PValue*) malloc(sizeof(PValue)); // Heapify.
@@ -60,8 +60,31 @@ void assignValueToSymbol(SymbolTable* symtab, String ident, PValue pvalue) {
 	addToHashTable(table, createSymbol(ident, ppvalue), true); // Else add symbol.
 }
 
+void assignValueToSymbol(SymbolTable* symtab, String ident, PValue pvalue) {
+    // Determine symbol table to use.
+    SymbolTable* table = symtab;
+    if (!isInHashTable(symtab, ident) && isInHashTable(globalTable, ident)) {
+        table = globalTable;
+    }
+    // Prepare the value to put in the symbol table.
+    // If the pvalue holds a string the symbol table now takes over ownership of that string. No other
+    // code can change it or free it.
+    PValue* copy = malloc(sizeof(PValue)); // Copy pvalue to the heap.
+    *copy = pvalue;
+    // See if the symbol already exists.
+    Symbol* symbol = searchHashTable(table, ident);
+    // If the symbol exists free its old value (but retain the symbol)
+    if (symbol) {
+        freePValue(symbol->value);
+        symbol->value = copy;
+    // Else add a new symbol with the new value.
+    } else {
+        addToHashTable(table, createSymbol(ident, copy), true);
+    }
+}
+
 // getValueOfSymbol gets the value of a Symbol from a SymbolTable; PValue is returned on stack.
-PValue getValueOfSymbol(SymbolTable* symtab, String ident) {
+PValue oldgetValueOfSymbol(SymbolTable* symtab, String ident) {
 	Symbol *symbol = searchHashTable(symtab, ident); // Local.
 	if (symbol) {
 		PValue *ppvalue = symbol->value;
@@ -73,6 +96,38 @@ PValue getValueOfSymbol(SymbolTable* symtab, String ident) {
 		if (ppvalue) return (PValue){ppvalue->type, ppvalue->value};
 	}
 	return nullPValue; // Undefined.
+}
+
+PValue notAsOldgetValueOfSymbol(SymbolTable* symtab, String ident) {
+    Symbol* symbol = searchHashTable(symtab, ident); // Local
+    if (!symbol) {
+        symbol = searchHashTable(globalTable, ident); // Global
+    }
+    if (symbol && symbol->value) {
+        PValue* ppvalue = symbol->value;
+        switch (ppvalue->type) {
+            case PVString:
+                // Return a new, heap-owned string PValue
+                return createStringPValue(ppvalue->value.uString);
+            // Add similar logic for other types that require deep copy
+            default:
+                // For scalar types like int, float, etc., shallow copy is fine
+                return *ppvalue;
+        }
+    }
+    return nullPValue;
+}
+
+PValue getValueOfSymbol(SymbolTable* symtab, String ident) {
+    Symbol *symbol = searchHashTable(symtab, ident);
+    if (!symbol) symbol = searchHashTable(globalTable, ident);
+    if (!symbol || !symbol->value) return nullPValue;
+
+    PValue* stored = symbol->value;
+    if (stored->type == PVString && stored->value.uString) {
+        return createStringPValue(stored->value.uString); // copy string
+    }
+    return *stored; // shallow copy for ints, floats, etc.
 }
 
 // showSymbolTable shows the contents of a SymbolTable.

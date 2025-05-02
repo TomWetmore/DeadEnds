@@ -51,11 +51,17 @@ PValue evaluate(PNode* pnode, Context* context, bool* errflg) {
 PValue evaluateIdent(PNode* pnode, Context* context, bool* errflg) {
     ASSERT((pnode->type == PNIdent) && context);
     if (programDebugging)
-        printf("evaluateIden: %d: %s\n", pnode->lineNumber, pnode->identifier);
+        printf("evaluateIdent: %d: %s\n", pnode->lineNumber, pnode->identifier);
     String ident = pnode->identifier;
     ASSERT(ident);
-	if (debugging) showSymbolTable(context->symbolTable);
-    return getValueOfSymbol(context->symbolTable, ident);
+    if (debugging) showSymbolTable(context->symbolTable);
+    PValue orig = getValueOfSymbol(context->symbolTable, ident);
+    // If the PValue is a string, copy the string.
+    if (orig.type == PVString) {
+        return createStringPValue(orig.value.uString);
+    } else {
+        return orig; // safe for non-owning types like int, float, etc.
+    }
 }
 
 // evaluateConditional evaluates a conditional expression. They have the form ([iden,] expr),

@@ -228,9 +228,9 @@ PValue __ord(PNode* expr, Context* context, bool* eflg) {
 	if (lvalue < 1) return __d(expr, context, eflg);
 	if (lvalue > 12) {
 		sprintf(scratch, "%ldth", lvalue);
-		value.value.uString = strsave(scratch);
+        createStringPValue(scratch);
 	} else {
-		value.value.uString = strsave(ordinals[lvalue - 1]);
+        createStringPValue(ordinals[lvalue - 1]);
 	}
 	return value;
 }
