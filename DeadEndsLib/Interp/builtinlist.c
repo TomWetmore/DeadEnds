@@ -5,10 +5,11 @@
 // MNOTE: Memory management is an issue to be dealt with carefully.
 //
 // Created by Thomas Wetmore on 16 April 2023.
-// Last changed on 2 May 2024.
+// Last changed on 3 May 2024.
 
 #include "interp.h"
 #include "list.h"
+#include "pvalue.h"
 
 // __list creates a list.
 // usage: list(IDENT) -> VOID
@@ -163,8 +164,7 @@ PValue __setel (PNode* node, Context* context, bool* eflg) {
         scriptError(node, "the third argument to setel is in error");
         return nullPValue;
     }
-    PValue *ppvalue = (PValue*) stdalloc(sizeof(PValue));
-    *ppvalue = pvalue;
+    PValue *ppvalue = clonePValue(&pvalue);
     setListElement(list, ppvalue, index);
     return nullPValue;
 }
@@ -200,7 +200,7 @@ PValue __getel(PNode *node, Context *context, bool *eflg) {
     // Retrieve and return a copy of the PValue.
     PValue *ppvalue = (PValue*) getListElement(list, index);
     if (!ppvalue) return nullPValue;
-    return *ppvalue;
+    return *clonePValue(ppvalue);
 }
 
 // __length returns the length of a list.

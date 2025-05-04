@@ -3,7 +3,7 @@
 // builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 30 April 2025.
+// Last changed on 3 May 2025.
 
 #include "standard.h"
 #include "gnode.h"    // GNode.
@@ -25,6 +25,7 @@
 const PValue nullPValue = {PVNull, PV()};
 const PValue truePValue = PVALUE(PVBool, uBool, true);
 const PValue falsePValue = PVALUE(PVBool, uBool, false);
+extern bool symbolTableDebugging;
 
 // isZeroVUnion returns if VUnion value is a numeric zero.
 bool isZeroVUnion(PVType type, VUnion vunion) {
@@ -175,6 +176,10 @@ PValue __set(PNode* pnode, Context* context, bool* eflg) {
 	PValue value = evaluate(expr, context, eflg);
 	if (*eflg) return nullPValue;
 	assignValueToSymbol(context->symbolTable, iden->identifier, value);
+    if (symbolTableDebugging) {
+        printf("Symtab after set() builtin with variable %s\n", iden->identifier);
+        showSymbolTable(context->symbolTable);
+    }
 	return nullPValue;
 }
 

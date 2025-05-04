@@ -34,12 +34,12 @@ PValue *allocPValue(PVType type, VUnion value) {
 	return ppvalue;
 }
 
-// createStringPValue creates string PValues; non-null String are always copied to the help.
+// createStringPValue creates string PValues; Strings are copied to the help.
 PValue createStringPValue(String string) {
     PValue pvalue;
     pvalue.type = PVString;
     pvalue.value.uString = string ? strsave(string) : null;
-    return pvalue;
+    return pvalue; // Returned on stack.
 }
 
 // In case we ever need it. Thanks, ChatGPT.
@@ -48,6 +48,18 @@ PValue copyPValue(PValue orig) {
         return createStringPValue(orig.value.uString);
     }
     return orig;
+}
+
+// clonePValue returns a heap-allocated copy of the given PValue.
+// If the value is a PVString, the underlying string is duplicated.
+PValue* clonePValue(const PValue* original) {
+    if (!original) return NULL;
+    PValue* copy = stdalloc(sizeof(PValue));
+    *copy = *original;
+    if (original->type == PVString && original->value.uString) {
+        copy->value.uString = strsave(original->value.uString);
+    }
+    return copy;
 }
 
 // freePValue frees an allocated PValue.

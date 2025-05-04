@@ -8,7 +8,7 @@
 //  identifiers to PValue pointers.
 
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 30 April 2025.
+//  Last changed on 3 May 2025.
 
 #include "evaluate.h"
 #include "standard.h"
@@ -21,6 +21,7 @@
 
 static bool debugging = false;
 static bool builtInDebugging = false;
+ bool symbolTableDebugging = true;
 extern SymbolTable *globalTable;
 extern FunctionTable *functionTable;
 extern bool traceprogram;

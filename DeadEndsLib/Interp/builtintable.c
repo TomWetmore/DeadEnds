@@ -50,7 +50,7 @@ PValue __insert (PNode *node, Context *context, bool *eflg) {
         scriptError(node, "the third argument to insert must be a value");
         return nullPValue;
     }
-    insertInPValueTable(table, key, pvalue); // Add (key, value).
+    insertInPValueTable(table, key, *clonePValue(&pvalue));
     return nullPValue;
 }
 
@@ -70,7 +70,7 @@ PValue __lookup (PNode* node, Context* context, bool* eflg) {
         scriptError(node, "the second argument to lookup must be an identifier");
         return nullPValue;
     }
-    String key = arg->stringCons;
+    String key = arg->next->stringCons;
     pvalue = getValueOfPValueElement(table, key);
-    return pvalue;
+    return *clonePValue(&pvalue);
 }
