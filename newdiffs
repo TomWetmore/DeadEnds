@@ -1,0 +1,3 @@
+pullfile DeadEndsLib/Database/import.c
+pullfile DeadEndsLib/Gedcom/Includes/gedcom.h
+pullfile DeadEndsLib/Gedcom/gedcom.c

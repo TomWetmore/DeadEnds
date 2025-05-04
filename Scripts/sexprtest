@@ -1,0 +1,10 @@
+proc main () {
+	set(i, indi("@I1"))
+	"Hello, " name(i) nl()
+	"Hello, " givens(i) nl()
+	"Hello, " surname(i) nl()
+	set(b, birth(i))
+	set(d, date(b))
+	set(p, place(b))
+	d " " p
+}

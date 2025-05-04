@@ -1,0 +1,60 @@
+typedef enum PNType{
+	PNICons = 1, PNFCons, PNSCons, PNIdent, PNIf, PNWhile, PNBreak, PNContinue, PNReturn,
+	PNProcDef, PNProcCall, PNFuncDef, PNFuncCall, PNBltinCall, PNTraverse, PNNodes, PNFamilies,
+	PNSpouses, PNChildren, PNIndis, PNFams, PNSources, PNEvents, PNOthers, PNList, PNSequence,
+	PNTable, PNFathers, PNMothers, PNFamsAsChild, PNNotes
+
+struct PNode
+	PNType type;         Type of node
+	PNode  *parent;      Parent; null in roots
+	int    lineNumber;   Line file
+	String fileName;     File node is from
+	PNode  *next;        Next node in list (blocks, arg)
+	long   intCons;      Integer constant
+	double floatCons;    Float constant
+	String stringOne;    String constant: pIdentifier, pProcName, pFuncName, pBuiltinName
+	PNode  *expression;
+	PNode  *gnodeExpr;   GNode expr
+	PNode  *listExpr;    List expr
+	PNode  *setExpr;     Set expr
+	PNode  *sequenceExpr IndiSet expr
+	PNode *pnodeOne;     pThenState, pLoopState, pFuncBody, pProcBody
+	PNode *pnodeTwo;     pElseState
+	BIFunc builtinFunc;  Pointer builtin
+	String idenOne;
+	String idenTwo;
+	String idenThree;
+
+identifier   stringOne   Ident name
+procName     stringOne   Proc name
+funcName     stringOne   Func name
+builtinName  stringOne   Builtin name
+thenState  pnodeOne     First node in then clause
+elseState  pnodeTwo     First node in an else clause
+loopState  pnodeOne     First node  in a loop body
+funcBody   pnodeOne     First node in fun body
+procBody   pnodeOne     First node in proc body
+parameters pnodeTwo     First param to func or proc in list
+arguments  pnodeTwo     First arg to func or proc in list
+condExpr   expression   Cond exp in if and while states
+returnExpr expression   Expr in return state
+personExpr expression   Person expr in some loops
+familyExpr expression   Family expr in some loops
+gnodeExpr  expression   GNode expr in some loops
+listExpr   expression   Needed??
+sequenceExpr  expression
+countIden   idenThree   Loop counter
+levelIden   idenTwo     Traverse loop level
+valueIden   idenTwo     Sequence loop value
+personIden  idenOne     Person ident
+familyIden  idenOne     Family ident
+childIden   idenOne     Child ident
+spouseIden  idenTwo     Spouse inden
+gnodeIden   idenOne     GNode ident
+fatherIden  idenTwo     Father ident
+motherIden  idenTwo     Mother ident
+sourceIden  idenOne     Source ident
+eventIden   idenOne     Event ident
+otherIden   idenOne     Other ident
+elementIden idenOne     Element of list or set
+stringCons  stringOne

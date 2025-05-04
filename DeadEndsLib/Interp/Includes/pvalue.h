@@ -97,6 +97,7 @@ PValue eqPValues(PValue, PValue, bool* eflag);
 
 // PValue Functions.
 void coercePValue(PValue* pvalue, int newType, bool* errorFlag);
+PValue* clonePValue(const PValue* original);
 //PValue copyPValue(PValue);
 //void deletePValue(PValue);
 //bool eqv_pvalues(PValue, PValue);

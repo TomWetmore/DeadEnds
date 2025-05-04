@@ -1,0 +1,53 @@
+
+global(tagnames)
+global(taglevels)
+global(content)
+
+proc main ()
+{
+   list(tagnames)
+   list(taglevels)
+   table(content)
+
+   forindi(pers,x) {
+       call out(pers)
+   }
+   forfam(fm,x) {
+       call out(fm)
+   }
+   foreven(evn, n) {
+       call out(evn)
+   }
+   forsour(src, n) {
+       call out(src)
+   }
+   forothr(oth, n) {
+       call out(oth)
+   }
+
+   /* insert sorting code here if desired */
+
+   forlist(tagnames,n,p) { n "\n" }
+}
+
+proc out(item)
+{
+   traverse(root(item),y,level) {
+
+     setel(taglevels,add(level,1),tag(y))
+
+     set(i,0)
+     set(s,"")
+     while(le(i,level)) {
+       if(gt(i,0)) {
+         set(s,concat(s,"."))
+       }
+       set(s,concat(s, getel(taglevels,add(i,1))))
+       incr(i)
+     }
+     if(eq(lookup(content, s),0)) {
+       enqueue(tagnames,s)
+       insert(content,s,1)
+     }
+   }
+}

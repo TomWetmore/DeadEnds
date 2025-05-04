@@ -1,0 +1,12 @@
+How I use git most of the time.
+
+1. Make changes in DeadEndsXcode. Test them.
+
+2. Run difftree program that shows diffs between DeadEndsVScode and DeadEndsXcode.
+
+3. Edit output of difftree to creates a shell program that runs pullfile and the changed files
+   (pull moves them from Xcode to VScode; pushfile the other way [for makefiles, scripts, ...]
+
+4. Use VScode Git to make a commit.
+
+5. Use VSCode Git to push to repository.
