@@ -3,7 +3,7 @@
 // intrpmath.c has the built-in script functions for math and logic.
 //
 // Created by Thomas Wetmore on 17 March 2023.
-// Last changed on 2 May 2024.
+// Last changed on 4 May 2024.
 
 #include "standard.h"
 #include "pnode.h"
@@ -41,6 +41,48 @@ PValue __add(PNode* pnode, Context* context, bool* eflg) {
     if (currentType == PVInt) value.value.uInt = intSum;
     else value.value.uFloat = floatSum;
     return value;
+}
+
+// __eq -- Compare two values for equality.
+// usage: eq(ANY, ANY) -> BOOL
+PValue __chatGPTeq(PNode* node, Context* context, bool* eflg) {
+    PValue a = evaluate(node->arguments, context, eflg);
+    if (*eflg) return nullPValue;
+
+    PValue b = evaluate(node->arguments->next, context, eflg);
+    if (*eflg) return nullPValue;
+
+    // Handle nulls gracefully
+    if (a.type == PVNull && b.type == PVNull) return PVALUE(PVBool, uBool, true);
+    if (a.type == PVNull) {
+        if (b.type == PVInt)    return PVALUE(PVBool, uBool, b.value.uInt == 0);
+        if (b.type == PVString) return PVALUE(PVBool, uBool, b.value.uString == NULL || b.value.uString[0] == '\0');
+        return PVALUE(PVBool, uBool, false);
+    }
+    if (b.type == PVNull) {
+        if (a.type == PVInt)    return PVALUE(PVBool, uBool, a.value.uInt == 0);
+        if (a.type == PVString) return PVALUE(PVBool, uBool, a.value.uString == NULL || a.value.uString[0] == '\0');
+        return PVALUE(PVBool, uBool, false);
+    }
+
+    // If both are ints
+    if (a.type == PVInt && b.type == PVInt)
+        return PVALUE(PVBool, uBool, a.value.uInt == b.value.uInt);
+
+    // If both are strings
+    if (a.type == PVString && b.type == PVString)
+        return PVALUE(PVBool, uBool, strcmp(a.value.uString, b.value.uString) == 0);
+
+    // Mixed int/string comparison
+    if (a.type == PVInt && b.type == PVString) {
+        return PVALUE(PVBool, uBool, a.value.uInt == atoi(b.value.uString));
+    }
+    if (a.type == PVString && b.type == PVInt) {
+        return PVALUE(PVBool, uBool, atoi(a.value.uString) == b.value.uInt);
+    }
+
+    // For other types (e.g., GNode, List), require exact match by pointer
+    return PVALUE(PVBool, uBool, false);
 }
 
 // __sub is the builtin subtract function; operands must be both int or both float.
@@ -259,6 +301,13 @@ PValue __not (PNode *node, Context *context, bool *errflg) {
 	PValue value = evaluateBoolean(node->arguments, context, errflg);
 	if (*errflg || value.type != PVBool) return nullPValue;
 	return value.value.uBool ? falsePValue : truePValue;
+}
+
+// __isnull returns whether its argument PValue is nullPValue.
+PValue __isnull(PNode* node, Context* context, bool *errflg) {
+    PValue pvalue = evaluate(node->arguments, context, errflg);
+    if (*errflg) return nullPValue;
+    return (pvalue.type == PVNull) ? truePValue : falsePValue;
 }
 
 // evalBinary evaluates and returns the arguments of a binary expression.

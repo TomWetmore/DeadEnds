@@ -14,14 +14,14 @@
 #include "standard.h"
 #include "symboltable.h"
 #include "functiontable.h"
-#include "interp.h"
+#include "interp.h" 
 #include "pvalue.h"
 #include "pnode.h"
 #include "utils.h"
 
 static bool debugging = false;
 static bool builtInDebugging = false;
- bool symbolTableDebugging = true;
+ bool symbolTableDebugging = false;
 extern SymbolTable *globalTable;
 extern FunctionTable *functionTable;
 extern bool traceprogram;

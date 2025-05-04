@@ -55,9 +55,14 @@ PValue copyPValue(PValue orig) {
 PValue* clonePValue(const PValue* original) {
     if (!original) return NULL;
     PValue* copy = stdalloc(sizeof(PValue));
-    *copy = *original;
-    if (original->type == PVString && original->value.uString) {
-        copy->value.uString = strsave(original->value.uString);
+    copy->type = original->type;
+    switch (original->type) {
+        case PVString:
+            copy->value.uString = original->value.uString ? strsave(original->value.uString) : NULL;
+            break;
+        default:
+            copy->value = original->value;
+            break;
     }
     return copy;
 }
