@@ -17,6 +17,8 @@ typedef struct HashTable SymbolTable;
 #include "symboltable.h"
 #include "database.h"
 
+#define CC 32 // 'Commutative constant'.
+
 // InterpType enumerates the interpreter functions return types.
 typedef enum InterpType {
     InterpError = 0, InterpOkay, InterpBreak, InterpContinue, InterpReturn

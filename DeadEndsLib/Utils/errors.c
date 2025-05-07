@@ -3,7 +3,7 @@
 //  errors.c has code for handling DeadEnds errors.
 //
 //  Created by Thomas Wetmore on 4 July 2023.
-//  Last changed on 2 April 2025.
+//  Last changed on 5 May 2025.
 
 #include "errors.h"
 #include "list.h"
@@ -49,7 +49,7 @@ Error* createError(ErrorType type, String fileName, int lineNumber, String messa
 	Error* error = (Error*) stdalloc(sizeof(Error));
 	error->type = type;
 	error->severity = severeError;
-	error->fileName = fileName; // Do not free.
+	error->fileName = strsave(fileName);
 	error->lineNumber = lineNumber;
 	error->message = strsave(message);
 	if (debugging) printf("CREATE ERROR: %s, %d, %s\n", fileName, lineNumber, message);
@@ -64,6 +64,7 @@ void setSeverityError(Error* error, ErrorSeverity severity) {
 // deleteError deletes an Error.
 void deleteError (Error* error) {
 	if (error->message) stdfree(error->message);
+    if (error->fileName) stdfree(error->fileName);
 	stdfree(error);
 }
 

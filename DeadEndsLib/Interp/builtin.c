@@ -3,7 +3,7 @@
 // builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 3 May 2025.
+// Last changed on 7 May 2025.
 
 #include "standard.h"
 #include "gnode.h"    // GNode.
@@ -353,7 +353,7 @@ PValue __concat (PNode *pnode, Context *context, bool *errflg) {
 	PNode *arg = pnode->arguments;
 	if (arg == null) return nullPValue;
 	int len = 0, nstrs = 0;
-	String hold[100];
+	String hold[CC];
 	while (arg != null) {
 		PValue svalue = evaluate(arg, context, errflg);
 		if (*errflg || svalue.type != PVString) return nullPValue;
@@ -450,7 +450,6 @@ PValue __extractdate(PNode *pnode, Context *context, bool* errflg) {
 	PNode *dvar = arg->next; // Symbol to hold day integer.
 	PNode *mvar = dvar->next; // Symbol to hold month integer.
 	PNode *yvar = mvar->next; // Symbol to hold year integer.
-    *errflg = true;
 	bool error = false;
 	if (dvar->type != PNIdent) error = true;
 	if (mvar->type != PNIdent) error = true;

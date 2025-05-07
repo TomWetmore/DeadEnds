@@ -4,7 +4,7 @@
 // into closed sets of persons and families.
 //
 // Created by Thomas Wetmore on 4 October 2024.
-// Last changed on 13 December 2024.
+// Last changed on 7 May 2025.
 
 #include <stdio.h>
 #include "import.h"
@@ -50,18 +50,16 @@ int main(int argc, char** argv) {
 	if (debugging) printf("%s: partition: resolved file: %s\n", gms, resolvedFile);
 
 	// Read the Gedcom file and get the list of its records.
-	File* file = openFile(resolvedFile, "r");
 	ErrorLog* log = createErrorLog();
 	IntegerTable* keymap = createIntegerTable(4097);
-	RootList* roots = getRootListFromFile(file, keymap, log); // All roots parsed from file.
+	RootList* roots = getRecordListFromFile(resolvedFile, keymap, log); // All roots parsed from file.
 	if (brownnose) showRootList(roots);
 	if (timing) printf("%s: Partition: read gedcom file.\n", gms);
 	if (debugging) printf("%s: Partition: |roots| = %d.\n", gms, lengthList(roots));
 	if (lengthList(log) > 0) goAway(log);
-	closeFile(file);
 
 	// Validate record keys read from the Gedcom file.
-	checkKeysAndReferences(roots, file->name, keymap, log);
+	checkKeysAndReferences(roots, gedcomFile, keymap, log);
 	if (timing) printf("%s: Partition: validated keys.\n", gms);
 	if (lengthList(log)) goAway(log);
 	GNodeIndex* index = createIndexOfGNodes(roots); // Index of all GNodes.

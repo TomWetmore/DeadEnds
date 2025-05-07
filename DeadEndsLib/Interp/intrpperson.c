@@ -3,7 +3,7 @@
 // intrpperson.c has the built-in script functions that deal with persons.
 //
 // Created by Thomas Wetmore on 17 March 2023.
-// Last changed on 30 April 2025.
+// Last changed on 5 May 2025.
 
 #include "standard.h"
 #include "pnode.h"
@@ -42,7 +42,6 @@ PValue __name(PNode* pnode, Context* context, bool* errflg) {
         return nullPValue;
     }
     String name = manipulateName(nameNode->value, useCaps, true, 68);
-    //  MNOTE: The program value below has a pointer to data space, not heap space.
     if (name) return createStringPValue(name);
     else return nullPValue;
 }
@@ -56,13 +55,13 @@ PValue __fullname(PNode* pnode, Context* context, bool* eflg) {
         scriptError(pnode, "the first argument to fullname must be a person");
         return nullPValue;
     }
-    PValue pvalue = evaluate(arg = arg->next, context, eflg); // Allcaps boolean.
+    PValue pvalue = evaluateBoolean(arg = arg->next, context, eflg); // Allcaps boolean.
     if (*eflg || pvalue.type != PVBool) {
         scriptError(pnode, "the second argument to fullname must be a boolean");
         return nullPValue;
     }
     bool caps = pvalue.value.uBool;
-    pvalue = evaluate(arg = arg->next, context, eflg); // Surname first with comma boolean.
+    pvalue = evaluateBoolean(arg = arg->next, context, eflg); // Surname first with comma boolean.
     if (*eflg || pvalue.type != PVBool) {
         scriptError(pnode, "the third argument to fullname must be a boolean");
         return nullPValue;

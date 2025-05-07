@@ -641,41 +641,30 @@ InterpType interp_forothr(PNode *node, Context *context, PValue *pval) {
 
 // interpForFam interprets thr forfam statement looping through all families in the Database.
 // usage: forfam(FAM_V,INT_V) {...}
-// THIS IS BASED ON LIFELINES ASSUMPTIONS AND DOES NOT YET WORK IN DEADENDS.
-InterpType interpForFam (PNode* node, Context* context, PValue* pval)
-{
-    ////    NODE fam;
-    ////    static char key[MAXKEYWIDTH];
-    ////    STRING record;
-    ////    INTERPTYPE irc;
-    ////    INT len, count = 0;
-    ////    INT fcount = 0;
-    ////    insert_pvtable(stab, inum(node), PINT, (VPTR)count);
-    ////    while (TRUE) {
-    ////        printkey(key, 'F', ++count);
-    ////        if (!(record = retrieve_record(key, &len))) {
-    ////            if(fcount < num_fams()) continue;
-    ////            break;
-    ////        }
-    ////        if (!(fam = stringToGNodeTree(record))) continue;
-    ////        fcount++;
-    ////        insert_pvtable(stab, ielement(node), PFAM,
-    ////                       (VPTR) fam_to_cacheel(fam));
-    ////        insert_pvtable(stab, inum(node), PINT, (VPTR)count);
-    ////        irc = interpret((PNODE) ibody(node), stab, pval);
-    ////        free_nodes(fam);
-    ////        stdfree(record);
-    ////        switch (irc) {
-    ////            case INTCONTINUE:
-    ////            case INTOKAY:
-    ////                continue;
-    ////            case INTBREAK:
-    ////                return INTOKAY;
-    ////            default:
-    ////                return irc;
-    ////        }
-    ////    }
-    ////    return INTOKAY;
+InterpType interpForFam (PNode* pnode, Context* context, PValue* pvalue) {
+    RootList *rootList = context->database->familyRoots;
+    sortList(rootList); // Sort by key.
+    int numFamilies = lengthList(rootList);
+    for (int i = 0; i < numFamilies; i++) {
+        String key = rootList->getKey(getListElement(rootList, i));
+        GNode* family = keyToFamily(key, context->database->recordIndex);
+        if (family) {
+            assignValueToSymbol(context->symbolTable, pnode->familyIden, PVALUE(PVFamily, uGNode, family));
+            assignValueToSymbol(context->symbolTable, pnode->countIden, PVALUE(PVInt, uInt, i));
+            InterpType irc = interpret(pnode->loopState, context, pvalue);
+            switch (irc) {
+            case InterpContinue:
+            case InterpOkay: continue;
+            case InterpBreak:
+            case InterpReturn: goto e;
+            case InterpError: return InterpError;
+            }
+        } else {
+            printf("HIT THE ELSE IN INTERPFORFAM--PROBABLY NOT GOOD\n");
+        }
+    }
+    e:  removeFromHashTable(context->symbolTable, pnode->familyIden);
+    removeFromHashTable(context->symbolTable, pnode->countIden);
     return InterpOkay;
 }
 

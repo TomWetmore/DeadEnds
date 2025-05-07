@@ -67,6 +67,16 @@ PValue* clonePValue(const PValue* original) {
     return copy;
 }
 
+// cloneAndReturnPValue clones a copy of a PValue on the heap, but then makes a stack copy,
+// frees the help copy and returns the stack copy.
+PValue cloneAndReturnPValue(const PValue* original) {
+    if (!original) return nullPValue;
+    PValue* heapCopy = clonePValue(original);
+    PValue result = *heapCopy;
+    stdfree(heapCopy);
+    return result;
+}
+
 // freePValue frees an allocated PValue.
 void freePValue(PValue* ppvalue) {
 	switch (ppvalue->type) {

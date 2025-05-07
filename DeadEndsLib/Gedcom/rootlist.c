@@ -4,7 +4,7 @@
 // the root GNodes of Gedcom records.
 //
 // Created by Thomas Wetmore on 2 March 2024.
-// Last changed on 11 December 2024.
+// Last changed on 7 May 2025.
 
 #include "rootlist.h"
 #include "gnodelist.h"
@@ -30,6 +30,10 @@ RootList *createRootList(void) {
 	return createList(getKey, compare, null, true);
 }
 
+void deleteRootList(RootList* rootlist) {
+    deleteList(rootlist);
+}
+
 // insertInRootList adds a GNode* to a RootList.
 void insertInRootList(RootList* list, GNode* root) {
 	int index = -1;
@@ -38,31 +42,6 @@ void insertInRootList(RootList* list, GNode* root) {
 		return;
 	}
 	insertInList(list, root, index);
-}
-
-// getRootListFromFile returns the RootList of all GNode records from a Gedcom source, including
-// the header and trailer. If there are errors returns null with the errors in the ErrorLog.
-static void deleteEl(void* el) { stdfree(el); }
-RootList* getRootListFromFile(File* file, IntegerTable* keymap, ErrorLog* elog) {
-	int nerrors = lengthList(elog);
-	// Get the GNodeList all all lines in the Gedcom source.
-	GNodeList* nodes = getGNodeListFromFile(file, keymap, elog);
-	if (nerrors != lengthList(elog)) {
-		if (nodes) {
-			deleteGNodeList(nodes, deleteEl);
-			deleteHashTable(keymap);
-		}
-		return null;
-	}
-	// Get the RootList of all records by processing the GNodeList of Gedcom lines.
-	RootList* roots = getRootListFromGNodeList(nodes, file->name, elog);
-	if (nerrors != lengthList(elog)) {
-		deleteGNodeList(nodes, deleteEl);
-		deleteHashTable(keymap);
-		if (roots) deleteGNodeList(roots, deleteEl); // Does not delete the GNodes.
-		return null;
-	}
-	return roots;
 }
 
 // getNodeTreesFromNodeList processes the GNodeList of all GNodes from a Gedcom source into

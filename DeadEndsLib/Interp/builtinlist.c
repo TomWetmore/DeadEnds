@@ -5,7 +5,7 @@
 // MNOTE: Memory management is an issue to be dealt with carefully.
 //
 // Created by Thomas Wetmore on 16 April 2023.
-// Last changed on 3 May 2024.
+// Last changed on 4 May 2024.
 
 #include "interp.h"
 #include "list.h"
@@ -46,9 +46,8 @@ PValue __prepend(PNode* node, Context* context, bool* eflg) {
         scriptError(node, "the second argument to prepend/push/enqueue must be a program value");
         return nullPValue;
     }
-    PValue *ppvalue = stdalloc(sizeof(PValue));
-    *ppvalue = pvalue;
-    prependToList(list, ppvalue); // Ownership of String is now in the list.
+    PValue *ppvalue = clonePValue(&pvalue);
+    prependToList(list, ppvalue);
     return nullPValue;
 }
 
@@ -68,49 +67,46 @@ PValue __append(PNode* node, Context* context, bool* eflg) {
         scriptError(node, "the second argument to append/requeue must be a program value");
         return nullPValue;
     }
-    PValue *ppvalue = (PValue*) malloc(sizeof(PValue));
-    *ppvalue = pvalue;
-    appendToList(list, ppvalue); // Ownership of String is now in the list.
+    PValue *ppvalue = clonePValue(&pvalue);
+    appendToList(list, ppvalue);
     return nullPValue;
 }
 
-// __removeFirst treats the list as a stack and pops an element from the front.
-// usage: removefirst(LIST) -> ANY
+// __removeFirst treats the list as a stack and removes the first element.
+// usage: remfirst(LIST) -> ANY
 // usage: pop(LIST) -> ANY
 PValue __removeFirst(PNode* node, Context* context, bool* eflg) {
     PValue arg = evaluate(node->arguments, context, eflg);
     if (*eflg || arg.type != PVList) {
-        scriptError(node, "the argument to pop/removefirst must be a list");
+        scriptError(node, "the argument to pop/rmvfirst must be a list");
         *eflg = true;
         return nullPValue;
     }
     List *list = arg.value.uList;
-    ASSERT(list && lengthList(list) >= 0);
+    ASSERT(list);
     PValue *ppvalue = (PValue*) popList(list);
     if (!ppvalue) return nullPValue;
-    PValue result = *ppvalue;
-    stdfree(ppvalue);          // Frees the wrapper
+    PValue result = cloneAndReturnPValue(ppvalue);
+    freePValue(ppvalue);
     return result;
 }
 
-// __removeLast treats the list as a queue and dequeues an element from the back.
+// __removeLast treats the list as a queue and removes the last element.
 // usage: removelast(LIST) -> ANY
 // usage: dequeue(LIST) -> ANY
 PValue __removeLast(PNode* node, Context* context, bool* eflg) {
     PValue arg = evaluate(node->arguments, context, eflg);
     if (*eflg || arg.type != PVList) {
-        scriptError(node, "the argument to dequeue must be a list");
+        scriptError(node, "the argument to dequeue/rmvlast must be a list");
         *eflg = true;
         return nullPValue;
     }
-
     List *list = arg.value.uList;
-    ASSERT(list && lengthList(list) >= 0);
-
-    PValue *ppvalue = (PValue*) dequeueList(list);
+    ASSERT(list);
+    PValue *ppvalue = (PValue*) popList(list);
     if (!ppvalue) return nullPValue;
-    PValue result = *ppvalue;  // ✅ Copy the value
-    stdfree(ppvalue);          // Free the heap wrapper (not the string inside)
+    PValue result = cloneAndReturnPValue(ppvalue);
+    freePValue(ppvalue);
     return result;
 }
 
@@ -200,7 +196,7 @@ PValue __getel(PNode *node, Context *context, bool *eflg) {
     // Retrieve and return a copy of the PValue.
     PValue *ppvalue = (PValue*) getListElement(list, index);
     if (!ppvalue) return nullPValue;
-    return *clonePValue(ppvalue);
+    return cloneAndReturnPValue(ppvalue);
 }
 
 // __length returns the length of a list.
