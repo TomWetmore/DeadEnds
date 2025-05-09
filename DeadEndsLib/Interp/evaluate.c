@@ -8,7 +8,7 @@
 //  identifiers to PValue pointers.
 
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 3 May 2025.
+//  Last changed on 8 May 2025.
 
 #include "evaluate.h"
 #include "standard.h"
@@ -37,7 +37,7 @@ PValue evaluate(PNode* pnode, Context* context, bool* errflg) {
 		printf("evaluate:%d ", pnode->lineNumber);
 		showPNode(pnode);
 	}
-    if (pnode->type == PNIdent) return evaluateIdent(pnode, context, errflg);
+    if (pnode->type == PNIdent) return evaluateIdent(pnode, context);
     if (pnode->type == PNBltinCall) return evaluateBuiltin(pnode, context, errflg);
     if (pnode->type == PNFuncCall) return evaluateUserFunc(pnode, context, errflg);
     *errflg = false;
@@ -49,13 +49,13 @@ PValue evaluate(PNode* pnode, Context* context, bool* errflg) {
 }
 
 // evaluateIdent evaluates an identifier by looking it up in the symbol tables.
-PValue evaluateIdent(PNode* pnode, Context* context, bool* errflg) {
+PValue evaluateIdent(PNode* pnode, Context* context) {
     ASSERT((pnode->type == PNIdent) && context);
     if (programDebugging)
         printf("evaluateIdent: %d: %s\n", pnode->lineNumber, pnode->identifier);
     String ident = pnode->identifier;
     ASSERT(ident);
-    if (debugging) showSymbolTable(context->symbolTable);
+    if (symbolTableDebugging) showSymbolTable(context->symbolTable);
     PValue orig = getValueOfSymbol(context->symbolTable, ident);
     // If the PValue is a string, copy the string.
     if (orig.type == PVString) {
@@ -100,7 +100,7 @@ PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg) {
 	if (debugging) printf("evaulateUserFunc: %s\n", name);
     PNode *func;
     if ((func = (PNode*) searchFunctionTable(functionTable, name)) == null) {
-        scriptError(pnode, "The function %s is undefined", pnode->funcName);
+        scriptError(pnode, "function %s is undefined", name);
         *errflg = true;
         return nullPValue;
     }
@@ -114,7 +114,7 @@ PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg) {
     while (arg && parm) {
         PValue value = evaluate(arg, context, errflg); // Eval current arg.
         if (*errflg) {
-            scriptError(pnode, "could not evaluate an argument expression");
+            scriptError(pnode, "could not evaluate an argument of %s", name);
             return nullPValue;
         }
 		if (debugging) printf("Assigning %s to %s\n", pvalueToString(value, true), parm->identifier);
@@ -123,12 +123,12 @@ PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg) {
         parm = parm->next;
     }
     if (arg || parm) {
-        scriptError(pnode, "there are different numbers of arguments and parameters");
+        scriptError(pnode, "different numbers of arguments and parameters to %s", name);
         deleteContext(newContext);
         *errflg = true;
         return nullPValue;
     }
-	if (debugging) showSymbolTable(newtab);
+	if (symbolTableDebugging) showSymbolTable(newtab);
     //  Iterpret the function's body.
     PValue value;
     InterpType irc = interpret((PNode*) func->funcBody, newContext, &value);
@@ -179,9 +179,18 @@ static bool pvalueToBoolean(PValue pvalue) {
 GNode* evaluatePerson(PNode* pnode, Context* context, bool* errflg) {
     ASSERT(pnode && context);
     PValue pvalue = evaluate(pnode, context, errflg);
-    if (*errflg ||  pvalue.type != PVPerson) return null;
+    if (*errflg || pvalue.type == PVNull) return null; // Error or null chaining.
+    if (pvalue.type != PVPerson) {
+        scriptError(pnode, "expression must be a person");
+        *errflg = true;
+        return null;
+    }
     GNode* indi = pvalue.value.uGNode;
-    if (nestr("INDI", indi->tag)) return null;
+    if (nestr("INDI", indi->tag)) {
+        scriptError(pnode, "serious error: expression must be a persons");
+        *errflg = true;
+        return null;
+    }
     return indi;
 }
 
@@ -189,9 +198,18 @@ GNode* evaluatePerson(PNode* pnode, Context* context, bool* errflg) {
 GNode* evaluateFamily(PNode* pnode, Context* context, bool* errflg) {
     ASSERT(pnode && context);
     PValue pvalue = evaluate(pnode, context, errflg);
-    if (*errflg || pvalue.type != PVFamily) return null;
+    if (*errflg || pvalue.type == PVNull) return null; // Error or null chaining.
+    if (pvalue.type != PVFamily) {
+        scriptError(pnode, "expression must be a family");
+        *errflg = true;
+        return null;
+    }
     GNode* fam = pvalue.value.uGNode;
-    if (nestr("FAM", fam->tag)) return null;
+    if (nestr("FAM", fam->tag)) {
+        scriptError(pnode, "serious error: expression must be a family");
+        *errflg = true;
+        return null;
+    }
     return fam;
 }
 
@@ -208,6 +226,7 @@ int evaluateInteger(PNode *pnode, Context *context, bool *errflg) {
 	ASSERT(pnode && context);
 	PValue pvalue = evaluate(pnode, context, errflg);
 	if (*errflg || pvalue.type != PVInt) {
+        scriptError(pnode, "expression must be an integer");
 		*errflg = true;
 		return 0;
 	}

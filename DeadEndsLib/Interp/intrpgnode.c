@@ -5,7 +5,7 @@
 //    nodes that hold gedcom nodes.
 //
 //  Created by Thomas Wetmore on 17 March 2023.
-//  Last changed on 30 April 2025.
+//  Last changed on 8 May 2025.
 //
 
 #include "standard.h"
@@ -16,11 +16,11 @@
 
 // __key returns key of a root Gedcom node.
 // usage: key(INDI|FAM) -> STRING
-// NOTE: THIS IS A DIFFERENT INTERFACE THAN THAT USED BY LIFELINES.
-PValue __key(PNode* pnode, Context* context, bool* eflg) {
+// This is a differnt interface from LifeLines.
+PValue __key(PNode* pnode, Context* context, bool* errflg) {
     ASSERT(pnode && context);
-    PValue value = evaluate(pnode->arguments, context, eflg);
-    if (*eflg || !isRecordType(value.type)) return nullPValue;
+    PValue value = evaluate(pnode->arguments, context, errflg);
+    if (*errflg || !isRecordType(value.type)) return nullPValue;
     GNode* gnode = value.value.uGNode;
     if (gnode && gnode->key) return createStringPValue(gnode->key);
     return nullPValue;
@@ -28,10 +28,10 @@ PValue __key(PNode* pnode, Context* context, bool* eflg) {
 
 // __xref returns the xref (aka key) field of a GNode.
 // usage: xref(NODE) -> STRING
-PValue __xref (PNode* pnode, Context* context, bool* eflg) {
+PValue __xref (PNode* pnode, Context* context, bool* errflg) {
     ASSERT(pnode && context);
-    PValue value = evaluate(pnode->arguments, context, eflg);
-    if (*eflg || !isGNodeType(value.type)) return nullPValue;
+    PValue value = evaluate(pnode->arguments, context, errflg);
+    if (*errflg || !isGNodeType(value.type)) return nullPValue;
     GNode* gnode = value.value.uGNode;
     if (!gnode->key) return nullPValue;
     return createStringPValue(gnode->key);
@@ -51,11 +51,11 @@ PValue __tag (PNode* pnode, Context* context, bool* errflg) {
 
 // __value returns the value of a gedcom node; it may be empty.
 // usage: value(NODE) -> STRING
-PValue __value (PNode* pnode, Context* context, bool* eflg) {
+PValue __value (PNode* pnode, Context* context, bool* errflg) {
     ASSERT(pnode && context);
-    GNode *gnode = evaluateGNode(pnode->arguments, context, eflg);
-    if (*eflg || !gnode) {
-        *eflg = true;
+    GNode *gnode = evaluateGNode(pnode->arguments, context, errflg);
+    if (*errflg || !gnode) {
+        *errflg = true;
         return nullPValue;
     }
     if (!gnode->value) return nullPValue;

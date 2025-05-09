@@ -25,7 +25,7 @@ static int compare(String a, String b) {
 	return 0;
 }
 
-// createRootList creates and returns a RootList; a RootList is a sorted List.
+// createRootList creates and returns a RootList; a RootList is a sortable List.
 RootList *createRootList(void) {
 	return createList(getKey, compare, null, true);
 }

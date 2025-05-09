@@ -5,7 +5,7 @@
 // MNOTE: Memory management is an issue to be dealt with carefully.
 //
 // Created by Thomas Wetmore on 16 April 2023.
-// Last changed on 4 May 2024.
+// Last changed on 8 May 2024.
 
 #include "interp.h"
 #include "list.h"
@@ -13,11 +13,11 @@
 
 // __list creates a list.
 // usage: list(IDENT) -> VOID
-PValue __list(PNode* pnode, Context* context, bool* eflg) {
+PValue __list(PNode* pnode, Context* context, bool* errflg) {
     PNode *var = pnode->arguments;
     if (var->type != PNIdent) {
         scriptError(pnode, "the argument to list must be an identifier");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
     String ident = var->identifier;
@@ -31,18 +31,18 @@ PValue __list(PNode* pnode, Context* context, bool* eflg) {
 // usage: prepend(LIST, ANY) -> VOID
 // usage: push(LIST, ANY) -> VOID
 // usage: enqueue(LIST, ANY) -> VOID
-PValue __prepend(PNode* node, Context* context, bool* eflg) {
+PValue __prepend(PNode* node, Context* context, bool* errflg) {
     PNode *arg = node->arguments; // First arg is a list.
-    PValue pvalue = evaluate(arg, context, eflg);
-    if (*eflg || pvalue.type != PVList) {
-        *eflg = true;
+    PValue pvalue = evaluate(arg, context, errflg);
+    if (*errflg || pvalue.type != PVList) {
+        *errflg = true;
         scriptError(node, "the first argument to prepend/push/enqueue must be a list");
         return nullPValue;
     }
     List *list = pvalue.value.uList;
     ASSERT(list);
-    pvalue = evaluate(arg->next, context, eflg); // Second arg is a PValue.
-    if (*eflg) {
+    pvalue = evaluate(arg->next, context, errflg); // Second arg is a PValue.
+    if (*errflg) {
         scriptError(node, "the second argument to prepend/push/enqueue must be a program value");
         return nullPValue;
     }
@@ -54,16 +54,16 @@ PValue __prepend(PNode* node, Context* context, bool* eflg) {
 // __append handle the cases that add to the end of a list.
 // usage: append(LIST, ANY) -> VOID
 // usage: requeue(LIST, ANY) -> VOID
-PValue __append(PNode* node, Context* context, bool* eflg) {
-    PValue pvalue = evaluate(node->arguments, context, eflg); // First arg is a list.
-    if (*eflg || pvalue.type != PVList) {
+PValue __append(PNode* node, Context* context, bool* errflg) {
+    PValue pvalue = evaluate(node->arguments, context, errflg); // First arg is a list.
+    if (*errflg || pvalue.type != PVList) {
         scriptError(node, "the first argument to append/requeue must be a list");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
     List *list = pvalue.value.uList;
-    pvalue = evaluate(node->arguments->next, context, eflg); // Second arg is a PValue.
-    if (*eflg) {
+    pvalue = evaluate(node->arguments->next, context, errflg); // Second arg is a PValue.
+    if (*errflg) {
         scriptError(node, "the second argument to append/requeue must be a program value");
         return nullPValue;
     }
@@ -75,11 +75,11 @@ PValue __append(PNode* node, Context* context, bool* eflg) {
 // __removeFirst treats the list as a stack and removes the first element.
 // usage: remfirst(LIST) -> ANY
 // usage: pop(LIST) -> ANY
-PValue __removeFirst(PNode* node, Context* context, bool* eflg) {
-    PValue arg = evaluate(node->arguments, context, eflg);
-    if (*eflg || arg.type != PVList) {
+PValue __removeFirst(PNode* node, Context* context, bool* errflg) {
+    PValue arg = evaluate(node->arguments, context, errflg);
+    if (*errflg || arg.type != PVList) {
         scriptError(node, "the argument to pop/rmvfirst must be a list");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
     List *list = arg.value.uList;
@@ -94,11 +94,11 @@ PValue __removeFirst(PNode* node, Context* context, bool* eflg) {
 // __removeLast treats the list as a queue and removes the last element.
 // usage: removelast(LIST) -> ANY
 // usage: dequeue(LIST) -> ANY
-PValue __removeLast(PNode* node, Context* context, bool* eflg) {
-    PValue arg = evaluate(node->arguments, context, eflg);
-    if (*eflg || arg.type != PVList) {
+PValue __removeLast(PNode* node, Context* context, bool* errflg) {
+    PValue arg = evaluate(node->arguments, context, errflg);
+    if (*errflg || arg.type != PVList) {
         scriptError(node, "the argument to dequeue/rmvlast must be a list");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
     List *list = arg.value.uList;
@@ -112,11 +112,11 @@ PValue __removeLast(PNode* node, Context* context, bool* eflg) {
 
 // __empty  checks if a list is empty.
 // usage: empty(LIST) -> BOOL
-PValue __empty (PNode* pnode, Context* context, bool* eflg) {
-    PValue pvalue = evaluate(pnode->arguments, context, eflg);
-    if (*eflg || pvalue.type != PVList) {
+PValue __empty (PNode* pnode, Context* context, bool* errflg) {
+    PValue pvalue = evaluate(pnode->arguments, context, errflg);
+    if (*errflg || pvalue.type != PVList) {
         scriptError(pnode, "the argument to empty is not a list");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
     ASSERT(pvalue.value.uList);
@@ -126,26 +126,26 @@ PValue __empty (PNode* pnode, Context* context, bool* eflg) {
 // __setel treats the list as an array and sets the nth value. If the index is outside the range of the
 // current "array" the array is expanded and the unused element set to the nullPValue.
 // usage: setel(LIST, INT, ANY) -> VOID
-PValue __setel (PNode* node, Context* context, bool* eflg) {
+PValue __setel (PNode* node, Context* context, bool* errflg) {
     PNode *arg = node->arguments; // First arg is a list.
-    PValue pvalue = evaluate(arg, context, eflg);
-    if (*eflg || pvalue.type != PVList) {
+    PValue pvalue = evaluate(arg, context, errflg);
+    if (*errflg || pvalue.type != PVList) {
         scriptError(node, "the first argument to setel must be a list");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
     List *list = pvalue.value.uList;
     arg = arg->next; // Second arg is an index.
-    pvalue = evaluate(arg, context, eflg);
-    if (*eflg || pvalue.type != PVInt) {
+    pvalue = evaluate(arg, context, errflg);
+    if (*errflg || pvalue.type != PVInt) {
         scriptError(node, "the second argument to setel must be a integer");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
     int index = (int) pvalue.value.uInt;
     if (index < 0) {
         scriptError(node, "the index to setel is out of range");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
     // Extend the list with NULLs as needed
@@ -155,8 +155,8 @@ PValue __setel (PNode* node, Context* context, bool* eflg) {
         *filler = nullPValue;
         appendToList(list, filler);
     }
-    pvalue = evaluate(arg->next, context, eflg); // Third arg is a PValue.
-    if (*eflg) {
+    pvalue = evaluate(arg->next, context, errflg); // Third arg is a PValue.
+    if (*errflg) {
         scriptError(node, "the third argument to setel is in error");
         return nullPValue;
     }
@@ -167,29 +167,29 @@ PValue __setel (PNode* node, Context* context, bool* eflg) {
 
 // __getel treats the list as an array and returns the nth element.
 // usage: getel(LIST, INT) -> ANY
-PValue __getel(PNode *node, Context *context, bool *eflg) {
+PValue __getel(PNode *node, Context *context, bool *errflg) {
     PNode *arg = node->arguments;
 
     // Evaluate first argument: should be a list.
-    PValue listVal = evaluate(arg, context, eflg);
-    if (*eflg || listVal.type != PVList) {
+    PValue listVal = evaluate(arg, context, errflg);
+    if (*errflg || listVal.type != PVList) {
         scriptError(node, "the first argument to getel must be a list");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
     List *list = listVal.value.uList;
 
     // Evaluate second argument: should be an integer index.
-    PValue indexVal = evaluate(arg->next, context, eflg);
-    if (*eflg || indexVal.type != PVInt) {
+    PValue indexVal = evaluate(arg->next, context, errflg);
+    if (*errflg || indexVal.type != PVInt) {
         scriptError(node, "the second argument to getel must be an integer index");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
     int index = (int) indexVal.value.uInt;
     if (index < 0 || index >= lengthList(list)) {
         scriptError(node, "the index to getel is out of range");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
 
@@ -201,12 +201,12 @@ PValue __getel(PNode *node, Context *context, bool *eflg) {
 
 // __length returns the length of a list.
 // usage: length(LIST) -> INT
-PValue __length(PNode* node, Context* context, bool* eflg) {
+PValue __length(PNode* node, Context* context, bool* errflg) {
     PNode *arg = node->arguments; // Arg is the list.
-    PValue pvalue = evaluate(arg, context, eflg);
-    if (*eflg || pvalue.type != PVList) {
+    PValue pvalue = evaluate(arg, context, errflg);
+    if (*errflg || pvalue.type != PVList) {
         scriptError(node, "the first argument to setel must be a list");
-        *eflg = true;
+        *errflg = true;
         return nullPValue;
     }
     List *list = pvalue.value.uList;

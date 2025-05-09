@@ -3,7 +3,7 @@
 // interp.h if the header file for the DeadEnds script interpreter.
 //
 // Created by Thomas Wetmore on 8 December 2022.
-// Last changed on 21 August 2024.
+// Last changed on 7 May 2025.
 
 #ifndef interp_h
 #define interp_h
@@ -52,10 +52,10 @@ InterpType interpParents(PNode*, Context*, PValue*);
 InterpType interp_fornotes(PNode*, Context*, PValue*);
 InterpType interp_fornodes(PNode*, Context*, PValue*);
 InterpType interpForindi(PNode*, Context*, PValue*);
-InterpType interp_forsour(PNode*, Context*, PValue*);
-InterpType interp_foreven(PNode*, Context*, PValue*);
-InterpType interp_forothr(PNode*, Context*, PValue*);
-InterpType interpForFam(PNode*, Context*, PValue*);
+InterpType interpForfam(PNode*, Context*, PValue*);
+InterpType interpForsour(PNode*, Context*, PValue*);
+InterpType interpForeven(PNode*, Context*, PValue*);
+InterpType interpForothr(PNode*, Context*, PValue*);
 InterpType interpretSequenceLoop(PNode*, Context*, PValue*);
 InterpType interpForList(PNode*, Context*, PValue*);
 InterpType interpIfStatement(PNode*, Context*, PValue*);
@@ -71,7 +71,7 @@ PNode *createPNode(int);
 PValue evaluate(PNode*, Context*, bool*);
 bool evaluateConditional(PNode*, Context*, bool*);
 PValue evaluateBuiltin(PNode*, Context*, bool*);
-PValue evaluateIdent(PNode*, Context*, bool*);
+PValue evaluateIdent(PNode*, Context*);
 PValue evaluateUserFunc(PNode*, Context*, bool*);
 //GNode* evaluateFamily(PNode*, Context*, bool*);
 GNode* evaluateGNode(PNode*, Context*, bool*);

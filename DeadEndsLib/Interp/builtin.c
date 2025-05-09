@@ -3,7 +3,7 @@
 // builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 7 May 2025.
+// Last changed on 8 May 2025.
 
 #include "standard.h"
 #include "gnode.h"    // GNode.
@@ -169,12 +169,16 @@ PValue __strsoundex(PNode* expr, Context* context, bool* eflg) {
 
 // __set performs the DeadEnds script assignment statement.
 // usage: set(IDEN, ANY) -> VOID
-PValue __set(PNode* pnode, Context* context, bool* eflg) {
+PValue __set(PNode* pnode, Context* context, bool* errflg) {
 	PNode *iden = pnode->arguments;
 	PNode *expr = iden->next;
-	if (iden->type != PNIdent) { *eflg = true; return nullPValue; }
-	PValue value = evaluate(expr, context, eflg);
-	if (*eflg) return nullPValue;
+    if (iden->type != PNIdent) {
+        scriptError(pnode, "First argument to set() must be an identifier.");
+        *errflg = true;
+        return nullPValue;
+    }
+	PValue value = evaluate(expr, context, errflg);
+	if (*errflg) return nullPValue;
 	assignValueToSymbol(context->symbolTable, iden->identifier, value);
     if (symbolTableDebugging) {
         printf("Symtab after set() builtin with variable %s\n", iden->identifier);
@@ -278,20 +282,20 @@ PValue __roman(PNode* node, Context* context, bool* eflg) {
 // __strcmp -- Compare two strings and return their relationship.
 // usage: strcmp(STRING, STRING) -> INT
 // usage: nestr(STRING, STRING) -> BOOL
-PValue __strcmp (PNode* pnode, Context* context, bool* eflg) {
+PValue __strcmp (PNode* pnode, Context* context, bool* errflg) {
 	PNode *arg = pnode->arguments;
-	PValue pvalue = evaluate(arg, context, eflg);
+	PValue pvalue = evaluate(arg, context, errflg);
 	if (pvalue.type != PVString) {
 		scriptError(pnode, "the first argument to strcmp must be a string");
-		*eflg = true;
+		*errflg = true;
 		return nullPValue;
 	}
 	String str1 = pvalue.value.uString;
 	arg = arg->next;
-	pvalue = evaluate(arg, context, eflg);
+	pvalue = evaluate(arg, context, errflg);
 	if (pvalue.type != PVString) {
 		scriptError(pnode, "the second argument to strcmp must be a string");
-		*eflg = true;
+		*errflg = true;
 		return nullPValue;
 	}
 	String str2 = pvalue.value.uString;
@@ -300,20 +304,20 @@ PValue __strcmp (PNode* pnode, Context* context, bool* eflg) {
 
 //  __eqstr -- Compare two strings
 //    usage: eqstr(STRING, STRING) -> BOOL
-PValue __eqstr (PNode *node, Context *context, bool *eflg) {
+PValue __eqstr (PNode *node, Context *context, bool *errflg) {
 	PNode *arg = node->arguments;
-	PValue pvalue = evaluate(arg, context, eflg);
+	PValue pvalue = evaluate(arg, context, errflg);
 	if (pvalue.type != PVString) {
 		scriptError(node, "the first argument to eqstr must be a string");
-		*eflg = true;
+		*errflg = true;
 		return nullPValue;
 	}
 	String left = pvalue.value.uString;
 	arg = arg->next;
-	pvalue = evaluate(arg, context, eflg);
+	pvalue = evaluate(arg, context, errflg);
 	if (pvalue.type != PVString) {
 		scriptError(node, "the second argument to eqstr must be a string");
-		*eflg = true;
+		*errflg = true;
 		return nullPValue;
 	}
 	return PVALUE(PVBool, uBool, eqstr(left, pvalue.value.uString));
@@ -560,17 +564,17 @@ PValue __extractplaces (PNode *pnode, Context *context, bool *errflg) {
 
 // __copyfile copies the contents of a file to the output stream.
 // usage: copyfile(STRING) -> VOID
-PValue __copyfile (PNode *node, Context *context, bool *eflg) {
-	String fileName = evaluateString(node->arguments, context, eflg);
-	if (*eflg || fileName == null || strlen(fileName) == 0) {
-		*eflg = true;
+PValue __copyfile (PNode *node, Context *context, bool *errflg) {
+	String fileName = evaluateString(node->arguments, context, errflg);
+	if (*errflg || fileName == null || strlen(fileName) == 0) {
+		*errflg = true;
 		scriptError(node, "The argument to copyfile must be a string.");
 		return nullPValue;
 	}
 	FILE *cfp = fopenPath(fileName, "r", null);
 	if (cfp == null) {
 		scriptError(node, "Could not open file for copying.");
-		*eflg = true;
+		*errflg = true;
 		return nullPValue;
 	}
 	char buffer[1024];
@@ -614,23 +618,23 @@ PValue __noop(PNode *pnode, Context *context, bool* errflg) { return nullPValue;
 
 // __createnode creates a Gedcom node.
 // usage: createnode(STRING key[, STRING value]) -> NODE, where value can be omitted.
-PValue __createnode(PNode* node, Context* context, bool* eflg) {
+PValue __createnode(PNode* node, Context* context, bool* errflg) {
 	PNode *arg1 = node->arguments, *arg2 = arg1->next;
 	// Get the tag.
-	PValue tagValue = evaluate(arg1, context, eflg);
+	PValue tagValue = evaluate(arg1, context, errflg);
 	if (tagValue.type != PVString) {
 		scriptError(node, "first argument to createnode must be a key string");
-		*eflg = true;
+		*errflg = true;
 		return nullPValue;
 	}
 	String tag = tagValue.value.uString;
 	String value = null;
 	// Get the value if there.
 	if (arg2) {
-		PValue valValue = evaluate(arg2, context, eflg);
+		PValue valValue = evaluate(arg2, context, errflg);
 		if (valValue.type != PVNull && valValue.type != PVString) {
 			scriptError(node, "the second argument to create node must be an optional string");
-			*eflg = true;
+			*errflg = true;
 			return nullPValue;
 		}
 		value = valValue.value.uString;
@@ -640,30 +644,30 @@ PValue __createnode(PNode* node, Context* context, bool* eflg) {
 
 // __addnode adds a node to a Gedcom tree.
 // usage: addnode(NODE this, NODE parent[, NODE prevsib]) -> VOID, where prevsib may omitted.
-PValue __addnode(PNode* node, Context* context, bool* eflg) {
+PValue __addnode(PNode* node, Context* context, bool* errflg) {
 	// Get node to add.
 	PNode* arg1 = node->arguments, *arg2 = arg1->next, *arg3 = arg2->next;;
-	PValue this = evaluate(arg1, context, eflg);
-	if (*eflg || !isGNodeType(this.type)) {
-		*eflg = true;
-		scriptError(node, "the first argument to addnode must be an existing node");
+	PValue this = evaluate(arg1, context, errflg);
+	if (*errflg || !isGNodeType(this.type)) {
+        scriptError(node, "the first argument to addnode must be an existing node");
+		*errflg = true;
 		return nullPValue;
 	}
 	GNode *thisNode = this.value.uGNode;
 	// Get parent of node.
-	PValue parent = evaluate(arg2, context, eflg);
-	if (*eflg || !isGNodeType(parent.type)) {
-		*eflg = true;
-		scriptError(node, "the second argument to addnode must be an existing node");
+	PValue parent = evaluate(arg2, context, errflg);
+	if (*errflg || !isGNodeType(parent.type)) {
+        scriptError(node, "the second argument to addnode must be an existing node");
+		*errflg = true;
 		return nullPValue;
 	}
 	GNode *parentNode = parent.value.uGNode;
 	// Get previous sibling if there is one.
 	GNode* prevNode = null;
 	if (arg3) { // Previous sibling may be omitted.
-		PValue prev = evaluate(arg3, context, eflg);
-		if (*eflg || !isGNodeType(prev.type)) {
-			*eflg = true;
+		PValue prev = evaluate(arg3, context, errflg);
+		if (*errflg || !isGNodeType(prev.type)) {
+			*errflg = true;
 			scriptError(node, "the third argument to addnode must be an existing node");
 			return nullPValue;
 		}
@@ -685,17 +689,17 @@ PValue __addnode(PNode* node, Context* context, bool* eflg) {
 // __deletenode removes subtree from a Gedcom tree/record.
 // usage: deletenode(NODE) -> VOID
 // mnote: memory leak.
-PValue __deletenode(PNode *node, Context *context, bool *eflg) {
-	PValue pvalue = evaluate(node->arguments, context, eflg);
-	if (*eflg || !isGNodeType(pvalue.type)) {
-		*eflg = true;
+PValue __deletenode(PNode *node, Context *context, bool *errflg) {
+	PValue pvalue = evaluate(node->arguments, context, errflg);
+	if (*errflg || !isGNodeType(pvalue.type)) {
+		*errflg = true;
 		scriptError(node, "the argument to deletenode must be an existing node");
 		return nullPValue;
 	}
 	GNode *this = pvalue.value.uGNode;
 	// If this node has no parent, it is a root node, and they cannot be deleted.
 	if (!this->parent) {
-		*eflg = true;
+		*errflg = true;
 		scriptError(node, "the argument node is a root and cannot be deleted.");
 		return nullPValue;
 	}
