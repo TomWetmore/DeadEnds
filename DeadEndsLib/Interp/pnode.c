@@ -3,7 +3,7 @@
 // pnode.c holds the functions that manage PNodes (program nodes).
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 21 October 2024.
+// Last changed on 10 May 2025.
 
 #include "pnode.h"
 #include "standard.h"
@@ -30,37 +30,37 @@ extern int curLine;   // parse.c; used to set the line numbers of PNodes.
 void showPNode(PNode* pnode) {
     printf("%s ", pnodeTypes[pnode->type]);
     switch (pnode->type) {
-        case PNICons:     printf("%ld\n", pnode->intCons); break;
-        case PNFCons:     printf("%g\n", pnode->floatCons); break;
-        case PNSCons:     printf("%s\n", pnode->stringCons); break;
-        case PNProcCall:  printf("%s()\n", pnode->procName); break;
-        case PNFuncCall:  printf("%s()\n", pnode->funcName); break;
-        case PNBltinCall: printf("%s()\n", pnode->funcName); break;
-        case PNIdent:     printf("%s\n", pnode->identifier); break;
-        case PNProcDef:   printf("%s\n", pnode->procName); break;
-        case PNFuncDef:   printf("%s\n", pnode->funcName); break;
-        case PNIf:
-        case PNWhile:
-        case PNBreak:
-        case PNContinue:
-        case PNReturn:
-        case PNTraverse:
-        case PNNodes:
-        case PNFamilies:
-        case PNSpouses:
-        case PNChildren:
-        case PNIndis:
-        case PNFams:
-        case PNSources:
-        case PNEvents:
-        case PNOthers:
-        case PNList:
-        case PNSequence:
-        case PNFathers:
-        case PNMothers:
-        case PNFamsAsChild:
-        case PNNotes:
-        default: printf("\n"); break;
+    case PNICons:     printf("%ld\n", pnode->intCons); break;
+    case PNFCons:     printf("%g\n", pnode->floatCons); break;
+    case PNSCons:     printf("%s\n", pnode->stringCons); break;
+    case PNProcCall:  printf("%s()\n", pnode->procName); break;
+    case PNFuncCall:  printf("%s()\n", pnode->funcName); break;
+    case PNBltinCall: printf("%s()\n", pnode->funcName); break;
+    case PNIdent:     printf("%s\n", pnode->identifier); break;
+    case PNProcDef:   printf("%s\n", pnode->procName); break;
+    case PNFuncDef:   printf("%s\n", pnode->funcName); break;
+    case PNIf:
+    case PNWhile:
+    case PNBreak:
+    case PNContinue:
+    case PNReturn:
+    case PNTraverse:
+    case PNNodes:
+    case PNFamilies:
+    case PNSpouses:
+    case PNChildren:
+    case PNIndis:
+    case PNFams:
+    case PNSources:
+    case PNEvents:
+    case PNOthers:
+    case PNList:
+    case PNSequence:
+    case PNFathers:
+    case PNMothers:
+    case PNFamsAsChild:
+    case PNNotes:
+    default: printf("\n"); break;
     }
 }
 
@@ -200,7 +200,7 @@ PNode* funcCallPNode(String name, PNode* alist) {
         node->builtinFunc = builtIns[md].func;
         return node;
     }
-	// Function is undefined; assume it will be later.
+    // Function is undefined; assume it will be later.
     PNode *node = allocPNode(PNFuncCall);
     node->funcName = name;
     node->parameters = alist;
@@ -335,7 +335,7 @@ PNode *forlistPNode (PNode *lexpr, String evar, String nvar, PNode *body)
     return node;
 }
 
-// forindisetPNode creates a squence loop.
+// forindisetPNode creates a sequence loop.
 PNode *forindisetPNode(PNode *iexpr, String ivar, String vvar, String nvar, PNode *body) {
     PNode *node = allocPNode(PNSequence);
     node->sequenceExpr = iexpr;
@@ -347,20 +347,15 @@ PNode *forindisetPNode(PNode *iexpr, String ivar, String vvar, String nvar, PNod
     return node;
 }
 
-// fornotesPNode -- Create fornotes loop node
-//--------------------------------------------------------------------------------------------------
-PNode *fornotesPNode (PNode *nexpr, String vvar, PNode *body)
-// nexpr -- PNode expression that evaluates to a GNode.
-// vvar -- value
-// body -- First PNode of loop body.
-{
-//    PNode *node = allocPNode(INOTES);
-//    node->pnexpr = nexpr;
-//    istrng(node) = (Word) vvar;
-//    node->pbody = body;
-//    setParents(body, node);
-//    return node;
-    return null;
+// fornotesPNode creates fornotes loop node. nexpr evaluates to a GNode. vvar is the variable that will hold NOTE
+// values; body is the loop.
+PNode *fornotesPNode(PNode *nexpr, String vvar, PNode *body) {
+    PNode *pnode = allocPNode(PNNotes);
+    pnode->gnodeExpr = nexpr;
+    pnode->noteIden = vvar;
+    pnode->loopState = body;
+    setParents(body, pnode);
+    return pnode;
 }
 
 // iden_node -- Create an identifier PNode.
@@ -414,150 +409,149 @@ static void setParents (PNode *list, PNode *parent) {
     }
 }
 
-//  freePNodes -- Free the program nodes rooted at the given program node.
-//    TODO: Write me.
-//    NOTE: This is more complicated than it seem at first. Just like there is a separate
-//      function for allocating each type of program node, there should be a separate function
-//      for freeing each tyhpe of program node.
-//--------------------------------------------------------------------------------------------------
-void freePNodes(PNode *pnode)
-{
+// freePNodes frees the program nodes rooted at the given program node.
+void freePNodes(PNode *pnode) {
     while (pnode) {
         switch (pnode->type) {
-            case PNICons: break;
-            case PNFCons: break;
-            case PNSCons:
-            case PNIdent:
-                stdfree(pnode->stringCons);
-                break;
-            case PNIf:
-                freePNodes(pnode->condExpr);
-                freePNodes(pnode->thenState);
-                freePNodes(pnode->elseState);
-                break;
-            case PNWhile:
-                freePNodes(pnode->condExpr);
-                freePNodes(pnode->loopState);
-                break;
-            case PNBreak:
-            case PNContinue:
-                break;
-            case PNReturn:
-                if (pnode->returnExpr)
-                    freePNodes(pnode->returnExpr);
-                break;
-            case PNProcDef:
-                stdfree(pnode->procName);
-                freePNodes(pnode->parameters);
-                freePNodes(pnode->procBody);
-                break;
-            case PNProcCall:
-                stdfree(pnode->procName);
-                freePNodes(pnode->arguments);
-                break;
-            case PNFuncDef:
-                stdfree(pnode->funcName);
-                freePNodes(pnode->parameters);
-                freePNodes(pnode->funcBody);
-                break;
-            case PNFuncCall:
-            case PNBltinCall:
-                stdfree(pnode->funcName);
-                freePNodes(pnode->arguments);
-                break;
-            case PNTraverse:
-                freePNodes(pnode->gnodeExpr);
-                stdfree(pnode->gnodeIden);
-                stdfree(pnode->levelIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNNodes:
-                freePNodes(pnode->gnodeExpr);
-                stdfree(pnode->gnodeIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNFamilies:
-                freePNodes(pnode->personExpr);
-                stdfree(pnode->familyIden);
-                stdfree(pnode->spouseIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNSpouses:
-                freePNodes(pnode->personExpr);
-                stdfree(pnode->spouseIden);
-                stdfree(pnode->familyIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNChildren:
-                freePNodes(pnode->familyExpr);
-                stdfree(pnode->childIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNIndis:
-                stdfree(pnode->personIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNFams:
-                stdfree(pnode->familyIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNSources:
-                stdfree(pnode->sourceIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNEvents:
-                stdfree(pnode->eventIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNOthers:
-                stdfree(pnode->otherIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNList:
-                freePNodes(pnode->listExpr);
-                stdfree(pnode->elementIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNSequence:
-                freePNodes(pnode->sequenceExpr);
-                stdfree(pnode->elementIden);
-                stdfree(pnode->valueIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNTable:
-            case PNFathers:
-                freePNodes(pnode->personExpr);
-                stdfree(pnode->fatherIden);
-                stdfree(pnode->familyIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNMothers:
-                freePNodes(pnode->personExpr);
-                stdfree(pnode->motherIden);
-                stdfree(pnode->familyIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNFamsAsChild:
-                freePNodes(pnode->personExpr);
-                stdfree(pnode->familyIden);
-                stdfree(pnode->countIden);
-                freePNodes(pnode->loopState);
-                break;
-            case PNNotes:
-                break;
+        case PNICons: break;
+        case PNFCons: break;
+        case PNSCons:
+        case PNIdent:
+            stdfree(pnode->stringCons);
+            break;
+        case PNIf:
+            freePNodes(pnode->condExpr);
+            freePNodes(pnode->thenState);
+            freePNodes(pnode->elseState);
+            break;
+        case PNWhile:
+            freePNodes(pnode->condExpr);
+            freePNodes(pnode->loopState);
+            break;
+        case PNBreak:
+        case PNContinue:
+            break;
+        case PNReturn:
+            if (pnode->returnExpr)
+                freePNodes(pnode->returnExpr);
+            break;
+        case PNProcDef:
+            stdfree(pnode->procName);
+            freePNodes(pnode->parameters);
+            freePNodes(pnode->procBody);
+            break;
+        case PNProcCall:
+            stdfree(pnode->procName);
+            freePNodes(pnode->arguments);
+            break;
+        case PNFuncDef:
+            stdfree(pnode->funcName);
+            freePNodes(pnode->parameters);
+            freePNodes(pnode->funcBody);
+            break;
+        case PNFuncCall:
+        case PNBltinCall:
+            stdfree(pnode->funcName);
+            freePNodes(pnode->arguments);
+            break;
+        case PNTraverse:
+            freePNodes(pnode->gnodeExpr);
+            stdfree(pnode->gnodeIden);
+            stdfree(pnode->levelIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNNodes:
+            freePNodes(pnode->gnodeExpr);
+            stdfree(pnode->gnodeIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNFamilies:
+            freePNodes(pnode->personExpr);
+            stdfree(pnode->familyIden);
+            stdfree(pnode->spouseIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNSpouses:
+            freePNodes(pnode->personExpr);
+            stdfree(pnode->spouseIden);
+            stdfree(pnode->familyIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNChildren:
+            freePNodes(pnode->familyExpr);
+            stdfree(pnode->childIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNIndis:
+            stdfree(pnode->personIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNFams:
+            stdfree(pnode->familyIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNSources:
+            stdfree(pnode->sourceIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNEvents:
+            stdfree(pnode->eventIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNOthers:
+            stdfree(pnode->otherIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNList:
+            freePNodes(pnode->listExpr);
+            stdfree(pnode->elementIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNSequence:
+            freePNodes(pnode->sequenceExpr);
+            stdfree(pnode->elementIden);
+            stdfree(pnode->valueIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNTable: break; // TODO: FINISH TABLE IMPLEMENTATION.
+        case PNFathers:
+            freePNodes(pnode->personExpr);
+            stdfree(pnode->fatherIden);
+            stdfree(pnode->familyIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNMothers:
+            freePNodes(pnode->personExpr);
+            stdfree(pnode->motherIden);
+            stdfree(pnode->familyIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNFamsAsChild:
+            freePNodes(pnode->personExpr);
+            stdfree(pnode->familyIden);
+            stdfree(pnode->countIden);
+            freePNodes(pnode->loopState);
+            break;
+        case PNNotes:
+            break; // TODO: NOT FULLY IMPLEMENTED.
+        default:
+            fprintf(stderr, "Warning: Unknown PNode type %d in freePNodes\n", pnode->type);
+            ASSERT(false);
         }
+        PNode* save = pnode;
         pnode = pnode->next;
+        stdfree(save);
     }
 }

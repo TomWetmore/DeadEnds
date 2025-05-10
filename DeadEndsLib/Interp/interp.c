@@ -5,7 +5,7 @@
 // or it may call a specific function.
 //
 // Created by Thomas Wetmore on 9 December 2022.
-// Last changed on 2 May 2025.
+// Last changed on 9 May 2025.
 
 #include <stdarg.h>
 #include "symboltable.h"
@@ -450,14 +450,14 @@ InterpType interpParents(PNode* node, Context* context, PValue *pval) {
     return InterpOkay;
 }
 
-// interp_fornotes -- Interpret NOTE loop
+// interp_fornotes interprets the fornote loop.
 InterpType interp_fornotes(PNode* node, Context* context, PValue *pval) {
     ASSERT(node && context);
     bool eflg = false;
     InterpType irc;
-    GNode *root = evaluateGNode(node, context, &eflg);
+    GNode *root = evaluateGNode(node->gnodeExpr, context, &eflg);
     if (eflg) {
-        scriptError(node, "1st arg to fornotes must be a record line");
+        scriptError(node, "first arg of fornotes() must evaluate to a record line.");
         return InterpError;
     }
     if (!root) return InterpOkay;

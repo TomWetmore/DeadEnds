@@ -4,7 +4,7 @@
 //  pnode.h -- Header file for the program node structure.
 //
 //  Created by Thomas Wetmore on 14 December 2022.
-//  Last changed on 15 March 2025.
+//  Last changed on 9 May 2025.
 //
 
 #ifndef pnode_h
@@ -66,7 +66,6 @@ struct PNode {
 };
 
 // Mnemonic names for the program node fields.
-//--------------------------------------------------------------------------------------------------
 #define identifier   stringOne   // Identifier name.
 #define procName     stringOne   // Procedure name.
 #define funcName     stringOne   // Function (built-in and user-defined) name.
@@ -107,6 +106,7 @@ struct PNode {
 #define elementIden idenOne   // Element of a list or set.
 
 #define stringCons  stringOne
+#define noteIden    stringOne  // The value of a GNode value field (with continuation) in NOTE node.
 
 PNode *iconsPNode(long);
 PNode *fconsPNode(double);
@@ -140,8 +140,7 @@ PNode *parentsPNode(PNode*, String, String, PNode*);
 void freePNodes(PNode*);
 void showPNode(PNode*);
 
-//  BuiltIn -- Structure that holds built-in functions.
-//--------------------------------------------------------------------------------------------------
+//  BuiltIn is the structure that holds built-in functions.
 typedef struct BuiltIn {
 	String name;    //  Name of the function.
 	int minParams;  //  Minimum number of parameters to the function.

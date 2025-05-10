@@ -3,7 +3,7 @@
 // import.c has functions that import Gedcom files into internal structures.
 //
 // Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 7 May 2025.
+// Last changed on 9 May 2025.
 
 #include "import.h"
 #include "validate.h"
@@ -47,6 +47,12 @@ Database* getDatabaseFromFile(String path, int vcodes, ErrorLog* errlog) {
 		deleteDatabase(database);
 		return null;
 	}
+    validatePersons(database->recordIndex, database->name, keymap, errlog);
+    validateFamilies(database->recordIndex, database->name, keymap, errlog);
+    if (lengthList(errlog)) {
+        deleteDatabase(database);
+        return null;
+    }
     if (timing) printf("%s: getDatabaseFromFile: database created.\n", gms);
 	return database;
 }
@@ -105,8 +111,7 @@ void checkKeysAndReferences(RootList* records, String name, IntegerTable* keymap
 // root GNode of the record's GNode tree.
 RootList* getRecordListFromFile(String path, IntegerTable* keymap, ErrorLog* elog) {
     if (timing) printf("%s: getRecordIndexFromFile: started.\n", gms);
-
-    File* file = openFile(path, "r"); // Open the GEDCOM file.
+    File* file = openFile(path, "r"); // Open the Gedcom file.
     if (!file) {
         addErrorToLog(elog, createError(systemError, path, 0, "Could not open file."));
         return null;
