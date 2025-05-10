@@ -127,10 +127,16 @@ InterpType interpret(PNode* programNode, Context* context, PValue* returnValue) 
                 stdfree(pvalue.value.uString);  // The pvalue's string is in the heap.
             }
             break;
+        case PNNotes: // Iterate NOTEs.
+            switch (returnCode = interpFornotes(programNode, context, returnValue)) {
+            case InterpOkay: break;
+            case InterpError: return InterpError;
+            default: return returnCode;
+            }
+            break;
         case PNFuncDef: // Illegal during interpretation.
         case PNProcDef:
         case PNTable:
-        case PNNotes: // Maybe this is legit?
             FATAL();
         case PNChildren: // Interpret children loop.
             switch (returnCode = interpChildren(programNode, context, returnValue)) {
@@ -451,13 +457,13 @@ InterpType interpParents(PNode* node, Context* context, PValue *pval) {
 }
 
 // interp_fornotes interprets the fornote loop.
-InterpType interp_fornotes(PNode* node, Context* context, PValue *pval) {
+InterpType interpFornotes(PNode* node, Context* context, PValue *pval) {
     ASSERT(node && context);
     bool eflg = false;
     InterpType irc;
     GNode *root = evaluateGNode(node->gnodeExpr, context, &eflg);
     if (eflg) {
-        scriptError(node, "first arg of fornotes() must evaluate to a record line.");
+        scriptError(node, "first arg of fornotes() must evaluate to a gedcom node.");
         return InterpError;
     }
     if (!root) return InterpOkay;

@@ -129,8 +129,8 @@ void renameElementInSequence(Sequence* sequence, String key) {
 	}
 }
 
-// isInSequence checks if a SequenceEl with given key is in a Sequence. NOTE: Consider
-// what could be done if the sequence were sorted.
+// isInSequence checks if a SequenceEl with given key is in a Sequence.
+// TODO: Should take advantage of the sortability of the Sequence.
 bool isInSequence(Sequence *seq, String key) {
 	if (!seq || !key) return false;
 	Block *block = &(seq->block);

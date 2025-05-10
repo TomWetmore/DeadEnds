@@ -44,11 +44,11 @@ PValue __addtoset(PNode *pnode, Context *context, bool *errflg) {
     Sequence *sequence = pvalue.value.uSequence;
     PNode *indiarg = setarg->next; // GNode.
     GNode *indi = evaluatePerson(indiarg, context, errflg);
-    if (*errflg || !indi) {
-        *errflg = true;
-        scriptError(pnode, "The second argument to addtoset must be a person.");
+    if (*errflg) {
+        scriptError(pnode, "second argument to addtoset() must be a person.");
         return nullPValue;
     }
+    if (!indi) return nullPValue;
     String key = indi->key; // Person key.
     if (!key || *key == 0) {
         *errflg = true;
@@ -89,7 +89,7 @@ PValue __inset(PNode* programNode, Context* context, bool* eflg) {
     PValue value1 = evaluate(arg1, context, eflg); // Sequence.
     if (*eflg || value1.type != PVSequence) {
         *eflg = true;
-        scriptError(programNode, "the first argument to inset must be a set.");
+        scriptError(programNode, "first argument to inset() must be a set.");
         return nullPValue;
     }
     Sequence *seq = value1.value.uSequence;
@@ -98,7 +98,7 @@ PValue __inset(PNode* programNode, Context* context, bool* eflg) {
     PValue value2 = evaluate(arg2, context, eflg);
     if (*eflg || value2.type != PVPerson) {
         *eflg = true;
-        scriptError(programNode, "the second argument to inset must be a person.");
+        scriptError(programNode, "second argument to inset() must be a person.");
         return nullPValue;
     }
     GNode *indi = value2.value.uGNode;

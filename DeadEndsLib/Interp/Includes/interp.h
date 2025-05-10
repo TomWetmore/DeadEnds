@@ -49,7 +49,7 @@ InterpType interpFamilies(PNode*, Context*, PValue*);
 InterpType interpFathers(PNode*, Context*, PValue*);
 InterpType interpMothers(PNode*, Context*, PValue*);
 InterpType interpParents(PNode*, Context*, PValue*);
-InterpType interp_fornotes(PNode*, Context*, PValue*);
+InterpType interpFornotes(PNode*, Context*, PValue*);
 InterpType interp_fornodes(PNode*, Context*, PValue*);
 InterpType interpForindi(PNode*, Context*, PValue*);
 InterpType interpForfam(PNode*, Context*, PValue*);
