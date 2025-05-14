@@ -3,7 +3,7 @@
 // place.c has the functions that handle Gedcom place values.
 //
 // Created by Thomas Wetmore on 12 February 2024.
-// Last changed on 19 August 2024.
+// Last changed on 14 May 2025.
 
 #include <stdio.h>
 #include "standard.h"
@@ -24,48 +24,38 @@ bool placeToList(String place, List *list) {
 // Returns true on success.
 bool valueToList(String str, List* list, String dlm) {
     if (!str || *str == 0 || !list) return false;
-
-    emptyList(list); // Clear the list before use
-
+    emptyList(list); // Empty list before use.
+    // Create heap buffer to hold copy of string.
     int len = (int) strlen(str);
-    String buf = (String) stdalloc(len + 2);  // Extra space for null terminator guard
+    String buf = (String) stdalloc(len + 2);
     strcpy(buf, str);
-    buf[len + 1] = 0;  // Safety guard for final string
-
-    // Split the string in-place using nulls at delimiter locations
-    int phraseCount = 1;
+    buf[len + 1] = 0;  // Safety guard.
+    int phraseCount = 1; // Split string in-place with nulls at delimiter locations.
     for (char* p = buf; *p; p++) {
         if (inString(*p, dlm)) {
             *p = '\0';
             phraseCount++;
         }
     }
-
     // Extract and trim each phrase
     char* p = buf;
     for (int i = 0; i < phraseCount; i++) {
         char* n = p + strlen(p) + 1;
 
-        // Trim leading whitespace
         while (*p && chartype(*p) == WHITE) p++;
-
-        // Trim trailing whitespace
         char* q = p + strlen(p) - 1;
-        while (q > p && chartype(*q) == WHITE)
-            *q-- = '\0';
+        while (q > p && chartype(*q) == WHITE) *q-- = '\0';
 
-        // Add to list (even empty strings are valid phrases)
-        appendToList(list, strsave(p));
+        appendToList(list, strsave(p)); // Add to list; empty strings are valid.
         p = n;
     }
-
-    stdfree(buf);  // Free the temporary buffer
+    stdfree(buf);  // Free buffer.
     return true;
 }
+
 static bool inString (int chr, String str)
 {
-	while (*str && chr != *str)
-		str++;
+	while (*str && chr != *str)	str++;
 	return *str != 0;
 }
 
