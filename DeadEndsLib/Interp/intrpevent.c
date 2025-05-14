@@ -34,7 +34,7 @@ PValue __place(PNode *pnode, Context *context, bool *errflg) {
     return nullPValue;
 }
 
-// __year return the year of a Gedcom event as a string.
+// __year returns the year of a Gedcom event as a string.
 // usage: year(EVENT) -> STRING
 PValue __year(PNode *pnode, Context *context, bool* errflg) {
     PValue evnt = evaluate(pnode->arguments, context, errflg);
@@ -42,24 +42,24 @@ PValue __year(PNode *pnode, Context *context, bool* errflg) {
     return createStringPValue(eventToDate(evnt.value.uGNode, true));
 }
 
-//  __long -- Return the long form of an event as a string.
-//    usage: long(EVENT) -> STRING
+//  __long return the long form of an event as a string.
+//  usage: long(EVENT) -> STRING
 PValue __long(PNode *pnode, Context *context, bool* errflg) {
     PValue event = evaluate(pnode->arguments, context, errflg);
     if (*errflg || !isRecordType(event.type)) return nullPValue;
     return createStringPValue(eventToString(event.value.uGNode, false));
 }
 
-//  __short -- Return the long form of an event as a string.
-//    usage: short(EVENT) -> STRING
+//  __short return the short form of an event as a string.
+//  usage: short(EVENT) -> STRING
 PValue __short (PNode *pnode, Context *context, bool* errflg) {
     PValue event = evaluate(pnode->arguments, context, errflg);
     if (*errflg || !isRecordType(event.type)) return nullPValue;
     return createStringPValue(eventToString(event.value.uGNode, true));
 }
 
-//  __dayformat -- Set day format for standard dates.
-//    usage: dayformat(INT) -> NULL
+//  __dayformat sets the day format for displaying standard dates.
+//  usage: dayformat(INT) -> NULL
 PValue __dayformat (PNode *node, Context *context, bool* eflg) {
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVInt) return nullPValue;
@@ -68,8 +68,8 @@ PValue __dayformat (PNode *node, Context *context, bool* eflg) {
     return nullPValue;
 }
 
-//  __monthformat -- Set the month format for showing standard dates.
-//    usage: dayformat(INT) -> NULL
+//  __monthformat sets the month format for displaying standard dates.
+//  usage: monthformat(INT) -> NULL
 PValue __monthformat(PNode *node, Context *context, bool* eflg) {
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVInt) return nullPValue;
@@ -78,8 +78,8 @@ PValue __monthformat(PNode *node, Context *context, bool* eflg) {
     return nullPValue;
 }
 
-//  __dateformat -- Set date format for standard date
-//    usage: dateformat(INT) -> NULL
+//  __dateformat sets date format for displaying standard dates.
+//  usage: dateformat(INT) -> NULL
 PValue __dateformat(PNode *node, Context *context, bool* eflg) {
     PValue pvalue = evaluate(node->arguments, context, eflg);
     if (*eflg || pvalue.type != PVInt) return nullPValue;

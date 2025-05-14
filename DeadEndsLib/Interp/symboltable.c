@@ -3,7 +3,7 @@
 // symboltable.c holds the functions that implement SymbolTables.
 //
 // Created by Thomas Wetmore on 23 March 2023.
-// Last changed on 5 May 2025.
+// Last changed on 11 May 2025.
 
 #include "standard.h"
 #include "symboltable.h"
@@ -19,7 +19,7 @@ static int compare(String a, String b) {
 // delete deletes a Symbol.
 static void delete(void* a) {
 	Symbol* symbol = (Symbol*) a;
-	free(symbol->value);
+	stdfree(symbol->value);
 }
 
 // getKey returns the Symbol's identifier.
@@ -72,7 +72,7 @@ PValue getValueOfSymbol(SymbolTable* symtab, String ident) {
     return cloneAndReturnPValue(symbol->value);
 }
 
-// showSymbolTable shows the contents of a SymbolTable.
+// showSymbolTable shows the contents of a SymbolTable. For debugging.
 void showSymbolTable(SymbolTable* table) {
 	printf("Symbol Table contents:\n");
 	for (int i = 0; i < table->numBuckets; i++) {

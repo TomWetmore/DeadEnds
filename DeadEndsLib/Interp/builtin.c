@@ -3,20 +3,20 @@
 // builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 8 May 2025.
+// Last changed on 13 May 2025.
 
 #include "standard.h"
-#include "gnode.h"    // GNode.
+#include "gnode.h"
 #include "lineage.h"
-#include "pvalue.h"   // PValue.
-#include "pnode.h"    // PNode.
-#include "name.h"     // getSurname, manipulateName.
+#include "pvalue.h"
+#include "pnode.h"
+#include "name.h"
 #include "interp.h"
-#include "recordindex.h" // searchRecordIndex.
-#include "database.h"    // personIndex, familyIndex.
+#include "recordindex.h"
+#include "database.h"
 #include "hashtable.h"
-#include "evaluate.h"  // evaluate.
-#include "path.h"      // fopenPath.
+#include "evaluate.h"
+#include "path.h"
 #include "symboltable.h"
 #include "date.h"
 #include "place.h"
@@ -279,14 +279,14 @@ PValue __roman(PNode* node, Context* context, bool* eflg) {
 	return createStringPValue(scratch);
 }
 
-// __strcmp -- Compare two strings and return their relationship.
+// __strcmp compares two strings and return their relationship using C rules.
 // usage: strcmp(STRING, STRING) -> INT
 // usage: nestr(STRING, STRING) -> BOOL
 PValue __strcmp (PNode* pnode, Context* context, bool* errflg) {
 	PNode *arg = pnode->arguments;
 	PValue pvalue = evaluate(arg, context, errflg);
 	if (pvalue.type != PVString) {
-		scriptError(pnode, "the first argument to strcmp must be a string");
+		scriptError(pnode, "first argument to nestr/strcmp() must be a string");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -294,7 +294,7 @@ PValue __strcmp (PNode* pnode, Context* context, bool* errflg) {
 	arg = arg->next;
 	pvalue = evaluate(arg, context, errflg);
 	if (pvalue.type != PVString) {
-		scriptError(pnode, "the second argument to strcmp must be a string");
+		scriptError(pnode, "second argument to nestr/strcmp() must be a string");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -302,13 +302,13 @@ PValue __strcmp (PNode* pnode, Context* context, bool* errflg) {
 	return PVALUE(PVInt, uInt, (long) strcmp(str1, str2));
 }
 
-//  __eqstr -- Compare two strings
+//  __eqstr compares two strings for equality.
 //    usage: eqstr(STRING, STRING) -> BOOL
 PValue __eqstr (PNode *node, Context *context, bool *errflg) {
 	PNode *arg = node->arguments;
 	PValue pvalue = evaluate(arg, context, errflg);
 	if (pvalue.type != PVString) {
-		scriptError(node, "the first argument to eqstr must be a string");
+		scriptError(node, "first argument to eqstr() must be a string");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -316,7 +316,7 @@ PValue __eqstr (PNode *node, Context *context, bool *errflg) {
 	arg = arg->next;
 	pvalue = evaluate(arg, context, errflg);
 	if (pvalue.type != PVString) {
-		scriptError(node, "the second argument to eqstr must be a string");
+		scriptError(node, "second argument to eqstr() must be a string");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -324,34 +324,33 @@ PValue __eqstr (PNode *node, Context *context, bool *errflg) {
 }
 
 //  __strtoint -- Convert string to integer
-//    usage: strtoint(STRING) -> INT
+//  usage: strtoint(STRING) -> INT and atoi(STRING) -> INT
 PValue __strtoint (PNode *node, Context *context, bool *eflg) {
 	PValue value = evaluate(node->arguments, context, eflg);
 	if (*eflg || value.type != PVString || !value.value.uString) return nullPValue;
 	return PVALUE(PVInt, uInt, atoi(value.value.uString));
 }
 
-//  __save -- Copy string
+//  __save copies a string on the heap.
 PValue __save (PNode *pnode, Context *context, bool *errflg) {
     String value = evaluateString(pnode->arguments, context, errflg);
 	if (*errflg || !value || *value == 0) {
-		scriptError(pnode, "The argument to save must be a string.");
+		scriptError(pnode, "argument to save() must be a string.");
 		*errflg = true;
 		return nullPValue;
 	}
 	return createStringPValue(value);
 }
 
-//  __strlen -- Find length of string
-//    usage: strlen(STRING) -> INT
-PValue __strlen (PNode *node, Context *context, bool* eflg)
-{
+//  __strlen returns the length of string
+//  usage: strlen(STRING) -> INT
+PValue __strlen (PNode *node, Context *context, bool* eflg) {
 	PValue value = evaluate(node->arguments, context, eflg);
 	if (*eflg || value.type != PVString) return nullPValue;
 	return PVALUE(PVInt, uInt, (long) strlen(value.value.uString));
 }
 
-//  __concat -- Catenate potentially many strings.
+//  __concat catenates potentially two to thirty-two strings.
 //    usage: concat(STRING [, STRING]+) -> STRING
 PValue __concat (PNode *pnode, Context *context, bool *errflg) {
 	PNode *arg = pnode->arguments;
@@ -373,35 +372,34 @@ PValue __concat (PNode *pnode, Context *context, bool *errflg) {
 		stdfree(hold[i]);
 	}
 	*p = 0;
-    PValue rvalue = createStringPValue(nstring); // Makes extra copy.
+    PValue rvalue = createStringPValue(nstring);
     stdfree(nstring);
     return rvalue;
 }
 
-//  __lower -- Convert string to lower case.
-//    usage: lower(STRING) -> STRING
+//  __lower converts a string to lower case.
+//  usage: lower(STRING) -> STRING
 PValue __lower(PNode *node, Context *context, bool* eflg) {
 	PValue val = evaluate(node->arguments, context, eflg);
 	if (*eflg || val.type != PVString) return nullPValue;
 	return createStringPValue(lower(val.value.uString));
 }
 
-//  __upper -- Convert string to upper case.
-//    usage: upper(STRING) -> STRING
+//  __upper converts a string to upper case.
+//  usage: upper(STRING) -> STRING
 PValue __upper(PNode *node, Context *context, bool* eflg) {
 	PValue val = evaluate(node->arguments, context, eflg);
 	if (*eflg || val.type != PVString) return nullPValue;
 	return createStringPValue(upper(val.value.uString));
 }
 
-//  __capitalize -- Capitalize a string.
-//    usage: capitalize(STRING) -> STRING
+//  __capitalize capitalizes a string.
+// usage: capitalize(STRING) -> STRING
 PValue __capitalize(PNode *node, Context *context, bool* eflg) {
 	PValue val = evaluate(node->arguments, context, eflg);
 	if (*eflg || val.type != PVString) return nullPValue;
 	return createStringPValue(capitalize(val.value.uString));
 }
-
 
 // __print prints a list of expresseion values to the stdout window.
 // usage: print([STRING]+,) -> VOID
@@ -419,13 +417,15 @@ PValue __capitalize(PNode *node, Context *context, bool* eflg) {
 //    return NULL;
 //}
 
-// __root returns the root node of record the argument node is in.
+static bool localDebugging = false;
+
+// __root returns the root node of the record the argument node is in.
 // usage: root(NODE) -> NODE
 PValue __root (PNode* pnode, Context* context, bool* errflg) {
     PNode *arg = pnode->arguments;
 	GNode *gnode = evaluateGNode(arg, context, errflg);
 	if (*errflg) {
-		scriptError(pnode, "The first argument to root must be a Gedcom node.");
+		scriptError(pnode, "argument to root() must be a Gedcom node");
 		return nullPValue;
 	}
 	int count = 0;
@@ -434,7 +434,7 @@ PValue __root (PNode* pnode, Context* context, bool* errflg) {
 	}
 	if (count >= 100) {
 		*errflg = true;
-		scriptError(pnode, "Recursion counter error.");
+		scriptError(pnode, "recursion loop in root()");
 		return nullPValue;
 	}
 	return PVALUE(PVGNode, uGNode, gnode);
@@ -448,7 +448,7 @@ PValue __extractdate(PNode *pnode, Context *context, bool* errflg) {
     PNode *arg = pnode->arguments; // GNode of event or DATE.
     GNode *gnode = evaluateGNode(arg, context, errflg);
 	if (*errflg) {
-		scriptError(pnode, "The first argument to extractdate must be a event or DATE node.");
+		scriptError(pnode, "first argument to extractdate() must be an event or DATE node.");
 		return nullPValue;
 	}
 	PNode *dvar = arg->next; // Symbol to hold day integer.
@@ -478,11 +478,9 @@ PValue __extractdate(PNode *pnode, Context *context, bool* errflg) {
     return nullPValue;
 }
 
-//  __extractnames -- Extract name parts from person or NAME node.
-//    usage: extractnames(NODE, LIST, VARB, VARB) -> VOID
-//--------------------------------------------------------------------------------------------------
-PValue __extractnames (PNode *pnode, Context *context, bool *errflg)
-{
+//  __extractnames tries to extract name parts from person or NAME node.
+//  usage: extractnames(NODE, LIST, VARB, VARB) -> VOID
+PValue __extractnames (PNode *pnode, Context *context, bool *errflg) {
 	PNode *nexp = pnode->arguments;
 	PNode *lexp = nexp->next;
 	PNode *lvar = lexp->next;
@@ -523,43 +521,88 @@ PValue __extractnames (PNode *pnode, Context *context, bool *errflg)
 	return nullPValue;
 }
 
-// _extractplaces extracts the place phrases from an event or PLAC GNode.
+// __extractplaces extracts the place phrases from an event or PLAC GNode.
 // usage: extractplaces(NODE, LIST, VARB) -> VOID
-// MNOTE: decide how to handle freeing the List.
-PValue __extractplaces (PNode *pnode, Context *context, bool *errflg) {
+PValue __oldextractplaces (PNode *pnode, Context *context, bool *errflg) {
 	// Get the PLAC GNode to extract the place phrases from.
 	PNode *nexp = pnode->arguments;
 	GNode *place = evaluateGNode(nexp, context, errflg);
 	if (*errflg) {
-		scriptError(pnode, "The first argument to extractplaces must be a PLAC or event node.");
+		scriptError(pnode, "first argument to extractplaces must be a PLAC or event node");
 		return nullPValue;
 	}
 	if (nestr(place->tag, "PLAC")) place = PLAC(place);
 	if (!place) {
-		*errflg = true;
-		scriptError(pnode, "The first argument to extractplaces must be a PLAC or event node.");
 		return nullPValue;
 	}
-	// Get the List to put the places in.
+	// Get the List to put the places in. The next argument should be an identifier that names a list. But
+    // use the generic evaluator in case the language gets fancier in the future.
 	PNode *lexp = nexp->next;
 	PValue pvalue = evaluate(lexp, context, errflg);
 	if (*errflg || pvalue.type != PVList) {
-		scriptError(pnode, "The second argument to extractplaces must be a List.");
+		scriptError(pnode, "second argument to extractplaces must identify a list.");
 		return nullPValue;
 	}
 	List *list = pvalue.value.uList;
 	// Get the variable to put the number of places in.
 	PNode *varb = lexp->next;
 	if (varb->type != PNIdent) {
-		scriptError(pnode, "The third argument to extractplaces must be an identifier.");
+		scriptError(pnode, "third argument to extractplaces must be an identifier.");
 		*errflg = true;
 		return nullPValue;
 	}
 	String pstr = place->value;
 	int len;
 	placeToList(pstr, list, &len);
-	assignValueToSymbol(context->symbolTable, varb->identifier, PVALUE(PVInt, uInt, len));
+	assignValueToSymbol(context->symbolTable, varb->identifier, PVALUE(PVList, uList, list));
+    if (symbolTableDebugging) showSymbolTable(context->symbolTable);
 	return nullPValue;
+}
+
+PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
+    PNode *nexp = pnode->arguments;
+    GNode *node = evaluateGNode(nexp, context, errflg); // First arg is a Gedcom node.
+    if (*errflg || !node) {
+        scriptError(pnode, "first argument to extractplaces() must evaluate to a Gedcom node");
+        return nullPValue;
+    }
+    GNode *placeNode = eqstr(node->tag, "PLAC") ? node : findTag(node->child, "PLAC"); // Find PLAC node.
+    if (!placeNode || !placeNode->value) return nullPValue;
+
+    PNode *listVar = nexp->next; // List identifier.
+    if (listVar->type != PNIdent) {
+        scriptError(pnode, "second argument to extractplaces() must be a list identifier");
+        *errflg = true;
+        return nullPValue;
+    }
+    String listName = listVar->identifier;
+    PValue listVal = getValueOfSymbol(context->symbolTable, listName);
+    List* list = listVal.value.uList;
+    if (listVal.type != PVList || !list) {
+        scriptError(pnode, "second argument to extractplaces() must identifiy a valid list");
+        *errflg = true;
+        return nullPValue;
+    }
+    emptyList(list); // Frees all strings but keeps the shell.
+    PNode *countVar = listVar->next; // Counter identifier.
+    if (countVar->type != PNIdent) {
+        scriptError(pnode, "third argument to extractplaces() must be an integer identifier");
+        *errflg = true;
+        return nullPValue;
+    }
+    int count = 0; // Extract places.
+    if (!placeToList(placeNode->value, list, &count)) {
+        scriptError(pnode, "place value could not be split into phrases");
+        *errflg = true;
+        return nullPValue;
+    }
+
+    // Assign the count to the symbol table
+    assignValueToSymbol(context->symbolTable, countVar->identifier, PVALUE(PVInt, uInt, count));
+
+    if (localDebugging) showSymbolTable(context->symbolTable); // Debug.
+
+    return nullPValue;
 }
 
 // __copyfile copies the contents of a file to the output stream.

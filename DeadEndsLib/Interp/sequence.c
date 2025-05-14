@@ -4,7 +4,7 @@
 // persons and other record types. It underlies the indiseq data type of DeadEnds Script.
 //
 // Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 4 April 2025.
+// Last changed on 11 May 2025.
 
 #include "standard.h"
 #include "sequence.h"
@@ -46,7 +46,7 @@ static int nameCompare(String a, String b) {
 
 // delete is the function that deletes a SequenceEl.
 static void delete(void* element) {
-	free(element);
+	stdfree(element);
 }
 
 void baseFree(void *word) { free(word); }

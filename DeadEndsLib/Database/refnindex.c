@@ -4,7 +4,7 @@
 // 1 REFN nodes whose values give records unique identifiers.
 //
 // Created by Thomas Wetmore on 16 December 2023.
-// Last changed on 7 July 2024.
+// Last changed on 11 May 2025.
 
 #include "refnindex.h"
 #include "gedcom.h"
@@ -44,7 +44,7 @@ static String getKey(void* a) {
 
 // delete frees a RefnIndexEl.
 static void delete(void* element) {
-	free(element);
+	stdfree(element);
 }
 
 // createRefnIndex creates a RefnIndex.

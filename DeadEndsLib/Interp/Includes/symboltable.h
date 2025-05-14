@@ -5,7 +5,7 @@
 //    DeadEnds programs. Symbol tables are implented with hash tables.
 //
 // Created by Thomas Wetmore on 23 March 2023.
-// Last changed on 2 April 2024.
+// Last changed on 13 May 2025.
 //
 
 #ifndef symboltable_h
@@ -31,6 +31,6 @@ typedef struct {
 SymbolTable *createSymbolTable(void);
 void assignValueToSymbol(SymbolTable*, String, PValue);
 PValue getValueOfSymbol(SymbolTable*, String);
-void showSymbolTable(SymbolTable*);
+void showSymbolTable(SymbolTable*); // Debug.
 
 #endif // symboltable_h

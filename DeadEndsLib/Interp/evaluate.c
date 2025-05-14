@@ -81,7 +81,7 @@ bool evaluateConditional(PNode* pnode, Context* context, bool* errflg) {
     }
     PValue value = evaluate(expr, context, errflg); // Evaluate the expression.
     if (*errflg) {
-        scriptError(pnode, "There was an error evaluating the conditional expression.");
+        scriptError(pnode, "There was an error evaluating the conditional expression");
         return false;
     }
     if (iden) assignValueToSymbol(context->symbolTable, pnode->identifier, value);
