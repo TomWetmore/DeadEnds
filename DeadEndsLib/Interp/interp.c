@@ -5,7 +5,7 @@
 // or it may call a specific function.
 //
 // Created by Thomas Wetmore on 9 December 2022.
-// Last changed on 9 May 2025.
+// Last changed on 17 May 2025.
 
 #include <stdarg.h>
 #include "symboltable.h"
@@ -32,7 +32,6 @@ bool programRunning = false;
 bool programDebugging = false;
 
 // Interface between the lexer, parser, and interpreter.
-FILE *Poutfp = null;  // Output file.
 int Perrors = 0;      // Number of errors.
 
 // initializeInterpreter initializes the interpreter.
@@ -45,6 +44,7 @@ Context* createContext(SymbolTable *symbolTable, Database *database) {
     Context* context = (Context*) malloc(sizeof(Context));
     context->symbolTable = symbolTable;
     context->database = database;
+    context->file = stdOutputFile();
     return context;
 }
 
@@ -78,6 +78,7 @@ InterpType interpret(PNode* programNode, Context* context, PValue* returnValue) 
     bool errorFlag = false;
     InterpType returnCode;
     PValue pvalue;
+    //FILE* fp = context->file->fp;
     while (programNode) { // Iterate the PNodes in list to interpret.
         if (programDebugging) {
             printf("interpret:%d: ", programNode->lineNumber);
@@ -85,7 +86,7 @@ InterpType interpret(PNode* programNode, Context* context, PValue* returnValue) 
         }
         switch (programNode->type) {
         case PNSCons: // Strings are written.
-            printf("%s", (String) programNode->stringCons);
+            fprintf(context->file->fp, "%s", (String) programNode->stringCons);
             break;
         case PNICons: // Numbers are ignored.
         case PNFCons:
@@ -93,7 +94,7 @@ InterpType interpret(PNode* programNode, Context* context, PValue* returnValue) 
         case PNIdent: // Idents with String values are written.
             pvalue = evaluateIdent(programNode, context);
             if (pvalue.type == PVString && pvalue.value.uString)
-                printf("%s", pvalue.value.uString);
+                fprintf(context->file->fp, "%s", pvalue.value.uString);
             break;
         case PNBltinCall: // Call builtin and write return value if a String.
             pvalue = evaluateBuiltin(programNode, context, &errorFlag);
@@ -102,7 +103,7 @@ InterpType interpret(PNode* programNode, Context* context, PValue* returnValue) 
                 return InterpError;
             }
             if (pvalue.type == PVString && pvalue.value.uString) {
-                printf("%s", pvalue.value.uString);
+                fprintf(context->file->fp, "%s", pvalue.value.uString);
                 stdfree(pvalue.value.uString);
             }
             break;
@@ -110,7 +111,7 @@ InterpType interpret(PNode* programNode, Context* context, PValue* returnValue) 
             switch (returnCode = interpProcCall(programNode, context, returnValue)) {
             case InterpOkay:
                 if (returnValue && returnValue->type == PVString && returnValue->value.uString) {
-                    printf("%s", returnValue->value.uString);
+                    fprintf(context->file->fp, "%s", returnValue->value.uString);
                     stdfree(returnValue->value.uString);
                 }
                 break;
@@ -123,7 +124,7 @@ InterpType interpret(PNode* programNode, Context* context, PValue* returnValue) 
             pvalue = evaluateUserFunc(programNode, context, &errorFlag);
             if (errorFlag) return InterpError;
             if (pvalue.type == PVString && pvalue.value.uString) {
-                printf("%s", pvalue.value.uString);
+                fprintf(context->file->fp, "%s", pvalue.value.uString);
                 stdfree(pvalue.value.uString);  // The pvalue's string is in the heap.
             }
             break;
@@ -704,6 +705,7 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
     }
     SymbolTable* newSymbolTable = createSymbolTable(); // Context to run proc in.
     Context* newContext = createContext(newSymbolTable, context->database);
+    newContext->file = context->file; // Propogate output file.
     PNode* argument = pnode->arguments; // First arg.
     PNode* parameter = procedure->parameters; // First param.
     while (argument && parameter) { // Bind args and params.

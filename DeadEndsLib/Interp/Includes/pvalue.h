@@ -4,7 +4,7 @@
 // expressions in the DeadEnds script language. They are the values stored in symbol tables.
 //
 // Created by Thomas Wetmore on 15 December 2022.
-// Last changed on 30 April 2025.
+// Last changed on 17 May 2025.
 
 #ifndef pvalue_h
 #define pvalue_h
@@ -64,7 +64,6 @@ extern const PValue nullPValue;
 extern const PValue truePValue;
 extern const PValue falsePValue;
 
-extern FILE *Poutfp;
 extern int Perrors;
 extern int nobuiltins;
 

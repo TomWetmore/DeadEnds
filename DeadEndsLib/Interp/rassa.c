@@ -3,7 +3,7 @@
 // rassa.c handles printing output from DeadEnds script programs.
 //
 // Created by Thomas Wetmore on 10 February 2024.
-// Last changed on 24 October 2024.
+// Last changed on 17 May 2025.
 
 #include <string.h>
 #include <stdio.h>
@@ -37,14 +37,14 @@ void initrassa(void) {
 }
 
 // finishrassa finalizes script program output.
-void finishrassa(void) {
-	if (outputmode == BUFFERED && linebuflen > 0 && Poutfp) {
-		fwrite(linebuffer, linebuflen, 1, Poutfp);
-		linebuflen = 0;
-		bufptr = linebuffer;
-		curcol = 1;
-	}
-}
+//void finishrassa(void) {
+//	if (outputmode == BUFFERED && linebuflen > 0 && Poutfp) {
+//		fwrite(linebuffer, linebuflen, 1, Poutfp);
+//		linebuflen = 0;
+//		bufptr = linebuffer;
+//		curcol = 1;
+//	}
+//}
 
 // __pagemode switches script program output to page mode.
 // usage: pagemode(INT, INT) -> VOID
@@ -91,48 +91,39 @@ PValue __linemode(PNode* pnode, Context* context, bool* errflg) {
 
 // __newfile switches script program output to a new file.
 // usage: newfile(STRING, BOOL) -> VOID
-PValue __newfile(PNode* pnode, Context* context, bool* errflg) {
-	PNode *arg = pnode->arguments;
-	PValue pvalue = evaluate(arg, context, errflg);
-	if (*errflg || pvalue.type != PVString || strlen(pvalue.value.uString) == 0) {
-		scriptError(pnode, "First argument to newfile must be a string.");
-		return nullPValue;
-	}
-	String name = pvalue.value.uString;
-	arg = arg->next;
-	pvalue = evaluateBoolean(arg, context, errflg);
-	if (*errflg) {
-		scriptError(pnode, "Second argument to newfile must be a boolean.");
-		return nullPValue;
-	}
-	bool aflag = pvalue.value.uBool;
-	if (Poutfp) {
-		finishrassa();
-		fclose(Poutfp);
-		Poutfp = null;
-	}
-	outfilename = strsave(name);
-	if (!(Poutfp = fopenPath(name, aflag?"a":"w", "." /*llprograms*/))) {
-		scriptError(pnode, "Could not open file %s", name);
-		return nullPValue;
-	}
+PValue  __newfile(PNode* pnode, Context* context, bool* errflg) {
+    PNode *arg = pnode->arguments;
+    PValue pvalue = evaluate(arg, context, errflg);
+    if (*errflg) return nullPValue;
+    if (pvalue.type != PVString || strlen(pvalue.value.uString) == 0) {
+        *errflg = true;
+        scriptError(pnode, "first argument to newfile() must be a string");
+        return nullPValue;
+    }
+    String name = pvalue.value.uString;
+    arg = arg->next;
+    pvalue = evaluateBoolean(arg, context, errflg);
+    if (*errflg) {
+        scriptError(pnode, "second argument to newfile must be a boolean.");
+        return nullPValue;
+    }
+    bool aflag = pvalue.value.uBool;
+    closeFile(context->file);
+    File* file = openFile(name, aflag ? "a" : "w");
+    if (!file) {
+        *errflg = true;
+        scriptError(pnode, "could not open file %s", name);
+        return nullPValue;
+    }
+    context->file = file;
 	return nullPValue;
 }
 
 // __outfile returns the name of the script output file.
 // usage: outfile() -> STRING
-//PValue __outfile(PNode* pnode, Context* context, bool* errflg) {
-//	if (!Poutfp) {
-//		Poutfp = ask_for_file("w", whtout, &outfilename, llreports);
-//		if (!Poutfp)  {
-//			message(noreport);
-//			return;
-//		}
-//		setbuf(Poutfp, NULL);
-//	}
-//	*eflg = false;
-//	return (WORD) outfilename;
-//}
+PValue __outfile(PNode* pnode, Context* context, bool* errflg) {
+    return createStringPValue(context->file->name);
+}
 
 // __pos positions page output to a row and column.
 // usage: pos(INT, INT) -> VOID
@@ -196,36 +187,36 @@ PValue __col (PNode *pnode, Context *context, bool *errflg)
 
 // __pageout outputs the current page and clears the page buffer.
 // usage: pageout() -> VOID
-PValue __pageout(PNode* pnode, Context* context, bool* errflg) {
-	char scratch[MAXCOLS+2];
-	String p;
-	int row, i;
-	*errflg = true;
-	if (outputmode != PAGEMODE) return nullPValue;
-//	if (!Poutfp) {
-//		Poutfp = ask_for_file("w", whtout, &outfilename, llreports);
-//		if (!Poutfp)  {
-//			message(noreport);
-//			return;
-//		}
-//		setbuf(Poutfp, NULL);
+//PValue __pageout(PNode* pnode, Context* context, bool* errflg) {
+//	char scratch[MAXCOLS+2];
+//	String p;
+//	int row, i;
+//	*errflg = true;
+//	if (outputmode != PAGEMODE) return nullPValue;
+////	if (!Poutfp) {
+////		Poutfp = ask_for_file("w", whtout, &outfilename, llreports);
+////		if (!Poutfp)  {
+////			message(noreport);
+////			return;
+////		}
+////		setbuf(Poutfp, NULL);
+////	}
+//	*errflg = false;
+//	scratch[__cols] = '\n';
+//	scratch[__cols+1] = 0;
+//	p = pagebuffer;
+//	for (row = 1; row <= __rows; row++) {
+//		memcpy(scratch, p, __cols);
+//		for (i = __cols - 1; i > 0 && scratch[i] == ' '; i--)
+//			;
+//		scratch[i+1] = '\n';
+//		scratch[i+2] = 0;
+//		fputs(scratch, Poutfp);
+//		p += __cols;
 //	}
-	*errflg = false;
-	scratch[__cols] = '\n';
-	scratch[__cols+1] = 0;
-	p = pagebuffer;
-	for (row = 1; row <= __rows; row++) {
-		memcpy(scratch, p, __cols);
-		for (i = __cols - 1; i > 0 && scratch[i] == ' '; i--)
-			;
-		scratch[i+1] = '\n';
-		scratch[i+2] = 0;
-		fputs(scratch, Poutfp);
-		p += __cols;
-	}
-	memset(pagebuffer, ' ', __rows*__cols);
-	return nullPValue;
-}
+//	memset(pagebuffer, ' ', __rows*__cols);
+//	return nullPValue;
+//}
 
 // adjustCols adjusts the column after printing a string
 void adjustCols(String string) {
@@ -239,62 +230,63 @@ void adjustCols(String string) {
 }
 
 // poutput outputs a string in the current mode.
-void poutput(String string) {
-	String p;
-	int c, len;
-	if (!string || *string == 0 || (len = (int) strlen(string)) <= 0) return;
-//	if (!Poutfp) {
-//		Poutfp = ask_for_file("w", whtout, &name, llreports);
-//		if (!Poutfp)  {
-//			message(noreport);
+//void poutput(String string) {
+//	String p;
+//	int c, len;
+//	if (!string || *string == 0 || (len = (int) strlen(string)) <= 0) return;
+////	if (!Poutfp) {
+////		Poutfp = ask_for_file("w", whtout, &name, llreports);
+////		if (!Poutfp)  {
+////			message(noreport);
+////			return;
+////		}
+////		setbuf(Poutfp, NULL);
+////		outfilename = strsave(name);
+////	}
+//	switch (outputmode) {
+//	case UNBUFFERED:
+//		fwrite(string, len, 1, Poutfp);
+//		adjustCols(string);
+//		return;
+//	case BUFFERED:
+//		if (len > 1024) {
+//			fwrite(linebuffer, linebuflen, 1, Poutfp);
+//			fwrite(string, len, 1, Poutfp);
+//			linebuflen = 0;
+//			bufptr = linebuffer;
+//			adjustCols(string);
 //			return;
 //		}
-//		setbuf(Poutfp, NULL);
-//		outfilename = strsave(name);
+//		if (len + linebuflen > 1024) {
+//			fwrite(linebuffer, linebuflen, 1, Poutfp);
+//			linebuflen = 0;
+//			bufptr = linebuffer;
+//		}
+//		linebuflen += len;
+//		while ((c = *bufptr++ = *string++)) {
+//			if (c == '\n')
+//				curcol = 1;
+//			else
+//				curcol++;
+//		}
+//		--bufptr;
+//		return;
+//	case PAGEMODE:
+//		p = pagebuffer + (currow - 1)*__cols + curcol - 1;
+//		while ((c = *string++)) {
+//			if (c == '\n') {
+//				curcol = 1;
+//				currow++;
+//				p = pagebuffer + (currow - 1)*__cols;
+//			} else {
+//				if (curcol <= __cols && currow <= __rows)
+//					*p++ = c;
+//				curcol++;
+//			}
+//		}
+//		return;
+//	default:
+//		FATAL();
 //	}
-	switch (outputmode) {
-	case UNBUFFERED:
-		fwrite(string, len, 1, Poutfp);
-		adjustCols(string);
-		return;
-	case BUFFERED:
-		if (len > 1024) {
-			fwrite(linebuffer, linebuflen, 1, Poutfp);
-			fwrite(string, len, 1, Poutfp);
-			linebuflen = 0;
-			bufptr = linebuffer;
-			adjustCols(string);
-			return;
-		}
-		if (len + linebuflen > 1024) {
-			fwrite(linebuffer, linebuflen, 1, Poutfp);
-			linebuflen = 0;
-			bufptr = linebuffer;
-		}
-		linebuflen += len;
-		while ((c = *bufptr++ = *string++)) {
-			if (c == '\n')
-				curcol = 1;
-			else
-				curcol++;
-		}
-		--bufptr;
-		return;
-	case PAGEMODE:
-		p = pagebuffer + (currow - 1)*__cols + curcol - 1;
-		while ((c = *string++)) {
-			if (c == '\n') {
-				curcol = 1;
-				currow++;
-				p = pagebuffer + (currow - 1)*__cols;
-			} else {
-				if (curcol <= __cols && currow <= __rows)
-					*p++ = c;
-				curcol++;
-			}
-		}
-		return;
-	default:
-		FATAL();
-	}
-}
+//}
+

@@ -3,7 +3,7 @@
 // builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 14 May 2025.
+// Last changed on 16 May 2025.
 
 #include "standard.h"
 #include "gnode.h"
@@ -349,8 +349,8 @@ PValue __strlen (PNode *node, Context *context, bool* eflg) {
 }
 
 //  __concat catenates potentially two to thirty-two strings.
-//    usage: concat(STRING [, STRING]+) -> STRING
-PValue __concat (PNode *pnode, Context *context, bool *errflg) {
+//  usage: concat(STRING [, STRING]+) -> STRING
+PValue __concat(PNode *pnode, Context *context, bool *errflg) {
 	PNode *arg = pnode->arguments;
 	if (arg == null) return nullPValue;
 	int len = 0, nstrs = 0;
@@ -401,19 +401,15 @@ PValue __capitalize(PNode *node, Context *context, bool* eflg) {
 
 // __print prints a list of expresseion values to the stdout window.
 // usage: print([STRING]+,) -> VOID
-//WORD __print (node, stab, eflg)
-//INTERP node; TABLE stab; bool *eflg;
-//{
-//    INTERP arg = (INTERP) ielist(node);
-//    WORD val;
-//    while (arg) {
-//        val = evaluate(arg, stab, eflg);
-//        if (*eflg) return NULL;
-//        if (val) wprintf("%s", (STRING) val);
-//        arg = inext(arg);
-//    }
-//    return NULL;
-//}
+PValue __print(PNode *pnode, Context *context, bool *errflg) {
+    for (PNode* arg = pnode->arguments; arg != null; arg = arg->next) {
+        PValue svalue = evaluate(arg, context, errflg);
+        if (*errflg) return nullPValue;
+        if (svalue.type != PVString) continue;
+        printf("%s", svalue.value.uString);
+    }
+    return nullPValue;
+}
 
 static bool localDebugging = false;
 
@@ -597,9 +593,7 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
 
     // Assign the count to the symbol table
     assignValueToSymbol(context->symbolTable, countVar->identifier, PVALUE(PVInt, uInt, count));
-
     if (localDebugging) showSymbolTable(context->symbolTable); // Debug.
-
     return nullPValue;
 }
 
@@ -775,7 +769,7 @@ PValue __getrecord (PNode *pnode, Context *context, bool *errflg) {
 	return root ? PVALUE(PVGNode, uGNode, root) : nullPValue;
 }
 
-// __freerecord is now a no-op because of the in-Ram database.
+// __freerecord is a no-op because of the in-Ram database.
 // usage: freerecord(NODE) -> VOID
 PValue __freerecord (PNode* pnode, Context* context, bool* errflg) {
 	return nullPValue;
@@ -827,9 +821,8 @@ PValue __extracttokens (PNode *pnode, Context *context, bool *errflg) {
 		*errflg = true;
 		return nullPValue;
 	}
-	int len = 0;
 	valueToList(str, list, dlm);
-	assignValueToSymbol(context->symbolTable, lvar->identifier, PVALUE(PVInt, uInt, len));
+	assignValueToSymbol(context->symbolTable, lvar->identifier, PVALUE(PVInt, uInt, lengthList(list)));
 	return nullPValue;
 }
 

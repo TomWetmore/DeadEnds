@@ -3,7 +3,7 @@
 // functable.c has the table of built-in functions in the DeadEnds scripting language.
 //
 // Created by Thomas Wetmore on 10 January 2023.
-// Last changed on 10 May 2025.
+// Last changed on 17 May 2025.
 
 #include "standard.h"
 #include "symboltable.h"
@@ -310,9 +310,9 @@ BuiltIn builtIns[] = {
     "nspouses",     1,    1,    __nspouses,
     "or",           2,   CC,    __or,
     "ord",          1,    1,    __ord,
-//  "outfile",      0,    0,    __outfile,
+    "outfile",      0,    0,    __outfile,
 	"pagemode",     2,    2,    __pagemode,
-	"pageout",      0,    0,    __pageout,
+//"pageout",      0,    0,    __pageout,
     "parent",       1,    1,    __parent,
 	"parents",      1,    1,    __parents,
     "parentset",    1,    1,    __parentset,
@@ -324,7 +324,7 @@ BuiltIn builtIns[] = {
 	"prevfam",      1,    1,    __prevfam,
 	"previndi",     1,    1,    __previndi,
 	"prevsib",      1,    1,    __prevsib,
-//  "print",        1,   CC,    __print,
+    "print",        1,   CC,    __print,
     "push",         2,    2,    __prepend,
     "qt",           0,    0,    __qt,
 	"reference",    1,    1,    __reference,

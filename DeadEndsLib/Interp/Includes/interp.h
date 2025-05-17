@@ -3,7 +3,7 @@
 // interp.h if the header file for the DeadEnds script interpreter.
 //
 // Created by Thomas Wetmore on 8 December 2022.
-// Last changed on 7 May 2025.
+// Last changed on 17 May 2025.
 
 #ifndef interp_h
 #define interp_h
@@ -28,6 +28,7 @@ typedef enum InterpType {
 typedef struct Context {
     SymbolTable *symbolTable;
     Database *database;
+    File* file;
 } Context;
 
 // Report Interpreter.

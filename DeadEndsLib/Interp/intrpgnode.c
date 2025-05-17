@@ -5,7 +5,7 @@
 //    nodes that hold gedcom nodes.
 //
 //  Created by Thomas Wetmore on 17 March 2023.
-//  Last changed on 8 May 2025.
+//  Last changed on 16 May 2025.
 //
 
 #include "standard.h"
@@ -58,8 +58,9 @@ PValue __value (PNode* pnode, Context* context, bool* errflg) {
         *errflg = true;
         return nullPValue;
     }
-    if (!gnode->value) return nullPValue;
-    return createStringPValue(gnode->value);
+    return createStringPValue(gnode->value ? gnode->value : "");
+    //if (!gnode->value) return nullPValue;
+    //return createStringPValue(gnode->value);
 }
 
 // __parent returns the parent node of a gedcom node.
