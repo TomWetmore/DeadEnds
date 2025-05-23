@@ -174,6 +174,7 @@ extern PValue __tag(PNode*, Context*, bool*);
 extern PValue __title(PNode*, Context*, bool*);
 extern PValue __trim(PNode*, Context*, bool*);
 extern PValue __trimname(PNode*, Context*, bool*);
+extern PValue __TYPEOF(PNode*, Context*, bool*);
 extern PValue __union(PNode*, Context*, bool*);
 extern PValue __uniqueset(PNode*, Context*, bool*);
 extern PValue __unlock(PNode*, Context*, bool*);
@@ -362,6 +363,7 @@ BuiltIn builtIns[] = {
     "title",        1,    1,    __title,
 	"trim",         2,    2,    __trim,
     "trimname",     2,    2,    __trimname,
+    "typeof",       1,    1,    __TYPEOF,
     "union",        2,    2,    __union,
     "uniqueset",    1,    1,    __uniqueset,
     "unlock",       1,    1,    __noop,

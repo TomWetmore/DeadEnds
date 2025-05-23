@@ -3,7 +3,7 @@
 //  gnode.c has many functions for the GNode data type.
 //
 //  Created by Thomas Wetmore on 12 November 2022.
-//  Last changed on 22 October 2024.
+//  Last changed on 20 May 2025.
 
 #include "standard.h"
 #include "gnode.h"
@@ -19,17 +19,13 @@
 // tagTable is the StringTable that holds a single copy of all tags used in the GNodes.
 static StringTable *tagTable = null;
 
-// numNodeAllocs returns the number of GNodes that have been allocatedp. Debugging.
-static int nodeAllocs = 0;
-int numNodeAllocs(void) {
-	return nodeAllocs;
-}
+// numGNodeAllocs returns the number of GNodes that have been allocated. Debugging.
+static int gnodeAllocs = 0;
+int numGNodeAllocs(void) { return gnodeAllocs; }
 
-// numNodeFrees returns the number of GNodes that have been freed. Debugging.
-static int nodeFrees = 0;
-int numNodeFrees(void) {
-	return nodeFrees;
-}
+// numGNodeFrees returns the number of GNodes that have been freed. Debugging.
+static int gnodeFrees = 0;
+int numGNodeFrees(void) { return gnodeFrees; }
 
 // getFromTagTable returns the persistent tag value from the tag table.
 static int numBucketsInTagTable = 67;
@@ -39,11 +35,11 @@ static String getFromTagTable(String tag) {
 	return fixString(tagTable, tag);
 }
 
-// freeGNode frees a GNode.
+// freeGNode frees a GNode. Do not free the tag!
 void freeGNode(GNode* node) {
 	if (node->key) stdfree(node->key);
 	if (node->value) stdfree(node->value);
-	nodeFrees++;
+	gnodeFrees++;
 	stdfree(node);
 }
 
@@ -51,8 +47,8 @@ void freeGNode(GNode* node) {
 // created the key and value, if there, are allocated in the heap, and the tag pointer is taken
 // from the tag table. This is the only time that memory for these fields is handled.
 GNode* createGNode(String key, String tag, String value, GNode* parent) {
-	nodeAllocs++;
-	GNode* node = (GNode*) malloc(sizeof(GNode));;
+	gnodeAllocs++;
+	GNode* node = (GNode*) stdalloc(sizeof(GNode));;
 	node->key = strsave(key);
 	node->tag = getFromTagTable(tag);
 	node->value = strsave(value);
@@ -186,8 +182,8 @@ void showGNode(int level, GNode* node) {
 	printf("\n");
 }
 
-// gNodesLength returns the length of a list of GNodes.
-int gNodesLength(GNode* node) {
+// lengthGNodes returns the length of a list of GNodes.
+int lengthGNodes(GNode* node) {
 	int len = 0;
 	while (node) {
 		len++;
@@ -242,18 +238,18 @@ String shortenPlace(String place) {
 	return place;
 }
 
-// copyNode copies a GNode.
-GNode* copyNode(GNode* node) {
+// copyGNode copies a GNode.
+GNode* copyGNode(GNode* node) {
 	return createGNode(node->key, node->tag, node->value, null);
 }
 
-// copyNodes copies a GNode tree. If kids or sibs copy children or siblings respectively.
-GNode* copyNodes(GNode* node, bool kids, bool sibs) {
+// copyGNodes copies a GNode tree. If kids or sibs copy children or siblings respectively.
+GNode* copyGNodes(GNode* node, bool kids, bool sibs) {
 	if (!node) return null;
 	GNode* kin;
-	GNode* new = copyNode(node);
+	GNode* new = copyGNode(node);
 	if (kids && node->child) {
-		kin = copyNodes(node->child, true, true);
+		kin = copyGNodes(node->child, true, true);
 		new->child = kin;
 		while (kin) {
 			kin->parent = new;
@@ -261,7 +257,7 @@ GNode* copyNodes(GNode* node, bool kids, bool sibs) {
 		}
 	}
 	if (sibs && node->sibling) {
-		kin = copyNodes(node->sibling, kids, true);
+		kin = copyGNodes(node->sibling, kids, true);
 		new->sibling = kin;
 	}
 	return new;
@@ -276,10 +272,10 @@ void traverseNodes(GNode* node, int level, bool (*func)(GNode*, int)) {
 	}
 }
 
-// countNodes return the number of GNodes in a GNode tree or forest.
-int countNodes(GNode* node) {
+// countGNodes return the number of GNodes in a GNode tree or forest.
+int countGNodes(GNode* node) {
 	if (node == null) return 0;
-	int count = 1 + countNodes(node->child) + countNodes(node->sibling);
+	int count = 1 + countGNodes(node->child) + countGNodes(node->sibling);
 	if (count > 40000) {
 		printf("Recursing forever?????\n");
 		exit(3);
@@ -375,7 +371,7 @@ String full_value(GNode* node) {
 // countNodesInTree counts the GNodes in a single GNode tree. Siblings of node are not counted.
 static int countNodesInTree(GNode *node) {
 	if (!node) return 0;
-	return 1 + countNodes(node->child);
+	return 1 + countGNodes(node->child);
 }
 
 // countNodesBefore returns the number of GNodes that occur before this one in depth first,

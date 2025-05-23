@@ -3,7 +3,7 @@
 // testgedcomstrings.c
 //
 // Created by Thomas Wetmore on 27 May 2024.
-// Last changed on 8 July 2024.
+// Last changed on 20 May 2025.
 
 #include "standard.h"
 #include "readnode.h"
@@ -43,7 +43,7 @@ char* readFileIntoString(const char* filename) {
 		fseek(file, 0, SEEK_END); // Get length.
 		length = ftell(file);
 		fseek(file, 0, SEEK_SET);
-		buffer = (char*)malloc((length + 1) * sizeof(char));
+		buffer = (char*) stdalloc((length + 1) * sizeof(char));
 		if (buffer) {
 			fread(buffer, 1, length, file);
 			buffer[length] = '\0';

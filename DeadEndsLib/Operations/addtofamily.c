@@ -3,7 +3,7 @@
 // addtofamily.c has functions to add an existing child or spouse to an existing family.
 //
 // Created by Thomas Wetmore on 30 May 2024.
-// Last changed on 8 June 2024.
+// Last changed on 18 May 2025.
 
 #include "stdlib.h"
 #include "splitjoin.h"
@@ -16,7 +16,7 @@ bool addChildToFamily (GNode *child, GNode *family, int index, Database *databas
 	// Add CHIL family.
 	GNode *frefn, *husb, *wife, *chil, *rest;
 	splitFamily(family, &frefn, &husb, &wife, &chil, &rest);
-	int numChildren = gNodesLength(chil);
+	int numChildren = lengthGNodes(chil);
 	if (index < 0 || index > numChildren) index = numChildren;
 	GNode* prev = null;
 	GNode* node = chil;

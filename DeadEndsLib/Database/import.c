@@ -85,7 +85,7 @@ void checkKeysAndReferences(RootList* records, String name, IntegerTable* keymap
 	FORLIST(records, element)
 		recordsVisited++;
 		GNode* root = (GNode*) element;
-		nodesCounted += countNodes(root);
+		nodesCounted += countGNodes(root);
 		FORTRAVERSE(root, node)
 			nodesTraversed++;
 			if (isKey(node->value)) numReferences++;

@@ -4,7 +4,7 @@
 // 1 REFN nodes whose values give records unique identifiers.
 //
 // Created by Thomas Wetmore on 16 December 2023.
-// Last changed on 11 May 2025.
+// Last changed on 20 May 2025.
 
 #include "refnindex.h"
 #include "gedcom.h"
@@ -21,7 +21,7 @@ String searchRefnIndex(RefnIndex* index, String refn) {
 
 // createRefnIndexEl creates a new reference index entry.
 RefnIndexEl *createRefnIndexEl(String refn, String key) {
-	RefnIndexEl *el = (RefnIndexEl*) malloc(sizeof(RefnIndexEl));
+	RefnIndexEl *el = (RefnIndexEl*) stdalloc(sizeof(RefnIndexEl));
 	el->refn = refn;
 	el->key = key;
 	return el;

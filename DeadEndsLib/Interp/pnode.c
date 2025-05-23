@@ -166,7 +166,7 @@ PNode* funcCallPNode(String name, PNode* alist) {
         PNode *node = allocPNode(PNFuncCall);
         node->funcName = name;
         node->arguments = alist;
-        node->funcBody = searchFunctionTable(functionTable, name);
+        //node->funcBody = searchFunctionTable(functionTable, name); // DEPRECATED -- NOT NEEDED
         return node;
     }
 

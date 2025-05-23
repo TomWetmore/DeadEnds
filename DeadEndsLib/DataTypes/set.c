@@ -6,14 +6,14 @@
 // each Set element.
 //
 // Created by Thomas Wetmore on 22 November 2022.
-// Last changed 10 April 2024.
+// Last changed 20 May 2025.
 //
 
 #include "set.h"
 
 // createSet creates a Set; the getKey and compare functions are required; delete is optional.
 Set* createSet(String(*getKey)(void*), int(*compare)(String, String), void(*delete)(void*)) {
-	Set* set = (Set*) malloc(sizeof(Set));
+    Set* set = (Set*) stdalloc(sizeof(Set));
 	initList(&(set->list), getKey, compare, delete, true);
 	return set;
 }

@@ -4,7 +4,7 @@
 // customiziing the compare, delete and getKey functions.
 //
 // Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 5 December 2024.
+// Last changed on 20 May 2025.
 
 #include "standard.h"
 #include "hashtable.h"
@@ -19,12 +19,12 @@ static void* searchBucket(Bucket*, String key, String(*g)(void*), int(*c)(String
 // an element, and delete is an optional function that frees an element.
 HashTable* createHashTable(String(*getKey)(void*), int(*compare)(String, String),
 						   void(*delete)(void*), int numBuckets) {
-	HashTable *table = (HashTable*) malloc(sizeof(HashTable));
+	HashTable *table = (HashTable*) stdalloc(sizeof(HashTable));
 	table->compare = compare;
 	table->delete = delete;
 	table->getKey = getKey;
 	table->numBuckets = numBuckets;
-	table->buckets = (Bucket**) malloc(numBuckets*sizeof(Bucket));
+    table->buckets = (Bucket**) stdalloc(numBuckets*sizeof(Bucket));
 	for (int i = 0; i < table->numBuckets; i++) table->buckets[i] = null;
 	return table;
 }
@@ -52,7 +52,7 @@ void deleteHashTable(HashTable *table) { //PH;
 
 // createBucket creates and returns an empty Bucket.
 Bucket *createBucket(void) { //PH;
-	Bucket *bucket = (Bucket*) malloc(sizeof(Bucket));
+	Bucket *bucket = (Bucket*) stdalloc(sizeof(Bucket));
 	initBlock(&(bucket->block));
 	return bucket;
 }

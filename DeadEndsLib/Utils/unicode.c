@@ -3,10 +3,11 @@
 //  JustParsing
 //
 //  Created by Thomas Wetmore on 6/20/23.
+//  Last changed on 20 May 2025.
 //
 
 #include "unicode.h"
-
+#include "standard.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -23,7 +24,7 @@ char* normalizeDType(const char* input) {
     size_t inputLength = strlen(input);
 
     // Allocate memory for the normalized output
-    char* normalized = (char*)malloc(sizeof(char) * (inputLength + 1));
+    char* normalized = (char*) stdalloc(sizeof(char) * (inputLength + 1));
     if (normalized == NULL) {
         // Handle memory allocation error
         return NULL;

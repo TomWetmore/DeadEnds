@@ -1,21 +1,25 @@
 // DeadEnds
 //
-// interp.h if the header file for the DeadEnds script interpreter.
+// interp.h is the header file for the DeadEnds script interpreter.
 //
 // Created by Thomas Wetmore on 8 December 2022.
-// Last changed on 17 May 2025.
+// Last changed on 22 May 2025.
 
 #ifndef interp_h
 #define interp_h
 
-typedef struct PNode PNode;
-typedef struct HashTable SymbolTable;
-
 #include "standard.h"
 #include "pnode.h"
-#include "pvalue.h"
 #include "symboltable.h"
+#include "frame.h"
+#include "context.h"
+#include "pvalue.h"
 #include "database.h"
+
+// Forward references.
+typedef struct PNode PNode;
+typedef struct HashTable SymbolTable;
+typedef struct Frame Frame;
 
 #define CC 32 // 'Commutative constant'.
 
@@ -23,13 +27,6 @@ typedef struct HashTable SymbolTable;
 typedef enum InterpType {
     InterpError = 0, InterpOkay, InterpBreak, InterpContinue, InterpReturn
 } InterpType;
-
-// Context holds the context in which interpretation takes place.
-typedef struct Context {
-    SymbolTable *symbolTable;
-    Database *database;
-    File* file;
-} Context;
 
 // Report Interpreter.
 void initializeInterpreter(Database*);
@@ -40,8 +37,8 @@ void finishInterpreter(void);
 void finishrassa(void);
 void progmessage(char*);
 
-Context *createContext(SymbolTable*, Database*);
-void deleteContext(Context*);
+//Context *createContext(SymbolTable*, Database*);
+//void deleteContext(Context*);
 
 InterpType interpret(PNode*, Context*, PValue*);
 InterpType interpChildren(PNode*, Context*, PValue*);
@@ -51,7 +48,6 @@ InterpType interpFathers(PNode*, Context*, PValue*);
 InterpType interpMothers(PNode*, Context*, PValue*);
 InterpType interpParents(PNode*, Context*, PValue*);
 InterpType interpFornotes(PNode*, Context*, PValue*);
-InterpType interp_fornodes(PNode*, Context*, PValue*);
 InterpType interpForindi(PNode*, Context*, PValue*);
 InterpType interpForfam(PNode*, Context*, PValue*);
 InterpType interpForsour(PNode*, Context*, PValue*);
@@ -63,37 +59,37 @@ InterpType interpIfStatement(PNode*, Context*, PValue*);
 InterpType interpWhileStatement(PNode*, Context*, PValue*);
 InterpType interpProcCall(PNode*, Context*, PValue*);  // User-defined procedure calls.
 InterpType interpTraverse(PNode*, Context*, PValue*);
+InterpType interp_fornodes(PNode*, Context*, PValue*);
 
 // Prototypes.
-//void assignIdent(SymbolTable*, String, PValue);
-int bool_to_int(bool);
-double bool_to_float(bool);
 PNode *createPNode(int);
 PValue evaluate(PNode*, Context*, bool*);
 bool evaluateConditional(PNode*, Context*, bool*);
 PValue evaluateBuiltin(PNode*, Context*, bool*);
 PValue evaluateIdent(PNode*, Context*);
 PValue evaluateUserFunc(PNode*, Context*, bool*);
-//GNode* evaluateFamily(PNode*, Context*, bool*);
 GNode* evaluateGNode(PNode*, Context*, bool*);
-//void extract_date(String, int*, int*, int*, int*, String*);
 String formatDate(String, int, int, int, int, bool);
-void free_all_pnodes(void);
-void free_pnode_tree(PNode*);
 String get_date(void);
 PNode *iden_node(String);
 bool iistype(PNode*, int);
 int num_params(PNode*);
 void scriptError(PNode*, String, ...);
-//void show_one_pnode(PNode*);
-void show_pnode(PNode*);
-void show_pnodes(PNode*);
+//void show_pnode(PNode*);
+//void show_pnodes(PNode*);
 PNode* string_node(String);
-//PValue valueOfIdent(SymbolTable*, String);
 int yylex(void);
 int yyparse(void);
 
-//void poutput(String);
 void interp_main(void);
+
+// Program running state flags.
+extern bool programParsing;
+extern bool programRunning;
+
+// Debugging flags.
+extern bool callTracing;
+extern bool returnTracing;
+extern bool symbolTableTracing;
 
 #endif // interp_h

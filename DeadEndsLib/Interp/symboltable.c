@@ -3,7 +3,7 @@
 // symboltable.c holds the functions that implement SymbolTables.
 //
 // Created by Thomas Wetmore on 23 March 2023.
-// Last changed on 11 May 2025.
+// Last changed on 22 May 2025.
 
 #include "standard.h"
 #include "symboltable.h"
@@ -16,10 +16,12 @@ static int compare(String a, String b) {
 	return strcmp(a, b);
 }
 
-// delete deletes a Symbol.
+// delete deletes a Symbol. It frees both PValue and the identifier before deleting the Symbol itself.
 static void delete(void* a) {
 	Symbol* symbol = (Symbol*) a;
 	stdfree(symbol->value);
+    stdfree(symbol->ident);
+    stdfree(symbol);
 }
 
 // getKey returns the Symbol's identifier.
@@ -29,7 +31,7 @@ static String getKey(void *symbol) {
 
 // createSymbol creates a Symbol.
 static Symbol *createSymbol(String iden, PValue *ppvalue) {
-	Symbol* symbol = (Symbol*) malloc(sizeof(Symbol));
+	Symbol* symbol = (Symbol*) stdalloc(sizeof(Symbol));
 	symbol->ident = iden;
 	symbol->value = ppvalue;
 	return symbol;
@@ -39,6 +41,11 @@ static Symbol *createSymbol(String iden, PValue *ppvalue) {
 static int numBucketsInSymbolTable = 37;
 SymbolTable* createSymbolTable(void) {
 	return createHashTable(getKey, compare, delete, numBucketsInSymbolTable);
+}
+
+// deleteSymbolTable deletes a SymbolTable.
+void deleteSymbolTable(SymbolTable* table) {
+    deleteHashTable(table);
 }
 
 // assignValueToSymbol assigns a value to a Symbol. If the Symbol isn't in the local table, check
@@ -58,7 +65,7 @@ void assignValueToSymbol(SymbolTable* symtab, String ident, PValue pvalue) {
         symbol->value = copy;
     // Else add a new symbol with the new value.
     } else {
-        addToHashTable(table, createSymbol(ident, copy), true);
+        addToHashTable(table, createSymbol(strsave(ident), copy), true);
     }
 }
 
@@ -73,8 +80,8 @@ PValue getValueOfSymbol(SymbolTable* symtab, String ident) {
 }
 
 // showSymbolTable shows the contents of a SymbolTable. For debugging.
+// Assumes caller has provided a title if desired.
 void showSymbolTable(SymbolTable* table) {
-	printf("Symbol Table contents:\n");
 	for (int i = 0; i < table->numBuckets; i++) {
 		Bucket *bucket = table->buckets[i];
 		if (!bucket) continue;

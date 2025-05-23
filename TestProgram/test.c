@@ -138,16 +138,16 @@ void parseAndRunProgramTest(Database *database, int testNumber) {
 	printf("\n%d: START OF PARSE AND RUN PROGRAM TEST: %s\n", testNumber, gms);
 	//parseProgram("llprogram", "/Users/ttw4/Desktop/DeadEnds/Reports/");
 	//parseProgram("scriptindiseq", "/Users/ttw4/Desktop/DeadEnds/Reports/");
-	parseProgram("llprogram", "/Users/ttw4/Desktop/DeadEnds/Scripts");
-	printf("Finished parsing: %2.3f\n", getMseconds());
-
-	curFileName = "internal";
-	curLine = 1;
-	PNode *pnode = procCallPNode("main", null); // PNode to call main proc.
-	SymbolTable *symbolTable = createSymbolTable();
-	Context *context = createContext(symbolTable, database);
-	PValue returnPvalue;
-	interpret(pnode, context, &returnPvalue); // Call main proc.
+//	parseProgram("llprogram", "/Users/ttw4/Desktop/DeadEnds/Scripts");
+//	printf("Finished parsing: %2.3f\n", getMseconds());
+//
+//	curFileName = "internal";
+//	curLine = 1;
+//	PNode *pnode = procCallPNode("main", null); // PNode to call main proc.
+//	SymbolTable *symbolTable = createSymbolTable();
+//	Context *context = createContext(symbolTable, database);
+//	PValue returnPvalue;
+//	interpret(pnode, context, &returnPvalue); // Call main proc.
 	printf("END OF PARSE AND RUN PROGRAM TEST: %s\n", gms);
 }
 

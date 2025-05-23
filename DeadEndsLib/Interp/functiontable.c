@@ -4,7 +4,7 @@
 //  functiontable.c -- The DeadEnds function and procedure table datatype.
 //
 //  Created by Thomas Wetmore on 9 April 2023.
-//  Last changed on 10 May 2025.
+//  Last changed on 20 May 2025.
 
 #include "functiontable.h"
 
@@ -49,7 +49,7 @@ void addToFunctionTable(FunctionTable* table, String name, PNode* pnode) {
 	if (element) {
 		printf("Multiply defined function or procedure named %s; new copied over old.\n", name);
 	}
-	element = (FunctionElement*) malloc(sizeof(FunctionElement)); // Create element.
+	element = (FunctionElement*) stdalloc(sizeof(FunctionElement)); // Create element.
 	element->name = strsave(name);
 	element->function = pnode;
 	addToHashTable(table, element, true);

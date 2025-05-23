@@ -36,8 +36,8 @@ GNode* uniqueNodes(GNode* node, bool kids) {
 // true copy the operands.
 GNode* unionNodes(GNode* node1, GNode* node2, bool kids, bool copy) {
 	GNode *curs1, *next1, *prev1, *curs2, *prev2;
-	if (copy) node1 = copyNodes(node1, true, true);
-	if (copy) node2 = copyNodes(node2, true, true);
+	if (copy) node1 = copyGNodes(node1, true, true);
+	if (copy) node2 = copyGNodes(node2, true, true);
 	prev2 = null;
 	curs2 = node2;
 	while (curs2) {
@@ -76,8 +76,8 @@ GNode* intersect_nodes (GNode* node1, GNode* node2, bool kids)
 	GNode *node3, *curs3;
 
 	if (!node1 || !node2) return null;
-	node1 = copyNodes(node1, true, true);
-	node2 = copyNodes(node2, true, true);
+	node1 = copyGNodes(node1, true, true);
+	node2 = copyGNodes(node2, true, true);
 	node3 = curs3 = null;
 
 	prev1 = null;
@@ -168,7 +168,7 @@ void classifyNodes (GNode** pnode1, GNode** pnode2, GNode** pnode3) {
 // node2. If kids is true children matter.
 GNode* difference_nodes (GNode* node1, GNode* node2, bool kids) {
 	GNode *prev1, *next1, *curs1, *curs2;
-	node1 = copyNodes(node1, true, true);
+	node1 = copyGNodes(node1, true, true);
 	prev1 = null;
 	curs1 = node1;
 	while (curs1) {
@@ -207,7 +207,7 @@ bool equalTree(GNode* root1, GNode* root2) {
     String str1, str2;
     if (!root1 && !root2) return true;
     if (!root1 || !root2) return false;
-    if (gNodesLength(root1) != gNodesLength(root2)) return false;
+    if (lengthGNodes(root1) != lengthGNodes(root2)) return false;
     while (root1) {
         if (nestr(root1->tag, root2->tag)) return false;
         str1 = root1->value;
@@ -242,8 +242,8 @@ bool isoList(GNode* root1, GNode* root2) {
     GNode *node1, *node2;
     if (!root1 && !root2) return true;
     if (!root1 || !root2) return false;
-    len1 = gNodesLength(root1);
-    len2 = gNodesLength(root2);
+    len1 = lengthGNodes(root1);
+    len2 = lengthGNodes(root2);
     if (len1 != len2) return false;
     if (len1 == 0) return true;
     node1 = root1;
@@ -282,8 +282,8 @@ bool isoGNodes(GNode* root1, GNode *root2, bool kids, bool sibs) {
     if (!root1 || !root2) return false;
     if (!kids && !sibs) return equalNode(root1, root2);
     if (kids && !sibs) return equalNode(root1, root2) && isoGNodes(root1->child, root2->child, 1, 1);
-    int len1 = gNodesLength(root1);
-    int len2 = gNodesLength(root2);
+    int len1 = lengthGNodes(root1);
+    int len2 = lengthGNodes(root2);
     if (len1 != len2) return false;
     if (len1 == 0) return true;
     GNode* node1 = root1;

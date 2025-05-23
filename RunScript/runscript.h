@@ -16,5 +16,6 @@
 #include "standard.h"
 #include "unistd.h"
 #include "utils.h"
+#include "context.h"
 
 #endif // runscript_h

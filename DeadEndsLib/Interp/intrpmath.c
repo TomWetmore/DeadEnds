@@ -3,13 +3,15 @@
 // intrpmath.c has the built-in script functions for math and logic.
 //
 // Created by Thomas Wetmore on 17 March 2023.
-// Last changed on 4 May 2024.
+// Last changed on 22 May 2024.
+//
 
 #include "standard.h"
 #include "pnode.h"
 #include "pvalue.h"
 #include "evaluate.h"
 #include "interp.h"
+#include "context.h"
 
 // evalBinary is a local function that ...
 static void evalBinary(PNode* pnode, Context* context, PValue* val1, PValue* val2, bool* eflag);
@@ -162,11 +164,12 @@ PValue __incr(PNode* pnode, Context* context, bool* errflg) {
     if (pnode->type != PNIdent) return nullPValue;
     String ident = pnode->identifier;
     if (!ident)  return nullPValue;
-    PValue pvalue = getValueOfSymbol(context->symbolTable, ident);
+    SymbolTable* table = context->frame->table;
+    PValue pvalue = getValueOfSymbol(table, ident);
     if (pvalue.type != PVInt) return nullPValue;
     *errflg = false;
     pvalue.value.uInt += 1;
-    assignValueToSymbol(context->symbolTable, ident, pvalue);
+    assignValueToSymbol(table, ident, pvalue);
     return nullPValue;
 }
 
@@ -178,11 +181,12 @@ PValue __decr(PNode* pnode, Context* context, bool* errflg) {
     if (pnode->type != PNIdent) return nullPValue;
     String ident = pnode->identifier;
     if (!ident) return nullPValue;
-    PValue pvalue = getValueOfSymbol(context->symbolTable, ident);
+    SymbolTable* table = context->frame->table;
+    PValue pvalue = getValueOfSymbol(table, ident);
     if (pvalue.type != PVInt) return nullPValue;
     *errflg = false;
     pvalue.value.uInt -= 1;
-    assignValueToSymbol(context->symbolTable, ident, pvalue);
+    assignValueToSymbol(table, ident, pvalue);
     return nullPValue;
 }
 

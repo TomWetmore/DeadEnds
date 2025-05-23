@@ -4,7 +4,7 @@
 // persons and other record types. It underlies the indiseq data type of DeadEnds Script.
 //
 // Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 11 May 2025.
+// Last changed on 20 May 2025.
 
 #include "standard.h"
 #include "sequence.h"
@@ -61,7 +61,7 @@ static SequenceEl** sequenceElements(Sequence *sequence) {
 // createSequenceEl creates a SequenceEl.
 //SequenceEl* createSequenceEl(Database* database, String key, void* value) {
 SequenceEl* createSequenceEl(RecordIndex* index, String key, void* value) {
-	SequenceEl* element = (SequenceEl*) malloc(sizeof(SequenceEl));
+	SequenceEl* element = (SequenceEl*) stdalloc(sizeof(SequenceEl));
 	GNode* root = getRecord(key, index);
 	ASSERT(root);
 	element->root = root;
@@ -73,7 +73,7 @@ SequenceEl* createSequenceEl(RecordIndex* index, String key, void* value) {
 // createSequence creates a Sequence.
 //Sequence* createSequence(Database* database) {
 Sequence* createSequence(RecordIndex* index) {
-	Sequence* sequence = (Sequence*) malloc(sizeof(Sequence));
+	Sequence* sequence = (Sequence*) stdalloc(sizeof(Sequence));
 	initBlock(&(sequence->block));
 	//sequence->database  = database;
 	sequence->index  = index;

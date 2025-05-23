@@ -5,9 +5,10 @@
 // MNOTE: Memory management is an issue to be dealt with carefully.
 //
 // Created by Thomas Wetmore on 16 April 2023.
-// Last changed on 13 May 2024.
+// Last changed on 21 May 2024.
 
 #include "interp.h"
+#include "context.h"
 #include "list.h"
 #include "pvalue.h"
 
@@ -26,8 +27,9 @@ PValue __list(PNode* pnode, Context* context, bool* errflg) {
     String ident = var->identifier;
     ASSERT(ident);
     List *list = createList(null, null, delete, false);
-    assignValueToSymbol(context->symbolTable, ident, PVALUE(PVList, uList, list));
-    if (localDebugging) showSymbolTable(context->symbolTable);
+    SymbolTable* table = context->frame->table;
+    assignValueToSymbol(table, ident, PVALUE(PVList, uList, list));
+    if (localDebugging) showSymbolTable(table);
     return nullPValue;
 }
 
@@ -239,9 +241,9 @@ InterpType interpForList(PNode* node, Context* context, PValue* pval) {
         PValue copy = *fromList;
         if (copy.type == PVString && copy.value.uString)
             copy.value.uString = strsave(copy.value.uString);  // deep copy
-
-        assignValueToSymbol(context->symbolTable, node->elementIden, copy);
-        assignValueToSymbol(context->symbolTable, node->countIden, PVALUE(PVInt, uInt, count++));
+        SymbolTable* table = context->frame->table;
+        assignValueToSymbol(table, node->elementIden, copy);
+        assignValueToSymbol(table, node->countIden, PVALUE(PVInt, uInt, count++));
         switch (irc = interpret(node->loopState, context, pval)) {
             case InterpContinue:
             case InterpOkay: goto i;

@@ -4,7 +4,7 @@
 // needed. Lists can be sorted or unsorted. Sorted lists require a compare function.
 //
 // Created by Thomas Wetmore on 22 November 2022.
-// Last changed on 15 October 2024.
+// Last changed on 20 May 2025.
 
 #include <stdlib.h>
 #include "list.h"
@@ -13,7 +13,7 @@
 // createList creates and returns a List.
 List* createList(String(*getKey)(void*), int(*compare)(String, String),
 				 void(*delete)(void*), bool sorted) {
-	List *list = (List *) malloc(sizeof(List));
+	List *list = (List *) stdalloc(sizeof(List));
 	initList(list, getKey, compare, delete, sorted);
 	return list;
 }
@@ -57,7 +57,7 @@ List* copyList(List* list, void* (*copyFunc)(void*)) {
 	Block* nblock = &copy->block;
 	nblock->length = oblock->length;
 	nblock->maxLength = oblock->maxLength;
-	nblock->elements = malloc(oblock->maxLength*sizeof(void*));
+	nblock->elements = stdalloc(oblock->maxLength*sizeof(void*));
 	for (int i = 0; i < oblock->length; i++) {
 		nblock->elements[i] = copyFunc(oblock->elements[i]);
 	}

@@ -4,7 +4,7 @@
 // DeadEnds scripts.
 //
 // Created by Thomas Wetmore on 15 December 2022.
-// Last changed on 13 May 2025.
+// Last changed on 22 May 2025.
 
 #include "pvalue.h"
 #include "standard.h"
@@ -402,7 +402,11 @@ char* pvalueToString(PValue value, bool debug) {
         else
             sprintf(p, "\"\"");
         break;
-    case PVPerson:
+    case PVPerson: {
+        GNode* gnode = value.value.uGNode;
+        sprintf(p, "%s: %s: %s", gnode->key, gnode->tag, gnode->child->value);
+        break;
+    }
     case PVFamily:
     case PVGNode:
     case PVSource:

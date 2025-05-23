@@ -1,10 +1,11 @@
 //
-// DeadEnds
+//  DeadEnds
 //
-// stringtable.c holds the StringTable data type, a HashTable whose keys and values are Strings.
+//  stringtable.c holds the StringTable data type, a HashTable whose keys and values are Strings.
 //
-// Created by Thomas Wetmore on 23 April 2023.
-// Last changed on 17 April 2024.
+//  Created by Thomas Wetmore on 23 April 2023.
+//  Last changed on 20 May 2025.
+//
 
 #include "standard.h"
 #include "stringtable.h"
@@ -47,7 +48,7 @@ bool isInStringTable(StringTable *table, String key) {
 void addToStringTable(HashTable *table, String key, String value) {
 	StringElement *element = (StringElement*) searchHashTable(table, key);
 	if (element) removeFromHashTable(table, key); // If in table remove element before replacing.
-	element = (StringElement*) malloc(sizeof(StringElement));
+	element = (StringElement*) stdalloc(sizeof(StringElement));
 	element->key = strsave(key);
 	element->value = value ? strsave(value) : null;
 	addToHashTable(table, element, false);

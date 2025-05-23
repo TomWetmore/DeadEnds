@@ -8,7 +8,8 @@
 //  identifiers to PValue pointers.
 
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 8 May 2025.
+//  Last changed on 22 May 2025.
+//
 
 #include "evaluate.h"
 #include "standard.h"
@@ -18,6 +19,7 @@
 #include "pvalue.h"
 #include "pnode.h"
 #include "utils.h"
+#include "context.h"
 
 static bool debugging = false;
 static bool builtInDebugging = false;
@@ -55,8 +57,9 @@ PValue evaluateIdent(PNode* pnode, Context* context) {
         printf("evaluateIdent: %d: %s\n", pnode->lineNumber, pnode->identifier);
     String ident = pnode->identifier;
     ASSERT(ident);
-    if (symbolTableDebugging) showSymbolTable(context->symbolTable);
-    PValue orig = getValueOfSymbol(context->symbolTable, ident);
+    SymbolTable* table = context->frame->table;
+    if (symbolTableDebugging) showSymbolTable(table);
+    PValue orig = getValueOfSymbol(table, ident);
     // If the PValue is a string, copy the string.
     if (orig.type == PVString) {
         return createStringPValue(orig.value.uString);
@@ -84,7 +87,8 @@ bool evaluateConditional(PNode* pnode, Context* context, bool* errflg) {
         scriptError(pnode, "There was an error evaluating the conditional expression");
         return false;
     }
-    if (iden) assignValueToSymbol(context->symbolTable, pnode->identifier, value);
+    SymbolTable* table = context->frame->table;
+    if (iden) assignValueToSymbol(table, pnode->identifier, value);
     return pvalueToBoolean(value); // Coerce to bool.
 }
 
@@ -94,45 +98,49 @@ PValue evaluateBuiltin(PNode* pnode, Context* context, bool* errflg) {
     return (*(BIFunc) pnode->builtinFunc)(pnode, context, errflg);
 }
 
-// evaluateUserFunc evaluates a user defined function.
+// evaluateUserFunc evaluates a user defined function. The evaluator 'call' the function. The steps are:
+// 1. Find the function in the function table from the name in the pnode's funcName field.
+// 2. Create a SymbolTable and Frame and add it to the Context.
+// 3. Evaluate the arguments and bind them to the parameters in the SymbolTable.
 PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg) {
     String name = pnode->funcName;
 	if (debugging) printf("evaulateUserFunc: %s\n", name);
-    PNode *func;
-    if ((func = (PNode*) searchFunctionTable(functionTable, name)) == null) {
+    PNode *func = searchFunctionTable(functionTable, name);
+    if (!func) {
         scriptError(pnode, "function %s is undefined", name);
         *errflg = true;
         return nullPValue;
     }
-    SymbolTable *newtab = createSymbolTable();
-	Context* newContext = createContext(newtab, context->database);
-    if (debugging) printf("evaluateUserFunc: creating symbol table for user function %s.\n", name);
+    // Create a SymbolTable and Frame for this function, and add them to the Context.
+    SymbolTable *table = createSymbolTable();
 
-    // Evaluate the arguments.
+    // Bind the arguments to the parameters.
     PNode *arg = pnode->arguments;
     PNode *parm = func->parameters;
     while (arg && parm) {
-        PValue value = evaluate(arg, context, errflg); // Eval current arg.
+        PValue value = evaluate(arg, context, errflg); // Eval arg.
         if (*errflg) {
             scriptError(pnode, "could not evaluate an argument of %s", name);
             return nullPValue;
         }
-		if (debugging) printf("Assigning %s to %s\n", pvalueToString(value, true), parm->identifier);
-        assignValueToSymbol(newtab, parm->identifier, value);
+        assignValueToSymbol(table, parm->identifier, value);
         arg = arg->next;
         parm = parm->next;
     }
     if (arg || parm) {
         scriptError(pnode, "different numbers of arguments and parameters to %s", name);
-        deleteContext(newContext);
         *errflg = true;
         return nullPValue;
     }
-	if (symbolTableDebugging) showSymbolTable(newtab);
-    //  Iterpret the function's body.
+	if (symbolTableDebugging) showSymbolTable(table);
+    // Create the frame for the called function. Call it. Delete the frame.
+    Frame* frame = createFrame(pnode, func, table, context->frame);
+    context->frame = frame;
     PValue value;
-    InterpType irc = interpret((PNode*) func->funcBody, newContext, &value);
-    deleteContext(newContext);
+    InterpType irc = interpret((PNode*) func->funcBody, context, &value);
+    context->frame = frame->caller;
+    deleteFrame(frame);
+    
     switch (irc) {
         case InterpReturn:
         case InterpOkay:
@@ -187,7 +195,7 @@ GNode* evaluatePerson(PNode* pnode, Context* context, bool* errflg) {
     }
     GNode* indi = pvalue.value.uGNode;
     if (nestr("INDI", indi->tag)) {
-        scriptError(pnode, "serious error: expression must be a persons");
+        scriptError(pnode, "serious error: expression must be a person");
         *errflg = true;
         return null;
     }

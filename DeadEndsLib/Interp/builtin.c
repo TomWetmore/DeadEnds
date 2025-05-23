@@ -3,7 +3,7 @@
 // builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 16 May 2025.
+// Last changed on 23 May 2025.
 
 #include "standard.h"
 #include "gnode.h"
@@ -20,6 +20,7 @@
 #include "symboltable.h"
 #include "date.h"
 #include "place.h"
+#include "context.h"
 
 // Global constants for useful PValues.
 const PValue nullPValue = {PVNull, PV()};
@@ -179,10 +180,11 @@ PValue __set(PNode* pnode, Context* context, bool* errflg) {
     }
 	PValue value = evaluate(expr, context, errflg);
 	if (*errflg) return nullPValue;
-	assignValueToSymbol(context->symbolTable, iden->identifier, value);
+    SymbolTable* table = context->frame->table;
+	assignValueToSymbol(table, iden->identifier, value);
     if (symbolTableDebugging) {
         printf("Symtab after set() builtin with variable %s\n", iden->identifier);
-        showSymbolTable(context->symbolTable);
+        showSymbolTable(table);
     }
 	return nullPValue;
 }
@@ -465,9 +467,10 @@ PValue __extractdate(PNode *pnode, Context *context, bool* errflg) {
 	if (!str || *str == 0) return nullPValue;  // Not considered an error.
 	String stryear;
     extractDate(str, &daormo, &day, &month, &year, &stryear);
-    assignValueToSymbol(context->symbolTable, dvar->identifier, PVALUE(PVInt, uInt, day));
-	assignValueToSymbol(context->symbolTable, mvar->identifier, PVALUE(PVInt, uInt, month));
-	assignValueToSymbol(context->symbolTable, yvar->identifier, PVALUE(PVInt, uInt, year));
+    SymbolTable* table = context->frame->table;
+    assignValueToSymbol(table, dvar->identifier, PVALUE(PVInt, uInt, day));
+	assignValueToSymbol(table, mvar->identifier, PVALUE(PVInt, uInt, month));
+	assignValueToSymbol(table, yvar->identifier, PVALUE(PVInt, uInt, year));
     *errflg = false;
     return nullPValue;
 }
@@ -502,16 +505,17 @@ PValue __extractnames (PNode *pnode, Context *context, bool *errflg) {
 		return nullPValue;
 	}
 	String str = name->value;
+    SymbolTable* table = context->frame->table;
 	if (!str || *str == 0) {
-		assignValueToSymbol(context->symbolTable, lvar->identifier, PVALUE(PVInt, uInt, 0));
-		assignValueToSymbol(context->symbolTable, svar->identifier, PVALUE(PVInt, uInt, 0));
+		assignValueToSymbol(table, lvar->identifier, PVALUE(PVInt, uInt, 0));
+		assignValueToSymbol(table, svar->identifier, PVALUE(PVInt, uInt, 0));
 		return nullPValue;
 	}
 	int len, sind;
 	*errflg = false;
 	nameToList(str, list, &len, &sind);
-	assignValueToSymbol(context->symbolTable, lvar->identifier, PVALUE(PVInt, uInt, len));
-	assignValueToSymbol(context->symbolTable, svar->identifier, PVALUE(PVInt, uInt, sind));
+	assignValueToSymbol(table, lvar->identifier, PVALUE(PVInt, uInt, len));
+	assignValueToSymbol(table, svar->identifier, PVALUE(PVInt, uInt, sind));
 	return nullPValue;
 }
 
@@ -548,8 +552,9 @@ PValue __oldextractplaces (PNode *pnode, Context *context, bool *errflg) {
 	String pstr = place->value;
 	int len;
 	placeToList(pstr, list, &len);
-	assignValueToSymbol(context->symbolTable, varb->identifier, PVALUE(PVList, uList, list));
-    if (symbolTableDebugging) showSymbolTable(context->symbolTable);
+    SymbolTable* table = context->frame->table;
+	assignValueToSymbol(table, varb->identifier, PVALUE(PVList, uList, list));
+    if (symbolTableDebugging) showSymbolTable(table);
 	return nullPValue;
 }
 
@@ -569,8 +574,9 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
         *errflg = true;
         return nullPValue;
     }
+    SymbolTable* table = context->frame->table;
     String listName = listVar->identifier;
-    PValue listVal = getValueOfSymbol(context->symbolTable, listName);
+    PValue listVal = getValueOfSymbol(table, listName);
     List* list = listVal.value.uList;
     if (listVal.type != PVList || !list) {
         scriptError(pnode, "second argument to extractplaces() must identifiy a valid list");
@@ -592,8 +598,8 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
     }
 
     // Assign the count to the symbol table
-    assignValueToSymbol(context->symbolTable, countVar->identifier, PVALUE(PVInt, uInt, count));
-    if (localDebugging) showSymbolTable(context->symbolTable); // Debug.
+    assignValueToSymbol(table, countVar->identifier, PVALUE(PVInt, uInt, count));
+    if (localDebugging) showSymbolTable(table); // Debug.
     return nullPValue;
 }
 
@@ -632,9 +638,9 @@ PValue __space(PNode* pnode, Context* context, bool* errflg) { return createStri
 // usage: qt() -> STRING
 PValue __qt(PNode *pnode, Context *context, bool* errflg) { return createStringPValue("\""); }
 
-//  __children returns the Sequence of children in a family
-PValue __children(PNode *pnode, Context *context, bool* errflg)
-{
+// __children returns the Sequence of children in a family
+// usage: children(FAM) -> SET
+PValue __children(PNode *pnode, Context *context, bool* errflg) {
 	GNode *family = evaluateFamily(pnode->arguments, context, errflg);
 	if (*errflg || !family) return nullPValue;
 	Sequence *children = familyToChildren(family, context->database->recordIndex);
@@ -643,6 +649,7 @@ PValue __children(PNode *pnode, Context *context, bool* errflg)
 }
 
 // __version returns the version of the DeadEnds program.
+// usage: version() -> STRING
 PValue __version(PNode*vpnode, Context* context, bool* errflg) {
 	extern String version;
 	return createStringPValue(version);
@@ -652,7 +659,7 @@ PValue __version(PNode*vpnode, Context* context, bool* errflg) {
 PValue __noop(PNode *pnode, Context *context, bool* errflg) { return nullPValue; }
 
 // __createnode creates a Gedcom node.
-// usage: createnode(STRING key[, STRING value]) -> NODE, where value can be omitted.
+// usage: createnode(STRING key[, STRING value]) -> NODE, value can be omitted.
 PValue __createnode(PNode* node, Context* context, bool* errflg) {
 	PNode *arg1 = node->arguments, *arg2 = arg1->next;
 	// Get the tag.
@@ -822,7 +829,7 @@ PValue __extracttokens (PNode *pnode, Context *context, bool *errflg) {
 		return nullPValue;
 	}
 	valueToList(str, list, dlm);
-	assignValueToSymbol(context->symbolTable, lvar->identifier, PVALUE(PVInt, uInt, lengthList(list)));
+	assignValueToSymbol(context->frame->table, lvar->identifier, PVALUE(PVInt, uInt, lengthList(list)));
 	return nullPValue;
 }
 
@@ -835,5 +842,5 @@ PValue __savenode (PNode *pnode, Context *context, bool *errflg) {
 		*errflg = true;
 		return nullPValue;
 	}
-	return PVALUE(PVGNode, uGNode, copyNodes(node, true, true));
+	return PVALUE(PVGNode, uGNode, copyGNodes(node, true, true));
 }

@@ -80,17 +80,16 @@ static void getEnvironment(String* gedcom, String* script) {
 // runScript runs a script by interpreting its main proc. After a script is parsed there must
 // be a proc named "main" in the global procedureTable. runScript creates a PNode to call that
 // proc, then creates the Context to call it in, and then calls it. The Context consists of the
-// Database and the main proc's SymbolTable.
+// Database and the main proc's Frame with SymbolTable.
 extern String curFileName;
 extern int curLine;
 static void runScript(Database* database, String fileName) {
 	// Create a PNode to call the main proc.
 	curFileName = "internal";
 	curLine = 1;
-	PNode* pnode = procCallPNode("main", null);
+	PNode* pnode = procCallPNode("main", null); // null because main has no parameters.
 	// Call the main proc.
-	SymbolTable* symbols = createSymbolTable();
-	Context* context = createContext(symbols, database);
+	Context* context = createContext(database);
 	interpret(pnode, context, null); // Call main proc.
 }
 

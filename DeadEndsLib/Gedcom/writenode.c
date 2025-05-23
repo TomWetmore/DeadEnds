@@ -1,10 +1,11 @@
-// DeadEnds
+//  DeadEnds
 //
-// writenode.c has the functions that write GNodes and GNode trees and forests to Strings and
-// FILEs.
+//  writenode.c has the functions that write GNodes and GNode trees and forests to Strings and
+//  FILEs.
 //
-// Created by Thomas Wetmore on 2 May 2023.
-// Last changed on 3 October 2024.
+//  Created by Thomas Wetmore on 2 May 2023.
+//  Last changed on 20 May 2025.
+//
 
 #include "standard.h"
 #include "gnode.h"
@@ -70,7 +71,7 @@ String gnodesToString(GNode* gnode) {
 // gnodeToString returns a GNode as a String without newline.
 String gnodeToString(GNode* gnode, int level) {
     int length = nodeStringLength(level, gnode);
-    String string = (String) malloc(length);
+    String string = (String) stdalloc(length);
     swriteGNode(level, gnode, string);
     string[strlen(string) - 1] = 0;
     return string;
