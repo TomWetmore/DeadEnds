@@ -378,7 +378,7 @@ PValue negPValue(PValue value, bool* eflg) {
     return nullPValue;
 }
 
-// pvalueToString returns a String representation of a PValue. Caller must free the String.
+// pvalueToString returns a string representation of a PValue. Caller must free the string.
 char* pvalueToString(PValue value, bool showtype) {
     char* buffer = stdalloc(1024);  // Fixed-size buffer; adjust if needed
     char* p = buffer;
@@ -404,7 +404,7 @@ char* pvalueToString(PValue value, bool showtype) {
         break;
     case PVPerson: {
         GNode* gnode = value.value.uGNode;
-        sprintf(p, "%s: %s: %s", gnode->key, gnode->tag, gnode->child->value);
+        sprintf(p, "%s %s %s", gnode->key, gnode->tag, gnode->child->value);
         break;
     }
     case PVFamily:
@@ -442,6 +442,5 @@ char* pvalueToString(PValue value, bool showtype) {
         sprintf(p, "<unknown PValue type %d>", value.type);
         break;
     }
-
     return buffer;
 }

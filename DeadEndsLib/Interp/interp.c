@@ -1,11 +1,12 @@
-// DeadEnds
 //
-// interp.c holds functions that interpret DeadEnds scripts. The main function is interpret,
-// which is called on a PNode. Depending on the PNode's type, interpret may handle it directly,
-// or it may call a specific function.
+//  C DeadEnds
 //
-// Created by Thomas Wetmore on 9 December 2022.
-// Last changed on 23 May 2025.
+//  interp.c holds functions that interpret DeadEnds scripts. The main function is interpret,
+//  which is called on a PNode. Depending on the PNode's type, interpret may handle it directly,
+//  or may call a specific function.
+//
+//  Created by Thomas Wetmore on 9 December 2022.
+//  Last changed on 24 May 2025.
 //
 
 #include <stdarg.h>
@@ -21,6 +22,7 @@
 #include "utils.h"
 #include "sequence.h"
 #include "context.h"
+#include "stringset.h"
 
 bool callTracing = false;
 bool returnTracing = false;
@@ -699,6 +701,7 @@ InterpType interpWhileStatement (PNode* pnode, Context* context, PValue* pval) {
 }
 
 // interpProcCall interprets a user-defined procedure call.
+extern void showFrame(Frame*);
 InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
     // Get the procedure from the procedure table.
     String name = pnode->procName;
@@ -711,35 +714,32 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
 
     // Create the symbol table for the called procedure.
     SymbolTable* table = createSymbolTable();
-    // Bind args to params. The args are evaluated with the caller's symbol table, while the params and
-    // their values are put in the called's symbol table.
+    
+    // Bind the arguments to the parameters. Important: the arguments are evaluated using the caller's symbol
+    // table, while the parameters and their values are put in the called procedure's symbol table.
     PNode* arg = pnode->arguments;
     PNode* parm = proc->parameters;
     int argcount = 1;
     while (arg && parm) {
         bool errflg = false;
-        PValue value = evaluate(arg, context, &errflg); // Evaluate an arg.
+        // Evaluate the argument values in the caller's context.
+        PValue value = evaluate(arg, context, &errflg);
         if (errflg) {
-            scriptError(pnode, "could not evaluate an argument %d of %s", argcount, name);
+            scriptError(pnode, "could not evaluate argument %d of %s", argcount++, name);
             return InterpError;
         }
-        assignValueToSymbol(table, parm->identifier, value); // Assign arg to param.
+        // Assign values to the parameters in the called procedure's symbol table.
+        assignValueToSymbol(table, parm->identifier, value);
         arg = arg->next;
         parm = parm->next;
-        argcount++;
     }
-    if (arg || parm) { // Check for arg/param mismatch.
+    if (arg || parm) { // Check for argument and parameter mismatch.
         scriptError(pnode, "different numbers of arguments and parameters to %s", name);
         return InterpError;
     }
-    if (frameTracing) {
-        showRuntimeStack(context, pnode);
-    }
-    if (symbolTableTracing) {
-        printf("Symbol Table before calling %s:\n", name);
-        showSymbolTable(table);
-    }
-    // Create the called procedure's frame; update the context; call the procedure; and delete the frame.
+
+    // Create the frame for the called procedure. Add the frame to the context. Call the procedure.
+    // Remove the frame from the context. Delete the frame while deletes the symbol table.
     Frame* frame = createFrame(pnode, proc, table, context->frame);
     context->frame = frame;
     InterpType returnCode = interpret(proc->procBody, context, pval);
@@ -832,23 +832,9 @@ void scriptError(PNode* pnode, String fmt, ...) {
     printf(".\n");
 }
 
-/*
- Notes about what showRuntimeStack should do.
- 1. Presumably, when called an error has occurred. Where is that somewhere? It's at or close to the line
-    number of the pnode that was being interpreted/evaluated at the point of error. If we had that PNode we could
-    start the run time stack by saying what line of the script is the fail point.
- 2. By looking at the call PNode in the Frame we can get the name of the routine we are in and the line in the script
-    where that routine is located.
- 3. By looking at the defn PNode in the Frame we can get the names of the variables, so we can look them up and show
-    the valueus of the variables separately from those of the 'automatics.'
- 4. By scanning through the Symbol Table, skipping the parameters we can show the automatics.
- 5. As we move up the run time stack, we would like to show the line number where each of the calls occurred. This
-    information is in the one of the PNodes in the frame.
- 6. Current assumption on airty of the function is showRuntimeStack(context, pnode), where the pnode can be null.
-    If it is not null this is the pnode location in the file that starts the showing of the run time stack.
- */
-
 // showRuntimeStack shows the contents of the run time stack. If pnode is not null its line number is shown;
+static StringSet* getParameterSet(PNode*);
+void showFrame(Frame*);
 void showRuntimeStack(Context* context, PNode* pnode) {
     // Get the bottom frame.
     Frame* frame = context->frame;
@@ -858,14 +844,45 @@ void showRuntimeStack(Context* context, PNode* pnode) {
         printf("from line %d in %s\n", pnode->lineNumber, frame->call->procName);
     }
     for (; frame; frame = frame->caller) {
-        String name = frame->call->procName;
-        int callline = frame->call->lineNumber;
-        int defnline = frame->defn->lineNumber;
-        printf("Frame: %s %d %d\n", name, callline, defnline);
-        SymbolTable* table = frame->table;
-        FORHASHTABLE(table, element)
-            Symbol* symbol = (Symbol*) element;
-            printf("    %s: %s\n", symbol->ident, pvalueToString(*(symbol->value), false));
-        ENDHASHTABLE
+        showFrame(frame);
     }
+}
+
+// showFrame shows one frame of the run time stack.
+void showFrame(Frame* frame) {
+    if (!frame) return;
+    String name = frame->call->procName;
+    int callline = frame->call->lineNumber;
+    int defnline = frame->defn->lineNumber;
+    printf("Frame: %s: defined: %d calls: %d\n", name, callline, defnline);
+    printf("  parameters:\n");
+    StringSet* params = getParameterSet(frame->defn);
+    SymbolTable* table = frame->table;
+    FORSET(params, element)
+        String param = (String) element;
+        PValue pvalue = getValueOfSymbol(table, param);
+        String svalue = pvalueToString(pvalue, false);
+        printf("    %s: %s\n", param, svalue);
+        stdfree(svalue);
+    ENDSET
+    printf("  automatics:\n");
+    FORHASHTABLE(table, element)
+        Symbol* symbol = (Symbol*) element;
+        String ident = symbol->ident;
+        if (!isInSet(params, ident)) {
+            String svalue = pvalueToString(*(symbol->value), false);
+            printf("    %s: %s\n", symbol->ident, svalue);
+            stdfree(svalue);
+        }
+    ENDHASHTABLE
+    deleteStringSet(params, false);
+}
+
+// getParameterSet gets the set of parameter names for a procedure or user function.
+static StringSet* getParameterSet(PNode* pnode) {
+    StringSet* set = createStringSet();
+    for (PNode* param = pnode->parameters; param; param = param->next) {
+        addToSet(set, param->identifier);
+    }
+    return set;
 }

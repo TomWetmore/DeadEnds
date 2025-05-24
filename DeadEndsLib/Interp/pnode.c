@@ -73,7 +73,8 @@ static PNode* allocPNode(int type) {
         printf("allocPNode(%d) %s, %d\n", type, curFileName, curLine);
     }
     node->type = type;
-    node->fileName = strsave(curFileName); // TODO: MEMORY!!!!!!!!!
+    // Warning: curFileName may be freed in a later version of DeadEnds.
+    node->fileName = curFileName;
     node->lineNumber = curLine; // Overwritten by the yacc m production?
     return node;
 }

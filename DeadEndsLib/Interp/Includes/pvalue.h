@@ -4,7 +4,7 @@
 // expressions in the DeadEnds script language. They are the values stored in symbol tables.
 //
 // Created by Thomas Wetmore on 15 December 2022.
-// Last changed on 17 May 2025.
+// Last changed on 24 May 2025.
 
 #ifndef pvalue_h
 #define pvalue_h
@@ -80,9 +80,9 @@ return NULL;\
 }
 
 // PValue Arithmetic and Logic Functions.
-PValue addPValues(PValue, PValue, bool* eflag);
+//PValue addPValues(PValue, PValue, bool* eflag);
 PValue subPValues(PValue, PValue, bool* eflag);
-PValue mulPValues(PValue, PValue, bool* eflag);
+//PValue mulPValues(PValue, PValue, bool* eflag);
 PValue divPValues(PValue, PValue, bool* eflag);
 PValue modPValues(PValue, PValue, bool* eflag);
 PValue negPValue(PValue, bool* eflag);

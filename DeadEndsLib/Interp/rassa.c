@@ -189,7 +189,6 @@ PValue __col (PNode *pnode, Context *context, bool *errflg)
 PValue __TYPEOF(PNode* pnode, Context* context, bool *errflg) {
     PValue pvalue = evaluate(pnode->arguments, context, errflg);
     if (*errflg) return nullPValue;
-
     String typename;
     switch (pvalue.type) {
         case PVNull:     typename = "null"; break;
@@ -208,8 +207,7 @@ PValue __TYPEOF(PNode* pnode, Context* context, bool *errflg) {
         case PVSequence: typename = "sequence"; break;
         default:         typename = "unknown"; break;
     }
-
-    return createStringPValue(strsave(typename));
+    return createStringPValue(typename);
 }
 
 // __SHOWSTACK prints the runtime stack.
