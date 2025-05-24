@@ -212,6 +212,14 @@ PValue __TYPEOF(PNode* pnode, Context* context, bool *errflg) {
     return createStringPValue(strsave(typename));
 }
 
+// __SHOWSTACK prints the runtime stack.
+// usage: showstack()
+extern void showRuntimeStack(Context*, PNode*);
+PValue __SHOWSTACK(PNode* pnode, Context* context, bool *errflg) {
+    showRuntimeStack(context, pnode);
+    return nullPValue;
+}
+
 // __pageout outputs the current page and clears the page buffer.
 // usage: pageout() -> VOID
 //PValue __pageout(PNode* pnode, Context* context, bool* errflg) {

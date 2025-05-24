@@ -155,6 +155,7 @@ extern PValue __set(PNode*, Context*, bool*);
 extern PValue __setel(PNode*, Context*, bool*);
 extern PValue __sex(PNode*, Context*, bool*);
 extern PValue __short(PNode*, Context*, bool*);
+extern PValue __SHOWSTACK(PNode*, Context*, bool*);
 extern PValue __sibling(PNode*, Context*, bool*);
 extern PValue __siblingset(PNode*, Context*, bool*);
 extern PValue __soundex(PNode*, Context*, bool*);
@@ -342,6 +343,7 @@ BuiltIn builtIns[] = {
     "setel",        3,    3,    __setel,
     "sex",          1,    1,    __sex,
     "short",        1,    1,    __short,  // Short form of an event.
+    "showstack",    0,    0,    __SHOWSTACK,
     "sibling",      1,    1,    __sibling,
     "siblingset",   1,    1,    __siblingset,
 	"soundex",      1,    1,    __soundex,

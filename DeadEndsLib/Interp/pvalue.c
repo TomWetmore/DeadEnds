@@ -379,7 +379,7 @@ PValue negPValue(PValue value, bool* eflg) {
 }
 
 // pvalueToString returns a String representation of a PValue. Caller must free the String.
-char* pvalueToString(PValue value, bool debug) {
+char* pvalueToString(PValue value, bool showtype) {
     char* buffer = stdalloc(1024);  // Fixed-size buffer; adjust if needed
     char* p = buffer;
 

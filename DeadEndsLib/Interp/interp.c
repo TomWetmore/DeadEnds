@@ -6,6 +6,7 @@
 //
 // Created by Thomas Wetmore on 9 December 2022.
 // Last changed on 23 May 2025.
+//
 
 #include <stdarg.h>
 #include "symboltable.h"
@@ -31,7 +32,7 @@ extern FunctionTable *functionTable;   // User-defined functions.
 extern SymbolTable *globalTable;       // Global symbol table.
 extern String pnodeTypes[];
 
-static void showRunTimeStack(Context*);
+void showRuntimeStack(Context*, PNode*); // Move elsewhere?
 
 bool programParsing = false;
 bool programRunning = false;
@@ -333,11 +334,11 @@ InterpType interpSpouses(PNode* pnode, Context* context, PValue *pval) {
 // interpFamilies interprets the families statement looping through the families a person is a spouse in.
 // usage: families(INDI, FAM_V, INDI_V, INT_V) {...}
 // fields: pPersonExpr, pFamilyIden, pSpouseIden, pCountIden, pLoopState
-InterpType interpFamilies(PNode* node, Context* context, PValue *pval) {
+InterpType interpFamilies(PNode* pnode, Context* context, PValue *pval) {
     bool eflg = false;
-    GNode *indi = evaluatePerson(node->personExpr, context, &eflg);
+    GNode *indi = evaluatePerson(pnode->personExpr, context, &eflg);
     if (eflg || !indi || nestr(indi->tag, "INDI")) {
-        scriptError(node, "the first argument to families must be a person");
+        scriptError(pnode, "the first argument to families must be a person");
         return InterpError;
     }
     GNode *spouse = null;
@@ -346,14 +347,14 @@ InterpType interpFamilies(PNode* node, Context* context, PValue *pval) {
     RecordIndex* index = context->database->recordIndex;
     SymbolTable* table = context->frame->table;
     FORFAMSS(indi, fam, key, index) {
-        assignValueToSymbol(table, node->familyIden, PVALUE(PVFamily, uGNode, fam));
+        assignValueToSymbol(table, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
         SexType sex = SEXV(indi);
         if (sex == sexMale) spouse = familyToWife(fam, index);
         else if (sex == sexFemale) spouse = familyToHusband(fam, index);
         else spouse = null;
-        assignValueToSymbol(table, node->spouseIden, PVALUE(PVPerson, uGNode, spouse));
-        assignValueToSymbol(table, node->countIden, PVALUE(PVInt, uInt, ++count));
-        InterpType irc = interpret(node->loopState, context, pval);
+        assignValueToSymbol(table, pnode->spouseIden, PVALUE(PVPerson, uGNode, spouse));
+        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, ++count));
+        InterpType irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
         case InterpOkay: goto c;
@@ -368,11 +369,11 @@ InterpType interpFamilies(PNode* node, Context* context, PValue *pval) {
 
 // interpFathers interprets the father loop statement. Most persons will only have one father in a
 // database, so most of the time the loop body is interpreted once.
-InterpType interpFathers(PNode* node, Context* context, PValue *pval) {
+InterpType interpFathers(PNode* pnode, Context* context, PValue *pval) {
     bool eflg = false;
-    GNode *indi = evaluatePerson(node->personExpr, context, &eflg);
+    GNode *indi = evaluatePerson(pnode->personExpr, context, &eflg);
     if (eflg || !indi || nestr(indi->tag, "INDI")) {
-        scriptError(node, "the first argument to fathers must be a person");
+        scriptError(pnode, "the first argument to fathers must be a person");
         return InterpError;
     }
     int nfams = 0;
@@ -380,10 +381,10 @@ InterpType interpFathers(PNode* node, Context* context, PValue *pval) {
     FORFAMCS(indi, fam, key, context->database->recordIndex)
     GNode *husb = familyToHusband(fam, context->database->recordIndex);
     if (husb == null) goto d;
-    assignValueToSymbol(table, node->familyIden, PVALUE(PVFamily, uGNode, fam));
-    assignValueToSymbol(table, node->fatherIden, PVALUE(PVFamily, uGNode, husb));
-    assignValueToSymbol(table, node->countIden, PVALUE(PVInt, uInt, ++nfams));
-    InterpType irc = interpret(node->loopState, context, pval);
+    assignValueToSymbol(table, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
+    assignValueToSymbol(table, pnode->fatherIden, PVALUE(PVFamily, uGNode, husb));
+    assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, ++nfams));
+    InterpType irc = interpret(pnode->loopState, context, pval);
     switch (irc) {
     case InterpContinue:
     case InterpOkay: goto d;
@@ -397,11 +398,11 @@ InterpType interpFathers(PNode* node, Context* context, PValue *pval) {
 
 // interpMothers interprets the mother loop statement. Most persons will only have one mother in a
 // database, so most of the time the loop body is interpreted once.
-InterpType interpMothers (PNode* node, Context* context, PValue *pval) {
+InterpType interpMothers (PNode* pnode, Context* context, PValue *pval) {
     bool eflg = false;
-    GNode *indi = evaluatePerson(node->personExpr, context, &eflg);
+    GNode *indi = evaluatePerson(pnode->personExpr, context, &eflg);
     if (eflg || !indi || nestr(indi->tag, "INDI")) {
-        scriptError(node, "the first argument to mothers must be a person");
+        scriptError(pnode, "the first argument to mothers must be a person");
         return InterpError;;
     }
     int nfams = 0;
@@ -410,12 +411,12 @@ InterpType interpMothers (PNode* node, Context* context, PValue *pval) {
         GNode *wife = familyToWife(fam, context->database->recordIndex);
         if (wife == null) goto d;
         //  Assign the current loop identifier valujes to the symbol table.
-        assignValueToSymbol(table, node->familyIden, PVALUE(PVFamily, uGNode, fam));
-        assignValueToSymbol(table, node->motherIden, PVALUE(PVFamily, uGNode, wife));
-        assignValueToSymbol(table, node->countIden, PVALUE(PVInt, uInt, ++nfams));
+        assignValueToSymbol(table, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
+        assignValueToSymbol(table, pnode->motherIden, PVALUE(PVFamily, uGNode, wife));
+        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, ++nfams));
 
         // Intepret the body of the loop.
-        InterpType irc = interpret(node->loopState, context, pval);
+        InterpType irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
         case InterpOkay: goto d;
@@ -429,20 +430,20 @@ InterpType interpMothers (PNode* node, Context* context, PValue *pval) {
 
 // interpParents -- Interpret parents loop; this loops over all families a person is a child in.
 // TODO: Does this exist in LifeLines?
-InterpType interpParents(PNode* node, Context* context, PValue *pval) {
+InterpType interpParents(PNode* pnode, Context* context, PValue *pval) {
     bool eflg = false;
     InterpType irc;
-    GNode *indi = evaluatePerson(node->personExpr, context, &eflg);
+    GNode *indi = evaluatePerson(pnode->personExpr, context, &eflg);
     if (eflg || !indi || nestr(indi->tag, "INDI")) {
-        scriptError(node, "the first argument to parents must be a person");
+        scriptError(pnode, "the first argument to parents must be a person");
         return InterpError;
     }
     int nfams = 0;
     SymbolTable* table = context->frame->table;
     FORFAMCS(indi, fam, key, context->database->recordIndex) {
-        assignValueToSymbol(table, node->familyIden, PVALUE(PVFamily, uGNode, fam));
-        assignValueToSymbol(table, node->countIden,  PVALUE(PVInt, uInt, ++nfams));
-        irc = interpret(node->loopState, context, pval);
+        assignValueToSymbol(table, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
+        assignValueToSymbol(table, pnode->countIden,  PVALUE(PVInt, uInt, ++nfams));
+        irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
         case InterpOkay: goto f;
@@ -456,20 +457,20 @@ InterpType interpParents(PNode* node, Context* context, PValue *pval) {
 }
 
 // interp_fornotes interprets the fornote loop.
-InterpType interpFornotes(PNode* node, Context* context, PValue *pval) {
-    ASSERT(node && context);
+InterpType interpFornotes(PNode* pnode, Context* context, PValue *pval) {
+    ASSERT(pnode && context);
     bool eflg = false;
     InterpType irc;
-    GNode *root = evaluateGNode(node->gnodeExpr, context, &eflg);
+    GNode *root = evaluateGNode(pnode->gnodeExpr, context, &eflg);
     if (eflg) {
-        scriptError(node, "first arg of fornotes() must evaluate to a gedcom node.");
+        scriptError(pnode, "first arg of fornotes() must evaluate to a gedcom node.");
         return InterpError;
     }
     if (!root) return InterpOkay;
     SymbolTable* table = context->frame->table;
     FORTAGVALUES(root, "NOTE", sub, vstring) {
-        assignValueToSymbol(table, node->gnodeIden, createStringPValue(vstring));
-        irc = interpret(node->loopState, context, pval);
+        assignValueToSymbol(table, pnode->gnodeIden, createStringPValue(vstring));
+        irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
         case InterpOkay:
@@ -486,18 +487,18 @@ InterpType interpFornotes(PNode* node, Context* context, PValue *pval) {
 
 // interp_fornodes interpret the fornodes statement looping though the children of a GNode.
 // usage: fornodes(NODE, NODE_V) {...}; fields: pGNodeExpr, pNodeIden, pLoopState
-InterpType interp_fornodes(PNode* node, Context* context, PValue *pval) {
+InterpType interp_fornodes(PNode* pnode, Context* context, PValue *pval) {
     bool eflg = false;
-    GNode *root = evaluateGNode(node->gnodeExpr, context, &eflg);
+    GNode *root = evaluateGNode(pnode->gnodeExpr, context, &eflg);
     if (eflg || !root) {
-        scriptError(node, "the first argument to fornodes must be a Gedcom node/line");
+        scriptError(pnode, "the first argument to fornodes must be a Gedcom node/line");
         return InterpError;
     }
     GNode *sub = root->child;
     SymbolTable* table = context->frame->table;
     while (sub) {
-        assignValueToSymbol(table, node->gnodeIden, PVALUE(PVGNode, uGNode, sub));
-        InterpType irc = interpret(node->loopState, context, pval);
+        assignValueToSymbol(table, pnode->gnodeIden, PVALUE(PVGNode, uGNode, sub));
+        InterpType irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
         case InterpOkay:
@@ -732,7 +733,7 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
         return InterpError;
     }
     if (frameTracing) {
-        showRunTimeStack(context);
+        showRuntimeStack(context, pnode);
     }
     if (symbolTableTracing) {
         printf("Symbol Table before calling %s:\n", name);
@@ -760,13 +761,13 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
 // Usage: traverse(GNode expr, GNode ident, int ident) {...}.
 // Fields: gnodeExpr, levelIden, gNodeIden.
 #define MAXTRAVERSEDEPTH 100
-InterpType interpTraverse(PNode* traverseNode, Context* context, PValue* returnValue) {
-    ASSERT(traverseNode && context);
+InterpType interpTraverse(PNode* pnode, Context* context, PValue* returnValue) {
+    ASSERT(pnode && context);
     bool errorFlag = false;
     // Get the root node of the traversal.
-    GNode* root = evaluateGNode(traverseNode->gnodeExpr, context, &errorFlag);
+    GNode* root = evaluateGNode(pnode->gnodeExpr, context, &errorFlag);
     if (errorFlag || !root) {
-        scriptError(traverseNode, "the first argument to traverse must be a Gedcom line");
+        scriptError(pnode, "the first argument to traverse must be a Gedcom line");
         return InterpError;
     }
     // Set up the traversal stack.
@@ -778,10 +779,10 @@ InterpType interpTraverse(PNode* traverseNode, Context* context, PValue* returnV
     SymbolTable* table = context->frame->table;
     while (true) {
         // Assign loop variables.
-        assignValueToSymbol(table, traverseNode->levelIden, PVALUE(PVInt, uInt, lev));
-        assignValueToSymbol(table, traverseNode->gnodeIden, PVALUE(PVGNode, uGNode, nodeStack[lev]));
+        assignValueToSymbol(table, pnode->levelIden, PVALUE(PVInt, uInt, lev));
+        assignValueToSymbol(table, pnode->gnodeIden, PVALUE(PVGNode, uGNode, nodeStack[lev]));
         // Interpret loop body
-        InterpType irc = interpret(traverseNode->loopState, context, returnValue);
+        InterpType irc = interpret(pnode->loopState, context, returnValue);
         switch (irc) {
         case InterpContinue:
         case InterpOkay:
@@ -796,7 +797,7 @@ InterpType interpTraverse(PNode* traverseNode, Context* context, PValue* returnV
         // Traverse to first child.
         if (nodeStack[lev]->child) {
             if (lev + 1 >= MAXTRAVERSEDEPTH) {
-                scriptError(traverseNode, "maximum traversal depth exceeded");
+                scriptError(pnode, "maximum traversal depth exceeded");
                 returnIrc = InterpError;
                 goto cleanup;
             }
@@ -816,24 +817,55 @@ InterpType interpTraverse(PNode* traverseNode, Context* context, PValue* returnV
     }
 
 cleanup:
-    removeFromHashTable(table, traverseNode->levelIden);
-    removeFromHashTable(table, traverseNode->gnodeIden);
+    removeFromHashTable(table, pnode->levelIden);
+    removeFromHashTable(table, pnode->gnodeIden);
     return returnIrc;
 }
 
 // scriptError reports a run time script error.
-void scriptError(PNode* gnode, String fmt, ...) {
+void scriptError(PNode* pnode, String fmt, ...) {
     va_list args;
-    printf("\nError in \"%s\" at line %d: ", gnode->fileName, gnode->lineNumber);
+    printf("\nError in \"%s\" at line %d: ", pnode->fileName, pnode->lineNumber);
     va_start(args, fmt);
     vprintf(fmt, args);
     va_end(args);
     printf(".\n");
 }
 
-void showRunTimeStack(Context* context) {
-    printf("Run time Stack\n");
-    for (Frame* frame = context->frame; frame; frame = frame->caller) {
+/*
+ Notes about what showRuntimeStack should do.
+ 1. Presumably, when called an error has occurred. Where is that somewhere? It's at or close to the line
+    number of the pnode that was being interpreted/evaluated at the point of error. If we had that PNode we could
+    start the run time stack by saying what line of the script is the fail point.
+ 2. By looking at the call PNode in the Frame we can get the name of the routine we are in and the line in the script
+    where that routine is located.
+ 3. By looking at the defn PNode in the Frame we can get the names of the variables, so we can look them up and show
+    the valueus of the variables separately from those of the 'automatics.'
+ 4. By scanning through the Symbol Table, skipping the parameters we can show the automatics.
+ 5. As we move up the run time stack, we would like to show the line number where each of the calls occurred. This
+    information is in the one of the PNodes in the frame.
+ 6. Current assumption on airty of the function is showRuntimeStack(context, pnode), where the pnode can be null.
+    If it is not null this is the pnode location in the file that starts the showing of the run time stack.
+ */
 
+// showRuntimeStack shows the contents of the run time stack. If pnode is not null its line number is shown;
+void showRuntimeStack(Context* context, PNode* pnode) {
+    // Get the bottom frame.
+    Frame* frame = context->frame;
+    if (!frame) return;
+    printf("Run time Stack\n");
+    if (pnode) {
+        printf("from line %d in %s\n", pnode->lineNumber, frame->call->procName);
+    }
+    for (; frame; frame = frame->caller) {
+        String name = frame->call->procName;
+        int callline = frame->call->lineNumber;
+        int defnline = frame->defn->lineNumber;
+        printf("Frame: %s %d %d\n", name, callline, defnline);
+        SymbolTable* table = frame->table;
+        FORHASHTABLE(table, element)
+            Symbol* symbol = (Symbol*) element;
+            printf("    %s: %s\n", symbol->ident, pvalueToString(*(symbol->value), false));
+        ENDHASHTABLE
     }
 }

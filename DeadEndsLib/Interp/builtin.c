@@ -304,11 +304,11 @@ PValue __strcmp (PNode* pnode, Context* context, bool* errflg) {
 
 //  __eqstr compares two strings for equality.
 //    usage: eqstr(STRING, STRING) -> BOOL
-PValue __eqstr (PNode *node, Context *context, bool *errflg) {
-	PNode *arg = node->arguments;
+PValue __eqstr (PNode *pnode, Context *context, bool *errflg) {
+	PNode *arg = pnode->arguments;
 	PValue pvalue = evaluate(arg, context, errflg);
 	if (pvalue.type != PVString) {
-		scriptError(node, "first argument to eqstr() must be a string");
+		scriptError(pnode, "first argument to eqstr() must be a string");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -316,7 +316,7 @@ PValue __eqstr (PNode *node, Context *context, bool *errflg) {
 	arg = arg->next;
 	pvalue = evaluate(arg, context, errflg);
 	if (pvalue.type != PVString) {
-		scriptError(node, "second argument to eqstr() must be a string");
+		scriptError(pnode, "second argument to eqstr() must be a string");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -605,16 +605,16 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
 
 // __copyfile copies the contents of a file to the output stream.
 // usage: copyfile(STRING) -> VOID
-PValue __copyfile (PNode *node, Context *context, bool *errflg) {
-	String fileName = evaluateString(node->arguments, context, errflg);
+PValue __copyfile (PNode *pnode, Context *context, bool *errflg) {
+	String fileName = evaluateString(pnode->arguments, context, errflg);
 	if (*errflg || fileName == null || strlen(fileName) == 0) {
 		*errflg = true;
-		scriptError(node, "The argument to copyfile must be a string.");
+		scriptError(pnode, "The argument to copyfile must be a string.");
 		return nullPValue;
 	}
 	FILE *cfp = fopenPath(fileName, "r", null);
 	if (cfp == null) {
-		scriptError(node, "Could not open file for copying.");
+		scriptError(pnode, "Could not open file for copying.");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -660,12 +660,12 @@ PValue __noop(PNode *pnode, Context *context, bool* errflg) { return nullPValue;
 
 // __createnode creates a Gedcom node.
 // usage: createnode(STRING key[, STRING value]) -> NODE, value can be omitted.
-PValue __createnode(PNode* node, Context* context, bool* errflg) {
-	PNode *arg1 = node->arguments, *arg2 = arg1->next;
+PValue __createnode(PNode* pnode, Context* context, bool* errflg) {
+	PNode *arg1 = pnode->arguments, *arg2 = arg1->next;
 	// Get the tag.
 	PValue tagValue = evaluate(arg1, context, errflg);
 	if (tagValue.type != PVString) {
-		scriptError(node, "first argument to createnode must be a key string");
+		scriptError(pnode, "first argument to createnode must be a key string");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -675,7 +675,7 @@ PValue __createnode(PNode* node, Context* context, bool* errflg) {
 	if (arg2) {
 		PValue valValue = evaluate(arg2, context, errflg);
 		if (valValue.type != PVNull && valValue.type != PVString) {
-			scriptError(node, "the second argument to create node must be an optional string");
+			scriptError(pnode, "the second argument to create node must be an optional string");
 			*errflg = true;
 			return nullPValue;
 		}
@@ -686,12 +686,12 @@ PValue __createnode(PNode* node, Context* context, bool* errflg) {
 
 // __addnode adds a node to a Gedcom tree.
 // usage: addnode(NODE this, NODE parent[, NODE prevsib]) -> VOID, where prevsib may omitted.
-PValue __addnode(PNode* node, Context* context, bool* errflg) {
+PValue __addnode(PNode* pnode, Context* context, bool* errflg) {
 	// Get node to add.
-	PNode* arg1 = node->arguments, *arg2 = arg1->next, *arg3 = arg2->next;;
+	PNode* arg1 = pnode->arguments, *arg2 = arg1->next, *arg3 = arg2->next;;
 	PValue this = evaluate(arg1, context, errflg);
 	if (*errflg || !isGNodeType(this.type)) {
-        scriptError(node, "the first argument to addnode must be an existing node");
+        scriptError(pnode, "the first argument to addnode must be an existing node");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -699,7 +699,7 @@ PValue __addnode(PNode* node, Context* context, bool* errflg) {
 	// Get parent of node.
 	PValue parent = evaluate(arg2, context, errflg);
 	if (*errflg || !isGNodeType(parent.type)) {
-        scriptError(node, "the second argument to addnode must be an existing node");
+        scriptError(pnode, "the second argument to addnode must be an existing node");
 		*errflg = true;
 		return nullPValue;
 	}
@@ -710,7 +710,7 @@ PValue __addnode(PNode* node, Context* context, bool* errflg) {
 		PValue prev = evaluate(arg3, context, errflg);
 		if (*errflg || !isGNodeType(prev.type)) {
 			*errflg = true;
-			scriptError(node, "the third argument to addnode must be an existing node");
+			scriptError(pnode, "the third argument to addnode must be an existing node");
 			return nullPValue;
 		}
 		prevNode = prev.value.uGNode;

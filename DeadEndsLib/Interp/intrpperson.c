@@ -121,22 +121,22 @@ PValue __givens(PNode* pnode, Context* context, bool* errflg) {
 
 // __trimname trims a name if too long
 // usage: trimname(INDI, INT) -> STRING
-PValue __trimname(PNode* node, Context* context, bool *eflg) {
-    PNode* arg = node->arguments;
+PValue __trimname(PNode* pnode, Context* context, bool *eflg) {
+    PNode* arg = pnode->arguments;
     GNode* indi = evaluatePerson(arg, context, eflg); // Person
     if (*eflg || !indi) {
-        scriptError(node, "the first argument to trimname must be a person");
+        scriptError(pnode, "the first argument to trimname must be a person");
         return nullPValue;
     }
     *eflg = true;
     if (!(indi = NAME(indi)) || !indi->value) {
-        scriptError(node, "the person must have a name");
+        scriptError(pnode, "the person must have a name");
         return nullPValue;
     }
     *eflg = false;
     PValue length = evaluate(arg->next, context, eflg); // Field width.
     if (*eflg || length.type != PVInt) {
-        scriptError(node, "the second argument to trimname must be an integer");
+        scriptError(pnode, "the second argument to trimname must be an integer");
         return nullPValue;
     }
     return createStringPValue(nameString(trimName(indi->value, (int) length.value.uInt)));

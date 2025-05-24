@@ -4,7 +4,7 @@
 // DeadEnds script language. It is implemented using PValueTable.
 //
 // Created by Thomas Wetmore on 19 April 2023.
-// Last changed on 21 May 2024.
+// Last changed on 23 May 2024.
 
 #include "pvaluetable.h"
 #include "interp.h"
@@ -26,12 +26,12 @@ PValue __table(PNode* pnode, Context* context, bool* errflg) {
 
 // __insert adds an element to a script value table.
 // usage: insert(TAB, STRING, ANY) -> VOID
-PValue __insert(PNode *node, Context *context, bool *errflg) {
-    PNode* arg = node->arguments; // Table.
+PValue __insert(PNode *pnode, Context *context, bool *errflg) {
+    PNode* arg = pnode->arguments; // Table.
     PValue tvalue = evaluate(arg, context, errflg);
     if (*errflg || tvalue.type != PVTable) {
         *errflg = true;
-        scriptError(node, "the first argument to insert must be a table");
+        scriptError(pnode, "the first argument to insert must be a table");
         return nullPValue;
     }
     PValueTable *table = tvalue.value.uTable;
@@ -39,14 +39,14 @@ PValue __insert(PNode *node, Context *context, bool *errflg) {
     PValue svalue = evaluate(arg, context, errflg);
     if (*errflg || svalue.type != PVString) {
         *errflg = true;
-        scriptError(node, "the second argument to insert must be a string");
+        scriptError(pnode, "the second argument to insert must be a string");
         return nullPValue;
     }
     String key = strsave(svalue.value.uString); // Need ownership.
     arg = arg->next; // Value of table entry.
     PValue evalue = evaluate(arg, context, errflg);
     if (*errflg) {
-        scriptError(node, "the third argument to insert must be a value");
+        scriptError(pnode, "the third argument to insert must be a value");
         return nullPValue;
     }
     insertInPValueTable(table, key, *clonePValue(&evalue));
@@ -55,12 +55,12 @@ PValue __insert(PNode *node, Context *context, bool *errflg) {
 
 // __lookup looks up an element in a script value table.
 // usage: lookup(TAB, STRING) -> ANY
-PValue __lookup(PNode* node, Context* context, bool* errflg) {
-    PNode* arg = node->arguments; // Table.
+PValue __lookup(PNode* pnode, Context* context, bool* errflg) {
+    PNode* arg = pnode->arguments; // Table.
     PValue tvalue = evaluate(arg, context, errflg);
     if (*errflg || tvalue.type != PVTable) {
         *errflg = true;
-        scriptError(node, "the first argument to lookup must be a table");
+        scriptError(pnode, "the first argument to lookup must be a table");
         return nullPValue;
     }
     PValueTable *table = tvalue.value.uTable;
@@ -68,7 +68,7 @@ PValue __lookup(PNode* node, Context* context, bool* errflg) {
     PValue svalue = evaluate(arg, context, errflg); // Key.
     if (*errflg || svalue.type != PVString) {
         *errflg = true;
-        scriptError(node, "the second argument to lookup must be a string");
+        scriptError(pnode, "the second argument to lookup must be a string");
         return nullPValue;
     }
     String key = svalue.value.uString;
