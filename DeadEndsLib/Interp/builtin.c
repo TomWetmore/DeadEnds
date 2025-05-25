@@ -521,43 +521,6 @@ PValue __extractnames (PNode *pnode, Context *context, bool *errflg) {
 
 // __extractplaces extracts the place phrases from an event or PLAC GNode.
 // usage: extractplaces(NODE, LIST, VARB) -> VOID
-PValue __oldextractplaces (PNode *pnode, Context *context, bool *errflg) {
-	// Get the PLAC GNode to extract the place phrases from.
-	PNode *nexp = pnode->arguments;
-	GNode *place = evaluateGNode(nexp, context, errflg);
-	if (*errflg) {
-		scriptError(pnode, "first argument to extractplaces must be a PLAC or event node");
-		return nullPValue;
-	}
-	if (nestr(place->tag, "PLAC")) place = PLAC(place);
-	if (!place) {
-		return nullPValue;
-	}
-	// Get the List to put the places in. The next argument should be an identifier that names a list. But
-    // use the generic evaluator in case the language gets fancier in the future.
-	PNode *lexp = nexp->next;
-	PValue pvalue = evaluate(lexp, context, errflg);
-	if (*errflg || pvalue.type != PVList) {
-		scriptError(pnode, "second argument to extractplaces must identify a list.");
-		return nullPValue;
-	}
-	List *list = pvalue.value.uList;
-	// Get the variable to put the number of places in.
-	PNode *varb = lexp->next;
-	if (varb->type != PNIdent) {
-		scriptError(pnode, "third argument to extractplaces must be an identifier.");
-		*errflg = true;
-		return nullPValue;
-	}
-	String pstr = place->value;
-	int len;
-	placeToList(pstr, list, &len);
-    SymbolTable* table = context->frame->table;
-	assignValueToSymbol(table, varb->identifier, PVALUE(PVList, uList, list));
-    if (symbolTableDebugging) showSymbolTable(table);
-	return nullPValue;
-}
-
 PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
     PNode *nexp = pnode->arguments;
     GNode *node = evaluateGNode(nexp, context, errflg); // First arg is a Gedcom node.
@@ -579,7 +542,7 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
     PValue listVal = getValueOfSymbol(table, listName);
     List* list = listVal.value.uList;
     if (listVal.type != PVList || !list) {
-        scriptError(pnode, "second argument to extractplaces() must identifiy a valid list");
+        scriptError(pnode, "second argument to extractplaces() must identify a valid list");
         *errflg = true;
         return nullPValue;
     }
@@ -590,15 +553,26 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
         *errflg = true;
         return nullPValue;
     }
-    int count = 0; // Extract places.
-    if (!placeToList(placeNode->value, list, &count)) {
+    List* strings = createList(null, null, null, false);
+    if (!placeToList(placeNode->value, strings)) {
         scriptError(pnode, "place value could not be split into phrases");
         *errflg = true;
         return nullPValue;
     }
+    FORLIST(strings, element)
+        String string = (String) element;
+
+        PValue* svalue = stdalloc(sizeof(PValue));
+        svalue->type = PVString;
+        svalue->value.uString = strsave(string); // one and only copy
+
+        appendToList(list, svalue);
+        stdfree(string);
+    ENDLIST
+    deleteList(strings);
 
     // Assign the count to the symbol table
-    assignValueToSymbol(table, countVar->identifier, PVALUE(PVInt, uInt, count));
+    assignValueToSymbol(table, countVar->identifier, PVALUE(PVInt, uInt, lengthList(list)));
     if (localDebugging) showSymbolTable(table); // Debug.
     return nullPValue;
 }

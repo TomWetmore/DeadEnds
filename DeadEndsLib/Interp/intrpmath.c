@@ -3,7 +3,7 @@
 // intrpmath.c has the built-in script functions for math and logic.
 //
 // Created by Thomas Wetmore on 17 March 2023.
-// Last changed on 22 May 2024.
+// Last changed on 24 May 2025.
 //
 
 #include "standard.h"

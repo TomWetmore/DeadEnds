@@ -221,7 +221,7 @@ PValue __length(PNode* pnode, Context* context, bool* errflg) {
 
 // interpForList interprets the list loop.
 // usage: forlist(LIST, ANY, INT) { BODY }
-InterpType interpForList(PNode* pnode, Context* context, PValue* pval) {
+InterpType oldinterpForList(PNode* pnode, Context* context, PValue* pval) {
     bool eflg = false;
     PValue pvalue = evaluate(pnode->listExpr, context, &eflg); // First arg is the list.
     if (eflg) {
@@ -254,3 +254,37 @@ InterpType interpForList(PNode* pnode, Context* context, PValue* pval) {
     }
     return InterpOkay;
 }
+InterpType interpForList(PNode* pnode, Context* context, PValue* pval) {
+    bool eflg = false;
+    PValue pvalue = evaluate(pnode->listExpr, context, &eflg); // First arg is the list.
+    if (eflg) {
+        scriptError(pnode, "The first argument to forlist must be a list");
+        return InterpError;
+    }
+    List *list = pvalue.value.uList;
+    if (!list) {
+        scriptError(pnode, "The first argument to forlist is in error");
+        return InterpError;
+    }
+    int count = 0;
+    InterpType irc;
+    Block* block = &(list->block);
+    for (int i = 0; i < block->length; i++) {
+        PValue* fromList = (PValue*) block->elements[i];
+        PValue copy = *fromList;
+        if (copy.type == PVString && copy.value.uString)
+            copy.value.uString = strsave(copy.value.uString);  // deep copy
+        SymbolTable* table = context->frame->table;
+        assignValueToSymbol(table, pnode->elementIden, copy);
+        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, count++));
+        switch (irc = interpret(pnode->loopState, context, pval)) {
+            case InterpContinue:
+            case InterpOkay: goto i;
+            case InterpBreak: return InterpOkay;
+            default: return irc;
+        }
+    i:  ;
+    }
+    return InterpOkay;
+}
+

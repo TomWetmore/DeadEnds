@@ -218,6 +218,14 @@ PValue __SHOWSTACK(PNode* pnode, Context* context, bool *errflg) {
     return nullPValue;
 }
 
+// __SHOWFRAME prints the current frame.
+// usage: showframe()
+extern void showFrame(Frame*);
+PValue __SHOWFRAME(PNode* pnode, Context* context, bool* errflg) {
+    showFrame(context->frame);
+    return nullPValue;
+}
+
 // __pageout outputs the current page and clears the page buffer.
 // usage: pageout() -> VOID
 //PValue __pageout(PNode* pnode, Context* context, bool* errflg) {

@@ -714,7 +714,7 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
 
     // Create the symbol table for the called procedure.
     SymbolTable* table = createSymbolTable();
-    
+
     // Bind the arguments to the parameters. Important: the arguments are evaluated using the caller's symbol
     // table, while the parameters and their values are put in the called procedure's symbol table.
     PNode* arg = pnode->arguments;
