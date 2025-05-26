@@ -40,6 +40,7 @@ void progmessage(char*);
 //Context *createContext(SymbolTable*, Database*);
 //void deleteContext(Context*);
 
+void interpScript(Database*, String);
 InterpType interpret(PNode*, Context*, PValue*);
 InterpType interpChildren(PNode*, Context*, PValue*);
 InterpType interpSpouses(PNode*, Context*, PValue*);

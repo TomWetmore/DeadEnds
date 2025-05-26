@@ -54,7 +54,7 @@ extern String curFileName;
 extern int curLine;
 
 // interpScript interprets a DeadEnds script.
-void interpScript(Database* database) {
+void interpScript(Database* database, String scriptfile) {
     // Create a PNProcCall PNode to call the main proc.
     curFileName = "..synthetic..";
     curLine = 1;
