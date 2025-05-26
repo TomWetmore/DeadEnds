@@ -3,7 +3,7 @@
 // pnode.c holds the functions that manage PNodes (program nodes).
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 10 May 2025.
+// Last changed on 25 May 2025.
 
 #include "pnode.h"
 #include "standard.h"
@@ -66,7 +66,7 @@ void showPNode(PNode* pnode) {
 
 static void setParents(PNode* list, PNode* parent); // Set the parents of a PNode list.
 
-// allocPNode allocates a PNode and sets the pType, pFileName and pLineNum fields.
+// allocPNode allocates a PNode and sets the type, fileName and lineNum fields.
 static PNode* allocPNode(int type) {
     PNode* node = (PNode*) stdalloc(sizeof(*node));
     if (debugging) {

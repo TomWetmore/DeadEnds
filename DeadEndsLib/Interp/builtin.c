@@ -3,7 +3,7 @@
 // builtin.c contains many built-in functions of the DeadEnds script language.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 23 May 2025.
+// Last changed on 5 May 2025.
 
 #include "standard.h"
 #include "gnode.h"
@@ -553,23 +553,22 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
         *errflg = true;
         return nullPValue;
     }
+    // Use placeToList to separate a PLAC value into list of string parts.
     List* strings = createList(null, null, null, false);
     if (!placeToList(placeNode->value, strings)) {
-        scriptError(pnode, "place value could not be split into phrases");
+        scriptError(pnode, "place value could not be split into parts");
         *errflg = true;
         return nullPValue;
     }
+    // Transform the list of strings into a list of pvalues.
     FORLIST(strings, element)
         String string = (String) element;
-
         PValue* svalue = stdalloc(sizeof(PValue));
         svalue->type = PVString;
-        svalue->value.uString = strsave(string); // one and only copy
-
+        svalue->value.uString = string; // Take ownership of heap memory.
         appendToList(list, svalue);
-        stdfree(string);
     ENDLIST
-    deleteList(strings);
+    deleteList(strings); // Do not free the strings.
 
     // Assign the count to the symbol table
     assignValueToSymbol(table, countVar->identifier, PVALUE(PVInt, uInt, lengthList(list)));
@@ -594,7 +593,7 @@ PValue __copyfile (PNode *pnode, Context *context, bool *errflg) {
 	}
 	char buffer[1024];
 	while (fgets(buffer, 1024, cfp)) {
-		printf("%s", buffer);  // TODO: GOT TO CHANGE TO A MORE POUTPUT APPROACH.
+		printf("%s", buffer);  // TODO: CHANGE TO A MORE POUTPUT APPROACH.
 	}
 	fclose(cfp);
 	return nullPValue;

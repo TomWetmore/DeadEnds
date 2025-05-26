@@ -25,7 +25,7 @@ typedef struct Context {
 } Context;
 
 // Public interface.
-Context* createContext(Database*); // Create a Context.
+Context* createContext(Database*, File*); // Create a Context.
 void deleteContext(Context*);  // Delete a Context.
 
 #endif // context_h

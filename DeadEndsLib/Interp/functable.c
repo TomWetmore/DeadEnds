@@ -3,7 +3,7 @@
 // functable.c has the table of built-in functions in the DeadEnds scripting language.
 //
 // Created by Thomas Wetmore on 10 January 2023.
-// Last changed on 17 May 2025.
+// Last changed on 26 May 2025.
 
 #include "standard.h"
 #include "symboltable.h"
@@ -303,7 +303,7 @@ BuiltIn builtIns[] = {
     "ne",           2,    2,    __ne,
     "neg",          1,    1,    __neg,
 	"nestr",        2,    2,    __strcmp,
-	"newfile",      2,    2,    __newfile,
+	"newfile",      0,    2,    __newfile,
 	"nextfam",      1,    1,    __nextfam,
     "nextindi",     1,    1,    __nextindi,
     "nextsib",      1,    1,    __nextsib,

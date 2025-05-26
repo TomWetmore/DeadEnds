@@ -90,33 +90,48 @@ PValue __linemode(PNode* pnode, Context* context, bool* errflg) {
 }
 
 // __newfile switches script program output to a new file.
-// usage: newfile(STRING, BOOL) -> VOID
-PValue  __newfile(PNode* pnode, Context* context, bool* errflg) {
-    PNode *arg = pnode->arguments;
+// usage: newfile() -> VOID
+// usage: newfile(STRING[, BOOL]) -> VOID
+PValue __newfile(PNode* pnode, Context* context, bool* errflg) {
+    PNode* arg = pnode->arguments;
+    // Revert to standard output if there are no arguments.
+    if (!arg) {
+        closeFile(context->file);
+        context->file = stdOutputFile();
+        return nullPValue;
+    }
+    // The first argument must be a non-empty string (file name).
     PValue pvalue = evaluate(arg, context, errflg);
     if (*errflg) return nullPValue;
-    if (pvalue.type != PVString || strlen(pvalue.value.uString) == 0) {
+    if (pvalue.type != PVString || !pvalue.value.uString || strlen(pvalue.value.uString) == 0) {
         *errflg = true;
-        scriptError(pnode, "first argument to newfile() must be a string");
+        scriptError(pnode, "first argument to newfile() must be a non-empty string");
         return nullPValue;
     }
     String name = pvalue.value.uString;
+    // Default mode is write
+    char* mode = "w";
+    // The optional second argument can specify append mode.
     arg = arg->next;
-    pvalue = evaluateBoolean(arg, context, errflg);
-    if (*errflg) {
-        scriptError(pnode, "second argument to newfile must be a boolean.");
-        return nullPValue;
+    if (arg) {
+        pvalue = evaluateBoolean(arg, context, errflg);
+        if (*errflg) {
+            scriptError(pnode, "second argument to newfile() must be a boolean");
+            return nullPValue;
+        }
+        if (pvalue.value.uBool) mode = "a";
     }
-    bool aflag = pvalue.value.uBool;
-    closeFile(context->file);
-    File* file = openFile(name, aflag ? "a" : "w");
+    // Open the new file.
+    File* file = openFile(name, mode);
     if (!file) {
         *errflg = true;
-        scriptError(pnode, "could not open file %s", name);
+        scriptError(pnode, "could not open file: %s", name);
         return nullPValue;
     }
+    // Close the previous file and switch.
+    closeFile(context->file);
     context->file = file;
-	return nullPValue;
+    return nullPValue;
 }
 
 // __outfile returns the name of the script output file.

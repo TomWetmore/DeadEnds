@@ -6,7 +6,7 @@
 //  or may call a specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 24 May 2025.
+//  Last changed on 25 May 2025.
 //
 
 #include <stdarg.h>
@@ -43,27 +43,28 @@ bool programDebugging = false;
 // Interface between the lexer, parser, and interpreter.
 int Perrors = 0;      // Number of errors.
 
-// initializeInterpreter initializes the interpreter.
-void initializeInterpreter(Database* database) {
-    Perrors = 0;
-}
-
-
-
-// finishInterpreter is called when the interpreter is done; currently a no-op.
-void finishInterpreter(void) { }
-
 //  remove_tables - Remove the interpreter's tables when no longer needed.
-//--------------------------------------------------------------------------------------------------
-//static void remove_tables(void)
-//{
-//    // The node block cleaner will free pnodes in procedureTable. TODO: FIGURE OUT WHAT THAT MEANS.
+//static void remove_tables(void) {
 //    deleteHashTable(procedureTable);
-//    // TODO: The lexer saved global names so they need to be freed.
 //    deleteHashTable(globalTable);
-//    // TODO: Are local variable IDENs leaking.
 //    deleteHashTable(functionTable);
 //}
+
+extern String curFileName;
+extern int curLine;
+
+// interpScript interprets a DeadEnds script.
+void interpScript(Database* database) {
+    // Create a PNProcCall PNode to call the main proc.
+    curFileName = "..synthetic..";
+    curLine = 1;
+    PNode* pnode = procCallPNode("main", null);
+    // Create the Context for running the main procedure.
+    Context* context = createContext(database, stdOutputFile());
+    // Run the script by interpreting the main procedure.
+    interpret(pnode, context, null);
+    deleteContext(context);
+}
 
 // interpret interprets a list of PNodes. If a return statement is found it returns the return
 // value through the last parameter. The language allows expressions at the statement level, so

@@ -21,6 +21,7 @@ static void getEnvironment(String*, String*);
 static void runScript(Database*, String);
 
 // main is the main program of the RunScript program.
+extern void interpScript(Context*, File*);
 int main(int argc, char* argv[]) {
 	// Get the files.
 	fprintf(stderr, "%s: RunScript started.\n", getMsecondsStr());
@@ -42,7 +43,9 @@ int main(int argc, char* argv[]) {
 	// Parse and run the script.
 	parseProgram(scriptFile, scriptPath);
 	fprintf(stderr, "%s: Script parsed.\n", getMsecondsStr());
-	runScript(database, scriptFile);
+	//runScript(database, scriptFile);
+
+    interpScript(database, scriptFile);
 	fprintf(stderr, "%s: RunScript done.\n", getMsecondsStr());
 }
 
@@ -89,7 +92,7 @@ static void runScript(Database* database, String fileName) {
 	curLine = 1;
 	PNode* pnode = procCallPNode("main", null); // null because main has no parameters.
 	// Call the main proc.
-	Context* context = createContext(database);
+	Context* context = createContext(database, stdOutputFile());
 	interpret(pnode, context, null); // Call main proc.
 }
 
