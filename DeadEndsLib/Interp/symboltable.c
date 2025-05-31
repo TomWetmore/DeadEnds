@@ -3,7 +3,7 @@
 // symboltable.c holds the functions that implement SymbolTables.
 //
 // Created by Thomas Wetmore on 23 March 2023.
-// Last changed on 22 May 2025.
+// Last changed on 31 May 2025.
 
 #include "standard.h"
 #include "symboltable.h"
@@ -50,11 +50,26 @@ void deleteSymbolTable(SymbolTable* table) {
 
 // assignValueToSymbol assigns a value to a Symbol. If the Symbol isn't in the local table, check
 // the global table.
-void assignValueToSymbol(SymbolTable* symtab, String ident, PValue pvalue) {
+//void assignValueToSymbol(SymbolTable* symtab, String ident, PValue pvalue) {
+void assignValueToSymbolTable(SymbolTable* table, String ident, PValue pvalue) {
+    // Prepare the value to put in the symbol table.
+    PValue* copy = clonePValue(&pvalue);
+    // If the symbol exists free its old value.
+    Symbol* symbol = searchHashTable(table, ident);
+    if (symbol) {
+        freePValue(symbol->value);
+        symbol->value = copy;
+    // Else add a new symbol with the new value.
+    } else {
+        addToHashTable(table, createSymbol(strsave(ident), copy), true);
+    }
+}
+
+void assignValueToSymbol(Context* context, String ident, PValue pvalue) {
     // Determine symbol table to use.
-    SymbolTable* table = symtab;
-    if (!isInHashTable(symtab, ident) && isInHashTable(globalTable, ident)) {
-        table = globalTable;
+    SymbolTable* table = context->frame->table;
+    if (!isInHashTable(table, ident) && isInHashTable(context->globals, ident)) {
+        table = context->globals;
     }
     // Prepare the value to put in the symbol table.
     PValue* copy = clonePValue(&pvalue);
@@ -69,13 +84,22 @@ void assignValueToSymbol(SymbolTable* symtab, String ident, PValue pvalue) {
     }
 }
 
-// getValueOfSymbol gets the value of a Symbol from a SymbolTable; PValue is returned on stack.
-PValue getValueOfSymbol(SymbolTable* symtab, String ident) {
+// getValueFromSymbolTable gets the value of a Symbol from a SymbolTable; PValue is returned on stack.
+PValue getValueFromSymbolTable(SymbolTable* symtab, String ident) {
     Symbol *symbol = searchHashTable(symtab, ident);
     if (!symbol) symbol = searchHashTable(globalTable, ident);
     if (!symbol || !symbol->value) return nullPValue;
 
     // Return a clone of the PValue (deep enough)
+    return cloneAndReturnPValue(symbol->value);
+}
+
+// getValueOfSymbol gets the value of a symbol from a Context; the PValue is returned on the stack.
+PValue getValueOfSymbol(Context* context, String ident) {
+    SymbolTable* locals = context->frame->table;
+    Symbol* symbol = searchHashTable(locals, ident);
+    if (!symbol) searchHashTable(context->globals, ident);
+    if (!symbol || !symbol->value) return nullPValue;
     return cloneAndReturnPValue(symbol->value);
 }
 

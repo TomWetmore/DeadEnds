@@ -4,7 +4,7 @@
 // DeadEnds script language. It is implemented using PValueTable.
 //
 // Created by Thomas Wetmore on 19 April 2023.
-// Last changed on 23 May 2024.
+// Last changed on 31 May 2025.
 
 #include "pvaluetable.h"
 #include "interp.h"
@@ -20,7 +20,7 @@ PValue __table(PNode* pnode, Context* context, bool* errflg) {
         return nullPValue;
     }
     PValueTable *pvtable = createPValueTable();
-    assignValueToSymbol(context->frame->table, var->identifier, PVALUE(PVTable, uTable, pvtable));
+    assignValueToSymbol(context, var->identifier, PVALUE(PVTable, uTable, pvtable));
     return nullPValue;
 }
 

@@ -1,11 +1,12 @@
-// DeadEnds
+//  DeadEnds
 //
-// builtinlist.c has the functions that implement the list datatype built-ins. They use the List
-// datatype. The elements of the lists are program values.
-// MNOTE: Memory management is an issue to be dealt with carefully.
+//  builtinlist.c has the functions that implement the list datatype built-ins. They use the List
+//  datatype. The elements of the lists are program values.
+//  MNOTE: Memory management is an issue to be dealt with carefully.
 //
-// Created by Thomas Wetmore on 16 April 2023.
-// Last changed on 23 May 2024.
+//  Created by Thomas Wetmore on 16 April 2023.
+//  Last changed on 31 May 2025.
+//
 
 #include "interp.h"
 #include "context.h"
@@ -27,9 +28,9 @@ PValue __list(PNode* pnode, Context* context, bool* errflg) {
     String ident = var->identifier;
     ASSERT(ident);
     List *list = createList(null, null, delete, false);
-    SymbolTable* table = context->frame->table;
-    assignValueToSymbol(table, ident, PVALUE(PVList, uList, list));
-    if (localDebugging) showSymbolTable(table);
+    //SymbolTable* table = context->frame->table;
+    assignValueToSymbol(context, ident, PVALUE(PVList, uList, list));
+    if (localDebugging) showSymbolTable(context->frame->table);
     return nullPValue;
 }
 
@@ -241,9 +242,8 @@ InterpType oldinterpForList(PNode* pnode, Context* context, PValue* pval) {
         PValue copy = *fromList;
         if (copy.type == PVString && copy.value.uString)
             copy.value.uString = strsave(copy.value.uString);  // deep copy
-        SymbolTable* table = context->frame->table;
-        assignValueToSymbol(table, pnode->elementIden, copy);
-        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, count++));
+        assignValueToSymbol(context, pnode->elementIden, copy);
+        assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, count++));
         switch (irc = interpret(pnode->loopState, context, pval)) {
             case InterpContinue:
             case InterpOkay: goto i;
@@ -274,9 +274,8 @@ InterpType interpForList(PNode* pnode, Context* context, PValue* pval) {
         PValue copy = *fromList;
         if (copy.type == PVString && copy.value.uString)
             copy.value.uString = strsave(copy.value.uString);  // deep copy
-        SymbolTable* table = context->frame->table;
-        assignValueToSymbol(table, pnode->elementIden, copy);
-        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, count++));
+        assignValueToSymbol(context, pnode->elementIden, copy);
+        assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, count++));
         switch (irc = interpret(pnode->loopState, context, pval)) {
             case InterpContinue:
             case InterpOkay: goto i;

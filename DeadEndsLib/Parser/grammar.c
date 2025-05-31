@@ -756,7 +756,7 @@ case 5:
 #line 58 "grammar.y"
 {  /* Interested in "global".*/
         if (eqstr("global", yyvsp[-3].identifier))
-            assignValueToSymbol(globalTable, yyvsp[-1].identifier, (PValue) {PVNull});
+            assignValueToSymbolTable(globalTable, yyvsp[-1].identifier, (PValue) {PVNull});
     }
 break;
 case 6:

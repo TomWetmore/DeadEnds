@@ -1,3 +1,4 @@
+//
 //  DeadEnds
 //  evaluate.c contains the functions that evaluate PNode expressions during interpretation.
 //  PNodes form the abstract syntax trees of DeadEnds scripts. They represent functions,
@@ -8,7 +9,7 @@
 //  identifiers to PValue pointers.
 
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 22 May 2025.
+//  Last changed on 31 May 2025.
 //
 
 #include "evaluate.h"
@@ -57,9 +58,8 @@ PValue evaluateIdent(PNode* pnode, Context* context) {
         printf("evaluateIdent: %d: %s\n", pnode->lineNumber, pnode->identifier);
     String ident = pnode->identifier;
     ASSERT(ident);
-    SymbolTable* table = context->frame->table;
-    if (symbolTableDebugging) showSymbolTable(table);
-    PValue orig = getValueOfSymbol(table, ident);
+    if (symbolTableDebugging) showSymbolTable(context->frame->table);
+    PValue orig = getValueOfSymbol(context, ident);
     // If the PValue is a string, copy the string.
     if (orig.type == PVString) {
         return createStringPValue(orig.value.uString);
@@ -87,8 +87,7 @@ bool evaluateConditional(PNode* pnode, Context* context, bool* errflg) {
         scriptError(pnode, "There was an error evaluating the conditional expression");
         return false;
     }
-    SymbolTable* table = context->frame->table;
-    if (iden) assignValueToSymbol(table, pnode->identifier, value);
+    if (iden) assignValueToSymbol(context, pnode->identifier, value);
     return pvalueToBoolean(value); // Coerce to bool.
 }
 
@@ -105,7 +104,7 @@ PValue evaluateBuiltin(PNode* pnode, Context* context, bool* errflg) {
 PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg) {
     String name = pnode->funcName;
 	if (debugging) printf("evaulateUserFunc: %s\n", name);
-    PNode *func = searchFunctionTable(functionTable, name);
+    PNode *func = searchFunctionTable(context->functions, name);
     if (!func) {
         scriptError(pnode, "function %s is undefined", name);
         *errflg = true;
@@ -123,7 +122,7 @@ PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg) {
             scriptError(pnode, "could not evaluate an argument of %s", name);
             return nullPValue;
         }
-        assignValueToSymbol(table, parm->identifier, value);
+        assignValueToSymbolTable(table, parm->identifier, value);
         arg = arg->next;
         parm = parm->next;
     }

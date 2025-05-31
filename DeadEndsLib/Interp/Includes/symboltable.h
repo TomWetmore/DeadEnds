@@ -5,7 +5,7 @@
 //    DeadEnds programs. Symbol tables are implented with hash tables.
 //
 // Created by Thomas Wetmore on 23 March 2023.
-// Last changed on 24 May 2025.
+// Last changed on 31 May 2025.
 //
 
 #ifndef symboltable_h
@@ -35,8 +35,10 @@ typedef struct Symbol {
 //  Interface to SymbolTable.
 SymbolTable *createSymbolTable(void);
 void deleteSymbolTable(SymbolTable*);
-void assignValueToSymbol(SymbolTable*, String, PValue);
-PValue getValueOfSymbol(SymbolTable*, String);
+void assignValueToSymbol(Context*, String, PValue);
+void assignValueToSymbolTable(SymbolTable*, String, PValue);
+PValue getValueOfSymbol(Context*, String);
+PValue getValueFromSymbolTable(SymbolTable*, String);
 void showSymbolTable(SymbolTable*); // Debug.
 
 #endif // symboltable_h

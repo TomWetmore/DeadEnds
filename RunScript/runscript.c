@@ -40,9 +40,11 @@ int main(int argc, char* argv[]) {
     }
     fprintf(stderr, "%s: Database created.\n", getMsecondsStr());
     // Parse and run the script.
-    parseProgram(scriptFile, scriptPath);
     fprintf(stderr, "%s: Script parsed.\n", getMsecondsStr());
-    interpScript(database, scriptFile);
+    Context* context = parseProgram(scriptFile, scriptPath);
+    context->database = database;
+    context->file = stdOutputFile();
+    interpScript(context, stdOutputFile());
     fprintf(stderr, "%s: RunScript done.\n", getMsecondsStr());
 }
 
@@ -75,22 +77,6 @@ static void getEnvironment(String* gedcom, String* script) {
     *script = getenv("DE_SCRIPTS_PATH");
     if (!*gedcom) *gedcom = ".";
     if (!*script) *script = ".";
-}
-
-// runScript runs a script by interpreting its main proc. After a script is parsed there must
-// be a proc named "main" in the global procedureTable. runScript creates a PNode to call that
-// proc, then creates the Context to call it in, and then calls it. The Context consists of the
-// Database and the main proc's Frame with SymbolTable.
-extern String curFileName;
-extern int curLine;
-static void runScript(Database* database, String fileName) {
-    // Create a PNode to call the main proc.
-    curFileName = "internal";
-    curLine = 1;
-    PNode* pnode = procCallPNode("main", null); // null because main has no parameters.
-                                                // Call the main proc.
-    Context* context = createContext(database, stdOutputFile());
-    interpret(pnode, context, null); // Call main proc.
 }
 
 // usage prints the RunScript usage message.

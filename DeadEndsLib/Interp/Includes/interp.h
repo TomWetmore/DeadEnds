@@ -3,7 +3,7 @@
 // interp.h is the header file for the DeadEnds script interpreter.
 //
 // Created by Thomas Wetmore on 8 December 2022.
-// Last changed on 22 May 2025.
+// Last changed on 31 May 2025.
 
 #ifndef interp_h
 #define interp_h
@@ -17,6 +17,7 @@
 #include "database.h"
 
 // Forward references.
+typedef struct Script Script;
 typedef struct PNode PNode;
 typedef struct HashTable SymbolTable;
 typedef struct Frame Frame;
@@ -31,16 +32,9 @@ typedef enum InterpType {
 // Report Interpreter.
 void initializeInterpreter(Database*);
 void initset(void);
-void initrassa(void);
-void parseProgram(String fileName, String searchPath);
-void finishInterpreter(void);
-void finishrassa(void);
-void progmessage(char*);
+Context* parseProgram(String fileName, String searchPath);
 
-//Context *createContext(SymbolTable*, Database*);
-//void deleteContext(Context*);
-
-void interpScript(Database*, String);
+void interpScript(Context*, File*);
 InterpType interpret(PNode*, Context*, PValue*);
 InterpType interpChildren(PNode*, Context*, PValue*);
 InterpType interpSpouses(PNode*, Context*, PValue*);
@@ -76,13 +70,8 @@ PNode *iden_node(String);
 bool iistype(PNode*, int);
 int num_params(PNode*);
 void scriptError(PNode*, String, ...);
-//void show_pnode(PNode*);
-//void show_pnodes(PNode*);
-PNode* string_node(String);
 int yylex(void);
 int yyparse(void);
-
-void interp_main(void);
 
 // Program running state flags.
 extern bool programParsing;

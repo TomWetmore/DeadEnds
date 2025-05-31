@@ -18,15 +18,14 @@
 // usage: indiset(IDEN) -> VOID
 PValue __indiset(PNode* pnode, Context* context, bool* errorFlag) {
     ASSERT(pnode && pnode->arguments && context);
-    PNode *argument = pnode->arguments; // Ident.
-    if (argument->type != PNIdent) {
+    PNode *arg = pnode->arguments; // Ident.
+    if (arg->type != PNIdent) {
         *errorFlag = true;
         scriptError(pnode, "The argument to indiset must be an identifier.");
         return nullPValue;
     }
     *errorFlag = false;
-    SymbolTable* table = context->frame->table;
-    assignValueToSymbol(table, argument->identifier,
+    assignValueToSymbol(context, arg->identifier,
                         PVALUE(PVSequence, uSequence, createSequence(context->database->recordIndex)));
     return nullPValue;
 }

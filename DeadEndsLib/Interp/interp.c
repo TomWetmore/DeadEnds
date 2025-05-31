@@ -6,7 +6,7 @@
 //  or may call a specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 25 May 2025.
+//  Last changed on 31 May 2025.
 //
 
 #include <stdarg.h>
@@ -43,27 +43,22 @@ bool programDebugging = false;
 // Interface between the lexer, parser, and interpreter.
 int Perrors = 0;      // Number of errors.
 
-//  remove_tables - Remove the interpreter's tables when no longer needed.
-//static void remove_tables(void) {
-//    deleteHashTable(procedureTable);
-//    deleteHashTable(globalTable);
-//    deleteHashTable(functionTable);
-//}
-
 extern String curFileName;
 extern int curLine;
 
 // interpScript interprets a DeadEnds script.
-void interpScript(Database* database, String scriptfile) {
+void interpScript(Context* context, File* outfile) {
     // Create a PNProcCall PNode to call the main proc.
     curFileName = "..synthetic..";
     curLine = 1;
     PNode* pnode = procCallPNode("main", null);
-    // Create the Context for running the main procedure.
-    Context* context = createContext(database, stdOutputFile());
+    // If user supplies and output file use it.
+    if (outfile && context->file != outfile) {
+        closeFile(context->file);
+        context->file = outfile;
+    }
     // Run the script by interpreting the main procedure.
     interpret(pnode, context, null);
-    deleteContext(context);
 }
 
 // interpret interprets a list of PNodes. If a return statement is found it returns the return
@@ -290,10 +285,10 @@ InterpType interpChildren (PNode* pnode, Context* context, PValue* pval) {
         scriptError(pnode, "the first argument to children must be a family");
         return InterpError;
     }
-    SymbolTable* table = context->frame->table;
+    //SymbolTable* table = context->frame->table;
     FORCHILDREN(fam, chil, key, nchil, context->database->recordIndex) {
-        assignValueToSymbol(table, pnode->childIden, PVALUE(PVPerson, uGNode, chil));
-        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, nchil));
+        assignValueToSymbol(context, pnode->childIden, PVALUE(PVPerson, uGNode, chil));
+        assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, nchil));
         InterpType irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
@@ -316,11 +311,10 @@ InterpType interpSpouses(PNode* pnode, Context* context, PValue *pval) {
         scriptError(pnode, "the first argument to spouses must be a person");
         return InterpError;
     }
-    SymbolTable* table = context->frame->table;
     FORSPOUSES(indi, spouse, fam, nspouses, context->database->recordIndex) {
-        assignValueToSymbol(table, pnode->spouseIden, PVALUE(PVPerson, uGNode, spouse));
-        assignValueToSymbol(table, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
-        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, nspouses));
+        assignValueToSymbol(context, pnode->spouseIden, PVALUE(PVPerson, uGNode, spouse));
+        assignValueToSymbol(context, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
+        assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, nspouses));
 
         InterpType irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
@@ -348,15 +342,14 @@ InterpType interpFamilies(PNode* pnode, Context* context, PValue *pval) {
     int count = 0;
     //Database *database = context->database;
     RecordIndex* index = context->database->recordIndex;
-    SymbolTable* table = context->frame->table;
     FORFAMSS(indi, fam, key, index) {
-        assignValueToSymbol(table, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
+        assignValueToSymbol(context, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
         SexType sex = SEXV(indi);
         if (sex == sexMale) spouse = familyToWife(fam, index);
         else if (sex == sexFemale) spouse = familyToHusband(fam, index);
         else spouse = null;
-        assignValueToSymbol(table, pnode->spouseIden, PVALUE(PVPerson, uGNode, spouse));
-        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, ++count));
+        assignValueToSymbol(context, pnode->spouseIden, PVALUE(PVPerson, uGNode, spouse));
+        assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, ++count));
         InterpType irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
@@ -380,13 +373,12 @@ InterpType interpFathers(PNode* pnode, Context* context, PValue *pval) {
         return InterpError;
     }
     int nfams = 0;
-    SymbolTable* table = context->frame->table;
     FORFAMCS(indi, fam, key, context->database->recordIndex)
     GNode *husb = familyToHusband(fam, context->database->recordIndex);
     if (husb == null) goto d;
-    assignValueToSymbol(table, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
-    assignValueToSymbol(table, pnode->fatherIden, PVALUE(PVFamily, uGNode, husb));
-    assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, ++nfams));
+    assignValueToSymbol(context, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
+    assignValueToSymbol(context, pnode->fatherIden, PVALUE(PVFamily, uGNode, husb));
+    assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, ++nfams));
     InterpType irc = interpret(pnode->loopState, context, pval);
     switch (irc) {
     case InterpContinue:
@@ -409,14 +401,13 @@ InterpType interpMothers (PNode* pnode, Context* context, PValue *pval) {
         return InterpError;;
     }
     int nfams = 0;
-    SymbolTable* table = context->frame->table;
     FORFAMCS(indi, fam, key, context->database->recordIndex) {
         GNode *wife = familyToWife(fam, context->database->recordIndex);
         if (wife == null) goto d;
         //  Assign the current loop identifier valujes to the symbol table.
-        assignValueToSymbol(table, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
-        assignValueToSymbol(table, pnode->motherIden, PVALUE(PVFamily, uGNode, wife));
-        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, ++nfams));
+        assignValueToSymbol(context, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
+        assignValueToSymbol(context, pnode->motherIden, PVALUE(PVFamily, uGNode, wife));
+        assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, ++nfams));
 
         // Intepret the body of the loop.
         InterpType irc = interpret(pnode->loopState, context, pval);
@@ -442,10 +433,9 @@ InterpType interpParents(PNode* pnode, Context* context, PValue *pval) {
         return InterpError;
     }
     int nfams = 0;
-    SymbolTable* table = context->frame->table;
     FORFAMCS(indi, fam, key, context->database->recordIndex) {
-        assignValueToSymbol(table, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
-        assignValueToSymbol(table, pnode->countIden,  PVALUE(PVInt, uInt, ++nfams));
+        assignValueToSymbol(context, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
+        assignValueToSymbol(context, pnode->countIden,  PVALUE(PVInt, uInt, ++nfams));
         irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
@@ -470,9 +460,8 @@ InterpType interpFornotes(PNode* pnode, Context* context, PValue *pval) {
         return InterpError;
     }
     if (!root) return InterpOkay;
-    SymbolTable* table = context->frame->table;
     FORTAGVALUES(root, "NOTE", sub, vstring) {
-        assignValueToSymbol(table, pnode->gnodeIden, createStringPValue(vstring));
+        assignValueToSymbol(context, pnode->gnodeIden, createStringPValue(vstring));
         irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
@@ -498,9 +487,8 @@ InterpType interp_fornodes(PNode* pnode, Context* context, PValue *pval) {
         return InterpError;
     }
     GNode *sub = root->child;
-    SymbolTable* table = context->frame->table;
     while (sub) {
-        assignValueToSymbol(table, pnode->gnodeIden, PVALUE(PVGNode, uGNode, sub));
+        assignValueToSymbol(context, pnode->gnodeIden, PVALUE(PVGNode, uGNode, sub));
         InterpType irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
@@ -523,8 +511,8 @@ InterpType interpForindi (PNode* pnode, Context* context, PValue* pvalue) {
     SymbolTable* table = context->frame->table;
     for (int i = 0; i < lengthList(roots); i++) {
         GNode* person = getListElement(roots, i);
-        assignValueToSymbol(table, pnode->personIden, PVALUE(PVPerson, uGNode, person));
-        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, i));
+        assignValueToSymbol(context, pnode->personIden, PVALUE(PVPerson, uGNode, person));
+        assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, i));
         InterpType irc = interpret(pnode->loopState, context, pvalue);
         switch (irc) {
         case InterpContinue:
@@ -547,8 +535,8 @@ InterpType interpForfam(PNode* pnode, Context* context, PValue* pvalue) {
     SymbolTable* table = context->frame->table;
     for (int i = 0; i < lengthList(roots); i++) {
         GNode* family = getListElement(roots, i);
-        assignValueToSymbol(table, pnode->familyIden, PVALUE(PVFamily, uGNode, family));
-        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, i));
+        assignValueToSymbol(context, pnode->familyIden, PVALUE(PVFamily, uGNode, family));
+        assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, i));
         InterpType irc = interpret(pnode->loopState, context, pvalue);
         switch (irc) {
         case InterpContinue:
@@ -571,8 +559,8 @@ InterpType interpForsour(PNode *pnode, Context *context, PValue *pvalue) {
     SymbolTable* table = context->frame->table;
     for (int i = 0; i < lengthList(roots); i++) {
         GNode* source = getListElement(roots, i);
-        assignValueToSymbol(table, pnode->familyIden, PVALUE(PVFamily, uGNode, source));
-        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, i));
+        assignValueToSymbol(context, pnode->familyIden, PVALUE(PVFamily, uGNode, source));
+        assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, i));
         InterpType irc = interpret(pnode->loopState, context, pvalue);
         switch (irc) {
         case InterpContinue:
@@ -595,8 +583,8 @@ InterpType interpForeven (PNode* node, Context* context, PValue *pvalue) {
     SymbolTable* table = context->frame->table;
     for (int i = 0; i < lengthList(roots); i++) {
         GNode *event = getListElement(roots, i);
-        assignValueToSymbol(table, node->eventIden, PVALUE(PVEvent, uGNode, event));
-        assignValueToSymbol(table, node->countIden, PVALUE(PVInt, uInt, i));
+        assignValueToSymbol(context, node->eventIden, PVALUE(PVEvent, uGNode, event));
+        assignValueToSymbol(context, node->countIden, PVALUE(PVInt, uInt, i));
         InterpType irc = interpret(node->loopState, context, pvalue);
         switch (irc) {
         case InterpContinue:
@@ -618,8 +606,8 @@ InterpType interpForothr(PNode *node, Context *context, PValue *pval) {
     RootList* roots = context->database->otherRoots;
     for (int i = 0; i <= lengthList(roots); i++) {
         GNode* othr = getListElement(roots, i);
-        assignValueToSymbol(table, node->otherIden, PVALUE(PVEvent, uGNode, othr));
-        assignValueToSymbol(table, node->countIden, PVALUE(PVInt, uInt, i));
+        assignValueToSymbol(context, node->otherIden, PVALUE(PVEvent, uGNode, othr));
+        assignValueToSymbol(context, node->countIden, PVALUE(PVInt, uInt, i));
         InterpType irc = interpret(node->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
@@ -648,13 +636,12 @@ InterpType interpretSequenceLoop(PNode* pnode, Context* context, PValue* pval) {
     }
     Sequence *seq = val.value.uSequence;
     RecordIndex* index = context->database->recordIndex;
-    SymbolTable* table = context->frame->table;
     FORSEQUENCE(seq, el, ncount) {
         GNode *indi = keyToPerson(el->root->key, index); // Update person in symbol table.
-        assignValueToSymbol(table, pnode->elementIden, PVALUE(PVPerson, uGNode, indi));
+        assignValueToSymbol(context, pnode->elementIden, PVALUE(PVPerson, uGNode, indi));
         PValue pvalue = (PValue) {PVInt, el->value}; // Update person's value in symbol table.
-        assignValueToSymbol(table, pnode->valueIden, pvalue);
-        assignValueToSymbol(table, pnode->countIden, PVALUE(PVInt, uInt, ncount));
+        assignValueToSymbol(context, pnode->valueIden, pvalue);
+        assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, ncount));
         switch (irc = interpret(pnode->loopState, context, pval)) {
         case InterpContinue:
         case InterpOkay: goto h;
@@ -707,7 +694,7 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
     // Get the procedure from the procedure table.
     String name = pnode->procName;
     if (callTracing) printf("calling: %s (line %d)\n", name, pnode->lineNumber);
-    PNode* proc = searchFunctionTable(procedureTable, name);
+    PNode* proc = searchFunctionTable(context->procedures, name);
     if (!proc) {
         scriptError(pnode, "procedure %s is undefined", name);
         return InterpError;
@@ -730,7 +717,7 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
             return InterpError;
         }
         // Assign values to the parameters in the called procedure's symbol table.
-        assignValueToSymbol(table, parm->identifier, value);
+        assignValueToSymbolTable(table, parm->identifier, value);
         arg = arg->next;
         parm = parm->next;
     }
@@ -780,8 +767,8 @@ InterpType interpTraverse(PNode* pnode, Context* context, PValue* returnValue) {
     SymbolTable* table = context->frame->table;
     while (true) {
         // Assign loop variables.
-        assignValueToSymbol(table, pnode->levelIden, PVALUE(PVInt, uInt, lev));
-        assignValueToSymbol(table, pnode->gnodeIden, PVALUE(PVGNode, uGNode, nodeStack[lev]));
+        assignValueToSymbol(context, pnode->levelIden, PVALUE(PVInt, uInt, lev));
+        assignValueToSymbol(context, pnode->gnodeIden, PVALUE(PVGNode, uGNode, nodeStack[lev]));
         // Interpret loop body
         InterpType irc = interpret(pnode->loopState, context, returnValue);
         switch (irc) {
@@ -861,7 +848,7 @@ void showFrame(Frame* frame) {
     SymbolTable* table = frame->table;
     FORSET(params, element)
         String param = (String) element;
-        PValue pvalue = getValueOfSymbol(table, param);
+        PValue pvalue = getValueFromSymbolTable(table, param);
         String svalue = pvalueToString(pvalue, false);
         printf("    %s: %s\n", param, svalue);
         stdfree(svalue);

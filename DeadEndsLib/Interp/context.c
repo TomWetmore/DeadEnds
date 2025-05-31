@@ -10,7 +10,14 @@
 #include "context.h"
 #include "frame.h"
 
-// createContext creates a Context from a Database and File.
+// createEmptyContext creates an empty Context.
+Context* createEmptyContext(void) {
+    Context* context = (Context*) stdalloc(sizeof(Context));
+    if (context) memset(context, 0, sizeof(Context));
+    return context;
+}
+
+// createContext creates a Context from a Database and a File.
 Context* createContext(Database *database, File* file) {
     Context* context = (Context*) stdalloc(sizeof(Context));
     context->frame = null;
