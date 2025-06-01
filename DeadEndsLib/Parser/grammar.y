@@ -1,9 +1,12 @@
+//
 //  DeadEnds
 //
-//  interp.y is the yacc file for the DeadEnds script language.
+//  grammar.y is the yacc file for the DeadEnds script language.
 //
 //  Created by Thomas Wetmore on 8 December 2022.
-//  Last changed 31 May 2025.
+//  Last changed 1 June 2025.
+//
+
 %{
 #include "lexer.h"
 #include "symboltable.h"
@@ -13,9 +16,9 @@
 #include <stdlib.h>
 
 // Global variables that form the interface between the lexer, parser and interpreter.
-extern SymbolTable *globalTable; // Global variables.
-extern FunctionTable *procedureTable;// User procedures.
-extern FunctionTable *functionTable; // User functions.
+extern SymbolTable *globals; // Global variables.
+extern FunctionTable *procedures;// User procedures.
+extern FunctionTable *functions; // User functions.
 extern List *pendingFiles; // Pending list of included files.
 extern int curLine; // Line number in current file.
 
@@ -57,7 +60,7 @@ static void yyerror(String str);
     |	func
     |	IDEN '(' IDEN ')' {  // Interested in "global".
         if (eqstr("global", $1))
-            assignValueToSymbolTable(globalTable, $3, (PValue) {PVNull});
+            assignValueToSymbolTable(globals, $3, (PValue) {PVNull});
     }
     |	IDEN '(' SCONS ')' {  // Interested in "include".
         if (eqstr("include", $1))
@@ -69,7 +72,7 @@ static void yyerror(String str);
     proc:	PROC m IDEN '(' idenso ')' '{' states '}' {
 		$$ = procDefPNode($3, $5, $8);
 		$$->lineNumber = (int) $2;
-        addToFunctionTable(procedureTable, $3, $$);
+        addToFunctionTable(procedures, $3, $$);
     }
     ;
 
@@ -77,7 +80,7 @@ static void yyerror(String str);
     func:	FUNC_TOK m IDEN '(' idenso ')' '{' states '}' {
 		$$ = funcDefPNode($3, $5, $8);
 		$$->lineNumber = (int) $2;
-        addToFunctionTable(functionTable, $3, $$);
+        addToFunctionTable(functions, $3, $$);
     }
     ;
     // idenso -- null if empty, or it is a list of IIDEN PNodes if not.

@@ -1,10 +1,12 @@
-// DeadEnds
 //
-// pvalue.c holds the functions that handle program expression values (PValues) when interpreting
-// DeadEnds scripts.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 15 December 2022.
-// Last changed on 22 May 2025.
+//  pvalue.c holds the functions that handle program expression values (PValues) when interpreting
+//  DeadEnds scripts.
+//
+//  Created by Thomas Wetmore on 15 December 2022.
+//  Last changed on 1 June 2025.
+//
 
 #include "pvalue.h"
 #include "standard.h"
@@ -17,8 +19,8 @@ bool isGNodeType(PVType type) {
     return type >= PVGNode && type <= PVOther;
 }
 
-// ptypes is the array of PValue type names for debugging.
-static char *ptypes[] = {
+// pvalueTypes is the array of PValue type names for debugging.
+static char *pvalueTypes[] = {
     "PVNull", "PVInt", "PVFloat", "PVBool", "PVString", "PVGNode", "PVPerson",
     "PVFamily", "PVSource", "PVEvent", "PVOther", "PVList", "PVTable", "PVSequence"};
 
@@ -92,15 +94,6 @@ void freePValue(PValue* ppvalue) {
     }
     stdfree(ppvalue);
 }
-
-// setPValue -- Set a program value.
-// TODO: THIS ISN'T GOING TO WORK ANYMORE.
-//void setPValue(PValue pvalue, int type, VUnion value) {
-//	if (pvalue.type == PVString && pvalue.value.uString) stdfree(pvalue.value.uString);
-//	pvalue.type = type;
-//	if (type == PVString && value.uString) value.uString = strsave(value.uString);
-//	pvalue.value = value;
-//}
 
 // numericPValue checks if a PValue has numeric type.
 bool numericPValue(PValue value) {

@@ -21,9 +21,9 @@ static bool debugging = false;
 extern bool programParsing;
 
 // Shared global variables. Memory ownership of the first four are taken over by the Script object.
-SymbolTable* globalTable; // Global symbol table.
-FunctionTable* functionTable; // User functions.
-FunctionTable* procedureTable; // User procedures.
+SymbolTable* globals; // Global symbol table.
+FunctionTable* functions; // User functions.
+FunctionTable* procedures; // User procedures.
 List* parsedFiles; // Parsed files (interned copies of file names.
 
 List* pendingFiles; // Files to be parsed.
@@ -50,9 +50,9 @@ Context* parseProgram(String fileName, String searchPath) {
 	Set* included = createStringSet(); // Parsed so far.
     programParsing = true;
 
-    globalTable = createSymbolTable();
-    procedureTable = createFunctionTable();
-    functionTable = createFunctionTable();
+    globals = createSymbolTable();
+    procedures = createFunctionTable();
+    functions = createFunctionTable();
 
     while (!isEmptyList(pendingFiles)) { // Iterate the files.
         String nextFile = (String) dequeueList(pendingFiles);
@@ -69,11 +69,11 @@ Context* parseProgram(String fileName, String searchPath) {
     // Parsing was successful. Create and return a Context object.
     Context* context = createEmptyContext();
     context->fileNames = parsedFiles;
-    context->globals = globalTable;
-    context->procedures = procedureTable;
-    context->functions = functionTable;
-    globalTable = null;
-    procedureTable = functionTable = null;
+    context->globals = globals;
+    context->procedures = procedures;
+    context->functions = functions;
+    globals = null;
+    procedures = functions = null;
     parsedFiles = null;
     programParsing = false;
     return context;

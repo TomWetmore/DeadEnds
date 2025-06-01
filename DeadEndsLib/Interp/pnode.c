@@ -3,7 +3,7 @@
 // pnode.c holds the functions that manage PNodes (program nodes).
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 25 May 2025.
+// Last changed on 1 June 2025.
 
 #include "pnode.h"
 #include "standard.h"
@@ -22,7 +22,7 @@ String pnodeTypes[] = {
     "Fathers", "Mothers", "FamsAsChild", "Notes"
 };
 
-extern FunctionTable *functionTable;  // parse.c
+extern FunctionTable *functions;  // parse.c
 extern String curFileName;  // parse.c; used to set the file name of PNodes.
 extern int curLine;   // parse.c; used to set the line numbers of PNodes.
 
@@ -163,7 +163,7 @@ PNode* funcDefPNode(String name, PNode* parms, PNode* body) {
 
 // funcCallPNode creates a builtin or user-defined function call program node.
 PNode* funcCallPNode(String name, PNode* alist) {
-    if (isInHashTable(functionTable, name)) { // User-defined.
+    if (isInHashTable(functions, name)) { // User-defined.
         PNode *node = allocPNode(PNFuncCall);
         node->funcName = name;
         node->arguments = alist;

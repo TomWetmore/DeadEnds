@@ -1,17 +1,21 @@
-// DeadEnds
 //
-// symboltable.c holds the functions that implement SymbolTables.
+//  DeadEnds Library
+//  symboltable.c holds the functions that implement SymbolTables.
 //
-// Created by Thomas Wetmore on 23 March 2023.
-// Last changed on 31 May 2025.
+//  Symbols own their own memeory. When a Symbol is looked up a copy is returned, including a copy of a string
+//  if the Symbol is a string. The functions that look up Symbols (getSymbol...) return copies of the Symbols.
+//
+//  There are two versions of the assign and get functions, one that takes a SymbolTable, and one that takes
+//  a Context.
+//
+//  Created by Thomas Wetmore on 23 March 2023.
+//  Last changed on 1 June 2025.
+//
 
 #include "standard.h"
 #include "symboltable.h"
 
-// globalTable holds the Symbols defined in the global scope.
-extern SymbolTable* globalTable;
-
-// compare compares two Symbols by ident fields.
+// compare compares two Symbols by their ident fields.
 static int compare(String a, String b) {
 	return strcmp(a, b);
 }
@@ -48,9 +52,7 @@ void deleteSymbolTable(SymbolTable* table) {
     deleteHashTable(table);
 }
 
-// assignValueToSymbol assigns a value to a Symbol. If the Symbol isn't in the local table, check
-// the global table.
-//void assignValueToSymbol(SymbolTable* symtab, String ident, PValue pvalue) {
+// assignValueToSymbolTable assigns a value to a Symbol.
 void assignValueToSymbolTable(SymbolTable* table, String ident, PValue pvalue) {
     // Prepare the value to put in the symbol table.
     PValue* copy = clonePValue(&pvalue);
@@ -65,6 +67,8 @@ void assignValueToSymbolTable(SymbolTable* table, String ident, PValue pvalue) {
     }
 }
 
+// assignValueToSymbol assigns a PValue to a Symbol in a Context. If the Symbol isn't in the current Frame's
+// table, check the global table.
 void assignValueToSymbol(Context* context, String ident, PValue pvalue) {
     // Determine symbol table to use.
     SymbolTable* table = context->frame->table;
@@ -87,10 +91,7 @@ void assignValueToSymbol(Context* context, String ident, PValue pvalue) {
 // getValueFromSymbolTable gets the value of a Symbol from a SymbolTable; PValue is returned on stack.
 PValue getValueFromSymbolTable(SymbolTable* symtab, String ident) {
     Symbol *symbol = searchHashTable(symtab, ident);
-    if (!symbol) symbol = searchHashTable(globalTable, ident);
     if (!symbol || !symbol->value) return nullPValue;
-
-    // Return a clone of the PValue (deep enough)
     return cloneAndReturnPValue(symbol->value);
 }
 
@@ -98,13 +99,12 @@ PValue getValueFromSymbolTable(SymbolTable* symtab, String ident) {
 PValue getValueOfSymbol(Context* context, String ident) {
     SymbolTable* locals = context->frame->table;
     Symbol* symbol = searchHashTable(locals, ident);
-    if (!symbol) searchHashTable(context->globals, ident);
+    if (!symbol) symbol = searchHashTable(context->globals, ident);
     if (!symbol || !symbol->value) return nullPValue;
     return cloneAndReturnPValue(symbol->value);
 }
 
 // showSymbolTable shows the contents of a SymbolTable. For debugging.
-// Assumes caller has provided a title if desired.
 void showSymbolTable(SymbolTable* table) {
 	for (int i = 0; i < table->numBuckets; i++) {
 		Bucket *bucket = table->buckets[i];

@@ -9,7 +9,7 @@
 //  usage: gensexpr -s scriptfile
 //
 //  Created by Thomas Wetmore on 4 March 2025.
-//  Last changed on 5 April 2025.
+//  Last changed on 1 June 2025.
 //
 
 #include <stdio.h>
@@ -17,9 +17,9 @@
 #include "functiontable.h"
 
 // Global tables filled by the by parseProgram() function.
-extern SymbolTable* globalTable; // Global variables.
-extern FunctionTable* functionTable; // User functions.
-extern FunctionTable* procedureTable; // User procedures.
+extern SymbolTable* globals; // Global variables.
+extern FunctionTable* functions; // User functions.
+extern FunctionTable* procedures; // User procedures.
 extern void printPNodeTreeAsSExpr(FILE *out, PNode *root);
 
 // Local functions.
@@ -76,31 +76,31 @@ static void getEnvironment(String* script) {
 
 // genSExpressions generates the S-Expressions from the PNode trees in the procedure and function tables.
 static void genSExpressions(void) {
-	fprintf(stderr, "procedureTable holds %d procedures\n", sizeHashTable(procedureTable));
-	fprintf(stderr, "functionTable holds %d functions\n", sizeHashTable(functionTable));
-    fprintf(stderr, "globalTable holds %d variables\n", sizeHashTable(globalTable));
+	fprintf(stderr, "procedures holds %d procedures\n", sizeHashTable(procedures));
+	fprintf(stderr, "functions holds %d functions\n", sizeHashTable(functions));
+    fprintf(stderr, "globals holds %d variables\n", sizeHashTable(globals));
 
     printf("{\n");
-	FORHASHTABLE(procedureTable, element)
+	FORHASHTABLE(procedures, element)
 		FunctionElement* functionElement = (FunctionElement*) element;
 		PNode* root = functionElement->function;
 		printPNodeTreeAsSExpr(stdout, root);
 	ENDHASHTABLE
 
-	FORHASHTABLE(functionTable, element)
+	FORHASHTABLE(functions, element)
 		FunctionElement* functionElement = (FunctionElement*) element;
 		PNode* root = functionElement->function;
 		printPNodeTreeAsSExpr(stdout, root);
 	ENDHASHTABLE
 
-    FORHASHTABLE(globalTable, element)
+    FORHASHTABLE(globals, element)
         Symbol* symbol = (Symbol*) element;
         printf("(global %s\n)\n", symbol->ident);
     ENDHASHTABLE
     printf("\n}\n");
 }
 
-// usage prints the RunScript usage message.
+// usage prints the usage message.
 static void usage(void) {
 	fprintf(stderr, "usage: gensexpr -s scriptfile\n");
 }

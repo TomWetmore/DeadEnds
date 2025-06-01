@@ -3,7 +3,7 @@
 //  test.c holds test functions used during development.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 7 December 2024.
+//  Last changed on 1 June 2025.
 
 #include <stdio.h>
 #include "standard.h"
@@ -27,7 +27,7 @@
 static bool debugging = false;
 extern String curFileName;
 extern int curLine;
-extern FunctionTable *procedureTable;
+extern FunctionTable *procedures;
 
 extern Database *importFromFile(String, ErrorLog*);
 extern void testSequence(Database*, int);

@@ -6,7 +6,7 @@
 //  or may call a specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 31 May 2025.
+//  Last changed on 1 June 2025.
 //
 
 #include <stdarg.h>
@@ -29,10 +29,12 @@ bool returnTracing = false;
 bool symbolTableTracing = false;
 bool frameTracing = false;
 
-extern FunctionTable *procedureTable;  // User-defined procedures.
-extern FunctionTable *functionTable;   // User-defined functions.
-extern SymbolTable *globalTable;       // Global symbol table.
+extern FunctionTable *procedures; // User-defined procedures.
+extern FunctionTable *functions;  // User-defined functions.
+extern SymbolTable *globals;      // Global symbol table.
 extern String pnodeTypes[];
+extern String curFileName;
+extern int curLine;
 
 void showRuntimeStack(Context*, PNode*); // Move elsewhere?
 
@@ -43,10 +45,9 @@ bool programDebugging = false;
 // Interface between the lexer, parser, and interpreter.
 int Perrors = 0;      // Number of errors.
 
-extern String curFileName;
-extern int curLine;
-
-// interpScript interprets a DeadEnds script.
+// interpScript interprets a DeadEnds script. A script must contain a main procedure (named "main"). interpScript
+// 'arranges' to call that procedure. This function creates a procedure call PNode to call main, updates the script
+// output file in the Context if the caller has provided one, and then 'calls' that PNode in the updated Context.
 void interpScript(Context* context, File* outfile) {
     // Create a PNProcCall PNode to call the main proc.
     curFileName = "..synthetic..";
@@ -58,7 +59,8 @@ void interpScript(Context* context, File* outfile) {
         context->file = outfile;
     }
     // Run the script by interpreting the main procedure.
-    interpret(pnode, context, null);
+    // TODO: Should look at the return code.
+    (void) interpret(pnode, context, null);
 }
 
 // interpret interprets a list of PNodes. If a return statement is found it returns the return
@@ -827,13 +829,23 @@ void showRuntimeStack(Context* context, PNode* pnode) {
     // Get the bottom frame.
     Frame* frame = context->frame;
     if (!frame) return;
-    printf("Run time Stack\n");
+    printf("Run Time Stack ");
     if (pnode) {
-        printf("from line %d in %s\n", pnode->lineNumber, frame->call->procName);
+        printf("from line %d in %s", pnode->lineNumber, frame->call->procName);
     }
+    printf("\n");
     for (; frame; frame = frame->caller) {
         showFrame(frame);
     }
+    printf("Global symbols:\n");
+    FORHASHTABLE(context->globals, element)
+    Symbol* symbol = (Symbol*) element;
+    String ident = symbol->ident;
+        String svalue = pvalueToString(*(symbol->value), false);
+        String type = typeOf(*(symbol->value));
+        printf("    %s: %s: %s\n", symbol->ident, svalue, type);
+        stdfree(svalue);
+    ENDHASHTABLE
 }
 
 // showFrame shows one frame of the run time stack.
@@ -842,7 +854,7 @@ void showFrame(Frame* frame) {
     String name = frame->call->procName;
     int callline = frame->call->lineNumber;
     int defnline = frame->defn->lineNumber;
-    printf("Frame: %s: defined: %d calls: %d\n", name, callline, defnline);
+    printf("Frame: %s: defined: %d called: %d\n", name, defnline, callline);
     printf("  parameters:\n");
     StringSet* params = getParameterSet(frame->defn);
     SymbolTable* table = frame->table;

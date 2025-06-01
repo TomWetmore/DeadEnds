@@ -4,7 +4,7 @@
 // expressions in the DeadEnds script language. They are the values stored in symbol tables.
 //
 // Created by Thomas Wetmore on 15 December 2022.
-// Last changed on 24 May 2025.
+// Last changed on 1 June 2025.
 
 #ifndef pvalue_h
 #define pvalue_h
@@ -100,6 +100,7 @@ PValue eqPValues(PValue, PValue, bool* eflag);
 void coercePValue(PValue* pvalue, int newType, bool* errorFlag);
 PValue* clonePValue(const PValue* original);
 PValue cloneAndReturnPValue(const PValue* original);
+String typeOf(PValue);
 //PValue copyPValue(PValue);
 //void deletePValue(PValue);
 //bool eqv_pvalues(PValue, PValue);

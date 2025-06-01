@@ -225,6 +225,28 @@ PValue __TYPEOF(PNode* pnode, Context* context, bool *errflg) {
     return createStringPValue(typename);
 }
 
+String typeOf(PValue pvalue) {
+    String typename;
+    switch (pvalue.type) {
+        case PVNull:     typename = "null"; break;
+        case PVInt:      typename = "int"; break;
+        case PVFloat:    typename = "float"; break;
+        case PVBool:     typename = "bool"; break;
+        case PVString:   typename = "string"; break;
+        case PVGNode:    typename = "gnode"; break;
+        case PVPerson:   typename = "person"; break;
+        case PVFamily:   typename = "family"; break;
+        case PVSource:   typename = "source"; break;
+        case PVEvent:    typename = "event"; break;
+        case PVOther:    typename = "other"; break;
+        case PVList:     typename = "list"; break;
+        case PVTable:    typename = "table"; break;
+        case PVSequence: typename = "sequence"; break;
+        default:         typename = "unknown"; break;
+    }
+    return typename;
+}
+
 // __SHOWSTACK prints the runtime stack.
 // usage: showstack()
 extern void showRuntimeStack(Context*, PNode*);
