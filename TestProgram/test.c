@@ -11,6 +11,7 @@
 #include "interp.h"
 #include "functiontable.h"
 #include "recordindex.h"
+#include "nameindex.h"
 #include "pnode.h"
 #include "errors.h"
 #include "sequence.h"

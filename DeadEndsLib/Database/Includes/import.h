@@ -11,6 +11,8 @@
 #ifndef import_h
 #define import_h
 
+#import "standard.h"
+
 typedef struct Database Database;
 typedef struct List List;
 typedef struct HashTable HashTable;

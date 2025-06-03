@@ -1,17 +1,20 @@
-// DeadEnds
 //
-// partition.c contains functions that partitions persons from a GNodeList into a List of
-// RootLists of persons in closed sets based on FAMS, FAMC, HUSB, WIFE & CHIL relationships.
+//  DeadEnds Partition
 //
-// Created by Thomas Wetmore on 11 December 2024.
-// Last changed on 14 December 2024.
+//  partition.c contains functions that partitions persons from a GNodeList into a List of
+//  RootLists of persons in closed sets based on FAMS, FAMC, HUSB, WIFE & CHIL relationships.
+//
+//  Created by Thomas Wetmore on 11 December 2024.
+//  Last changed on 3 June 2025.
+//
 
 #include <stdio.h>
 #include "errors.h"
 #include "gnodeindex.h"
 #include "gnodelist.h"
-#include "utils.h"
+#include "rootlist.h"
 #include "stringset.h"
+#include "utils.h"
 
 #define gms getMsecondsStr()
 static List* createPartition(GNode*, GNodeIndex*, StringSet*, ErrorLog*);

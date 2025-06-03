@@ -5,6 +5,10 @@
 // Created by Thomas Wetmore on 21 June 2024.
 // Last changed on 15 October 2024.
 
+#include "database.h"
+#include "errors.h"
+#include "list.h"
+#include "nameindex.h"
 #include "standard.h"
 #include "import.h"
 #include "utils.h"

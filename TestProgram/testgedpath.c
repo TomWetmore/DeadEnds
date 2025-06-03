@@ -1,12 +1,15 @@
-// testgedpath.c
-// TestProgram
 //
-// Created by Thomas Wetmore on 15 October 2024.
-// Last changed on 16 October 2024.
+//  DeadEnds TestProgram
+//  testgedpath.c
+//
+//  Created by Thomas Wetmore on 15 October 2024.
+//  Last changed on 3 June 2025.
+//
 
 #include "database.h"
 #include "gedpath.h"
 #include "gnodelist.h"
+#include "recordindex.h"
 #include "utils.h"
 
 void testGedPaths(Database* database, int testNumber) {

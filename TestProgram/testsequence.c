@@ -1,10 +1,13 @@
-// DeadEnds
 //
-// testsequence.c has code to test the Sequence data type.
+//  DeadEnds TestProgram
 //
-// Created by Thomas Wetmore on 2 May 2024.
-// Last changed on 16 May 2024.
+//  testsequence.c has code to test the Sequence data type.
+//
+//  Created by Thomas Wetmore on 2 May 2024.
+//  Last changed on 3 June 2025.
+//
 
+#include "database.h"
 #include "sequence.h"
 #include "utils.h"
 

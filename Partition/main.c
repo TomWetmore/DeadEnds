@@ -1,21 +1,24 @@
-// DeadEnds Partition
 //
-// main.c is the main program of the partition program. It reads a Gedcom file and partitions it
-// into closed sets of persons and families.
+//  DeadEnds Partition
 //
-// Created by Thomas Wetmore on 4 October 2024.
-// Last changed on 7 May 2025.
+//  main.c is the main program of the partition program. It reads a Gedcom file and partitions it
+//  into closed sets of persons and families.
+//
+//  Created by Thomas Wetmore on 4 October 2024.
+//  Last changed on 3 June 2025.
+//
 
 #include <stdio.h>
-#include "import.h"
-#include "gnodelist.h"
-#include "utils.h"
-#include "stringtable.h"
-#include "generatekey.h"
-#include "writenode.h"
-#include "file.h"
 #include "connect.h"
+#include "file.h"
+#include "generatekey.h"
+#include "gnodelist.h"
+#include "import.h"
 #include "partition.h"
+#include "rootlist.h"
+#include "stringtable.h"
+#include "utils.h"
+#include "writenode.h"
 
 #define gms getMsecondsStr()
 
