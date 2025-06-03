@@ -1,13 +1,16 @@
-// DeadEnds
 //
-// refnindex.c has the functions that implement the reference index. Gedcom records can have
-// 1 REFN nodes whose values give records unique identifiers.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 16 December 2023.
-// Last changed on 20 May 2025.
+//  refnindex.c has the functions that implement the reference index. Gedcom records can have
+//  1 REFN nodes whose values give records unique identifiers.
+//
+//  Created by Thomas Wetmore on 16 December 2023.
+//  Last changed on 3 June 2025.
+//
 
-#include "refnindex.h"
 #include "gedcom.h"
+#include "hashtable.h"
+#include "refnindex.h"
 
 static int numRefnIndexBuckets = 1024;
 

@@ -1,23 +1,22 @@
 //
+//  DeadEnds Library
 //  context.h
-//  C DeadEnds
 //
 //  Created by Thomas Wetmore on 21 May 2025.
-//  Last changed on 31 May 2025.
+//  Last changed on 3 June 2025.
 //
 
 #ifndef context_h
 #define context_h
 
-#include "database.h"
-#include "symboltable.h"
-#include "frame.h"
-#include "functiontable.h"
-
-// Forward references.
+typedef struct Database Database;
+typedef struct HashTable HashTable;
 typedef HashTable FunctionTable;
 typedef HashTable SymbolTable;
+typedef struct PValue PValue;
 typedef struct Frame Frame;
+typedef struct File File;
+typedef struct List List;
 
 // Program holds the context in which interpretation takes place.
 typedef struct Context {

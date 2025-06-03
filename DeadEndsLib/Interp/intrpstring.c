@@ -1,22 +1,22 @@
 //
+//  DeadEnds Library
 //  intrpstring.c
-//  CloneOne
 //
 //  Created by Thomas Wetmore on 14 February 2024.
-//  Last changed on 30 April 2025.
+//  Last changed on 3 June 2025.
 //
 
 #include <stdio.h>
-#include "standard.h"
-#include "interp.h"
 #include "evaluate.h"
+#include "interp.h"
+#include "pnode.h"
+#include "pvalue.h"
+#include "standard.h"
 #include "utils.h"
 
-//  __substring -- Find substring of string.
-//    usage: substring(STRING, INT, INT) -> STRING
-//--------------------------------------------------------------------------------------------------
-PValue __substring (PNode *pnode, Context *context, bool *errflg)
-{
+// __substring -- Find substring of string.
+//  usage: substring(STRING, INT, INT) -> STRING
+PValue __substring (PNode *pnode, Context *context, bool *errflg) {
 	PNode *arg = pnode->arguments;
 	String full = evaluateString(arg, context, errflg);
 	if (*errflg) {

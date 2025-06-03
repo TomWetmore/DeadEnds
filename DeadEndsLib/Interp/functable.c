@@ -1,14 +1,17 @@
-// DeadEnds
 //
-// functable.c has the table of built-in functions in the DeadEnds scripting language.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 10 January 2023.
-// Last changed on 26 May 2025.
+//  functable.c has the table of built-in functions in the DeadEnds scripting language.
+//
+//  Created by Thomas Wetmore on 10 January 2023.
+//  Last changed on 3 June 2025.
+//
 
 #include "standard.h"
 #include "symboltable.h"
 #include "gedcom.h"
 #include "interp.h"
+#include "pnode.h"
 
 extern PValue __add(PNode*, Context*, bool*);
 extern PValue __addnode(PNode*, Context*, bool*);

@@ -1,18 +1,17 @@
 //
-//
-//  C DeadEnds
-//  Frame.h
+//  DeadEnds Library
+//  frame.h is the header file for the sturture that defines the DeadEnds script run time stack.
 //
 //  Created by Thomas Wetmore on 20 May 2025.
-//  Last changed on 24 May 2025.
+//  Last changed on 3 June 2025.
 //
 
 #ifndef frame_h
 #define frame_h
 
-#include "symboltable.h"
-
-typedef HashTable SymbolTable; // Forward reference.
+typedef struct HashTable HashTable;
+typedef HashTable SymbolTable;
+typedef struct PNode PNode;
 
 // A Frame holds a routine's call PNode, definition PNode, SymbolTable, and its caller's Frame.
 typedef struct Frame Frame;

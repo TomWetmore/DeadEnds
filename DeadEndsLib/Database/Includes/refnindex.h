@@ -1,14 +1,14 @@
-// DeadEnds
+//  DeadEnds Library
 //
-// refnindex.h is the hearder file for the reference (REFN) index features.
+//  refnindex.h is the hearder file for the reference (REFN) index features.
 //
-// Created on 17 December 2023.
-// Last changed on 5 July 2024.
+//  Created on 17 December 2023.
+//  Last changed on 3 June 2025.
 
 #ifndef refnindex_h
 #define refnindex_h
 
-#include "hashtable.h"
+#include "standard.h"
 
 // RefnIndexEl is the type for elements in RefnIndexes. refn is the value of a 1 REFN Gedcom line
 // and key is the tag of the record it is in. Each refn key must be unique.

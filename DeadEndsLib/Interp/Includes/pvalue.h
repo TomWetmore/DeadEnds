@@ -1,25 +1,22 @@
-// DeadEnds
 //
-// pvalue.h is the header file for the program value (PValue) type. PValues are the values of
-// expressions in the DeadEnds script language. They are the values stored in symbol tables.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 15 December 2022.
-// Last changed on 1 June 2025.
+//  pvalue.h is the header file for the program value (PValue) type. PValues are the values of
+//  expressions in the DeadEnds script language. They are the values stored in symbol tables.
+//
+//  Created by Thomas Wetmore on 15 December 2022.
+//  Last changed on 2 June 2025.
+//
 
 #ifndef pvalue_h
 #define pvalue_h
 
-// Forward references.
+#include "standard.h"
+
 typedef struct Sequence Sequence;
 typedef struct HashTable PValueTable;
 typedef struct GNode GNode;
-
-#include "standard.h"
-#include "gnode.h"
-#include "pnode.h"
-#include "sequence.h"
-#include "list.h"
-#include "symboltable.h"
+typedef struct List List;
 
 // Macros that simplify creating union value and program value constants.
 #define PV(x) ((VUnion) { x })
@@ -30,8 +27,6 @@ typedef enum {
 	PVNull = 0, PVInt, PVFloat, PVBool, PVString, PVGNode, PVPerson,
 	PVFamily, PVSource, PVEvent, PVOther, PVList, PVTable, PVSequence
 } PVType;
-
-
 
 bool isGNodeType(PVType type);
 

@@ -23,6 +23,8 @@
 #include "date.h"
 #include "place.h"
 #include "context.h"
+#include "sequence.h"
+#include "frame.h"
 
 typedef struct Context Context;
 

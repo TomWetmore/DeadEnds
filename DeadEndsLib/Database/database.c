@@ -1,24 +1,27 @@
-// DeadEnds
 //
-// database.c has functions that provide an in-RAM database for Gedcom records. Each record is a
-// GNode tree. The backing store is a Gedcom file. When DeadEnds starts the Gedcom file is read
-// and used to build an internal database.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 10 November 2022.
-// Last changed 5 May 2025.
+//  database.c has functions that provide an in-RAM database for Gedcom records. Each record is a
+//  GNode tree. The backing store is a Gedcom file. When DeadEnds starts the Gedcom file is read
+//  and used to build an internal database.
+//
+//  Created by Thomas Wetmore on 10 November 2022.
+//  Last changed on 3 June 2025.
+//
 
 #include "database.h"
+#include "errors.h"
 #include "gnode.h"
+#include "import.h"
 #include "name.h"
-#include "recordindex.h"
-#include "stringtable.h"
 #include "nameindex.h"
 #include "path.h"
-#include "errors.h"
+#include "recordindex.h"
+#include "refnindex.h"
 #include "rootlist.h"
-#include "writenode.h"
+#include "stringtable.h"
 #include "validate.h"
-#include "import.h"
+#include "writenode.h"
 
 extern bool importDebugging;
 bool indexNameDebugging = false;

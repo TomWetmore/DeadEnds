@@ -1,10 +1,11 @@
-// DeadEnds Project
 //
-// gnode.h defines theGNode datatype. GNodes represent lines in a Gedcom file. GNodes are heap
-// objects.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 4 November 2022.
-// Last changed on 30 November 2024.
+//  gnode.h defines the GNode data type. GNodes represent lines in a Gedcom file.
+//
+//  Created by Thomas Wetmore on 4 November 2022.
+//  Last changed on 2 June 2025.
+//
 
 #ifndef gnode_h
 #define gnode_h
@@ -14,13 +15,13 @@ typedef struct HashTable HashTable;  // Forward reference.
 typedef struct Database Database;
 typedef enum SexType SexType;
 
-#include "standard.h"
+//#include "standard.h"
 #include "gedcom.h"
-#include "hashtable.h"
+//#include "hashtable.h"
 #include "database.h"
-#include "recordindex.h"
+//#include "recordindex.h"
 
-// GNode is the structure that holds a Gedcom line in its tree node form. Root nodes have keys.
+// GNode is the structure that holds a Gedcom line in its 'internal' form.
 typedef struct GNode GNode;
 struct GNode {
 	String key;     // Record key; only root nodes use this field.

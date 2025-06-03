@@ -1,11 +1,16 @@
-// DeadEnds
 //
-// import.c has functions that import Gedcom files into internal structures.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 13 November 2022.
-// Last changed on 9 May 2025.
+//  import.c has functions that import Gedcom files into internal structures.
+//
+//  Created by Thomas Wetmore on 13 November 2022.
+//  Last changed on 3 June 2025.
+//
 
+#include "database.h"
 #include "import.h"
+#include "rootlist.h"
+#include "stringset.h"
 #include "validate.h"
 #include "utils.h"
 

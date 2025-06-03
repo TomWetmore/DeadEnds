@@ -1,17 +1,21 @@
-//  DeadEnds
+//
+//  DeadEnds Library
 //
 //  builtinlist.c has the functions that implement the list datatype built-ins. They use the List
 //  datatype. The elements of the lists are program values.
 //  MNOTE: Memory management is an issue to be dealt with carefully.
 //
 //  Created by Thomas Wetmore on 16 April 2023.
-//  Last changed on 31 May 2025.
+//  Last changed on 3 June 2025.
 //
 
-#include "interp.h"
 #include "context.h"
+#include "frame.h"
+#include "interp.h"
 #include "list.h"
+#include "pnode.h"
 #include "pvalue.h"
+#include "symboltable.h"
 
 static bool localDebugging = false;
 

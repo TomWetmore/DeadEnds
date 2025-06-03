@@ -1,26 +1,23 @@
 //
-//  DeadEnds
+//  DeadEnds Library
 //
-//  pnode.h -- Header file for the program node structure.
+//  pnode.h is the header file for the PNode program node structure. PNode is the type of program nodes. PNode
+//  trees are the abstract syntax trees of the DeadEnds scripting language. The parser builds the trees for the
+//  procedures and functions it parses. The nodes represent both statements and expressions.
 //
 //  Created by Thomas Wetmore on 14 December 2022.
-//  Last changed on 9 May 2025.
+//  Last changed on 3 June 2025.
 //
 
 #ifndef pnode_h
 #define pnode_h
 
-typedef struct PValue PValue;  // Forward reference.
-typedef struct Context Context; 
 #include "standard.h"
-#include "symboltable.h"
-#include "interp.h"  // Context.
 
-// PNode is the type of program nodes. PNode trees are the abstract syntax trees of the DeadEnds scripting language.
-// The parser builds the trees for the procedures and functions it parses. The nodes represent both statements and
-// expressions.
-typedef struct PNode PNode;
+typedef struct Context Context;
 typedef struct HashTable SymbolTable;
+typedef struct PNode PNode;
+typedef struct PValue PValue;
 
 // PNType is the enumerated list of the PNode types.
 typedef enum PNType{

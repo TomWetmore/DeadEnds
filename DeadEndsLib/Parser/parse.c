@@ -1,21 +1,26 @@
-// DeadEnds
 //
-// parse.c contains two functions, parseProgram and parseFile, which parse DeadEnds scripts.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 4 January 2023.
-// Last changed on 30 May 2025.
+//  parse.c contains two functions, parseProgram and parseFile, which parse DeadEnds scripts.
+//
+//  Created by Thomas Wetmore on 4 January 2023.
+//  Last changed on 3 June 2025.
+//
 
-#include "parse.h"
 #include <stdarg.h>
+#include <unistd.h>
+#include "context.h"
 #include "functiontable.h"
-#include "integertable.h"
 #include "gedcom.h"
+#include "integertable.h"
 #include "interp.h"
 #include "list.h"
-#include "stringset.h"
+#include "parse.h"
 #include "path.h"
 #include "pnode.h"
-#include <unistd.h>  // sleep.
+#include "pvalue.h"
+#include "stringset.h"
+#include "symboltable.h"
 
 static bool debugging = false;
 extern bool programParsing;

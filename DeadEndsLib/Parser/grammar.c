@@ -9,13 +9,14 @@
 #define yyerrok (yyerrflag=0)
 #define YYRECOVERING() (yyerrflag!=0)
 #define YYPREFIX "yy"
-#line 11 "grammar.y"
-#include "lexer.h"
-#include "symboltable.h"
-#include "functiontable.h"
-#include "list.h"
-#include "interp.h"
+#line 13 "grammar.y"
 #include <stdlib.h>
+#include "functiontable.h"
+#include "interp.h"
+#include "lexer.h"
+#include "list.h"
+#include "pvalue.h"
+#include "symboltable.h"
 
 /* Global variables that form the interface between the lexer, parser and interpreter.*/
 extern SymbolTable *globals; /* Global variables.*/
@@ -31,7 +32,7 @@ static void join(PNode* list, PNode* last);
 static void yyerror(String str);
 
 #define YYSTYPE SemanticValue
-#line 35 "y.tab.c"
+#line 36 "y.tab.c"
 #define ICONS 257
 #define FCONS 258
 #define SCONS 259
@@ -541,7 +542,7 @@ short *yysslim;
 YYSTYPE *yyvs;
 unsigned int yystacksize;
 int yyparse(void);
-#line 301 "grammar.y"
+#line 304 "grammar.y"
 
 // join Joins a list of PNodes to another PNode (which may be the start of another list).
 // TODO: Isn't this generic enough to be moved to the pnode.[hc] files?
@@ -560,7 +561,7 @@ void yyerror(String str) {
 	printf("Syntax Error (%s): %s: line %d\n", str, curFileName, curLine);
 	Perrors++;
 }
-#line 556 "y.tab.c"
+#line 557 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack(void)
 {
@@ -753,21 +754,21 @@ yyreduce:
     switch (yyn)
     {
 case 5:
-#line 61 "grammar.y"
+#line 64 "grammar.y"
 {  /* Interested in "global".*/
         if (eqstr("global", yyvsp[-3].identifier))
             assignValueToSymbolTable(globals, yyvsp[-1].identifier, (PValue) {PVNull});
     }
 break;
 case 6:
-#line 65 "grammar.y"
+#line 68 "grammar.y"
 {  /* Interested in "include".*/
         if (eqstr("include", yyvsp[-3].identifier))
 			prependToList(pendingFiles, yyvsp[-1].string);
     }
 break;
 case 7:
-#line 72 "grammar.y"
+#line 75 "grammar.y"
 {
 		yyval.pnode = procDefPNode(yyvsp[-6].identifier, yyvsp[-4].pnode, yyvsp[-1].pnode);
 		yyval.pnode->lineNumber = (int) yyvsp[-7].integer;
@@ -775,7 +776,7 @@ case 7:
     }
 break;
 case 8:
-#line 80 "grammar.y"
+#line 83 "grammar.y"
 {
 		yyval.pnode = funcDefPNode(yyvsp[-6].identifier, yyvsp[-4].pnode, yyvsp[-1].pnode);
 		yyval.pnode->lineNumber = (int) yyvsp[-7].integer;
@@ -783,157 +784,157 @@ case 8:
     }
 break;
 case 9:
-#line 87 "grammar.y"
+#line 90 "grammar.y"
 {
         yyval.pnode = 0;
     }
 break;
 case 10:
-#line 90 "grammar.y"
+#line 93 "grammar.y"
 {
         yyval.pnode = yyvsp[0].pnode;
     }
 break;
 case 11:
-#line 97 "grammar.y"
+#line 100 "grammar.y"
 {
         yyval.pnode = iden_node(yyvsp[0].identifier);
     }
 break;
 case 12:
-#line 100 "grammar.y"
+#line 103 "grammar.y"
 {
         yyval.pnode = iden_node(yyvsp[-2].identifier);
         yyval.pnode->next = yyvsp[0].pnode;
     }
 break;
 case 13:
-#line 107 "grammar.y"
+#line 110 "grammar.y"
 {
         yyval.pnode = yyvsp[0].pnode;
     }
 break;
 case 14:
-#line 110 "grammar.y"
+#line 113 "grammar.y"
 {
         join(yyvsp[-1].pnode, yyvsp[0].pnode);
         yyval.pnode = yyvsp[-1].pnode;
     }
 break;
 case 15:
-#line 116 "grammar.y"
+#line 119 "grammar.y"
 {
         yyval.pnode = childrenPNode(yyvsp[-8].pnode, yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-10].integer;
     }
 break;
 case 16:
-#line 120 "grammar.y"
+#line 123 "grammar.y"
 {
         yyval.pnode = spousesPNode(yyvsp[-10].pnode, yyvsp[-8].identifier, yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-12].integer;
     }
 break;
 case 17:
-#line 124 "grammar.y"
+#line 127 "grammar.y"
 {
         yyval.pnode = familiesPNode(yyvsp[-10].pnode, yyvsp[-8].identifier, yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-12].integer;
     }
 break;
 case 18:
-#line 128 "grammar.y"
+#line 131 "grammar.y"
 {
         yyval.pnode = fathersPNode(yyvsp[-10].pnode, yyvsp[-8].identifier, yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-12].integer;
     }
 break;
 case 19:
-#line 132 "grammar.y"
+#line 135 "grammar.y"
 {
         yyval.pnode = mothersPNode(yyvsp[-10].pnode, yyvsp[-8].identifier, yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-12].integer;
     }
 break;
 case 20:
-#line 136 "grammar.y"
+#line 139 "grammar.y"
 {
         yyval.pnode = parentsPNode(yyvsp[-8].pnode, yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-10].integer;
     }
 break;
 case 21:
-#line 140 "grammar.y"
+#line 143 "grammar.y"
 {
         yyval.pnode = forindisetPNode(yyvsp[-10].pnode, yyvsp[-8].identifier, yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-12].integer;
     }
 break;
 case 22:
-#line 144 "grammar.y"
+#line 147 "grammar.y"
 {
         yyval.pnode = forlistPNode(yyvsp[-8].pnode, yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-10].integer;
     }
 break;
 case 23:
-#line 148 "grammar.y"
+#line 151 "grammar.y"
 {
         yyval.pnode = forindiPNode(yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-8].integer;
     }
 break;
 case 24:
-#line 152 "grammar.y"
+#line 155 "grammar.y"
 {
         yyval.pnode = fornotesPNode(yyvsp[-6].pnode, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-8].integer;
     }
 break;
 case 25:
-#line 156 "grammar.y"
+#line 159 "grammar.y"
 {
         yyval.pnode = forfamPNode(yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-8].integer;
     }
 break;
 case 26:
-#line 160 "grammar.y"
+#line 163 "grammar.y"
 {
         yyval.pnode = forsourPNode(yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-8].integer;
     }
 break;
 case 27:
-#line 164 "grammar.y"
+#line 167 "grammar.y"
 {
         yyval.pnode = forevenPNode(yyvsp[-6].identifier, yyvsp[-4].identifier,yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-8].integer;
     }
 break;
 case 28:
-#line 168 "grammar.y"
+#line 171 "grammar.y"
 {
         yyval.pnode = forothrPNode(yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-8].integer;
     }
 break;
 case 29:
-#line 172 "grammar.y"
+#line 175 "grammar.y"
 {
         yyval.pnode = traversePNode(yyvsp[-8].pnode, yyvsp[-6].identifier, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-10].integer;
     }
 break;
 case 30:
-#line 176 "grammar.y"
+#line 179 "grammar.y"
 {
         yyval.pnode = fornodesPNode(yyvsp[-6].pnode, yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-8].integer;
     }
 break;
 case 31:
-#line 180 "grammar.y"
+#line 183 "grammar.y"
 {
         yyvsp[-7].pnode->next = yyvsp[-6].pnode;  /* In case there is an identifier first.*/
         prev = null;  this = yyvsp[-1].pnode;
@@ -950,7 +951,7 @@ case 31:
     }
 break;
 case 32:
-#line 194 "grammar.y"
+#line 197 "grammar.y"
 {
         yyvsp[-5].pnode->next = yyvsp[-4].pnode;
         yyval.pnode = whilePNode(yyvsp[-5].pnode, yyvsp[-1].pnode);
@@ -958,159 +959,159 @@ case 32:
     }
 break;
 case 33:
-#line 199 "grammar.y"
+#line 202 "grammar.y"
 {
         yyval.pnode = procCallPNode(yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-3].integer;
     }
 break;
 case 34:
-#line 203 "grammar.y"
+#line 206 "grammar.y"
 {
         yyval.pnode = breakPNode();
         yyval.pnode->lineNumber = (int)yyvsp[-2].integer;
     }
 break;
 case 35:
-#line 207 "grammar.y"
+#line 210 "grammar.y"
 {
         yyval.pnode = continuePNode();
         yyval.pnode->lineNumber = (int)yyvsp[-2].integer;
     }
 break;
 case 36:
-#line 211 "grammar.y"
+#line 214 "grammar.y"
 {
         yyval.pnode = returnPNode(yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-3].integer;
     }
 break;
 case 37:
-#line 215 "grammar.y"
+#line 218 "grammar.y"
 {
         yyval.pnode = yyvsp[0].pnode;
     }
 break;
 case 38:
-#line 219 "grammar.y"
+#line 222 "grammar.y"
 {
         yyval.pnode = 0;
     }
 break;
 case 39:
-#line 222 "grammar.y"
+#line 225 "grammar.y"
 {
         yyval.pnode = yyvsp[0].pnode;
     }
 break;
 case 40:
-#line 226 "grammar.y"
+#line 229 "grammar.y"
 {
         yyval.pnode = yyvsp[0].pnode;
     }
 break;
 case 41:
-#line 229 "grammar.y"
+#line 232 "grammar.y"
 {
         yyvsp[-1].pnode->elseState = yyvsp[0].pnode;
         yyval.pnode = yyvsp[-1].pnode;
     }
 break;
 case 42:
-#line 234 "grammar.y"
+#line 237 "grammar.y"
 {
         yyvsp[-5].pnode->next = yyvsp[-4].pnode;
         yyval.pnode = ifPNode(yyvsp[-5].pnode, yyvsp[-1].pnode, null);
     }
 break;
 case 43:
-#line 241 "grammar.y"
+#line 244 "grammar.y"
 {
         yyval.pnode = 0;
     }
 break;
 case 44:
-#line 244 "grammar.y"
+#line 247 "grammar.y"
 {
         yyval.pnode = yyvsp[-1].pnode;
     }
 break;
 case 45:
-#line 250 "grammar.y"
+#line 253 "grammar.y"
 {
         yyval.pnode = iden_node((String)yyvsp[0].identifier);
         yyval.pnode->arguments = null;
     }
 break;
 case 46:
-#line 254 "grammar.y"
+#line 257 "grammar.y"
 {
         yyval.pnode = funcCallPNode(yyvsp[-4].identifier, yyvsp[-1].pnode);
         yyval.pnode->lineNumber = (int)yyvsp[-3].integer;
     }
 break;
 case 47:
-#line 258 "grammar.y"
+#line 261 "grammar.y"
 {
         yyval.pnode = sconsPNode(yyvsp[0].string);
     }
 break;
 case 48:
-#line 261 "grammar.y"
+#line 264 "grammar.y"
 {
         yyval.pnode = iconsPNode(yyvsp[0].integer);
     }
 break;
 case 49:
-#line 264 "grammar.y"
+#line 267 "grammar.y"
 {
         yyval.pnode = fconsPNode(yyvsp[0].floating);
     }
 break;
 case 50:
-#line 270 "grammar.y"
+#line 273 "grammar.y"
 {
         yyval.pnode = 0;
     }
 break;
 case 51:
-#line 273 "grammar.y"
+#line 276 "grammar.y"
 {
         yyval.pnode = yyvsp[0].pnode;
     }
 break;
 case 52:
-#line 279 "grammar.y"
+#line 282 "grammar.y"
 {
         yyval.pnode = yyvsp[0].pnode;
     }
 break;
 case 53:
-#line 282 "grammar.y"
+#line 285 "grammar.y"
 {
         yyvsp[-2].pnode->next = yyvsp[0].pnode;
         yyval.pnode = yyvsp[-2].pnode;
     }
 break;
 case 54:
-#line 287 "grammar.y"
+#line 290 "grammar.y"
 {
         yyval.pnode = 0;
     }
 break;
 case 55:
-#line 290 "grammar.y"
+#line 293 "grammar.y"
 {
         yyval.pnode = yyvsp[0].pnode;
     }
 break;
 case 56:
-#line 296 "grammar.y"
+#line 299 "grammar.y"
 {
         yyval.integer = curLine;
     }
 break;
-#line 1106 "y.tab.c"
+#line 1107 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

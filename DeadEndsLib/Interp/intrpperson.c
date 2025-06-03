@@ -1,9 +1,11 @@
-// DeadEnds
 //
-// intrpperson.c has the built-in script functions that deal with persons.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 17 March 2023.
-// Last changed on 9 May 2025.
+//  intrpperson.c has the built-in script functions that deal with persons.
+//
+//  Created by Thomas Wetmore on 17 March 2023.
+//  Last changed on 3 June 2025.
+//
 
 #include "standard.h"
 #include "pnode.h"
@@ -14,6 +16,7 @@
 #include "interp.h"
 #include "recordindex.h"
 #include "database.h"
+#include "context.h"
 
 // __name gets a person's name.
 // usage: name(INDI [,BOOL]) -> STRING

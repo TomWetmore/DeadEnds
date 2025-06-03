@@ -14,6 +14,8 @@
 #include "standard.h"
 #include "block.h"
 
+typedef struct Block Block;
+
 //#define INITIAL_BUCKET_LENGTH 30
 #define INITIAL_BUCKET_LENGTH 4  // DBUG: Make the initial bucket length small for debugging.
 //#define SORT_THRESHOLD 30

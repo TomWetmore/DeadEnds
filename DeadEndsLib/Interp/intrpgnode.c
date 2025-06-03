@@ -1,14 +1,15 @@
 //
-//  DeadEnds
+//  DeadEnds Library
 //
 //  intrpgnode.c -- This file has the interpreter's built-in functions that handle program
-//    nodes that hold gedcom nodes.
+//  nodes that hold gedcom nodes.
 //
 //  Created by Thomas Wetmore on 17 March 2023.
-//  Last changed on 16 May 2025.
+//  Last changed on 3 June 2025.
 //
 
 #include "standard.h"
+#include "gnode.h"
 #include "interp.h"
 #include "pnode.h"
 #include "pvalue.h"

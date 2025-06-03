@@ -1,12 +1,15 @@
 //
-//  DeadEnds
+//  DeadEnds Library
 //
 //  functiontable.c -- The DeadEnds function and procedure table datatype.
 //
 //  Created by Thomas Wetmore on 9 April 2023.
-//  Last changed on 20 May 2025.
+//  Last changed on 3 June 2025.
+//
 
 #include "functiontable.h"
+#include "pnode.h"
+#include "hashtable.h"
 
 static bool debugging = false;
 
@@ -16,8 +19,7 @@ static int compare(String a, String b) {
 }
 
 // getKey is the getKey function for FunctionTables.
-static String getKey(void* element)
-{
+static String getKey(void* element) {
 	FunctionElement* funcEl = (FunctionElement*) element;
 	return funcEl->name;
 }

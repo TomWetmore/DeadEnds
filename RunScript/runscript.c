@@ -1,17 +1,21 @@
-// DeadEnds
 //
-// main.c is the DeadEnds RunScript program. It has three steps.
-//  1. Create a Database from a Gedcom file.
-//  2. Parse a DeadEnds script file into its internal form.
-//  3. Run the script on the Database and write any output to stdout.
+// DeadEnds Runscript
 //
-// usage: runscript -g gedcomfile -s scriptfile
+//  main.c is the DeadEnds RunScript program. It has three steps.
+//   1. Create a Database from a Gedcom file.
+//   2. Parse a DeadEnds script file into its internal form.
+//   3. Run the script on the Database and write its output to a file.
 //
-// If DE_GEDCOM_PATH and/or DE_SCRIPTS_PATH are defined, they may be used to find the files.
+//  usage: runscript -g gedcomfile -s scriptfile
 //
-// Created by Thomas Wetmore on 21 July 2024
-// Last changed on 26 May 2025.
+//  If DE_GEDCOM_PATH and/or DE_SCRIPTS_PATH are defined, they may be used as search paths.
+//
+//  Created by Thomas Wetmore on 21 July 2024
+//  Last changed on 3 June 2025.
+//
 
+#include "file.h"
+#include "interp.h"
 #include "runscript.h"
 
 // Local functions.
@@ -44,7 +48,10 @@ int main(int argc, char* argv[]) {
     Context* context = parseProgram(scriptFile, scriptPath);
     context->database = database;
     context->file = stdOutputFile();
-    interpScript(context, stdOutputFile());
+    // Try out the file feature.
+    File* file = openFile("/Users/ttw4/runscript.out.txt", "w");
+    //interpScript(context, stdOutputFile());
+    interpScript(context, file);
     fprintf(stderr, "%s: RunScript done.\n", getMsecondsStr());
 }
 

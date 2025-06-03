@@ -1,6 +1,6 @@
 //
+//  DeadEnds Library
 //  functiontable.h
-//  JustParsing
 //
 //  Created by Thomas Wetmore on 9 April 2023.
 //  Last changed on 1 June 2023.
@@ -10,14 +10,14 @@
 #define functiontable_h
 
 #include "standard.h"
-#include "pnode.h"
+//#include "pnode.h"
+typedef struct HashTable HashTable;
+typedef struct PNode PNode;
 
-//  FunctionTable -- Hash table that holds DeadEnds procedures and user-defined functions.
-//--------------------------------------------------------------------------------------------------
+// FunctionTable is the hash table that holds DeadEnds procedures and user-defined functions.
 typedef HashTable FunctionTable;
 
-//  FuncElement -- Elements for the interpreter's table of procedures and user-defined functions.
-//--------------------------------------------------------------------------------------------------
+// FuncElement is an element of a FunctionTable.
 typedef struct {
 	String name;      //  Name of the procedure or function.
 	PNode *function;  //  Root program node of the procedure or function.

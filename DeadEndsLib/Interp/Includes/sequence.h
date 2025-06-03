@@ -1,22 +1,26 @@
-// DeadEnds
 //
-// sequence.h is the header file for the Sequence datatype.
-// NOTE: This datatype is located in the Interp subdirectory of the DeadEndsLib because it is
-// the data structure underlyihg the INDISEQ data type of DEScript. However, it could easily be
-// used as a more general purpose data structure.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 1 March 2023.
-// Last changed on 13 December 2024.
+//  sequence.h is the header file for the Sequence datatype.
+//  NOTE: This datatype is located in the Interp subdirectory of the DeadEndsLib because it is
+//  the data structure underlyihg the INDISEQ data type of DEScript. However, it could easily be
+//  used as a more general purpose data structure.
+//
+//  Created by Thomas Wetmore on 1 March 2023.
+//  Last changed on 2 June 2025.
+//
 
 #ifndef sequence_h
 #define sequence_h
 
-#include "standard.h"
 #include "block.h"
-#include "gnode.h"
-#include "recordindex.h"
-#include "nameindex.h"
-#include "refnindex.h"
+
+typedef struct GNode GNode;
+typedef struct HashTable HashTable;
+typedef HashTable RecordIndex;
+typedef HashTable NameIndex;
+typedef HashTable RefnIndex;
+typedef struct Block Block;
 
 // SortType holds the possible sorted states of a Sequence.
 typedef enum {

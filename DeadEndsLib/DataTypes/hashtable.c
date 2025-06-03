@@ -6,6 +6,7 @@
 // Created by Thomas Wetmore on 29 November 2022.
 // Last changed on 20 May 2025.
 
+#include "block.h"
 #include "standard.h"
 #include "hashtable.h"
 #include "sort.h"

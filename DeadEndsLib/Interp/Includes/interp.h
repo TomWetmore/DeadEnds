@@ -1,26 +1,26 @@
-// DeadEnds
 //
-// interp.h is the header file for the DeadEnds script interpreter.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 8 December 2022.
-// Last changed on 31 May 2025.
+//  interp.h is the header file for the DeadEnds script interpreter.
+//
+//  Created by Thomas Wetmore on 8 December 2022.
+//  Last changed on 3 June 2025.
+//
 
 #ifndef interp_h
 #define interp_h
 
 #include "standard.h"
-#include "pnode.h"
-#include "symboltable.h"
-#include "frame.h"
-#include "context.h"
-#include "pvalue.h"
-#include "database.h"
 
-// Forward references.
-typedef struct Script Script;
-typedef struct PNode PNode;
-typedef struct HashTable SymbolTable;
+typedef struct Context Context;
+typedef struct Database Database;
+typedef struct File File;
 typedef struct Frame Frame;
+typedef struct GNode GNode;
+typedef struct HashTable SymbolTable;
+typedef struct PNode PNode;
+typedef struct PValue PValue;
+typedef struct Script Script;
 
 #define CC 32 // 'Commutative constant'.
 

@@ -1,17 +1,21 @@
-// DeadEnds
 //
-// validate.c has the functions that validate Gedcom records.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 12 April 2023.
-// Last changed on 6 December 2024.
+//  validate.c has the functions that validate Gedcom records.
+//
+//  Created by Thomas Wetmore on 12 April 2023.
+//  Last changed on 3 June 2025.
+//
 
-#include "validate.h"
+#include "errors.h"
 #include "gnode.h"
 #include "gedcom.h"
-#include "recordindex.h"
+#include "hashtable.h"
+#include "integertable.h"
 #include "lineage.h"
-#include "errors.h"
+#include "recordindex.h"
 #include "refnindex.h"
+#include "validate.h"
 
 static bool validateSource(GNode*, Database*, ErrorLog*);
 static bool validateEvent(GNode*, Database*, ErrorLog*);

@@ -1,11 +1,12 @@
-// DeadEnds
+//  DeadEnds Library
 //
-// recordindex.c holds the functions that implement RecordIndex, a HashTable that maps Gedcom
-// record keys to the roots of the GNode trees with those keys.
+//  recordindex.c holds the functions that implement RecordIndex, a HashTable that maps Gedcom
+//  record keys to the roots of the GNode trees with those keys.
 //
-// Created by Thomas Wetmore on 29 November 2022.
-// Last changed on 11 December 2024.
+//  Created by Thomas Wetmore on 29 November 2022.
+//  Last changed on 3 June 2025.
 
+#include "hashtable.h"
 #include "recordindex.h"
 #include "list.h"
 #include "sort.h"

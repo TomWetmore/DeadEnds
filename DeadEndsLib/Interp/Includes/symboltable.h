@@ -1,25 +1,23 @@
 //
-// DeadEnds
+//  DeadEnds Library
 //
-// symboltable.h -- Header file for the symbol tables that hold the values of variables in
-//    DeadEnds programs. Symbol tables are implented with hash tables.
+//  symboltable.h is the header file for the symbol tables that hold the values of variables in
+//  DeadEnds programs. Symbol tables are implented with hash tables.
 //
-// Created by Thomas Wetmore on 23 March 2023.
-// Last changed on 1 June 2025.
+//  Created by Thomas Wetmore on 23 March 2023.
+//  Last changed on 3 June 2025.
 //
 
 #ifndef symboltable_h
 #define symboltable_h
 
+#include "standard.h"
+
 typedef struct PValue PValue;
 typedef struct PNode PNode;
 typedef struct Frame Frame;
-
-#include "standard.h"
-#include "hashtable.h"
-#include "pnode.h"
-#include "pvalue.h"
-#include "frame.h"
+typedef struct Context Context;
+typedef struct HashTable HashTable;
 
 
 // A SymbolTable holds DeadEnds script variables and their PValues.

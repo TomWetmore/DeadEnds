@@ -1,29 +1,31 @@
-// DeadEnds
 //
-// database.h is the header file for the Database type.
+//  DeadEnds
 //
-// Created by Thomas Wetmore on 10 November 2022.
-// Last changed on 5 May 2025.
+//  database.h is the header file for the Database type.
+//
+//  Created by Thomas Wetmore on 10 November 2022.
+//  Last changed on 3 June 2025.
+//
 
 #ifndef database_h
 #define database_h
 
 #include "standard.h"
-#include "hashtable.h"
-#include "recordindex.h"
-#include "nameindex.h"
-#include "refnindex.h"
-#include "gnode.h"
-#include "errors.h"
-#include "rootlist.h"
-#include "integertable.h"
 
-typedef HashTable RecordIndex; // Forward references.
+typedef struct Database Database; // Only needed because of where DatabaseAction is defined.
+typedef struct GNode GNode;
+typedef struct HashTable HashTable;
+typedef struct List List;
+
+typedef HashTable IntegerTable;
 typedef HashTable NameIndex;
+typedef HashTable RecordIndex;
+typedef HashTable RefnIndex;
 typedef List RootList;
+typedef List ErrorLog;
 
 // DBaseAction is a "Database action" that customizes Database processing.
-// NOTE: THIS IS A GOOD IDEA THAT IS NOT INCORPORTATED YET.
+// NOTE: THIS IS A GOOD IDEA THAT IS NOT YET INCORPORTATED.
 typedef void (*DBaseAction)(Database*, ErrorLog*);
 
 // Database is the structure that hold DeadEnds databases.

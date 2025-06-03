@@ -1,19 +1,22 @@
 //
-//  DeadEnds
+//  DeadEnds Library
 //
 //  grammar.y is the yacc file for the DeadEnds script language.
+//  I currently process this with oyacc, based on an old version of yacc, that I imported and built, because
+//  I do not like the code that bison produces, and this is the 'version' of yacc supported by Apple.
 //
 //  Created by Thomas Wetmore on 8 December 2022.
-//  Last changed 1 June 2025.
+//  Last changed 3 June 2025.
 //
 
 %{
-#include "lexer.h"
-#include "symboltable.h"
-#include "functiontable.h"
-#include "list.h"
-#include "interp.h"
 #include <stdlib.h>
+#include "functiontable.h"
+#include "interp.h"
+#include "lexer.h"
+#include "list.h"
+#include "pvalue.h"
+#include "symboltable.h"
 
 // Global variables that form the interface between the lexer, parser and interpreter.
 extern SymbolTable *globals; // Global variables.

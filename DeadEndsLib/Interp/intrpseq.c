@@ -1,18 +1,22 @@
-// DeadEnds
 //
-// intrpseq.c has the built-in script functions that access the Sequence functions. In the script
-// language this datatype is called an indiset. Each builtin calls one of the Sequence functions.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 4 March 2023.
-// Last changed on 23 May 2024.
+//  intrpseq.c has the built-in script functions that access the Sequence functions. In the script
+//  language this datatype is called an indiset. Each builtin calls one of the Sequence functions.
+//
+//  Created by Thomas Wetmore on 4 March 2023.
+//  Last changed on 3 June 2025.
+//
 
-#include "standard.h"
-#include "symboltable.h"
+#include "context.h"
+#include "evaluate.h"
 #include "gedcom.h"
 #include "interp.h"
-#include "sequence.h"
+#include "pnode.h"
 #include "pvalue.h"
-#include "evaluate.h"
+#include "sequence.h"
+#include "standard.h"
+#include "symboltable.h"
 
 // __indiset creates a sequence and assigns it to an identifier in a symbol table.
 // usage: indiset(IDEN) -> VOID

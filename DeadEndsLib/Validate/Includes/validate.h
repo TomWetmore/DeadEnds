@@ -1,16 +1,25 @@
-//  DeadEnds
+//
+//  DeadEnds Library
 //
 //  validate.h
 //
 //  Created by Thomas Wetmore on 12 April 2023.
-//  Last changed on 6 December 2024.
+//  Last changed on 3 June 2025.
+//
 
 #ifndef validate_h
 #define validate_h
 
-#include "database.h"
+//#include "database.h"
 #include "errors.h"
-#include "integertable.h"
+//#include "integertable.h"
+
+typedef struct GNode GNode;
+typedef struct HashTable HashTable;
+
+typedef HashTable IntegerTable;
+typedef HashTable RecordIndex;
+typedef HashTable RefnIndex;
 
 typedef enum ValidationCodes {
 	VCclosedKeys = 1,

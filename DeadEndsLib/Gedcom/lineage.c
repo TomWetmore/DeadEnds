@@ -1,9 +1,10 @@
-// DeadEnds
+//  DeadEnds Library
 //
-// lineage.c holds perations on GNodes based on genealogical relationsips and properties.
+//  lineage.c holds functions that peform genealogical operations on GNodes.
 //
-// Created by Thomas Wetmore on 17 February 2023.
-// Last changed on 12 May 2024.
+//  Created by Thomas Wetmore on 17 February 2023.
+//  Last changed on 2 June 2025.
+//
 
 #include "lineage.h"
 #include "gnode.h"
@@ -63,19 +64,9 @@ GNode* familyToHusband(GNode* node, RecordIndex* index) {
 	if (!(node = findTag(node->child, "HUSB"))) return null;
 	return keyToPerson(node->value, index);
 }
-GNode* newFamilyToHusband(GNode* node, RecordIndex* index) {
-	if (!node) return null;
-	if (!(node = findTag(node->child, "HUSB"))) return null;
-	return keyToPerson(node->value, index);
-}
 
 // familyToWife returns the first wife of a family, the first WIFE in the family.
 GNode* familyToWife(GNode* node, RecordIndex* index) {
-	if (!node) return null;
-	if (!(node = findTag(node->child, "WIFE"))) return null;
-	return keyToPerson(node->value, index);
-}
-GNode* newFamilyToWife(GNode* node, RecordIndex* index) {
 	if (!node) return null;
 	if (!(node = findTag(node->child, "WIFE"))) return null;
 	return keyToPerson(node->value, index);

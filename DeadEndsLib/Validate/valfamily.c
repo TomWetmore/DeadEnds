@@ -1,17 +1,20 @@
-// DeadEnds
 //
-// valfamily.c has the functions that validate family records.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 18 December 2023.
-// Last changed on 9 May 2025.
+//  valfamily.c has the functions that validate family records.
+//
+//  Created by Thomas Wetmore on 18 December 2023.
+//  Last changed on 3 June 2025.
+//
 
-#include "validate.h"
-#include "gnode.h"
-#include "gedcom.h"
-#include "recordindex.h"
-#include "lineage.h"
 #include "errors.h"
+#include "gedcom.h"
+#include "gnode.h"
+#include "hashtable.h"
+#include "lineage.h"
+#include "recordindex.h"
 #include "splitjoin.h"
+#include "validate.h"
 
 static bool validateFamily(GNode*, String name, RecordIndex*, IntegerTable*, ErrorLog*);
 extern bool importDebugging;

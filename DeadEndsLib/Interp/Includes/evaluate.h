@@ -1,5 +1,5 @@
 //
-//  DeadEnds
+//  DeadEnds Library
 //
 //  evaluate.h
 //
@@ -10,11 +10,12 @@
 #ifndef evaluate_h
 #define evaluate_h
 
-#include "symboltable.h"
-#include "pnode.h"
-#include "gnode.h"
-#include "pvalue.h"
-#include "interp.h"
+#include "standard.h"
+
+typedef struct Context Context;
+typedef struct GNode GNode;
+typedef struct PNode PNode;
+typedef struct PValue PValue;
 
 // TODO: Should some of these be made static inside evaluate.c?
 PValue evaluate(PNode*, Context*, bool*);          // Generic evaluator.

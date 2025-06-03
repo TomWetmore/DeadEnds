@@ -13,6 +13,8 @@
 //
 
 #include "evaluate.h"
+#include "frame.h"
+#include "gnode.h"
 #include "standard.h"
 #include "symboltable.h"
 #include "functiontable.h"

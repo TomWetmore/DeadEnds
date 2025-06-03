@@ -1,17 +1,20 @@
-// DeadEnds
 //
-// intrpfamily.c
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 17 March 2023.
-// Last changed on 21 May 2025.
+//  intrpfamily.c
+//
+//  Created by Thomas Wetmore on 17 March 2023.
+//  Last changed on 3 June 2025.
+//
 
-#include "standard.h"
+#include "context.h"
+#include "database.h"
+#include "evaluate.h"
+#include "interp.h"
+#include "lineage.h"
 #include "pnode.h"
 #include "pvalue.h"
-#include "evaluate.h"
-#include "lineage.h"
-#include "database.h"
-#include "context.h"
+#include "standard.h"
 
 // __marriage returns the first marriage event of a family.
 // usage: marriage(FAM) -> EVENT

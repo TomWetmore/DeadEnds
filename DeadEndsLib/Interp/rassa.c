@@ -1,17 +1,22 @@
-// DeadEnds
 //
-// rassa.c handles printing output from DeadEnds script programs.
+//  DeadEnds Library
+//  rassa.c handles printing output from DeadEnds script programs.
 //
-// Created by Thomas Wetmore on 10 February 2024.
-// Last changed on 17 May 2025.
+//  Created by Thomas Wetmore on 10 February 2024.
+//  Last changed on 3 June 2025.
+//
 
 #include <string.h>
 #include <stdio.h>
-#include "standard.h"
-#include "hashtable.h"
-#include "gedcom.h"
-#include "interp.h"
+#include "context.h"
 #include "evaluate.h"
+#include "file.h"
+#include "gedcom.h"
+#include "hashtable.h"
+#include "interp.h"
+#include "pnode.h"
+#include "pvalue.h"
+#include "standard.h"
 
 #define MAXROWS 512
 #define MAXCOLS 512
@@ -204,48 +209,10 @@ PValue __col (PNode *pnode, Context *context, bool *errflg)
 PValue __TYPEOF(PNode* pnode, Context* context, bool *errflg) {
     PValue pvalue = evaluate(pnode->arguments, context, errflg);
     if (*errflg) return nullPValue;
-    String typename;
-    switch (pvalue.type) {
-        case PVNull:     typename = "null"; break;
-        case PVInt:      typename = "int"; break;
-        case PVFloat:    typename = "float"; break;
-        case PVBool:     typename = "bool"; break;
-        case PVString:   typename = "string"; break;
-        case PVGNode:    typename = "gnode"; break;
-        case PVPerson:   typename = "person"; break;
-        case PVFamily:   typename = "family"; break;
-        case PVSource:   typename = "source"; break;
-        case PVEvent:    typename = "event"; break;
-        case PVOther:    typename = "other"; break;
-        case PVList:     typename = "list"; break;
-        case PVTable:    typename = "table"; break;
-        case PVSequence: typename = "sequence"; break;
-        default:         typename = "unknown"; break;
-    }
-    return createStringPValue(typename);
+    return createStringPValue(typeOf(pvalue));
 }
 
-String typeOf(PValue pvalue) {
-    String typename;
-    switch (pvalue.type) {
-        case PVNull:     typename = "null"; break;
-        case PVInt:      typename = "int"; break;
-        case PVFloat:    typename = "float"; break;
-        case PVBool:     typename = "bool"; break;
-        case PVString:   typename = "string"; break;
-        case PVGNode:    typename = "gnode"; break;
-        case PVPerson:   typename = "person"; break;
-        case PVFamily:   typename = "family"; break;
-        case PVSource:   typename = "source"; break;
-        case PVEvent:    typename = "event"; break;
-        case PVOther:    typename = "other"; break;
-        case PVList:     typename = "list"; break;
-        case PVTable:    typename = "table"; break;
-        case PVSequence: typename = "sequence"; break;
-        default:         typename = "unknown"; break;
-    }
-    return typename;
-}
+
 
 // __SHOWSTACK prints the runtime stack.
 // usage: showstack()

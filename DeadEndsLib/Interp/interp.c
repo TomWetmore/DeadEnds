@@ -1,37 +1,37 @@
 //
-//  C DeadEnds
+//  DeadEnds Library
 //
 //  interp.c holds functions that interpret DeadEnds scripts. The main function is interpret,
 //  which is called on a PNode. Depending on the PNode's type, interpret may handle it directly,
 //  or may call a specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 1 June 2025.
+//  Last changed on 3 June 2025.
 //
 
 #include <stdarg.h>
-#include "symboltable.h"
-#include "functiontable.h"
-#include "interp.h"
-#include "pnode.h"
-#include "evaluate.h"
-#include "lineage.h"
-#include "pvalue.h"
-#include "database.h"
-#include "list.h"
-#include "utils.h"
-#include "sequence.h"
 #include "context.h"
+#include "database.h"
+#include "evaluate.h"
+#include "file.h"
+#include "frame.h"
+#include "functiontable.h"
+#include "hashtable.h"
+#include "interp.h"
+#include "lineage.h"
+#include "list.h"
+#include "pnode.h"
+#include "pvalue.h"
+#include "sequence.h"
 #include "stringset.h"
+#include "symboltable.h"
+#include "utils.h"
 
 bool callTracing = false;
 bool returnTracing = false;
 bool symbolTableTracing = false;
 bool frameTracing = false;
 
-extern FunctionTable *procedures; // User-defined procedures.
-extern FunctionTable *functions;  // User-defined functions.
-extern SymbolTable *globals;      // Global symbol table.
 extern String pnodeTypes[];
 extern String curFileName;
 extern int curLine;

@@ -6,6 +6,7 @@
 // Last changed on 18 May 2025.
 //
 
+#include "errors.h"
 #include "stdlib.h"
 #include "splitjoin.h"
 #include "gnode.h"

@@ -1,14 +1,15 @@
 //
+//  DeadEnds Library
 //  context.c
-//  Library
 //
 //  Created by Thomas Wetmore on 21 May 2025.
-//  Last changed on 26 May 2025.
+//  Last changed on 2 June 2025.
 //
 
 #include <stdio.h>
 #include "context.h"
 #include "frame.h"
+#include "file.h"
 
 // createEmptyContext creates an empty Context.
 Context* createEmptyContext(void) {

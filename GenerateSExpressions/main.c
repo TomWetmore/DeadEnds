@@ -1,10 +1,11 @@
 //
-//  main.c
-//  gensexprs
-//  This is the DeadEnds gensexprs program. It parses a DeadEnds script file (and those it includes), which loads
-//  procedureTable, functionTable, and globalTable. The function and procedure tables hold PNode trees the make
-//  up the absract syntax form of the procedure and function bodies. The program then write those PNode trees to
-//  standard output as S-Expressions. The program uses DeadEndsLib to access to the script parser and PNode class.
+//  DeadEnds GenSExprsions
+//
+//  main.c is the main program of the DeadEnds gensexprs program. It parses a DeadEnds script file (and those it
+//  includes), which loads the procedures, functions, and globals tables. The function and procedure tables hold
+//  PNode trees the make up the absract syntax form of the procedure and function bodies. The program then writes
+//  those PNode trees to stdout as S-Expressions. The program uses DeadEndsLib to access to the script parser and
+//  the PNode class.
 //
 //  usage: gensexpr -s scriptfile
 //
@@ -17,16 +18,16 @@
 #include "functiontable.h"
 
 // Global tables filled by the by parseProgram() function.
-extern SymbolTable* globals; // Global variables.
-extern FunctionTable* functions; // User functions.
-extern FunctionTable* procedures; // User procedures.
+//extern SymbolTable* globals; // Global variables.
+//extern FunctionTable* functions; // User functions.
+//extern FunctionTable* procedures; // User procedures.
 extern void printPNodeTreeAsSExpr(FILE *out, PNode *root);
 
 // Local functions.
 static void usage(void);
 static void getArguments(int, char**, String*);
 static void getEnvironment(String*);
-static void genSExpressions(void);
+static void genSExpressions(Context*);
 
 // External functions (avoid header file).
 String getMsecondsStr(void);
@@ -42,10 +43,10 @@ int main(int argc, char* argv[]) {
     fprintf(stderr, "scriptFile is %s\n", scriptFile);
     fprintf(stderr, "scriptPath is %s\n", scriptPath);
 	// Parse the script into PNode trees.
-	parseProgram(scriptFile, scriptPath);
+	Context* context = parseProgram(scriptFile, scriptPath);
 	fprintf(stderr, "%s: Script parsed.\n", getMsecondsStr());
 	// Generate S-Expressions from the PNode trees.
-	genSExpressions();
+	genSExpressions(context);
 }
 
 // getArguments gets the arguments from the command line.
@@ -75,25 +76,25 @@ static void getEnvironment(String* script) {
 }
 
 // genSExpressions generates the S-Expressions from the PNode trees in the procedure and function tables.
-static void genSExpressions(void) {
-	fprintf(stderr, "procedures holds %d procedures\n", sizeHashTable(procedures));
-	fprintf(stderr, "functions holds %d functions\n", sizeHashTable(functions));
-    fprintf(stderr, "globals holds %d variables\n", sizeHashTable(globals));
+static void genSExpressions(Context* context) {
+	fprintf(stderr, "procedures holds %d procedures\n", sizeHashTable(context->procedures));
+	fprintf(stderr, "functions holds %d functions\n", sizeHashTable(context->functions));
+    fprintf(stderr, "globals holds %d variables\n", sizeHashTable(context->globals));
 
     printf("{\n");
-	FORHASHTABLE(procedures, element)
+	FORHASHTABLE(context->procedures, element)
 		FunctionElement* functionElement = (FunctionElement*) element;
 		PNode* root = functionElement->function;
 		printPNodeTreeAsSExpr(stdout, root);
 	ENDHASHTABLE
 
-	FORHASHTABLE(functions, element)
+	FORHASHTABLE(context->functions, element)
 		FunctionElement* functionElement = (FunctionElement*) element;
 		PNode* root = functionElement->function;
 		printPNodeTreeAsSExpr(stdout, root);
 	ENDHASHTABLE
 
-    FORHASHTABLE(globals, element)
+    FORHASHTABLE(context->globals, element)
         Symbol* symbol = (Symbol*) element;
         printf("(global %s\n)\n", symbol->ident);
     ENDHASHTABLE
