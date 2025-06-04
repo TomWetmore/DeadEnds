@@ -3,14 +3,14 @@
 //  functiontable.h
 //
 //  Created by Thomas Wetmore on 9 April 2023.
-//  Last changed on 1 June 2023.
+//  Last changed on 4 June 2023.
 //
 
 #ifndef functiontable_h
 #define functiontable_h
 
 #include "standard.h"
-//#include "pnode.h"
+
 typedef struct HashTable HashTable;
 typedef struct PNode PNode;
 

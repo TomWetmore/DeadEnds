@@ -1,9 +1,9 @@
 //
+//  DeadEnds Library
 //  nodeutils.h
-//  ImportGedcom
 //
 //  Created by Thomas Wetmore on 7 November 2022.
-//  Last changedd on 4 March 2023.
+//  Last changedd on 4 June 2025.
 //
 
 #ifndef nodeutils_h
@@ -23,5 +23,4 @@ bool isoList(GNode*, GNode*);
 bool equalNodes(GNode*, GNode*, bool, bool);
 bool isoGNodes(GNode*, GNode*, bool, bool);
 
-
-#endif /* nodeutils_h */
+#endif // nodeutils_h

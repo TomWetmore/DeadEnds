@@ -1,14 +1,16 @@
-// DeadEnds
 //
-// splitjoin.c has the functions that split persons and families into parts and join them back
-// together. Calling split and join formats GNode trees into standard form.
+// DeadEnds Library
 //
-// Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 19 May 2024.
+//  splitjoin.c has the functions that split persons and families into parts and join them back
+//  together. Calling split and join formats GNode trees into standard form.
+//
+//  Created by Thomas Wetmore on 7 November 2022.
+//  Last changed on 4 June 2025.
 
-#include "standard.h"
+#include "gedcom.h"
 #include "gnode.h"
 #include "splitjoin.h"
+#include "standard.h"
 
 // splitPerson splits a person GNode tree into parts.
 void splitPerson(GNode* indi, GNode** pname, GNode** prefn, GNode** psex, GNode** pbody,

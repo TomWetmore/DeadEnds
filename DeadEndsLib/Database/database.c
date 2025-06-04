@@ -6,12 +6,14 @@
 //  and used to build an internal database.
 //
 //  Created by Thomas Wetmore on 10 November 2022.
-//  Last changed on 3 June 2025.
+//  Last changed on 4 June 2025.
 //
 
 #include "database.h"
 #include "errors.h"
+#include "gedcom.h"
 #include "gnode.h"
+#include "hashtable.h"
 #include "import.h"
 #include "name.h"
 #include "nameindex.h"

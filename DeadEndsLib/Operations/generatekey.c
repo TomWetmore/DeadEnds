@@ -1,13 +1,16 @@
-// DeadEnds
 //
-// generatekey.c has the functions to generate random keys.
+//  DeadEnds
 //
-// Created by Thomas Wetmore on 1 June 2024.
-// Last changed on 14 March 2025.
+//  generatekey.c has the functions to generate random keys.
+//
+//  Created by Thomas Wetmore on 1 June 2024.
+//  Last changed on 4 June 2025.
+//
 
 #include "stdlib.h"
 #include "time.h"
 #include "gedcom.h"
+#include "set.h"
 #include "stringtable.h"
 #include "stringset.h"
 

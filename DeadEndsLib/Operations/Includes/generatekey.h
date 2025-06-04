@@ -1,12 +1,15 @@
-// DeadEnds
+//  DeadEnds Library
 //
-// generatekey.h
+//  generatekey.h
 //
-// Created by Thomas Wetmore on 20 July 2024.
-// Last changed on 14 March 2025.
+//  Created by Thomas Wetmore on 20 July 2024.
+//  Last changed on 4 June 2025.
+//
 
 #ifndef generatekey_h
 #define generatekey_h
+
+typedef enum RecordType RecordType;
 
 // Public interface.
 // generateRecordKey generates a new random key for a record type.

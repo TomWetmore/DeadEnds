@@ -4,19 +4,22 @@
 //  intrpperson.c has the built-in script functions that deal with persons.
 //
 //  Created by Thomas Wetmore on 17 March 2023.
-//  Last changed on 3 June 2025.
+//  Last changed on 4 June 2025.
 //
 
-#include "standard.h"
+#include "context.h"
+#include "database.h"
+#include "evaluate.h"
+#include "gedcom.h"
+#include "gnode.h"
+#include "interp.h"
+#include "lineage.h"
+#include "list.h"
+#include "name.h"
 #include "pnode.h"
 #include "pvalue.h"
-#include "evaluate.h"
-#include "name.h"
-#include "lineage.h"
-#include "interp.h"
 #include "recordindex.h"
-#include "database.h"
-#include "context.h"
+#include "standard.h"
 
 // __name gets a person's name.
 // usage: name(INDI [,BOOL]) -> STRING

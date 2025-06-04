@@ -4,9 +4,10 @@
 //  valfamily.c has the functions that validate family records.
 //
 //  Created by Thomas Wetmore on 18 December 2023.
-//  Last changed on 3 June 2025.
+//  Last changed on 4 June 2025.
 //
 
+#include "database.h"
 #include "errors.h"
 #include "gedcom.h"
 #include "gnode.h"

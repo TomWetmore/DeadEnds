@@ -1,14 +1,19 @@
-// DeadEnds
 //
-// rootlist.c holds the RootList datatype. A RootList is a List whose elements are pointers to
-// the root GNodes of Gedcom records.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 2 March 2024.
-// Last changed on 7 May 2025.
+//  rootlist.c holds the RootList datatype. A RootList is a List whose elements are pointers to
+//  the root GNodes of Gedcom records.
+//
+//  Created by Thomas Wetmore on 2 March 2024.
+//  Last changed on 4 June 2025.
+//
 
-#include "rootlist.h"
-#include "gnodelist.h"
+#include "errors.h"
+#include "file.h"
 #include "gnode.h"
+#include "gnodelist.h"
+#include "list.h"
+#include "rootlist.h"
 #include "writenode.h"
 
 // getKey is the get key function for RootLists.

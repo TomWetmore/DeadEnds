@@ -1,14 +1,14 @@
-//  DeadEnds
+//  DeadEnds Library
 //
 //  splitjoin.h defines the functions that split, join and normalize GNode records.
 //
 //  Created by Thomas Wetmore on 7 November 2022.
-//  Last changed on 22 June 2024.
+//  Last changed on 4 June 2025.
 
 #ifndef splitjoin_h
 #define splitjoin_h
 
-#include "gnode.h"
+typedef struct GNode GNode;
 
 // Prototypes of the functions found in splitjoin.c
 void splitPerson(GNode*, GNode**, GNode**, GNode**, GNode**, GNode**, GNode**);

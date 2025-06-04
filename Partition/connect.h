@@ -1,16 +1,19 @@
-// connect.h
-// Partition
+//  connect.h
+//  Partition
 //
 // Created by Thomas Wetmore on 5 October 2024.
-// Last changed on 11 October 2024.
+// Last changed on 4 June 2025.
 
 #ifndef connect_h
 #define connect_h
 
 #include <stdio.h>
 #include "standard.h"
-#include "gnode.h"
+//#include "gnode.h"
 #include "gnodeindex.h"
+
+typedef struct GNode GNode;
+typedef struct List List;
 
 // Connect data is the data field used in the GNodeIndexEls by the partition program. It holds
 // the numbers of ancestors and descendents of the persons in the index.

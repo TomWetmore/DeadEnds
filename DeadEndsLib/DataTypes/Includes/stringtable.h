@@ -1,16 +1,16 @@
-// DeadEnds Library
 //
-// stringtable.h is the header file for StringTables.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 23 April 2023.
-// Last changed on 21 November 2024.
+//  stringtable.h is the header file for StringTables. A StringTable is a HashTable that maps Strings to String.
+//
+//  Created by Thomas Wetmore on 23 April 2023.
+//  Last changed on 4 June 2025.
+//
 
 #ifndef stringtable_h
 #define stringtable_h
 
-#include "hashtable.h"
-
-// StringTable is a HashTable that maps Strings to Strings.
+typedef struct HashTable HashTable;
 typedef HashTable StringTable;
 
 // StringElement is an element in a StringTable.

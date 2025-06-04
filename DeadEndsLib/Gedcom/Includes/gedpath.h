@@ -1,15 +1,20 @@
-// DeadEnds
 //
-// gedpath.h is the header file for the GedPath feature.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 13 October 2024.
-// Last changed on 22 October 2024.
+//  gedpath.h is the header file for the GedPath feature.
+//
+//  Created by Thomas Wetmore on 13 October 2024.
+//  Last changed on 4 June 2025.
+//
 
 #ifndef gedpath_h
 #define gedpath_h
 
 #include "standard.h"
-#include "gnodelist.h"
+
+typedef struct GNode GNode;
+typedef struct List List;
+typedef List GNodeList;
 
 // GedPath is an element in a Gedcom path list.
 typedef struct GedPath GedPath;

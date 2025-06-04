@@ -1,11 +1,14 @@
-// DeadEnds Library
 //
-// integertable.c implements the IntegerTable data type, a HashTable that maps Strings
-// to integers.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 23 April 2023.
-// Last changed on 20 May 2025.
+//  integertable.c implements the IntegerTable data type, a HashTable that maps Strings
+//  to integers.
+//
+//  Created by Thomas Wetmore on 23 April 2023.
+//  Last changed on 4 June 2025.
+//
 
+#include "hashtable.h"
 #include "integertable.h"
 
 static String getKey(void* element) { return ((IntegerElement*) element)->key; }

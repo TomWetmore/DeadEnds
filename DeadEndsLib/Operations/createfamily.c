@@ -5,6 +5,7 @@
 // Created by Thomas Wetmore on 30 May 2024.
 // Last changed on 8 June 2024.
 
+#include "database.h"
 #include "gnode.h"
 #include "gedcom.h"
 #include "splitjoin.h"

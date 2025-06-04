@@ -1,10 +1,13 @@
-// DeadEnds
 //
-// stringset.c
+//  DeadEnds Lib
 //
-// Created by Thomas Wetmore on 20 April 2024.
-// Last changed on 9 December 2024.
+//  stringset.c
+//
+//  Created by Thomas Wetmore on 20 April 2024.
+//  Last changed on 4 June 2025.
+//
 
+#include "set.h"
 #include "stringset.h"
 
 // getKey is the getKey function for StringSets.

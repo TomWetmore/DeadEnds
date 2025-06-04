@@ -1,18 +1,22 @@
-// DeadEnds
 //
-// gnodeindex.c implemements the GNodeIndex data type. A GNodeIndex is a HashTable whose
-// elements are tuples of a GNode root and an arbitrary data object. The keys are the keys of
-// the root GNodes. The objects are arbitrary; it they should be deleted when the GNodeIndex
-// is deleted, a delete function should be passed to the createGNodeINdex function. Otherwise
-// pass null.
+//  DeadEnds Library
 //
-// A GNodeIndex is suited for special purpose indexes of Gedcom records/roots.
+//  gnodeindex.c implemements the GNodeIndex data type. A GNodeIndex is a HashTable whose
+//  elements are tuples of a GNode root and an arbitrary data object. The keys are the keys of
+//  the root GNodes. The objects are arbitrary; it they should be deleted when the GNodeIndex
+//  is deleted, a delete function should be passed to the createGNodeINdex function. Otherwise
+//  pass null.
 //
-// Created by Thomas Wetmore on 6 October 2024.
-// Last changed on 10 December 2024.
+//  A GNodeIndex is suited for special purpose indexes of Gedcom records/roots.
+//
+//  Created by Thomas Wetmore on 6 October 2024.
+//  Last changed on 4 June 2025.
+//
 
-#include <stdio.h>
+#include "gedcom.h"
+#include "gnode.h"
 #include "gnodeindex.h"
+#include "hashtable.h"
 
 // compare compares the keys from two Gnode index elements.
 static int compare(String left, String right) {

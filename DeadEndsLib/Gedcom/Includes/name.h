@@ -1,17 +1,18 @@
-// DeadEnds
 //
-// name.h is the header file for the Gedcom name functions.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 13 December 2024.
+//  name.h is the header file for the Gedcom name functions.
+//
+//  Created by Thomas Wetmore on 7 November 2022.
+//  Last changed on 4 June 2025.
+//
 
 #ifndef name_h
 #define name_h
 
 typedef struct Database Database;
-#include "standard.h"
-#include "nameindex.h"
-#include "recordindex.h"
+typedef struct List List;
+typedef HashTable NameIndex;
 
 // Some functions use static dataspace to construct names. MAXNAMELEN is the maximum length.
 #define MAXNAMELEN 512

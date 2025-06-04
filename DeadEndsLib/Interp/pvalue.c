@@ -5,12 +5,14 @@
 //  DeadEnds scripts.
 //
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 1 June 2025.
+//  Last changed on 4 June 2025.
 //
 
+#include "gedcom.h"
+#include "gnode.h"
+#include "list.h"
 #include "pvalue.h"
 #include "standard.h"
-#include "gedcom.h"
 
 extern const PValue nullPValue;  // Defined in builtin.c
 

@@ -1,12 +1,14 @@
-// DeadEnds
 //
-// hashtable.h is the header file for the HashTable data type. A HashTable is an array of buckets.
-// A bucket is a list of elements with the same hash value. Elements are defined by the user.
-// The user a getKey function to return the key of an element, and a compare function that is
-// use to keep the elements in a Bucket sorted.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore 29 November 2022.
-// Last changed on 7 October 2024.
+//  hashtable.h is the header file for the HashTable data type. A HashTable is an array of buckets.
+//  A bucket is a list of elements with the same hash value. Elements are defined by the user.
+//  The user a getKey function to return the key of an element, and a compare function that is
+//  use to keep the elements in a Bucket sorted.
+//
+//  Created by Thomas Wetmore 29 November 2022.
+//  Last changed on 4 June 2025.
+//
 
 #ifndef hashtable_h
 #define hashtable_h
@@ -14,12 +16,11 @@
 #include "standard.h"
 #include "block.h"
 
-typedef struct Block Block;
+#define INITIAL_BUCKET_LENGTH 30
+#define SORT_THRESHOLD 30
 
-//#define INITIAL_BUCKET_LENGTH 30
-#define INITIAL_BUCKET_LENGTH 4  // DBUG: Make the initial bucket length small for debugging.
-//#define SORT_THRESHOLD 30
-#define SORT_THRESHOLD 5  //  DBUG: Make the sort threshold small to debug the quick sort.
+//#define INITIAL_BUCKET_LENGTH 4  // DBUG: Make the initial bucket length small for debugging.
+//#define SORT_THRESHOLD 5  //  DBUG: Make the sort threshold small to debug the quick sort.
 
 // Bucket is the type of HashTable buckets.
 typedef struct Bucket {

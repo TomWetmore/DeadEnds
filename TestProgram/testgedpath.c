@@ -8,7 +8,9 @@
 
 #include "database.h"
 #include "gedpath.h"
+#include "gnode.h"
 #include "gnodelist.h"
+#include "list.h"
 #include "recordindex.h"
 #include "utils.h"
 

@@ -7,7 +7,8 @@
 //  Last changed on 20 May 2025.
 //
 
-#include "standard.h"
+#include "hashtable.h"
+//#include "standard.h"
 #include "stringtable.h"
 
 // getKey is the getKey function for StringTable.

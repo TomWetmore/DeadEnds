@@ -1,17 +1,18 @@
-// DeadEnds
 //
-// gedcom.h is the header file for Gedcom related data types and operations.
+// DeadEnds Library
 //
-// Created by Thomas Wetmore on 7 November 2022.
-// Last changed on 3 April 2025.
+//  gedcom.h is the header file for Gedcom related data types and operations.
+//
+//  Created by Thomas Wetmore on 7 November 2022.
+//  Last changed on 4 June 2025.
+//
 
 #ifndef gedcom_h
 #define gedcom_h
 
-typedef struct GNode GNode; // Forward ref.
 #include "standard.h"
-#include "gnode.h"
-#include "list.h"
+
+typedef struct GNode GNode; // Forward ref.
 
 // LN returns the line in the original Gedcom file where a GNode came from.
 #define LN(root, database, node) rootLine(root, database) + countNodesBefore(node)

@@ -4,22 +4,18 @@
 //  gnode.h defines the GNode data type. GNodes represent lines in a Gedcom file.
 //
 //  Created by Thomas Wetmore on 4 November 2022.
-//  Last changed on 2 June 2025.
+//  Last changed on 4 June 2025.
 //
 
 #ifndef gnode_h
 #define gnode_h
 
-typedef struct HashTable HashTable;  // Forward reference.
-#define RecordIndex HashTable
-typedef struct Database Database;
-typedef enum SexType SexType;
+#include "standard.h"
 
-//#include "standard.h"
-#include "gedcom.h"
-//#include "hashtable.h"
-#include "database.h"
-//#include "recordindex.h"
+typedef struct Database Database;
+typedef struct HashTable HashTable;
+typedef enum SexType SexType;
+typedef HashTable RecordIndex;
 
 // GNode is the structure that holds a Gedcom line in its 'internal' form.
 typedef struct GNode GNode;

@@ -1,21 +1,20 @@
-// DeadEnds
 //
-// rootlist.h
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 2 March 2024.
-// Last changed on 7 May 2025.
+//  rootlist.h
+//
+//  Created by Thomas Wetmore on 2 March 2024.
+//  Last changed on 4 June 2025.
 
 #ifndef rootlist_h
 #define rootlist_h
 
-#include "list.h"
-#include "gnode.h"
-#include "gnodelist.h"
-#include "integertable.h"
-#include "errors.h"
-#include "file.h"
+#include "standard.h"
 
-typedef List GNodeList; // Forward reference.
+typedef struct GNode GNode;
+typedef struct List List;
+typedef List GNodeList;
+typedef List ErrorLog;
 
 // RootList is a List of GNode* roots.
 typedef List RootList;

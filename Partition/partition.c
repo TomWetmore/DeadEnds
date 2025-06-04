@@ -5,14 +5,18 @@
 //  RootLists of persons in closed sets based on FAMS, FAMC, HUSB, WIFE & CHIL relationships.
 //
 //  Created by Thomas Wetmore on 11 December 2024.
-//  Last changed on 3 June 2025.
+//  Last changed on 4 June 2025.
 //
 
 #include <stdio.h>
 #include "errors.h"
+#include "gedcom.h"
+#include "gnode.h"
 #include "gnodeindex.h"
 #include "gnodelist.h"
+#include "hashtable.h"
 #include "rootlist.h"
+#include "set.h"
 #include "stringset.h"
 #include "utils.h"
 

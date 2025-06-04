@@ -5,12 +5,14 @@
 //  language this datatype is called an indiset. Each builtin calls one of the Sequence functions.
 //
 //  Created by Thomas Wetmore on 4 March 2023.
-//  Last changed on 3 June 2025.
+//  Last changed on 4 June 2025.
 //
 
 #include "context.h"
+#include "database.h"
 #include "evaluate.h"
 #include "gedcom.h"
+#include "gnode.h"
 #include "interp.h"
 #include "pnode.h"
 #include "pvalue.h"

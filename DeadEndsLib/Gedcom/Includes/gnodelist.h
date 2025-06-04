@@ -1,18 +1,23 @@
-// DeadEnds
 //
-// gnodelist.h
+// DeadEnds Library
 //
-// Created by Thomas Wetmore on 27 May 2024.
-// Last changed on 11 December 2024.
+//  gnodelist.h
+//
+//  Created by Thomas Wetmore on 27 May 2024.
+//  Last changed on 4 June 2025.
+//
 
 #ifndef gnodelist_h
 #define gnodelist_h
 
-#include "list.h"
-#include "gnode.h"
-#include "file.h"
-#include "integertable.h"
-#include "errors.h"
+#include "standard.h"
+
+typedef struct File File;
+typedef struct GNode GNode;
+typedef struct HashTable HashTable;
+typedef struct List List;
+typedef List ErrorLog;
+typedef HashTable IntegerTable;
 
 // GNodeList is a List of GNodeListEls.
 typedef List GNodeList;

@@ -10,6 +10,7 @@
 #include "standard.h"
 #include "gnode.h"
 #include "lineage.h"
+#include "list.h"
 #include "pvalue.h"
 #include "pnode.h"
 #include "name.h"

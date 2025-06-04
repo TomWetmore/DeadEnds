@@ -1,15 +1,17 @@
-// DeadEnds
 //
-// lineage.h is the header file for operations on GNodes based on genealogical relationsips
-// and properties
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 17 February 2023.
-// Last changed on 30 November 2024.
+//  lineage.h is the header file for operations on GNodes based on genealogical relationsips
+//  and properties
+//
+//  Created by Thomas Wetmore on 17 February 2023.
+//  Last changed on 4 June 2025.
+//
 
 #ifndef lineage_h
 #define lineage_h
 
-#include "gnode.h"
+typedef struct GNode GNode;
 
 GNode* personToFather(GNode*, RecordIndex*); // Return first father of a person.
 GNode* personToMother(GNode*, RecordIndex*); // Return first wife of a person.

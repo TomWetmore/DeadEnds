@@ -1,20 +1,24 @@
-// DeadEnds
 //
-// valperson.c contains functions that validate person records in a Database.
+//  DeadEnds Library
 //
-// Created by Thomas Wetmore on 17 December 2023.
-// Last changed on 8 December 2024.
+//  valperson.c contains functions that validate person records in a Database.
+//
+//  Created by Thomas Wetmore on 17 December 2023.
+//  Last changed on 4 June 2025.
+//
 
-#include "validate.h"
-#include "gnode.h"
-#include "gedcom.h"
-#include "recordindex.h"
-#include "lineage.h"
+#include "database.h"
 #include "errors.h"
-#include "list.h"
-#include "splitjoin.h"
+#include "gedcom.h"
+#include "gnode.h"
+#include "hashtable.h"
 #include "integertable.h"
+#include "lineage.h"
+#include "list.h"
+#include "recordindex.h"
+#include "splitjoin.h"
 #include "utils.h"
+#include "validate.h"
 
 #define LC(line, node) (line + countNodesBefore(node))
 

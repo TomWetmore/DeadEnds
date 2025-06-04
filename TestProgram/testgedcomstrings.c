@@ -5,6 +5,8 @@
 // Created by Thomas Wetmore on 27 May 2024.
 // Last changed on 20 May 2025.
 
+#include "errors.h"
+#include "gnode.h"
 #include "standard.h"
 #include "readnode.h"
 #include "gnodelist.h"
