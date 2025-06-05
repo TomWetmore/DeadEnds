@@ -4,34 +4,14 @@
 //  test.c holds test functions used during development.
 //
 //  Created by Thomas Wetmore on 5 October 2023.
-//  Last changed on 4 June 2025.
+//  Last changed on 5 June 2025.
 //
 
-#include <stdio.h>
-#include "database.h"
-#include "errors.h"
-#include "functiontable.h"
-#include "gedcom.h"
-#include "gnode.h"
-#include "hashtable.h"
-#include "import.h"
-#include "interp.h"
-#include "list.h"
-#include "nameindex.h"
-#include "parse.h"
-#include "path.h"
-#include "pnode.h"
-#include "readnode.h"
-#include "recordindex.h"
-#include "sequence.h"
-#include "standard.h"
-#include "stringtable.h"
-#include "utils.h"
-#include "validate.h"
+#include "deadends.h"
 
 #define gms getMsecondsStr()
 
-static bool debugging = false;
+//static bool debugging = false;
 extern String curFileName;
 extern int curLine;
 extern FunctionTable *procedures;

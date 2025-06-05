@@ -1,17 +1,12 @@
-// DeadEnds
+//  DeadEnds (Test Program)
 //
-// importone.c has the test function that tries to create a Database for the rest of the tests.
+//  importone.c has the test function that tries to create a Database for the rest of the tests.
 //
-// Created by Thomas Wetmore on 21 June 2024.
-// Last changed on 15 October 2024.
+//  Created by Thomas Wetmore on 21 June 2024.
+//  Last changed on 5 June 2025.
+//
 
-#include "database.h"
-#include "errors.h"
-#include "list.h"
-#include "nameindex.h"
-#include "standard.h"
-#include "import.h"
-#include "utils.h"
+#include "deadends.h"
 
 // importDatabaseTest tests the new import organization.
  Database* importDatabaseTest(ErrorLog* log, int testNumber) {

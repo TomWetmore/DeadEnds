@@ -4,12 +4,10 @@
 //  testsequence.c has code to test the Sequence data type.
 //
 //  Created by Thomas Wetmore on 2 May 2024.
-//  Last changed on 3 June 2025.
+//  Last changed on 5 June 2025.
 //
 
-#include "database.h"
-#include "sequence.h"
-#include "utils.h"
+#include "deadends.h"
 
 static void checkTest(String, int, int);
 static Sequence* tomsAncestors(RecordIndex*);

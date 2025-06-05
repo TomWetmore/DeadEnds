@@ -5,8 +5,7 @@
 // Created by Thomas Wetmore on 30 May 2024.
 // Last changed on 7 June 2024.
 
-#include "database.h"
-#include "utils.h"
+#include "deadends.h"
 
 void testWriteDatabase(String fileName, Database* database) {
 	printf("START WRITE DATABASE TEST: %2.3f\n", getMseconds());

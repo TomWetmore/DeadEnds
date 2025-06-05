@@ -3,9 +3,7 @@
 //  Created by Thomas Wetmore on 3 November 2023.
 //  Last changed on 25 March 2024.
 
-#include <stdio.h>
-#include "set.h"
-#include "gedcom.h"
+#include "deadends.h"
 
 int compare(String element1, String element2) {
 	return compareRecordKeys(element1, element2);

@@ -1,19 +1,21 @@
-//  connect.h
-//  Partition
 //
-// Created by Thomas Wetmore on 5 October 2024.
-// Last changed on 4 June 2025.
+//  DeadEnds (Partition)
+//  connect.h is a header file used by the Partition program. It defines the ConnectData type used as data
+//  in GNodeIndexEls.
+//
+//  Created by Thomas Wetmore on 5 October 2024.
+//  Last changed on 5 June 2025.
+//
 
 #ifndef connect_h
 #define connect_h
 
-#include <stdio.h>
 #include "standard.h"
-//#include "gnode.h"
-#include "gnodeindex.h"
 
 typedef struct GNode GNode;
+typedef struct HashTable HashTable;
 typedef struct List List;
+typedef HashTable GNodeIndex;
 
 // Connect data is the data field used in the GNodeIndexEls by the partition program. It holds
 // the numbers of ancestors and descendents of the persons in the index.

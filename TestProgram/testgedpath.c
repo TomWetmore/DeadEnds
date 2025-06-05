@@ -6,13 +6,7 @@
 //  Last changed on 3 June 2025.
 //
 
-#include "database.h"
-#include "gedpath.h"
-#include "gnode.h"
-#include "gnodelist.h"
-#include "list.h"
-#include "recordindex.h"
-#include "utils.h"
+#include "deadends.h"
 
 void testGedPaths(Database* database, int testNumber) {
 	printf("%d: START OF TEST GED PATHS: %2.3f\n", testNumber, getMseconds());

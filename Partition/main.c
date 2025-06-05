@@ -5,26 +5,13 @@
 //  into closed sets of persons and families.
 //
 //  Created by Thomas Wetmore on 4 October 2024.
-//  Last changed on 4 June 2025.
+//  Last changed on 5 June 2025.
 //
 
 #include <stdio.h>
+#include "deadends.h"
 #include "connect.h"
-#include "database.h"
-#include "errors.h"
-#include "file.h"
-#include "gedcom.h"
-#include "generatekey.h"
-#include "gnode.h"
-#include "gnodelist.h"
-#include "hashtable.h"
-#include "import.h"
-#include "integertable.h"
 #include "partition.h"
-#include "rootlist.h"
-#include "stringtable.h"
-#include "utils.h"
-#include "writenode.h"
 
 #define gms getMsecondsStr()
 
@@ -36,8 +23,9 @@ static GNodeIndex* createIndexOfGNodes(GNodeList*);
 static GNodeList* removeNonPersons(GNodeList*);
 static void showConnects(List*, GNodeIndex*);
 static void showPartitions(List*, RecordIndex*);
+static void showPartitionSizes(List*);
 static bool debugging = false;
-static bool timing = false;
+static bool timing = true;
 static bool brownnose = false;
 
 // main is the main program of the partition program. It reads a Gedcom file into a RootList and
@@ -89,6 +77,7 @@ int main(int argc, char** argv) {
 	ENDLIST
 	if (timing) printf("%s: Partition: computed connectedness numbers.\n", gms);
 
+    showPartitionSizes(partitions);
 	showPartitions(partitions, index);
 
 	// Find the most connected person.
@@ -192,6 +181,13 @@ static void showPartitions(List* partitions, RecordIndex* index) {
 		printf("%4d: ", count++);
 		showConnects((List*) el, index);
 	ENDLIST
+}
+
+static void showPartitionSizes(List* partitions) {
+    int count = 0;
+    FORLIST(partitions, el);
+        printf("%4d: %d\n", ++count, lengthList((List*) el));
+    ENDLIST
 }
 
 

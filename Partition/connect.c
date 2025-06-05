@@ -1,14 +1,13 @@
-// connect.c
-// Partition
 //
-// Created by Thomas Wetmore on 5 October 2024.
-// Last changed on 11 October 2024.
+//  DeadEnds (Partition)
+//  connect.c
+//
+//  Created by Thomas Wetmore on 5 October 2024.
+//  Last changed on 5 June 2025.
+//
 
+#include "deadends.h"
 #include "connect.h"
-#include "gnode.h"
-#include "gnodeindex.h"
-#include "hashtable.h"
-#include "list.h"
 
 static int getNumAncestors(GNode*, GNodeIndex*);
 static int getNumDescendents(GNode*, GNodeIndex*);
