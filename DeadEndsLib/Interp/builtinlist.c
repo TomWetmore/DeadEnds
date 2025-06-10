@@ -6,15 +6,17 @@
 //  MNOTE: Memory management is an issue to be dealt with carefully.
 //
 //  Created by Thomas Wetmore on 16 April 2023.
-//  Last changed on 3 June 2025.
+//  Last changed on 10 June 2025.
 //
 
 #include "context.h"
 #include "frame.h"
+#include "hashtable.h"
 #include "interp.h"
 #include "list.h"
 #include "pnode.h"
 #include "pvalue.h"
+#include "sequence.h"
 #include "symboltable.h"
 
 static bool localDebugging = false;
@@ -211,17 +213,35 @@ PValue __getel(PNode *pnode, Context *context, bool *errflg) {
 }
 
 // __length returns the length of a list.
-// usage: length(LIST) -> INT
+// usage: length(LIST|TABLE|SEQUENCE) -> INT
+// usage: size(LIST|TABLE|SEQUENCE) -> INT
+//PValue __oldlength(PNode* pnode, Context* context, bool* errflg) { // DEPRECATED.
+//    PNode *arg = pnode->arguments; // Arg is the list.
+//    PValue pvalue = evaluate(arg, context, errflg);
+//    if (*errflg || pvalue.type != PVList) {
+//        scriptError(pnode, "the argument to length must be a list");
+//        *errflg = true;
+//        return nullPValue;
+//    }
+//    List *list = pvalue.value.uList;
+//    return PVALUE(PVInt, uInt, lengthList(list));
+//}
 PValue __length(PNode* pnode, Context* context, bool* errflg) {
     PNode *arg = pnode->arguments; // Arg is the list.
     PValue pvalue = evaluate(arg, context, errflg);
-    if (*errflg || pvalue.type != PVList) {
-        scriptError(pnode, "the first argument to setel must be a list");
+    if (*errflg) return nullPValue;
+    switch (pvalue.type) {
+    case PVList:
+        return PVALUE(PVInt, uInt, lengthList(pvalue.value.uList));
+    case PVSequence:
+        return PVALUE(PVInt, uInt, lengthSequence(pvalue.value.uSequence));
+    case PVTable:
+        return PVALUE(PVInt, uInt, sizeHashTable(pvalue.value.uTable));
+    default:
+        scriptError(pnode, "the argument to length must be a list");
         *errflg = true;
         return nullPValue;
     }
-    List *list = pvalue.value.uList;
-    return PVALUE(PVInt, uInt, lengthList(list));
 }
 
 // interpForList interprets the list loop.

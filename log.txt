@@ -1,0 +1,20 @@
+May 10, 2025
+1.
+Error in "st_db.li" at line 196: The first argument to extractplaces must be a PLAC or event node B.
+Error in "st_db.li" at line 196: error calling built-in function: extractplaces.
+  a. Find source of first message.
+    Gets past. Seems to work. Want to prove it, but pvalueToString not implemented for PVList objects.
+  b. Implement pvalueToString for PVLists.
+    Implemented and the list seems empty. Look into valueToList.
+  c. valueToList.
+    Got it working.
+  d. extractplaces
+    Had misconception on its function. Made changes. ChatGPT helped. Seems to be working.
+  e. the List created by extractplaces modified to hold strings, not PValues.
+     working.
+May 11, 2025
+2.
+Error in "st_db.li" at line 198: There was an error evaluating the conditional expression.
+  a. The cond expression is (and(gt(yr,300),lt(yr,cutoff_yr))).
+     The problem occurs when the and is handled.
+ZZ

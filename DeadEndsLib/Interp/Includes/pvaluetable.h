@@ -4,12 +4,11 @@
 //  the table type in the DeadEnds script language.
 //
 //  Created by Thomas Wetmore on 21 April 2023.
-//  Last changed on 2 June 2025.
+//  Last changed on 6 June 2025.
 //
+
 #ifndef pvaluetable_h
 #define pvaluetable_h
-
-#include "standard.h"
 
 typedef struct HashTable HashTable;
 typedef struct PValue PValue;

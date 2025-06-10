@@ -4,7 +4,7 @@
 //  functable.c has the table of built-in functions in the DeadEnds scripting language.
 //
 //  Created by Thomas Wetmore on 10 January 2023.
-//  Last changed on 3 June 2025.
+//  Last changed on 10 June 2025.
 //
 
 #include "standard.h"
@@ -285,7 +285,7 @@ BuiltIn builtIns[] = {
 	"lastindi",     0,    0,    __lastindi,
     "le",           2,    2,    __le,
     "length",       1,    1,    __length,
-    "lengthset",    1,    1,    __lengthset,
+    "lengthset",    1,    1,    __lengthset, // DEPRECATED
 //  "linemode",     0,    0,    __linemode,
     "list",         1,    1,    __list,
     "lock",         1,    1,    __noop,
@@ -351,6 +351,7 @@ BuiltIn builtIns[] = {
     "showstack",    0,    0,    __SHOWSTACK,
     "sibling",      1,    1,    __sibling,
     "siblingset",   1,    1,    __siblingset,
+    "size",         1,    1,    __length,
 	"soundex",      1,    1,    __soundex,
     "sp",           0,    0,    __space,
     "spouseset",    1,    1,    __spouseset,

@@ -5,13 +5,11 @@
 //  DeadEnds programs. Symbol tables are implented with hash tables.
 //
 //  Created by Thomas Wetmore on 23 March 2023.
-//  Last changed on 3 June 2025.
+//  Last changed on 6 June 2025.
 //
 
 #ifndef symboltable_h
 #define symboltable_h
-
-#include "standard.h"
 
 typedef struct PValue PValue;
 typedef struct PNode PNode;
@@ -19,11 +17,10 @@ typedef struct Frame Frame;
 typedef struct Context Context;
 typedef struct HashTable HashTable;
 
-
 // A SymbolTable holds DeadEnds script variables and their PValues.
 typedef HashTable SymbolTable;
 
-// A Symbol is an element in a SymbolTable; ident is the name of a variable/identifier, and value is its PValue.
+// A Symbol is an element in a SymbolTable; ident is the name of the symbol, and value is its PValue.
 typedef struct Symbol {
 	String ident;
 	PValue *value;
