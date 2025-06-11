@@ -9,7 +9,7 @@
 //  identifiers to PValue pointers.
 
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 1 June 2025.
+//  Last changed on 10 June 2025.
 //
 
 #include "evaluate.h"
@@ -243,14 +243,25 @@ int evaluateInteger(PNode *pnode, Context *context, bool *errflg) {
 }
 
 //  evaluateString evaluates an expression that should resolve to a String.
+//String oldevaluateString(PNode* pnode, Context* context, bool *errflg) { // DEPRECATED
+//	ASSERT(pnode && context);
+//	PValue pvalue = evaluate(pnode, context, errflg);
+//	if (*errflg || pvalue.type != PVString) {
+//		*errflg = true;
+//		return "";
+//	}
+//	return pvalue.value.uString;
+//}
 String evaluateString(PNode* pnode, Context* context, bool *errflg) {
-	ASSERT(pnode && context);
-	PValue pvalue = evaluate(pnode, context, errflg);
-	if (*errflg || pvalue.type != PVString) {
-		*errflg = true;
-		return "";
-	}
-	return pvalue.value.uString;
+    ASSERT(pnode && context);
+    PValue pvalue = evaluate(pnode, context, errflg);
+    if (*errflg) return "";
+    if (pvalue.type == PVString) {
+        String string = pvalue.value.uString;
+        return *string ? string : "";
+    }
+    *errflg = true;
+    return "";
 }
 
 // iistype checks that a PNode has a specified type.
