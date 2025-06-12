@@ -49,7 +49,7 @@ PValue __add(PNode* pnode, Context* context, bool* eflg) {
 
 // __eq -- Compare two values for equality.
 // usage: eq(ANY, ANY) -> BOOL
-PValue __chatGPTeq(PNode* node, Context* context, bool* eflg) {
+PValue __eq(PNode* node, Context* context, bool* eflg) {
     PValue a = evaluate(node->arguments, context, eflg);
     if (*eflg) return nullPValue;
 
@@ -192,28 +192,35 @@ PValue __decr(PNode* pnode, Context* context, bool* errflg) {
 
 // __eq checks for equality between two numeric Pvalues.
 // usage: eq(NUMERIC, NUMERIC) -> BOOL
-PValue __eq(PNode* pnode, Context* context, bool* errflg) {
-    PValue val1, val2;
-    evalBinary(pnode, context, &val1, &val2, errflg);
-    if (*errflg) return nullPValue;
-    bool result = false;
-    if (val1.type ==  PVInt) result = val1.value.uInt == val2.value.uInt;
-    else if (val1.type == PVFloat) result = val1.value.uFloat == val2.value.uFloat;
-    else { *errflg = true; return nullPValue; }
-	return result ? truePValue : falsePValue;
-}
+//PValue __oldeq(PNode* pnode, Context* context, bool* errflg) {
+//    PValue val1, val2;
+//    evalBinary(pnode, context, &val1, &val2, errflg);
+//    if (*errflg) return nullPValue;
+//    bool result = false;
+//    if (val1.type ==  PVInt) result = val1.value.uInt == val2.value.uInt;
+//    else if (val1.type == PVFloat) result = val1.value.uFloat == val2.value.uFloat;
+//    else { *errflg = true; return nullPValue; }
+//	return result ? truePValue : falsePValue;
+//}
 
 // __ne checks for nonequality between two numeric PValues.
 // usage: ne(NUMERIC, NUMERIC) -> BOOL
+//PValue __Oldne(PNode* pnode, Context* context, bool* errflg) {
+//    PValue val1, val2;
+//    evalBinary(pnode, context, &val1, &val2, errflg);
+//    if (*errflg) return nullPValue;
+//    bool result = false;
+//    if (val1.type ==  PVInt) result = val1.value.uInt != val2.value.uInt;
+//    else if (val1.type == PVFloat) result = val1.value.uFloat != val2.value.uFloat;
+//    else { *errflg = true; return nullPValue; }
+//    return PVALUE(PVBool, uBool, result);
+//}
+
 PValue __ne(PNode* pnode, Context* context, bool* errflg) {
-    PValue val1, val2;
-    evalBinary(pnode, context, &val1, &val2, errflg);
-    if (*errflg) return nullPValue;
-    bool result = false;
-    if (val1.type ==  PVInt) result = val1.value.uInt != val2.value.uInt;
-    else if (val1.type == PVFloat) result = val1.value.uFloat != val2.value.uFloat;
-    else { *errflg = true; return nullPValue; }
-    return PVALUE(PVBool, uBool, result);
+    PValue pvalue = __eq(pnode, context, errflg);
+    if (pvalue.type != PVBool) return nullPValue;
+    pvalue.value.uBool = pvalue.value.uBool ? false : true;
+    return pvalue;
 }
 
 // __le checks the less than or equal relation between two numeric PValues.
