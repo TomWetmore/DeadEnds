@@ -6,7 +6,7 @@
 //  or may call a specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 4 June 2025.
+//  Last changed on 17 June 2025.
 //
 
 #include <stdarg.h>
@@ -40,6 +40,7 @@ extern String curFileName;
 extern int curLine;
 
 void showRuntimeStack(Context*, PNode*); // Move elsewhere?
+extern void poutput(String, Context*);
 
 bool programParsing = false;
 bool programRunning = false;
@@ -82,15 +83,19 @@ InterpType interpret(PNode* pnode, Context* context, PValue* returnValue) {
         }
         switch (pnode->type) {
         case PNSCons: // Strings are written.
-            fprintf(context->file->fp, "%s", (String) pnode->stringCons);
+            poutput(pnode->stringCons, context);
+            //fprintf(context->file->fp, "%s", (String) pnode->stringCons);
             break;
         case PNICons: // Numbers are ignored.
         case PNFCons:
             break;
         case PNIdent: // Idents with String values are written.
             pvalue = evaluateIdent(pnode, context);
-            if (pvalue.type == PVString && pvalue.value.uString)
-                fprintf(context->file->fp, "%s", pvalue.value.uString);
+            if (pvalue.type == PVString && pvalue.value.uString) {
+                //fprintf(context->file->fp, "%s", pvalue.value.uString);
+                poutput(pvalue.value.uString, context);
+                stdfree(pvalue.value.uString);
+            }
             break;
         case PNBltinCall: // Call builtin and write return value if a String.
             pvalue = evaluateBuiltin(pnode, context, &errorFlag);
@@ -99,7 +104,8 @@ InterpType interpret(PNode* pnode, Context* context, PValue* returnValue) {
                 return InterpError;
             }
             if (pvalue.type == PVString && pvalue.value.uString) {
-                fprintf(context->file->fp, "%s", pvalue.value.uString);
+                //fprintf(context->file->fp, "%s", pvalue.value.uString);
+                poutput(pvalue.value.uString, context);
                 stdfree(pvalue.value.uString);
             }
             break;
@@ -107,7 +113,8 @@ InterpType interpret(PNode* pnode, Context* context, PValue* returnValue) {
             switch (returnCode = interpProcCall(pnode, context, returnValue)) {
             case InterpOkay:
                 if (returnValue && returnValue->type == PVString && returnValue->value.uString) {
-                    fprintf(context->file->fp, "%s", returnValue->value.uString);
+                    //fprintf(context->file->fp, "%s", returnValue->value.uString);
+                    poutput(returnValue->value.uString, context);
                     stdfree(returnValue->value.uString);
                 }
                 break;
@@ -120,7 +127,8 @@ InterpType interpret(PNode* pnode, Context* context, PValue* returnValue) {
             pvalue = evaluateUserFunc(pnode, context, &errorFlag);
             if (errorFlag) return InterpError;
             if (pvalue.type == PVString && pvalue.value.uString) {
-                fprintf(context->file->fp, "%s", pvalue.value.uString);
+                poutput(pvalue.value.uString, context);
+                //fprintf(context->file->fp, "%s", pvalue.value.uString);
                 stdfree(pvalue.value.uString);  // The pvalue's string is in the heap.
             }
             break;

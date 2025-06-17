@@ -1,9 +1,11 @@
+//
 // DeadEnds
 //
 // file.c
 //
 // Created by Thomas Wetmore on 1 July 2024.
-// Last changed on 17 May 2025.
+// Last changed on 17 June 2025.
+//
 
 #include <stdio.h>
 #include "file.h"
@@ -22,6 +24,8 @@ File* openFile(String path, String mode) {
 	file->name = strsave(name);
     file->fp = fp;
     file->isStdout = false;
+    file->mode = lineMode;
+    file->page = null;
 	return file;
 }
 
@@ -30,6 +34,7 @@ void closeFile(File* file) {
     if (!file->isStdout && file->fp) fclose(file->fp);
     if (file->path) stdfree(file->path);
     if (file->name) stdfree(file->name);
+    if (file->mode == pageMode) stdfree(file->page);
     stdfree(file);
 }
 
@@ -40,5 +45,7 @@ File* stdOutputFile(void) {
     file->name = strsave("stdout");
     file->fp = stdout;
     file->isStdout = true;
+    file->mode = lineMode;
+    file->page = null;
     return file;
 }

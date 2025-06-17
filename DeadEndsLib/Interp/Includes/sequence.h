@@ -7,7 +7,7 @@
 //  used as a more general purpose data structure.
 //
 //  Created by Thomas Wetmore on 1 March 2023.
-//  Last changed on 2 June 2025.
+//  Last changed on 17 June 2025.
 //
 
 #ifndef sequence_h
@@ -21,6 +21,7 @@ typedef HashTable RecordIndex;
 typedef HashTable NameIndex;
 typedef HashTable RefnIndex;
 typedef struct Block Block;
+typedef struct PValue PValue;
 
 // SortType holds the possible sorted states of a Sequence.
 typedef enum {
@@ -33,7 +34,7 @@ typedef enum {
 typedef struct SequenceEl {
 	GNode* root; // Root of record. MNOTE: do not free on delete.
 	String name; // If element is a person. MNOTE: do not free on delete.
-	void* value; // MNOTE: what do we do with this? Scenarios exists for do or not do free.
+	PValue* value; // MNOTE: what do we do with this? Scenarios exists for do or not do free.
 } SequenceEl;
 
 // Sequence is a data type that holds sequences/sets/arrays of records.

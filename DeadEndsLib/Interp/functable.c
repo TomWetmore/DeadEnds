@@ -286,7 +286,7 @@ BuiltIn builtIns[] = {
     "le",           2,    2,    __le,
     "length",       1,    1,    __length,
     "lengthset",    1,    1,    __lengthset, // DEPRECATED
-//  "linemode",     0,    0,    __linemode,
+    "linemode",     0,    0,    __linemode,
     "list",         1,    1,    __list,
     "lock",         1,    1,    __noop,
     "long",         1,    1,    __long,
@@ -318,7 +318,7 @@ BuiltIn builtIns[] = {
     "ord",          1,    1,    __ord,
     "outfile",      0,    0,    __outfile,
 	"pagemode",     2,    2,    __pagemode,
-//"pageout",      0,    0,    __pageout,
+    "pageout",      0,    0,    __pageout,
     "parent",       1,    1,    __parent,
 	"parents",      1,    1,    __parents,
     "parentset",    1,    1,    __parentset,

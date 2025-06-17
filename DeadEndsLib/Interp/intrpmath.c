@@ -4,7 +4,7 @@
 //  intrpmath.c has the built-in script functions for math and logic.
 //
 //  Created by Thomas Wetmore on 17 March 2023.
-//  Last changed on 3 June 2025.
+//  Last changed on 13 June 2025.
 //
 
 #include "context.h"
@@ -45,48 +45,6 @@ PValue __add(PNode* pnode, Context* context, bool* eflg) {
     if (currentType == PVInt) value.value.uInt = intSum;
     else value.value.uFloat = floatSum;
     return value;
-}
-
-// __eq -- Compare two values for equality.
-// usage: eq(ANY, ANY) -> BOOL
-PValue __eq(PNode* node, Context* context, bool* eflg) {
-    PValue a = evaluate(node->arguments, context, eflg);
-    if (*eflg) return nullPValue;
-
-    PValue b = evaluate(node->arguments->next, context, eflg);
-    if (*eflg) return nullPValue;
-
-    // Handle nulls gracefully
-    if (a.type == PVNull && b.type == PVNull) return PVALUE(PVBool, uBool, true);
-    if (a.type == PVNull) {
-        if (b.type == PVInt)    return PVALUE(PVBool, uBool, b.value.uInt == 0);
-        if (b.type == PVString) return PVALUE(PVBool, uBool, b.value.uString == NULL || b.value.uString[0] == '\0');
-        return PVALUE(PVBool, uBool, false);
-    }
-    if (b.type == PVNull) {
-        if (a.type == PVInt)    return PVALUE(PVBool, uBool, a.value.uInt == 0);
-        if (a.type == PVString) return PVALUE(PVBool, uBool, a.value.uString == NULL || a.value.uString[0] == '\0');
-        return PVALUE(PVBool, uBool, false);
-    }
-
-    // If both are ints
-    if (a.type == PVInt && b.type == PVInt)
-        return PVALUE(PVBool, uBool, a.value.uInt == b.value.uInt);
-
-    // If both are strings
-    if (a.type == PVString && b.type == PVString)
-        return PVALUE(PVBool, uBool, strcmp(a.value.uString, b.value.uString) == 0);
-
-    // Mixed int/string comparison
-    if (a.type == PVInt && b.type == PVString) {
-        return PVALUE(PVBool, uBool, a.value.uInt == atoi(b.value.uString));
-    }
-    if (a.type == PVString && b.type == PVInt) {
-        return PVALUE(PVBool, uBool, atoi(a.value.uString) == b.value.uInt);
-    }
-
-    // For other types (e.g., GNode, List), require exact match by pointer
-    return PVALUE(PVBool, uBool, false);
 }
 
 // __sub is the builtin subtract function; operands must be both int or both float.
@@ -190,32 +148,44 @@ PValue __decr(PNode* pnode, Context* context, bool* errflg) {
     return nullPValue;
 }
 
-// __eq checks for equality between two numeric Pvalues.
-// usage: eq(NUMERIC, NUMERIC) -> BOOL
-//PValue __oldeq(PNode* pnode, Context* context, bool* errflg) {
-//    PValue val1, val2;
-//    evalBinary(pnode, context, &val1, &val2, errflg);
-//    if (*errflg) return nullPValue;
-//    bool result = false;
-//    if (val1.type ==  PVInt) result = val1.value.uInt == val2.value.uInt;
-//    else if (val1.type == PVFloat) result = val1.value.uFloat == val2.value.uFloat;
-//    else { *errflg = true; return nullPValue; }
-//	return result ? truePValue : falsePValue;
-//}
+// __eq compares two PValues for equality.
+// usage: eq(ANY, ANY) -> BOOL
+PValue __eq(PNode* node, Context* context, bool* eflg) {
+    PValue a = evaluate(node->arguments, context, eflg);
+    if (*eflg) return nullPValue;
+    PValue b = evaluate(node->arguments->next, context, eflg);
+    if (*eflg) return nullPValue;
+    // Handle PVNulls.
+    if (a.type == PVNull && b.type == PVNull) return PVALUE(PVBool, uBool, true);
+    if (a.type == PVNull) {
+        if (b.type == PVInt)    return PVALUE(PVBool, uBool, b.value.uInt == 0);
+        if (b.type == PVString) return PVALUE(PVBool, uBool, b.value.uString == NULL || b.value.uString[0] == '\0');
+        return PVALUE(PVBool, uBool, false);
+    }
+    if (b.type == PVNull) {
+        if (a.type == PVInt)    return PVALUE(PVBool, uBool, a.value.uInt == 0);
+        if (a.type == PVString) return PVALUE(PVBool, uBool, a.value.uString == NULL || a.value.uString[0] == '\0');
+        return PVALUE(PVBool, uBool, false);
+    }
+    // Handle two PVInts.
+    if (a.type == PVInt && b.type == PVInt)
+        return PVALUE(PVBool, uBool, a.value.uInt == b.value.uInt);
+    // Handle two PVStrings.
+    if (a.type == PVString && b.type == PVString)
+        return PVALUE(PVBool, uBool, strcmp(a.value.uString, b.value.uString) == 0);
+    // Handle mixed PVString and PVInt.
+    if (a.type == PVInt && b.type == PVString) {
+        return PVALUE(PVBool, uBool, a.value.uInt == atoi(b.value.uString));
+    }
+    if (a.type == PVString && b.type == PVInt) {
+        return PVALUE(PVBool, uBool, atoi(a.value.uString) == b.value.uInt);
+    }
+    // For other types (e.g., GNode, List), require exact pointer match.
+    return PVALUE(PVBool, uBool, false);
+}
 
-// __ne checks for nonequality between two numeric PValues.
-// usage: ne(NUMERIC, NUMERIC) -> BOOL
-//PValue __Oldne(PNode* pnode, Context* context, bool* errflg) {
-//    PValue val1, val2;
-//    evalBinary(pnode, context, &val1, &val2, errflg);
-//    if (*errflg) return nullPValue;
-//    bool result = false;
-//    if (val1.type ==  PVInt) result = val1.value.uInt != val2.value.uInt;
-//    else if (val1.type == PVFloat) result = val1.value.uFloat != val2.value.uFloat;
-//    else { *errflg = true; return nullPValue; }
-//    return PVALUE(PVBool, uBool, result);
-//}
-
+// __ne checks two PValues for nonequality.
+// usage: ne(ANY, ANY) -> BOOL
 PValue __ne(PNode* pnode, Context* context, bool* errflg) {
     PValue pvalue = __eq(pnode, context, errflg);
     if (pvalue.type != PVBool) return nullPValue;

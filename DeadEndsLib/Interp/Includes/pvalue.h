@@ -5,7 +5,7 @@
 //  expressions in the DeadEnds script language. They are the values stored in symbol tables.
 //
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 2 June 2025.
+//  Last changed on 17 June 2025.
 //
 
 #ifndef pvalue_h
@@ -63,10 +63,6 @@ extern const PValue falsePValue;
 
 extern int Perrors;
 extern int nobuiltins;
-
-#define UNBUFFERED 2    //  Output unbuffered to a file.
-#define BUFFERED   3    //  Output buffered to a file.
-#define PAGEMODE   4    //  Output page buffered to a file.
 
 #define TYPE_CHECK(t, v) \
 if (ptype(v) != t) {\

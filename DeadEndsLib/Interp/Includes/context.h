@@ -22,7 +22,7 @@ typedef struct List List;
 typedef struct Context {
     Database* database;
     Frame* frame;
-    File* file; // Current output file.
+    File* file; // Current program output file.
     SymbolTable* globals; // Global symbol table.
     FunctionTable* procedures; // User defined procedures.
     FunctionTable* functions; // User defined functions.
