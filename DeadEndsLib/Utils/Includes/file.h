@@ -32,13 +32,12 @@ typedef struct File {
     FILE* fp;       // Unix file pointer.
     String path;    // Path to file.
     String name;    // Name of file.
-    bool isStdout;  // New flag
-    FileMode mode;
-    Page* page;
+    bool isStdout;  // True if file is standard out.
+    FileMode mode;  // Mode of file -- line mode or page mode.
+    Page* page;     // Page if in page mode.
 } File;
 
-
-
+// Public API to File.
 File* openFile(String path, String mode);
 File* stdOutputFile(void);
 void closeFile(File*);

@@ -1,9 +1,9 @@
 //
 //  DeadEnds Library
-//  rassa.c handles printing output from DeadEnds script programs.
+//  rassa.c handles the page mode builtins for DeadEnds script programs.
 //
 //  Created by Thomas Wetmore on 10 February 2024.
-//  Last changed on 17 June 2025.
+//  Last changed on 18 June 2025.
 //
 
 #include <string.h>
@@ -20,45 +20,28 @@
 
 #define MAXROWS 512
 #define MAXCOLS 512
-static char linebuffer[1024];
-static int linebuflen = 0;
-static String bufptr = linebuffer;
-String outfilename;
 
-String noreport = (String) "No report was generated.";
-String whtout = (String) "What is the name of the output file?";
-
-// initrassa initializes script program output.
-void initrassa(void) {
-}
-
-// finishrassa finalizes script program output.
-//void finishrassa(void) {
-//	if (outputmode == BUFFERED && linebuflen > 0 && Poutfp) {
-//		fwrite(linebuffer, linebuflen, 1, Poutfp);
-//		linebuflen = 0;
-//		bufptr = linebuffer;
-//		curcol = 1;
-//	}
-//}
+extern Page* createPage(int, int);
+extern void deletePage(Page*);
 
 // __pagemode switches script program output to page mode.
 // usage: pagemode(INT, INT) -> VOID
+// First parameter is number of rows, second is number of columns.
 PValue __pagemode(PNode* pnode, Context* context, bool* errflg) {
 	PNode* arg = pnode->arguments;
 	PValue pvalue = evaluate(arg, context, errflg);
-	if (*errflg || pvalue.type != PVInt) {
-		scriptError(pnode, "the cols argument to pagemode must be an integer.");
-		return nullPValue;
-	}
-	int cols = (int) pvalue.value.uInt;
-	arg = arg->next;
-	pvalue = evaluate(arg, context, errflg);
 	if (*errflg || pvalue.type != PVInt) {
 		scriptError(pnode, "the rows argument to pagemode must be an integer.");
 		return nullPValue;
 	}
 	int rows = (int) pvalue.value.uInt;
+	arg = arg->next;
+	pvalue = evaluate(arg, context, errflg);
+	if (*errflg || pvalue.type != PVInt) {
+		scriptError(pnode, "the columns argument to pagemode must be an integer.");
+		return nullPValue;
+	}
+	int cols = (int) pvalue.value.uInt;
 	*errflg = true;
 	if (cols < 1 || cols > MAXCOLS || rows < 1 || rows > MAXROWS) {
 		scriptError(pnode, "the value of rows or cols to pagemode is out of range.");
@@ -66,16 +49,11 @@ PValue __pagemode(PNode* pnode, Context* context, bool* errflg) {
 	}
 	*errflg = false;
     File* file = context->file;
-    // Do nothing if already in page mode.
-    if (file->mode == pageMode) return nullPValue;
-    // Switch to page mode.
+    // If in page mode remove the old Page before creating a new one.
+    if (file->mode == pageMode) deletePage(file->page);
     file->mode = pageMode;
-    file->page = stdalloc(rows*cols);
-    memset(file->page, ' ', rows*cols);
-    file->page->nrows = rows;
-    file->page->ncols = cols;
-    file->page->curcol = file->page->currow = 0;
-	return nullPValue;
+    file->page = createPage(rows, cols);
+    return nullPValue;
 }
 
 // __linemode switches script program output to line mode.
@@ -86,8 +64,7 @@ PValue __linemode(PNode* pnode, Context* context, bool* errflg) {
     if (file->mode == lineMode) return nullPValue;
     // Switch to line mode; assume the last page has been written by a pageout().
 	file->mode = lineMode;
-    stdfree(file->page->buffer);
-    stdfree(file->page);
+    deletePage(file->page);
     return nullPValue;
 }
 
@@ -154,13 +131,13 @@ PValue __pos(PNode* pnode, Context* context, bool* errflg) {
     }
     PNode *arg = pnode->arguments;
     // Get the column value.
-	int col = evaluateInteger(arg, context, errflg);
+	int row = evaluateInteger(arg, context, errflg);
 	if (*errflg) {
 		scriptError(pnode, "The first argument to pos must be an integer");
 		return nullPValue;
 	}
     // Get the row value.
-	int row = evaluateInteger(arg->next, context, errflg);
+	int col = evaluateInteger(arg->next, context, errflg);
 	if (*errflg) {
 		scriptError(pnode, "The second argument to pos must be an integer.");
 		return nullPValue;
@@ -265,7 +242,7 @@ PValue __pageout(PNode* pnode, Context* context, bool* errflg) {
     scratch[page->ncols] = '\n';
     scratch[page->ncols + 1] = 0;
     String p = page->buffer;
-    for (int row = 1; row < page->nrows; row++) {
+    for (int row = 0; row < page->nrows; row++) {
         memcpy(scratch, p, page->ncols);
         fputs(scratch, file->fp);
         p += page->ncols;
@@ -287,7 +264,7 @@ void adjustCols(String string, Page* page) {
 }
 
 // poutput outputs a string to the current program output file in the current mode.
-void poutput(String string, Context* context) {
+void oldpoutput(String string, Context* context) {
     File* file = context->file;
     // Handle line mode.
     if (file->mode == lineMode) {
@@ -297,8 +274,7 @@ void poutput(String string, Context* context) {
 
     // Handle page mode.
     if (file->mode != pageMode) FATAL();
-    int len = 0;
-    if (!string || *string == 0 || (len = (int) strlen(string)) <= 0) return;
+    if (!string || *string == 0) return;
     Page* page = file->page;
     String buffer = page->buffer;
     String p = buffer + (page->currow - 1)*page->ncols + page->curcol - 1;
@@ -315,5 +291,46 @@ void poutput(String string, Context* context) {
             }
         }
     }
+}
+
+// poutput outputs a string to the current program output file in the current mode.
+void poutput(String string, Context* context) {
+    File* file = context->file;
+
+    // Handle line mode.
+    if (file->mode == lineMode) {
+        fprintf(file->fp, "%s", string);
+        return;
+    }
+
+    // Sanity check for page mode.
+    if (file->mode != pageMode || !string || *string == 0) return;
+
+    Page* page = file->page;
+    String buffer = page->buffer;
+
+    int row = page->currow;
+    int col = page->curcol;
+
+    while (*string) {
+        char c = *string++;
+
+        if (c == '\n') {
+            row++;
+            col = 1;
+            if (row > page->nrows) break; // Avoid writing past end of page
+            continue;
+        }
+
+        if (row > page->nrows || col > page->ncols) continue; // Ignore overflows
+
+        // Compute linear index and store character.
+        int offset = (row - 1) * page->ncols + (col - 1);
+        buffer[offset] = c;
+        col++;
+    }
+
+    page->currow = row;
+    page->curcol = col;
 }
 
