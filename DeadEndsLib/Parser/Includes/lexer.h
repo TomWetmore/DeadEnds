@@ -4,7 +4,7 @@
 //  lexer.h -- Header file for the objectified Lexer.
 //
 //  Created by Thomas Wetmore on 12 December 2022.
-//  Last changed on 28 September 2023.
+//  Last changed on 18 June 2025.
 //
 
 #ifndef lexer_h
@@ -15,12 +15,7 @@
 #include "pnode.h"    // PNode.
 #include "y.tab.h"    // Token types generated when yacc processes yacc.y.
 
-// LexerType -- Specifies whether the lexer reads from a file or string.
-//--------------------------------------------------------------------------------------------------
-typedef enum { FileMode, StringMode } LexerType;
-
-// SemanticValue -- Semantic values of the tokens and non-terminals that need them.
-//--------------------------------------------------------------------------------------------------
+// SemanticValue is the type of tokens and non-terminals that need semantic values.
 typedef union SemanticValue {
     long integer;      // Integer constants for ICONS tokens.
     double floating;   // Floating constant for FCONS tokens.

@@ -4,7 +4,7 @@
 // file.c
 //
 // Created by Thomas Wetmore on 1 July 2024.
-// Last changed on 18 June 2025.
+// Last changed on 19 June 2025.
 //
 
 #include <stdio.h>
@@ -53,22 +53,22 @@ File* stdOutputFile(void) {
     return file;
 }
 
-// createPage creates a new page with a grid of rows * cols characters. Not in the public API.
+// createPage creates a new page with a grid of rows * cols Unicode code points.
 Page* createPage(int rows, int cols) {
     Page* page = (Page*) stdalloc(sizeof(Page));
-    memset(page, ' ', rows*cols);
     page->nrows = rows;
     page->ncols = cols;
     page->curcol = 1;
     page->currow = 1;
-    page->buffer = (String) stdalloc(rows * cols);
-    memset(page->buffer, ' ', rows * cols);
+    page->grid = (int32_t*) stdalloc(rows * cols * sizeof(int32_t));
+    for (int i = 0; i < page->nrows * page->ncols; i++) {
+        page->grid[i] = 0x20; // U+0020 = space
+    }
     return page;
 }
 
 // deletePage deleges a Page. Not in the public API.
 void deletePage(Page* page) {
-    if (page && page->buffer) stdfree(page->buffer);
+    if (page && page->grid) stdfree(page->grid);
     if (page) stdfree(page);
 }
-

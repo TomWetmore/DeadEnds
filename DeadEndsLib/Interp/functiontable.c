@@ -1,10 +1,9 @@
 //
 //  DeadEnds Library
-//
 //  functiontable.c -- The DeadEnds function and procedure table datatype.
 //
 //  Created by Thomas Wetmore on 9 April 2023.
-//  Last changed on 3 June 2025.
+//  Last changed on 18 June 2025.
 //
 
 #include "functiontable.h"
@@ -35,6 +34,11 @@ static void delete(void* element) {
 static int numBucketsInFunctionTable = 13;
 FunctionTable* createFunctionTable(void) {
 	return createHashTable(getKey, compare, delete, numBucketsInFunctionTable);
+}
+
+// deleteFunctionTable deletes a FunctionTable.
+void deleteFunctionTable(FunctionTable* table) {
+    deleteHashTable(table);
 }
 
 // searchFunctionTable searches a function table for the function or procedure with given name.

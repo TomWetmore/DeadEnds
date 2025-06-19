@@ -3,7 +3,7 @@
 //  functiontable.h
 //
 //  Created by Thomas Wetmore on 9 April 2023.
-//  Last changed on 4 June 2023.
+//  Last changed on 18 June 2025.
 //
 
 #ifndef functiontable_h
@@ -24,6 +24,7 @@ typedef struct {
 } FunctionElement;
 
 FunctionTable *createFunctionTable(void);
+void deleteFunctionTable(FunctionTable*);
 PNode *searchFunctionTable(FunctionTable *table, String name);
 void addToFunctionTable(FunctionTable *table, String name, PNode *pnode);
 

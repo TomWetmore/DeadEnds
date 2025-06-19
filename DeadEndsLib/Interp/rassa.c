@@ -3,7 +3,7 @@
 //  rassa.c handles the page mode builtins for DeadEnds script programs.
 //
 //  Created by Thomas Wetmore on 10 February 2024.
-//  Last changed on 18 June 2025.
+//  Last changed on 19 June 2025.
 //
 
 #include <string.h>
@@ -23,6 +23,8 @@
 
 extern Page* createPage(int, int);
 extern void deletePage(Page*);
+static int unicodeToUtf8(int32_t, char*);
+static int utf8ToUnicode(const char*, int32_t*);
 
 // __pagemode switches script program output to page mode.
 // usage: pagemode(INT, INT) -> VOID
@@ -227,27 +229,28 @@ PValue __SHOWFRAME(PNode* pnode, Context* context, bool* errflg) {
     return nullPValue;
 }
 
-// __pageout outputs the current page and clears the page buffer.
+// __pageout writes the current page grid of Unicode code points to the file in Utf8 encoding.
 // usage: pageout() -> VOID
 PValue __pageout(PNode* pnode, Context* context, bool* errflg) {
-    // The file must be in page mode.
     File* file = context->file;
     if (file->mode != pageMode) {
-        scriptError(pnode, "The output file must in page mode");
+        scriptError(pnode, "the output file must be in page mode");
         *errflg = true;
         return nullPValue;
     }
     Page* page = file->page;
-    char scratch[page->ncols + 2];
-    scratch[page->ncols] = '\n';
-    scratch[page->ncols + 1] = 0;
-    String p = page->buffer;
+    char utf8[5]; // Room for max UTF-8 sequence + null terminator
     for (int row = 0; row < page->nrows; row++) {
-        memcpy(scratch, p, page->ncols);
-        fputs(scratch, file->fp);
-        p += page->ncols;
+        for (int col = 0; col < page->ncols; col++) {
+            int32_t cp = page->grid[row * page->ncols + col];
+            int len = unicodeToUtf8(cp, utf8);
+            if (len > 0) fwrite(utf8, 1, len, file->fp);
+        }
+        fputc('\n', file->fp);
     }
-    memset(page->buffer, ' ', page->nrows*page->ncols);
+    for (int i = 0; i < page->nrows * page->ncols; i++) {
+        page->grid[i] = 0x20; // U+0020 = space
+    }
     return nullPValue;
 }
 
@@ -263,74 +266,89 @@ void adjustCols(String string, Page* page) {
 	}
 }
 
-// poutput outputs a string to the current program output file in the current mode.
-void oldpoutput(String string, Context* context) {
-    File* file = context->file;
-    // Handle line mode.
-    if (file->mode == lineMode) {
-        fprintf(file->fp, "%s", string);
-        return;
-    }
-
-    // Handle page mode.
-    if (file->mode != pageMode) FATAL();
-    if (!string || *string == 0) return;
-    Page* page = file->page;
-    String buffer = page->buffer;
-    String p = buffer + (page->currow - 1)*page->ncols + page->curcol - 1;
-    int c;
-    while ((c = *string++)) {
-        if (c == '\n') {
-            page->curcol = 1;
-            page->currow++;
-            p = buffer + (page->currow)*page->ncols;
-        } else {
-            if (page->curcol <= page->ncols && page->currow <= page->nrows) {
-                *p++ = c;
-                page->curcol++;
-            }
-        }
-    }
-}
-
-// poutput outputs a string to the current program output file in the current mode.
+// poutput outputs a string to the current program output file in the current mode,
+// decoding UTF-8 into Unicode codepoints stored in the page grid.
 void poutput(String string, Context* context) {
     File* file = context->file;
 
-    // Handle line mode.
     if (file->mode == lineMode) {
         fprintf(file->fp, "%s", string);
         return;
     }
 
-    // Sanity check for page mode.
-    if (file->mode != pageMode || !string || *string == 0) return;
+    if (file->mode != pageMode || !string || !*string) return;
 
     Page* page = file->page;
-    String buffer = page->buffer;
-
     int row = page->currow;
     int col = page->curcol;
 
     while (*string) {
-        char c = *string++;
+        int32_t codepoint = 0;
+        int bytes = utf8ToUnicode(string, &codepoint);
+        if (bytes == 0) break; // Invalid sequence or string end
 
-        if (c == '\n') {
+        if (codepoint == '\n') {
             row++;
             col = 1;
-            if (row > page->nrows) break; // Avoid writing past end of page
-            continue;
+        } else if (row <= page->nrows && col <= page->ncols) {
+            int offset = (row - 1) * page->ncols + (col - 1);
+            page->grid[offset] = codepoint;
+            col++;
         }
 
-        if (row > page->nrows || col > page->ncols) continue; // Ignore overflows
-
-        // Compute linear index and store character.
-        int offset = (row - 1) * page->ncols + (col - 1);
-        buffer[offset] = c;
-        col++;
+        string += bytes;
     }
 
     page->currow = row;
     page->curcol = col;
 }
 
+// unicodeToUtf8 converts a 21-bit Unicode codepoint to one, two, three or four Utf8 bytes.
+// Not used yet; preparing for page mode to be Unicode compatible.
+static int unicodeToUtf8(int32_t codepoint, char* out) {
+    if (codepoint <= 0x7F) {
+        out[0] = (char) codepoint;
+        return 1;
+    } else if (codepoint <= 0x7FF) {
+        out[0] = (char) (0xC0 | ((codepoint >> 6) & 0x1F));
+        out[1] = (char) (0x80 | (codepoint & 0x3F));
+        return 2;
+    } else if (codepoint <= 0xFFFF) {
+        out[0] = (char) (0xE0 | ((codepoint >> 12) & 0x0F));
+        out[1] = (char) (0x80 | ((codepoint >> 6) & 0x3F));
+        out[2] = (char) (0x80 | (codepoint & 0x3F));
+        return 3;
+    } else if (codepoint <= 0x10FFFF) {
+        out[0] = (char) (0xF0 | ((codepoint >> 18) & 0x07));
+        out[1] = (char) (0x80 | ((codepoint >> 12) & 0x3F));
+        out[2] = (char) (0x80 | ((codepoint >> 6) & 0x3F));
+        out[3] = (char) (0x80 | (codepoint & 0x3F));
+        return 4;
+    } else {
+        return 0; // Invalid codepoint.
+    }
+}
+
+// utf8ToUnicode conerts a UTF-8 character to a single Unicode codepoint.
+// Returns number of bytes consumed, or 0 on error.
+static int utf8ToUnicode(const char* s, int32_t* out) {
+    unsigned char c = (unsigned char)s[0];
+    if (c < 0x80) {
+        *out = c;
+        return 1;
+    } else if ((c & 0xE0) == 0xC0) {
+        if ((s[1] & 0xC0) != 0x80) return 0;
+        *out = ((c & 0x1F) << 6) | (s[1] & 0x3F);
+        return 2;
+    } else if ((c & 0xF0) == 0xE0) {
+        if ((s[1] & 0xC0) != 0x80 || (s[2] & 0xC0) != 0x80) return 0;
+        *out = ((c & 0x0F) << 12) | ((s[1] & 0x3F) << 6) | (s[2] & 0x3F);
+        return 3;
+    } else if ((c & 0xF8) == 0xF0) {
+        if ((s[1] & 0xC0) != 0x80 || (s[2] & 0xC0) != 0x80 || (s[3] & 0xC0) != 0x80) return 0;
+        *out = ((c & 0x07) << 18) | ((s[1] & 0x3F) << 12) |
+               ((s[2] & 0x3F) << 6) | (s[3] & 0x3F);
+        return 4;
+    }
+    return 0;
+}

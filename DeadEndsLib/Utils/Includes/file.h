@@ -4,7 +4,7 @@
 // file.h holds the functions for File data types. These are the output files used for script output.
 //
 // Created by Thomas Wetmore on 1 July 2024.
-// Last changed on 17 June 2025.
+// Last changed on 19 June 2025.
 //
 
 #ifndef file_h
@@ -18,7 +18,7 @@ typedef struct Page {
     int ncols;
     int currow;
     int curcol;
-    String buffer;
+    int32_t* grid; // size = nrows * ncols, contains Unicode codepoints.
 } Page;
 
 // FileType is an enum that defines the types of Files, now restricted to lineMode and pageMode.

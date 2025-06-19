@@ -4,7 +4,7 @@
 //  parse.c contains two functions, parseProgram and parseFile, which parse DeadEnds scripts.
 //
 //  Created by Thomas Wetmore on 4 January 2023.
-//  Last changed on 4 June 2025.
+//  Last changed on 18 June 2025.
 //
 
 #include <stdarg.h>
@@ -12,6 +12,7 @@
 #include "context.h"
 #include "functiontable.h"
 #include "gedcom.h"
+#include "hashtable.h"
 #include "integertable.h"
 #include "interp.h"
 #include "list.h"
@@ -26,7 +27,7 @@
 static bool debugging = false;
 extern bool programParsing;
 
-// Shared global variables. Memory ownership of the first four are taken over by the Script object.
+// Shared global variables. Memory ownership of the first four are taken over by the context.
 SymbolTable* globals; // Global symbol table.
 FunctionTable* functions; // User functions.
 FunctionTable* procedures; // User procedures.
@@ -37,47 +38,60 @@ String curFileName = null; // File being parsed
 FILE* currentFile = null; // FILE being parsed.
 int curLine = 1; // Line number in current file.
 
-static void parseFile(String file, String path);
+static void parseFile(String file, String path); // Private function defined below.
 
-// parseProgram parses a DeadEnds script and creates a Program object for interpreting. The name of a script file
+// parseProgram parses a DeadEnds script and creates a context object for interpreting. The name of a script file
 // and a search path are passed in. The file may include other files. parseFile is called on each. Notes:
 // parsedFiles is a list of the names of all files parsed. These names are used as the targets for the file
-// pointers in all the PNodes making up the script. The list becomes part of the Program object. pendingFiles
-// is the queue of script files awaiting parsing. It is deleted at the end. globalTable, procedureTable, and
-// functionTable are the global variables shared with the parser where the parsed objects, particularly the PNode
+// pointers in all the PNodes making up the script. The list becomes part of the context. pendingFiles
+// is the queue of script files awaiting parsing. It is deleted at the end. globals, procedures, and
+// functions are global variables shared with the parser, where the parsed objects, particularly the PNode
 // trees of the procedures and functions are stored. Once parsing is done, links to the three tables are put in
-// the Program object and the global variables are set to null.
-// parsed files is a simple list of the file names of the main script file and the files it includes
+// the context and the global variables are set to null. parsed files is the list of names of the parsed files.
+
 Context* parseProgram(String fileName, String searchPath) {
 
-    parsedFiles = createList(null, null, null, false);
-    pendingFiles = createList(null, null, null, false);
+    // Create the data structues needed to parse the script.
+    parsedFiles = createList(null, null, null, false);  // List of parsed file names.
+    pendingFiles = createList(null, null, null, false); // Queue of pending file names.
+	Set* included = createStringSet(); // Set of parsed file names.
+    globals = createSymbolTable(); // Table of global variables.
+    procedures = createFunctionTable(); // Table of user-defined procedures.
+    functions = createFunctionTable(); // Table of user-defined functions.
+
+    // Initialize the pending files queue with the main program.
     enqueueList(pendingFiles, fileName);
-	Set* included = createStringSet(); // Parsed so far.
     programParsing = true;
 
-    globals = createSymbolTable();
-    procedures = createFunctionTable();
-    functions = createFunctionTable();
-
-    while (!isEmptyList(pendingFiles)) { // Iterate the files.
+    // Process the queue by parsing each file.
+    while (!isEmptyList(pendingFiles)) {
+        // Process the next file from the pending files queue.
         String nextFile = (String) dequeueList(pendingFiles);
         if (!isInSet(included, nextFile)) {
             addToSet(included, nextFile);
             appendToList(parsedFiles, nextFile);
-            parseFile(nextFile, searchPath); // May add to pendingFiles.
+            parseFile(nextFile, searchPath); // May add to the pending files.
         }
     }
+    // Delete the structures no longer needed.
     deleteList(pendingFiles);
     deleteSet(included);
-    if (Perrors) return null;
+    // If there were errors delete the other structures and return null.
+    if (Perrors) {
+        deleteList(parsedFiles);
+        deleteSymbolTable(globals);
+        deleteFunctionTable(procedures);
+        deleteFunctionTable(functions);
+        return null;
+    }
 
-    // Parsing was successful. Create and return a Context object.
+    // Parsing was successful. Create and return a context.
     Context* context = createEmptyContext();
     context->fileNames = parsedFiles;
     context->globals = globals;
     context->procedures = procedures;
     context->functions = functions;
+    // Null the globals after the context has taken ownership.
     globals = null;
     procedures = functions = null;
     parsedFiles = null;
@@ -85,8 +99,7 @@ Context* parseProgram(String fileName, String searchPath) {
     return context;
 }
 
-// parseFile parses a single script file with the yacc-generated parser. This function is static because it should
-// only be called by parseProgram.
+// parseFile parses a single script file with the yacc-generated parser. This function private to this file.
 static void parseFile(String fileName, String searchPath) {
     if (!fileName || *fileName == 0) return;
     curFileName = fileName;
