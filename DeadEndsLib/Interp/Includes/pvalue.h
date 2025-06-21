@@ -2,10 +2,11 @@
 //  DeadEnds Library
 //
 //  pvalue.h is the header file for the program value (PValue) type. PValues are the values of
-//  expressions in the DeadEnds script language. They are the values stored in symbol tables.
+//  expressions in the DeadEnds script language. They are the values stored in symbol tables and
+//  returned by script functions.
 //
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 17 June 2025.
+//  Last changed on 20 June 2025.
 //
 
 #ifndef pvalue_h
@@ -43,7 +44,9 @@ typedef union VUnion {
 	void* uWord;
 } VUnion;
 
-// PValue is the type of the script language expressions. It is a value type whenever possible.
+// PValue is the type of the script language expressions. It is a value type whenever possible,
+// though PValues in symbol tables are in the heap. Note that special care is reqired throughout
+// in handling PVString PValues because Strings are usually on the heap.
 typedef struct PValue {
 	PVType type;
 	VUnion value;

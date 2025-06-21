@@ -206,7 +206,10 @@ PValue __col (PNode *pnode, Context *context, bool *errflg) {
 	return nullPValue;
 }
 
+// NOTE: The next three functions should be in another file.
+
 // __TYPEOF returns the type of its argument as a string.
+// usage: typof(PNODE) -> STRING
 PValue __TYPEOF(PNode* pnode, Context* context, bool *errflg) {
     PValue pvalue = evaluate(pnode->arguments, context, errflg);
     if (*errflg) return nullPValue;
@@ -229,9 +232,11 @@ PValue __SHOWFRAME(PNode* pnode, Context* context, bool* errflg) {
     return nullPValue;
 }
 
-// __pageout writes the current page grid of Unicode code points to the file in Utf8 encoding.
+// __pageout writes the page grid of Unicode codepoints to the current script output file. The codepoints are
+// written as one, two, three or four UTF-8 bytes.
 // usage: pageout() -> VOID
 PValue __pageout(PNode* pnode, Context* context, bool* errflg) {
+    // Make sure the output file is in page mode.
     File* file = context->file;
     if (file->mode != pageMode) {
         scriptError(pnode, "the output file must be in page mode");
@@ -239,17 +244,19 @@ PValue __pageout(PNode* pnode, Context* context, bool* errflg) {
         return nullPValue;
     }
     Page* page = file->page;
-    char utf8[5]; // Room for max UTF-8 sequence + null terminator
+    char utf8[5]; // Buffer for UTF-8 encoding including an unused safety byte.
+    // Convert every codepoint to a sequence of UTF-8 bytes and write them to the current output file.
     for (int row = 0; row < page->nrows; row++) {
         for (int col = 0; col < page->ncols; col++) {
-            int32_t cp = page->grid[row * page->ncols + col];
-            int len = unicodeToUtf8(cp, utf8);
+            int32_t codepoint = page->grid[row * page->ncols + col];
+            int len = unicodeToUtf8(codepoint, utf8); // Convert codepoint to UTF-8.
             if (len > 0) fwrite(utf8, 1, len, file->fp);
         }
         fputc('\n', file->fp);
     }
+    // After writing the page fill the grid with spaces.
     for (int i = 0; i < page->nrows * page->ncols; i++) {
-        page->grid[i] = 0x20; // U+0020 = space
+        page->grid[i] = 0x20;
     }
     return nullPValue;
 }
@@ -268,14 +275,19 @@ void adjustCols(String string, Page* page) {
 
 // poutput outputs a string to the current program output file in the current mode,
 // decoding UTF-8 into Unicode codepoints stored in the page grid.
+
+// poutput outputs a string to the current program output file in the current mode,
+// decoding UTF-8 into Unicode codepoints stored in the page grid.
 void poutput(String string, Context* context) {
     File* file = context->file;
 
+    // Handle line mode
     if (file->mode == lineMode) {
         fprintf(file->fp, "%s", string);
         return;
     }
 
+    // Guard against non-page mode or null/empty string
     if (file->mode != pageMode || !string || !*string) return;
 
     Page* page = file->page;
@@ -285,15 +297,28 @@ void poutput(String string, Context* context) {
     while (*string) {
         int32_t codepoint = 0;
         int bytes = utf8ToUnicode(string, &codepoint);
-        if (bytes == 0) break; // Invalid sequence or string end
+
+        if (bytes == 0) {
+            // Invalid UTF-8; skip one byte and continue
+            string++;
+            continue;
+        }
 
         if (codepoint == '\n') {
             row++;
             col = 1;
-        } else if (row <= page->nrows && col <= page->ncols) {
-            int offset = (row - 1) * page->ncols + (col - 1);
-            page->grid[offset] = codepoint;
+            if (row > page->nrows) break; // No room for more lines
+        } else {
+            if (row >= 1 && row <= page->nrows && col >= 1 && col <= page->ncols) {
+                int offset = (row - 1) * page->ncols + (col - 1);
+                page->grid[offset] = codepoint;
+            }
             col++;
+            if (col > page->ncols) {
+                col = 1;
+                row++;
+                if (row > page->nrows) break; // No room for wrapping
+            }
         }
 
         string += bytes;
@@ -303,8 +328,8 @@ void poutput(String string, Context* context) {
     page->curcol = col;
 }
 
-// unicodeToUtf8 converts a 21-bit Unicode codepoint to one, two, three or four Utf8 bytes.
-// Not used yet; preparing for page mode to be Unicode compatible.
+// unicodeToUtf8 converts a 21-bit Unicode codepoint to one, two, three or four UTF8 bytes. Returns the number of
+// bytes written, or 0 on error. Array out must be long enough to accomodate.
 static int unicodeToUtf8(int32_t codepoint, char* out) {
     if (codepoint <= 0x7F) {
         out[0] = (char) codepoint;
@@ -329,10 +354,10 @@ static int unicodeToUtf8(int32_t codepoint, char* out) {
     }
 }
 
-// utf8ToUnicode conerts a UTF-8 character to a single Unicode codepoint.
-// Returns number of bytes consumed, or 0 on error.
+// utf8ToUnicode converts a UTF-8 character to a single Unicode codepoint. Returns the number of bytes read,
+// or 0 on error. One to four bytes are read based on the codepoint. The codepoint is a 32 bit integer.
 static int utf8ToUnicode(const char* s, int32_t* out) {
-    unsigned char c = (unsigned char)s[0];
+    unsigned char c = (unsigned char) s[0];
     if (c < 0x80) {
         *out = c;
         return 1;
