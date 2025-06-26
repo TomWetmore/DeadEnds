@@ -3,7 +3,7 @@
 //  rassa.c handles the page mode builtins for DeadEnds script programs.
 //
 //  Created by Thomas Wetmore on 10 February 2024.
-//  Last changed on 19 June 2025.
+//  Last changed on 26 June 2025.
 //
 
 #include <string.h>
@@ -55,6 +55,7 @@ PValue __pagemode(PNode* pnode, Context* context, bool* errflg) {
     if (file->mode == pageMode) deletePage(file->page);
     file->mode = pageMode;
     file->page = createPage(rows, cols);
+    file->curcol = 1;
     return nullPValue;
 }
 
@@ -63,6 +64,7 @@ PValue __pagemode(PNode* pnode, Context* context, bool* errflg) {
 PValue __linemode(PNode* pnode, Context* context, bool* errflg) {
     File* file = context->file;
     // Do nothing if already in line mode.
+    file->curcol = 1;
     if (file->mode == lineMode) return nullPValue;
     // Switch to line mode; assume the last page has been written by a pageout().
 	file->mode = lineMode;
@@ -151,7 +153,7 @@ PValue __pos(PNode* pnode, Context* context, bool* errflg) {
 		return nullPValue;
 	}
 	page->currow = row;
-	page->curcol = col;
+	file->curcol = col;
 	return nullPValue;
 }
 
@@ -177,32 +179,38 @@ PValue __row(PNode* pnode, Context* context, bool* errflg) {
 		return nullPValue;
 	}
     page->currow = row;
-    page->curcol = 1;
+    file->curcol = 1;
 	return nullPValue;
 }
 
 // __col positions page output to a specific column.
 // usage: col(INT) -> VOID
 PValue __col (PNode *pnode, Context *context, bool *errflg) {
-    // The file must be in page mode.
+    // The file can be in either mode.
     File* file = context->file;
-    if (file->mode != pageMode) {
-        scriptError(pnode, "The output file must in page mode");
-        *errflg = true;
-        return nullPValue;
-    }
 	int col = evaluateInteger(pnode->arguments, context, errflg);
 	if (*errflg) {
 		scriptError(pnode, "the argument to col must be an integer");
 		return nullPValue;
 	}
     Page* page = file->page;
-    if (col < 1 || col > page->ncols) {
+    // col is restricted when in page mode.
+    if (col < 1 || (file->mode == pageMode && col > page->ncols)) {
         scriptError(pnode, "the column value is out of range");
         *errflg = true;
         return nullPValue;
     }
-    page->curcol = col;
+    // If in line mode may need to write to the file.
+    if (file->mode == lineMode) {
+        int diff = col - file->curcol;
+        if (diff > 0) {
+            for (int i = 0; i < diff; i++) putc(' ', file->fp);
+        } else if (diff < 0) {
+            putc('\n', file->fp);
+            for (int i = 0; i > diff; i--) putc(' ', file->fp);
+        }
+    }
+    file->curcol = col;
 	return nullPValue;
 }
 
@@ -232,8 +240,8 @@ PValue __SHOWFRAME(PNode* pnode, Context* context, bool* errflg) {
     return nullPValue;
 }
 
-// __pageout writes the page grid of Unicode codepoints to the current script output file. The codepoints are
-// written as one, two, three or four UTF-8 bytes.
+// __pageout writes the page grid of Unicode codepoints to the current script output file. The
+// codepoints are written as one to four UTF-8 bytes.
 // usage: pageout() -> VOID
 PValue __pageout(PNode* pnode, Context* context, bool* errflg) {
     // Make sure the output file is in page mode.
@@ -262,19 +270,15 @@ PValue __pageout(PNode* pnode, Context* context, bool* errflg) {
 }
 
 // adjustCols adjusts the column after printing a string.
-// NOTE: This looks buggy. NOTE: This looks buggy.
-void adjustCols(String string, Page* page) {
+void adjustCols(String string, File* file) {
 	int c;
 	while ((c = *string++)) {
 		if (c == '\n')
-			page->curcol = 1;
+			file->curcol = 1;
 		else
-			page->curcol++;
+			file->curcol++;
 	}
 }
-
-// poutput outputs a string to the current program output file in the current mode,
-// decoding UTF-8 into Unicode codepoints stored in the page grid.
 
 // poutput outputs a string to the current program output file in the current mode,
 // decoding UTF-8 into Unicode codepoints stored in the page grid.
@@ -284,6 +288,7 @@ void poutput(String string, Context* context) {
     // Handle line mode
     if (file->mode == lineMode) {
         fprintf(file->fp, "%s", string);
+        adjustCols(string, file);
         return;
     }
 
@@ -292,7 +297,7 @@ void poutput(String string, Context* context) {
 
     Page* page = file->page;
     int row = page->currow;
-    int col = page->curcol;
+    int col = file->curcol;
 
     while (*string) {
         int32_t codepoint = 0;
@@ -323,13 +328,12 @@ void poutput(String string, Context* context) {
 
         string += bytes;
     }
-
     page->currow = row;
-    page->curcol = col;
+    file->curcol = col;
 }
 
-// unicodeToUtf8 converts a 21-bit Unicode codepoint to one, two, three or four UTF8 bytes. Returns the number of
-// bytes written, or 0 on error. Array out must be long enough to accomodate.
+// unicodeToUtf8 converts a 21-bit Unicode codepoint to one, two, three or four UTF8 bytes.
+// Returns the number of bytes written, or 0 on error. Array out must be long enough.
 static int unicodeToUtf8(int32_t codepoint, char* out) {
     if (codepoint <= 0x7F) {
         out[0] = (char) codepoint;
@@ -354,8 +358,9 @@ static int unicodeToUtf8(int32_t codepoint, char* out) {
     }
 }
 
-// utf8ToUnicode converts a UTF-8 character to a single Unicode codepoint. Returns the number of bytes read,
-// or 0 on error. One to four bytes are read based on the codepoint. The codepoint is a 32 bit integer.
+// utf8ToUnicode converts a UTF-8 character to a single Unicode codepoint. Returns the number of
+// bytes read, or 0 on error. One to four bytes are read based on the codepoint. The codepoint
+// is a 32 bit integer.
 static int utf8ToUnicode(const char* s, int32_t* out) {
     unsigned char c = (unsigned char) s[0];
     if (c < 0x80) {

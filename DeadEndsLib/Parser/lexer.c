@@ -3,7 +3,7 @@
 //  lexer.c has the lexer functions for DeadEnds script programs.
 //
 //  Created by Thomas Wetmore on 27 December 2022.
-//  Last changed on 18 June 2025.
+//  Last changed on 23 June 2025.
 //
 
 #include "lexer.h"
@@ -204,7 +204,7 @@ static void unreadchar(int c) {
     if (c == '\n') curLine--;
 }
 
-// rwordtable is the reserved word table; keep in alphabetical order.
+// rwordtable is the reserved word table.
 static struct {
     char* rword;
     int val;

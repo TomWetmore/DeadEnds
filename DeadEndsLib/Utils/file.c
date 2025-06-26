@@ -4,7 +4,7 @@
 // file.c
 //
 // Created by Thomas Wetmore on 1 July 2024.
-// Last changed on 19 June 2025.
+// Last changed on 26 June 2025.
 //
 
 #include <stdio.h>
@@ -58,7 +58,6 @@ Page* createPage(int rows, int cols) {
     Page* page = (Page*) stdalloc(sizeof(Page));
     page->nrows = rows;
     page->ncols = cols;
-    page->curcol = 1;
     page->currow = 1;
     page->grid = (int32_t*) stdalloc(rows * cols * sizeof(int32_t));
     for (int i = 0; i < page->nrows * page->ncols; i++) {
