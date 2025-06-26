@@ -183,10 +183,10 @@ PValue __row(PNode* pnode, Context* context, bool* errflg) {
 	return nullPValue;
 }
 
-// __col positions page output to a specific column.
+// __col positions the output file to a specific column. The file can be in either line or
+// page mode.
 // usage: col(INT) -> VOID
 PValue __col (PNode *pnode, Context *context, bool *errflg) {
-    // The file can be in either mode.
     File* file = context->file;
 	int col = evaluateInteger(pnode->arguments, context, errflg);
 	if (*errflg) {
@@ -207,7 +207,7 @@ PValue __col (PNode *pnode, Context *context, bool *errflg) {
             for (int i = 0; i < diff; i++) putc(' ', file->fp);
         } else if (diff < 0) {
             putc('\n', file->fp);
-            for (int i = 0; i > diff; i--) putc(' ', file->fp);
+            for (int i = 0; i < col; i++) putc(' ', file->fp);
         }
     }
     file->curcol = col;
@@ -308,7 +308,6 @@ void poutput(String string, Context* context) {
             string++;
             continue;
         }
-
         if (codepoint == '\n') {
             row++;
             col = 1;
@@ -325,7 +324,6 @@ void poutput(String string, Context* context) {
                 if (row > page->nrows) break; // No room for wrapping
             }
         }
-
         string += bytes;
     }
     page->currow = row;
