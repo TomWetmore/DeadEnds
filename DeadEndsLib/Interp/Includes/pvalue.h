@@ -6,7 +6,7 @@
 //  returned by script functions.
 //
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 20 June 2025.
+//  Last changed on 3 July 2025.
 //
 
 #ifndef pvalue_h
@@ -65,7 +65,6 @@ extern const PValue truePValue;
 extern const PValue falsePValue;
 
 extern int Perrors;
-extern int nobuiltins;
 
 #define TYPE_CHECK(t, v) \
 if (ptype(v) != t) {\

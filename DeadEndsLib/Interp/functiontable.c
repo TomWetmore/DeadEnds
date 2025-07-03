@@ -3,7 +3,7 @@
 //  functiontable.c -- The DeadEnds function and procedure table datatype.
 //
 //  Created by Thomas Wetmore on 9 April 2023.
-//  Last changed on 18 June 2025.
+//  Last changed on 3 July 2025.
 //
 
 #include "functiontable.h"
@@ -59,4 +59,8 @@ void addToFunctionTable(FunctionTable* table, String name, PNode* pnode) {
 	element->name = strsave(name);
 	element->function = pnode;
 	addToHashTable(table, element, true);
+}
+
+int sizeFunctionTable(FunctionTable* table) {
+    return sizeHashTable(table);
 }

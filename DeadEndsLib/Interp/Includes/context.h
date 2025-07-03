@@ -3,12 +3,13 @@
 //  context.h
 //
 //  Created by Thomas Wetmore on 21 May 2025.
-//  Last changed on 18 June 2025.
+//  Last changed on 3 July 2025.
 //
 
 #ifndef context_h
 #define context_h
 
+typedef struct Context Context;
 typedef struct Database Database;
 typedef struct HashTable HashTable;
 typedef HashTable FunctionTable;
@@ -17,6 +18,8 @@ typedef struct PValue PValue;
 typedef struct Frame Frame;
 typedef struct File File;
 typedef struct List List;
+
+void validateCalls(Context*);
 
 // Context holds the context in which interpretation takes place.
 typedef struct Context {

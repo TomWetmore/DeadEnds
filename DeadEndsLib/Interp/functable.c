@@ -4,7 +4,7 @@
 //  functable.c has the table of built-in functions in the DeadEnds scripting language.
 //
 //  Created by Thomas Wetmore on 10 January 2023.
-//  Last changed on 10 June 2025.
+//  Last changed on 3 July 2025.
 //
 
 #include "standard.h"
@@ -384,4 +384,4 @@ BuiltIn builtIns[] = {
     "year",         1,    1,    __year,
 };
 
-int nobuiltins = sizeof(builtIns)/sizeof(builtIns[0]);
+int numBuiltIns = sizeof(builtIns)/sizeof(builtIns[0]);

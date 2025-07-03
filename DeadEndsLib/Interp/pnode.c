@@ -176,7 +176,7 @@ PNode* funcCallPNode(String name, PNode* alist) {
 
     // Not user-defined; should be a builtin.
     int lo = 0;
-    int hi = nobuiltins - 1;
+    int hi = numBuiltIns - 1;
     bool found = false;
     int r;
     int md = 0;
