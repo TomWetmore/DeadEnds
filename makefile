@@ -7,6 +7,7 @@ all:
 	cd TestProgram; make
 	cd Partition; make
 	cd MultiBases; make
+	cd GenerateSExpressions; make
 
 clean:
 	cd DeadEndsLib; make clean
@@ -17,3 +18,4 @@ clean:
 	cd TestProgram; make clean
 	cd Partition; make clean
 	cd MultiBases; make clean
+	cd GenerateSExpressions; make clean

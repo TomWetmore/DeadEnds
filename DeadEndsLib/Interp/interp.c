@@ -2,11 +2,11 @@
 //  DeadEnds Library
 //
 //  interp.c holds functions that interpret DeadEnds scripts. The main function is interpret,
-//  which is called on a PNode. Depending on the PNode's type, interpret may handle it directly,
-//  or may call a specific function.
+//  which is called on a PNode. Depending on the PNode's type, interpret will handle it directly,
+//  or call a more specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 17 June 2025.
+//  Last changed on 3 July 2025.
 //
 
 #include <stdarg.h>
@@ -46,18 +46,18 @@ bool programParsing = false;
 bool programRunning = false;
 bool programDebugging = false;
 
-// Interface between the lexer, parser, and interpreter.
-int Perrors = 0;      // Number of errors.
+// Number of script errors.
+int Perrors = 0;
 
 // interpScript interprets a DeadEnds script. A script must contain a main procedure (named "main"). interpScript
-// 'arranges' to call that procedure. This function creates a procedure call PNode to call main, updates the script
-// output file in the Context if the caller has provided one, and then 'calls' that PNode in the updated Context.
+// arranges to call that procedure. The function creates a procedure call PNode to call main procecure, updates
+// the script output file in the Context if the caller provided one, and then calls that PNode with the Context.
 void interpScript(Context* context, File* outfile) {
-    // Create a PNProcCall PNode to call the main proc.
-    curFileName = "..synthetic..";
+    // Create a PNProcCall PNode that calls the main procedure.
+    curFileName = "..synthetic.."; // Think of a cleverer name.
     curLine = 1;
     PNode* pnode = procCallPNode("main", null);
-    // If user supplies and output file use it.
+    // If there is an output file use it.
     if (outfile && context->file != outfile) {
         closeFile(context->file);
         context->file = outfile;
@@ -67,16 +67,15 @@ void interpScript(Context* context, File* outfile) {
     (void) interpret(pnode, context, null);
 }
 
-// interpret interprets a list of PNodes. If a return statement is found it returns the return
-// value through the last parameter. The language allows expressions at the statement level, so
-// top level expressions are interpreted. Output is written when a statement or top level
-// expression evaluates to a String.
+// interpret interprets a list of PNodes. If a return statement is found it returns the return value through the
+// last parameter. The language allows expressions at the statement level, so top level expressions are
+// interpreted. Output is written when a statement or top level expression evaluates to a String.
 InterpType interpret(PNode* pnode, Context* context, PValue* returnValue) {
     ASSERT(pnode && context);
     bool errorFlag = false;
     InterpType returnCode;
     PValue pvalue;
-    while (pnode) { // Iterate the PNodes in list to interpret.
+    while (pnode) { // Interpret the list of PNodes in the current block.
         if (programDebugging) {
             printf("interpret:%d: ", pnode->lineNumber);
             showPNode(pnode);
@@ -84,7 +83,6 @@ InterpType interpret(PNode* pnode, Context* context, PValue* returnValue) {
         switch (pnode->type) {
         case PNSCons: // Strings are written.
             poutput(pnode->stringCons, context);
-            //fprintf(context->file->fp, "%s", (String) pnode->stringCons);
             break;
         case PNICons: // Numbers are ignored.
         case PNFCons:
@@ -92,7 +90,6 @@ InterpType interpret(PNode* pnode, Context* context, PValue* returnValue) {
         case PNIdent: // Idents with String values are written.
             pvalue = evaluateIdent(pnode, context);
             if (pvalue.type == PVString && pvalue.value.uString) {
-                //fprintf(context->file->fp, "%s", pvalue.value.uString);
                 poutput(pvalue.value.uString, context);
                 stdfree(pvalue.value.uString);
             }
@@ -104,16 +101,14 @@ InterpType interpret(PNode* pnode, Context* context, PValue* returnValue) {
                 return InterpError;
             }
             if (pvalue.type == PVString && pvalue.value.uString) {
-                //fprintf(context->file->fp, "%s", pvalue.value.uString);
                 poutput(pvalue.value.uString, context);
                 stdfree(pvalue.value.uString);
             }
             break;
-        case PNProcCall: {
+        case PNProcCall: { // Call a builtin procedure. If for some reason it returns a String write it.
             switch (returnCode = interpProcCall(pnode, context, returnValue)) {
             case InterpOkay:
                 if (returnValue && returnValue->type == PVString && returnValue->value.uString) {
-                    //fprintf(context->file->fp, "%s", returnValue->value.uString);
                     poutput(returnValue->value.uString, context);
                     stdfree(returnValue->value.uString);
                 }
@@ -123,12 +118,11 @@ InterpType interpret(PNode* pnode, Context* context, PValue* returnValue) {
             }
             break;
         }
-        case PNFuncCall: // Call a user-defined function at statement level.
+        case PNFuncCall: // Call a user-defined function as a statement. If it returns a String write it.
             pvalue = evaluateUserFunc(pnode, context, &errorFlag);
             if (errorFlag) return InterpError;
             if (pvalue.type == PVString && pvalue.value.uString) {
                 poutput(pvalue.value.uString, context);
-                //fprintf(context->file->fp, "%s", pvalue.value.uString);
                 stdfree(pvalue.value.uString);  // The pvalue's string is in the heap.
             }
             break;
@@ -298,7 +292,6 @@ InterpType interpChildren (PNode* pnode, Context* context, PValue* pval) {
         scriptError(pnode, "the first argument to children must be a family");
         return InterpError;
     }
-    //SymbolTable* table = context->frame->table;
     FORCHILDREN(fam, chil, key, nchil, context->database->recordIndex) {
         assignValueToSymbol(context, pnode->childIden, PVALUE(PVPerson, uGNode, chil));
         assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, nchil));
@@ -353,7 +346,6 @@ InterpType interpFamilies(PNode* pnode, Context* context, PValue *pval) {
     }
     GNode *spouse = null;
     int count = 0;
-    //Database *database = context->database;
     RecordIndex* index = context->database->recordIndex;
     FORFAMSS(indi, fam, key, index) {
         assignValueToSymbol(context, pnode->familyIden, PVALUE(PVFamily, uGNode, fam));
@@ -361,7 +353,7 @@ InterpType interpFamilies(PNode* pnode, Context* context, PValue *pval) {
         if (sex == sexMale) spouse = familyToWife(fam, index);
         else if (sex == sexFemale) spouse = familyToHusband(fam, index);
         else spouse = null;
-        assignValueToSymbol(context, pnode->spouseIden, PVALUE(PVPerson, uGNode, spouse));
+        assignValueToSymbol(context, pnode->spouseIden, spouse ? PVALUE(PVPerson, uGNode, spouse) : nullPValue);
         assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, ++count));
         InterpType irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
