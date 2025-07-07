@@ -3,10 +3,9 @@
 //
 //  builtinlist.c has the functions that implement the list datatype built-ins. They use the List
 //  datatype. The elements of the lists are program values.
-//  MNOTE: Memory management is an issue to be dealt with carefully.
 //
 //  Created by Thomas Wetmore on 16 April 2023.
-//  Last changed on 10 June 2025.
+//  Last changed on 7 July 2025.
 //
 
 #include "context.h"
@@ -23,7 +22,10 @@ static bool localDebugging = false;
 
 // __list creates a list.
 // usage: list(IDENT) -> VOID
-static void delete(void* element) { stdfree(element); } // Free strings when list freed.
+static void delete(void* element) { freePValue(element); } // Free PValue elements when the list freed.
+// TODO: Script Lists are composed of PValues. The Lists will own their elements. So when lists are emptied or
+// freed the delete function should free the PValues. This is how we have set things in the List's delete
+// function above.
 PValue __list(PNode* pnode, Context* context, bool* errflg) {
     PNode *var = pnode->arguments;
     if (var->type != PNIdent) {
@@ -34,7 +36,6 @@ PValue __list(PNode* pnode, Context* context, bool* errflg) {
     String ident = var->identifier;
     ASSERT(ident);
     List *list = createList(null, null, delete, false);
-    //SymbolTable* table = context->frame->table;
     assignValueToSymbol(context, ident, PVALUE(PVList, uList, list));
     if (localDebugging) showSymbolTable(context->frame->table);
     return nullPValue;
@@ -64,7 +65,7 @@ PValue __prepend(PNode* pnode, Context* context, bool* errflg) {
     return nullPValue;
 }
 
-// __append handle the cases that add to the end of a list.
+// __append handles the cases that add to the end of a list.
 // usage: append(LIST, ANY) -> VOID
 // usage: requeue(LIST, ANY) -> VOID
 PValue __append(PNode* pnode, Context* context, bool* errflg) {
@@ -162,7 +163,7 @@ PValue __setel (PNode* pnode, Context* context, bool* errflg) {
         return nullPValue;
     }
     // Extend the list with NULLs as needed
-    // Patched 27 April 2025 to get setel to work as it should.
+    // Patched 27 April 2025 to get setel to work in crazy places.
     while (index >= lengthList(list)) {
         PValue *filler = (PValue*) stdalloc(sizeof(PValue));
         *filler = nullPValue;
@@ -212,20 +213,9 @@ PValue __getel(PNode *pnode, Context *context, bool *errflg) {
     return cloneAndReturnPValue(ppvalue);
 }
 
-// __length returns the length of a list.
+// __length returns the length of a list, table or sequence.
 // usage: length(LIST|TABLE|SEQUENCE) -> INT
 // usage: size(LIST|TABLE|SEQUENCE) -> INT
-//PValue __oldlength(PNode* pnode, Context* context, bool* errflg) { // DEPRECATED.
-//    PNode *arg = pnode->arguments; // Arg is the list.
-//    PValue pvalue = evaluate(arg, context, errflg);
-//    if (*errflg || pvalue.type != PVList) {
-//        scriptError(pnode, "the argument to length must be a list");
-//        *errflg = true;
-//        return nullPValue;
-//    }
-//    List *list = pvalue.value.uList;
-//    return PVALUE(PVInt, uInt, lengthList(list));
-//}
 PValue __length(PNode* pnode, Context* context, bool* errflg) {
     PNode *arg = pnode->arguments; // Arg is the list.
     PValue pvalue = evaluate(arg, context, errflg);
