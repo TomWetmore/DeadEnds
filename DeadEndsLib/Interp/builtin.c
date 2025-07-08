@@ -504,8 +504,7 @@ PValue __extractnames (PNode *pnode, Context *context, bool *errflg) {
 		scriptError(pnode, "the second argument to extractnames must be a list");
 		return nullPValue;
 	}
-    // list is the List that will be filled with the name parts as PVStrings. It is a List in a symbol table
-    // that was created earlier in the script with a list(x) builtin.
+    // list will be filled with the name parts as PVStrings. It is a list in some symbol table.
 	List *list = pvalue.value.uList;
     if (list) emptyList(list);
 	bool error = false;
@@ -524,17 +523,18 @@ PValue __extractnames (PNode *pnode, Context *context, bool *errflg) {
 	}
 	int len, sind;
 	*errflg = false;
-    List* parts = createList(null, null, null, false);
+    // Use a temporaray list to get the name parts.
+    List* parts = createList(null, null, null, false); // Third null means Strings are not freed.
     nameToList(str, parts, &len, &sind);
-    // The Strings in parts must be converted to PVStrings.
+    // Convert the Strings in the temporary parts list to PValues and append them to list.
     for (int i = 0; i < len; i++) {
         String part = (String) getListElement(parts, i);
-        PValue pvalue = PVALUE(PVString, uString, part); // transfer ownership
-        PValue* ppvalue = (PValue*) stdalloc(sizeof(PValue)); // allocate on heap
-        *ppvalue = copyPValue(pvalue);
-        appendToList(list, ppvalue);  // copy onto heap, insert into list
+        PValue pvalue = PVALUE(PVString, uString, part); // Transfer String ownership.
+        PValue* ppvalue = (PValue*) stdalloc(sizeof(PValue)); // Create PValue* in the heap.
+        *ppvalue = pvalue;
+        appendToList(list, ppvalue);  // Add the PValue* to the list.
     }
-    deleteList(parts);
+    deleteList(parts); // Clean up temporary list.
 	assignValueToSymbol(context, lvar->identifier, PVALUE(PVInt, uInt, len));
 	assignValueToSymbol(context, svar->identifier, PVALUE(PVInt, uInt, sind));
 	return nullPValue;
@@ -546,7 +546,7 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
     PNode *nexp = pnode->arguments;
     GNode *node = evaluateGNode(nexp, context, errflg); // First arg is a Gedcom node.
     if (*errflg || !node) {
-        scriptError(pnode, "first argument to extractplaces() must evaluate to a Gedcom node");
+        scriptError(pnode, "first argument to extractplaces must evaluate to a Gedcom node");
         return nullPValue;
     }
     GNode *placeNode = eqstr(node->tag, "PLAC") ? node : findTag(node->child, "PLAC"); // Find PLAC node.
@@ -563,7 +563,7 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
     PValue listVal = getValueOfSymbol(context, listName);
     List* list = listVal.value.uList;
     if (listVal.type != PVList || !list) {
-        scriptError(pnode, "second argument to extractplaces() must identify a valid list");
+        scriptError(pnode, "second argument to extractplaces must identify a valid list");
         *errflg = true;
         return nullPValue;
     }
