@@ -185,6 +185,7 @@ extern PValue __uniqueset(PNode*, Context*, bool*);
 extern PValue __unlock(PNode*, Context*, bool*);
 extern PValue __upper(PNode*, Context*, bool*);
 extern PValue __value(PNode*, Context*, bool*);
+extern PValue __VALUEOF(PNode*, Context*, bool*);
 extern PValue __valuesort(PNode*, Context*, bool*);
 extern PValue __version(PNode*, Context*, bool*);
 extern PValue __wife(PNode*, Context*, bool*);
@@ -201,6 +202,7 @@ BuiltIn builtIns[] = {
     "ancestorset",  1,   1,    __ancestorset,
     "and",          2,  CC,    __and,
     "append",       2,   2,    __append,
+    "atoi",         1,   1,    __strtoint,
     "baptism",      1,   1,    __baptism,
     "birth",        1,   1,    __birth,
     "burial",       1,   1,    __burial,
@@ -377,6 +379,7 @@ BuiltIn builtIns[] = {
     "unlock",       1,    1,    __noop,
     "upper",        1,    1,    __upper,
     "value",        1,    1,    __value,
+    "valueof",      1,    1,    __VALUEOF,
 	"valuesort",    1,    1,    __valuesort,
     "version",      0,    0,    __version,
     "wife",         1,    1,    __wife,

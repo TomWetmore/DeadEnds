@@ -214,14 +214,25 @@ PValue __col (PNode *pnode, Context *context, bool *errflg) {
 	return nullPValue;
 }
 
-// NOTE: The next three functions should be in another file.
+// NOTE: The next four functions should be in another file.
 
 // __TYPEOF returns the type of its argument as a string.
-// usage: typof(PNODE) -> STRING
+// usage: typeof(PNODE) -> STRING
 PValue __TYPEOF(PNode* pnode, Context* context, bool *errflg) {
     PValue pvalue = evaluate(pnode->arguments, context, errflg);
-    if (*errflg) return nullPValue;
-    return createStringPValue(typeOf(pvalue));
+    //if (*errflg) return nullPValue;
+    return createStringPValue(typeOfPValue(pvalue));
+}
+
+// __VALUEOF returns the value its argument PNode. This includes the PNode's type and value.
+// usage: valueof(PNODE) -> STRING
+PValue __VALUEOF(PNode* pnode, Context* context, bool *errflg) {
+    static char scratch[1000];
+    PValue pvalue = evaluate(pnode->arguments, context, errflg);
+    String type = typeOfPValue(pvalue);
+    String value = valueOfPValue(pvalue);
+    sprintf(scratch, "(%s, %s)", type, value);
+    return createStringPValue(scratch);
 }
 
 // __SHOWSTACK prints the runtime stack.

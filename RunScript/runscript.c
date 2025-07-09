@@ -45,6 +45,10 @@ int main(int argc, char* argv[]) {
     // Parse and run the script.
     fprintf(stderr, "%s: Script parsed.\n", getMsecondsStr());
     Context* context = parseProgram(scriptFile, scriptPath);
+    if (!context) {
+        fprintf(stderr, "Error parsing program\n");
+        exit(1);
+    }
     validateCalls(context);
     context->database = database;
     context->file = stdOutputFile();

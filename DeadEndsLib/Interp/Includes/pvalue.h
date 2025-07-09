@@ -93,7 +93,8 @@ PValue eqPValues(PValue, PValue, bool* eflag);
 void coercePValue(PValue* pvalue, int newType, bool* errorFlag);
 PValue* clonePValue(const PValue* original);
 PValue cloneAndReturnPValue(const PValue* original);
-String typeOf(PValue);
+String typeOfPValue(PValue);
+String valueOfPValue(PValue);
 //void deletePValue(PValue);
 //bool eqv_pvalues(PValue, PValue);
 

@@ -845,7 +845,7 @@ void showRuntimeStack(Context* context, PNode* pnode) {
     Symbol* symbol = (Symbol*) element;
     String ident = symbol->ident;
         String svalue = pvalueToString(*(symbol->value), false);
-        String type = typeOf(*(symbol->value));
+        String type = typeOfPValue(*(symbol->value));
         printf("    %s: %s: %s\n", symbol->ident, svalue, type);
         stdfree(svalue);
     ENDHASHTABLE

@@ -82,26 +82,50 @@ PValue cloneAndReturnPValue(const PValue* original) {
 }
 
 // typeOf returns the 'type' of a PValue as a String.
-String typeOf(PValue pvalue) {
+String typeOfPValue(PValue pvalue) {
     String typename;
     switch (pvalue.type) {
-        case PVNull:     typename = "null"; break;
-        case PVInt:      typename = "int"; break;
-        case PVFloat:    typename = "float"; break;
-        case PVBool:     typename = "bool"; break;
-        case PVString:   typename = "string"; break;
-        case PVGNode:    typename = "gnode"; break;
-        case PVPerson:   typename = "person"; break;
-        case PVFamily:   typename = "family"; break;
-        case PVSource:   typename = "source"; break;
-        case PVEvent:    typename = "event"; break;
-        case PVOther:    typename = "other"; break;
-        case PVList:     typename = "list"; break;
-        case PVTable:    typename = "table"; break;
-        case PVSequence: typename = "sequence"; break;
-        default:         typename = "unknown"; break;
+    case PVNull:     typename = "null"; break;
+    case PVInt:      typename = "int"; break;
+    case PVFloat:    typename = "float"; break;
+    case PVBool:     typename = "bool"; break;
+    case PVString:   typename = "string"; break;
+    case PVGNode:    typename = "gnode"; break;
+    case PVPerson:   typename = "person"; break;
+    case PVFamily:   typename = "family"; break;
+    case PVSource:   typename = "source"; break;
+    case PVEvent:    typename = "event"; break;
+    case PVOther:    typename = "other"; break;
+    case PVList:     typename = "list"; break;
+    case PVTable:    typename = "table"; break;
+    case PVSequence: typename = "sequence"; break;
+    default:         typename = "unknown"; break;
     }
     return typename;
+}
+
+// valueOfPValue returns a string representation of the value of a PValue.
+#define BIGNUMBER 4000
+String valueOfPValue(PValue pvalue) {
+    static char scratch[BIGNUMBER];
+    switch (pvalue.type) {
+    case PVNull:     sprintf(scratch, "null"); break;
+    case PVInt:      sprintf(scratch, "%ld", pvalue.value.uInt); break;
+    case PVFloat:    sprintf(scratch, "%g", pvalue.value.uFloat); break;
+    case PVBool:     sprintf(scratch, "%s", pvalue.value.uBool ? "true" : "false"); break;
+    case PVString:   sprintf(scratch, "%s", pvalue.value.uString); break;
+    case PVGNode:
+    case PVPerson:
+    case PVFamily:
+    case PVSource:
+    case PVEvent:
+    case PVOther:    sprintf(scratch, "%s", gnodeToString(pvalue.value.uGNode, 0)); break;
+    case PVList:     sprintf(scratch, "write later if needed"); break;
+    case PVTable:    sprintf(scratch, "write later if needed"); break;
+    case PVSequence: sprintf(scratch, "write later if needed"); break;
+    default:         sprintf(scratch, "unknown"); break;
+    }
+    return scratch;
 }
 
 // freePValue frees an allocated PValue.
@@ -130,23 +154,6 @@ void freePValue(PValue* ppvalue) {
 bool numericPValue(PValue value) {
     return value.type == PVInt || value.type == PVFloat;
 }
-
-// coercePValue converts a PValue from one type to another.
-// THIS FUNCTION IS NOT CALLED.
-//void coercePValue(PValue* pvalue, int newType, bool* eflg) {
-//	int curType = pvalue->type;
-//	if (curType == newType) return; // Nothing to do.
-//	if (newType == PVFloat && curType == PVInt) { // PVInt to PVFloat.
-//		pvalue->type = newType;
-//		pvalue->value.uFloat = (float) pvalue->value.uInt;
-//	}
-//	if (newType == PVBool) { // Any to PVBool.
-//		pvalue->type = newType;
-//		pvalue->value.uBool = ((void*) pvalue->value.uGNode) != null;
-//	}
-//	printf("DID NOT COERCE FROM %d to %d\n", curType, newType);
-//	return;
-//}
 
 //  isPValue checks a PValue for validity by checking its type.
 bool isPValue(PValue pvalue) {
