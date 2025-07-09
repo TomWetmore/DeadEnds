@@ -10,21 +10,21 @@
 #include "list.h"
 
 static bool inString (int chr, String str);
-bool valueToList (String str, List *list, String dlm);
+void valueToList (String str, List *list, String dlm);
 
 // placeToList converts a Gedcom PLAC value to a list of phrases. A phrase is a string that
 // occurs before the first comma, after the last comma, or between successive commas. White
 // space is trimmed from the phrases.
-bool placeToList(String place, List *list) {
-	return valueToList(place, list, ",");
+void placeToList(String place, List *list) {
+	valueToList(place, list, ",");
 }
 
 // valueToList converts a String to a list of trimmed phrases split by delimiters.
 // Each phrase is trimmed of leading/trailing whitespace and added to the list.
 // Returns true on success.
-bool valueToList(String str, List* list, String dlm) {
-    if (!str || *str == 0 || !list) return false;
+void valueToList(String str, List* list, String dlm) {
     emptyList(list); // Empty list before use.
+    if (!str || *str == 0 || !list) return;
     // Create heap buffer to hold copy of string.
     int len = (int) strlen(str);
     String buf = (String) stdalloc(len + 2);
@@ -50,7 +50,7 @@ bool valueToList(String str, List* list, String dlm) {
         p = n;
     }
     stdfree(buf);  // Free buffer.
-    return true;
+    return;
 }
 
 static bool inString (int chr, String str)

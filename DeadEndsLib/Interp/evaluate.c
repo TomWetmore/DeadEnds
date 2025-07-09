@@ -170,7 +170,7 @@ static bool pvalueToBoolean(PValue pvalue) {
     case PVBool: return pvalue.value.uBool;
     case PVInt: return pvalue.value.uInt != 0;
     case PVFloat: return pvalue.value.uFloat != 0.0;
-    case PVString: return strlen(pvalue.value.uString) > 0;
+    case PVString: return pvalue.value.uString && *pvalue.value.uString;
     case PVPerson:
     case PVFamily:
     case PVSource:
@@ -178,7 +178,7 @@ static bool pvalueToBoolean(PValue pvalue) {
     case PVOther:
     case PVGNode: return pvalue.value.uGNode;
     case PVSequence: return pvalue.value.uSequence;
-        //case PVTable: return pvalue.pvValue.uTable ? truePValue : falsePValue;
+    //case PVTable: return pvalue.pvValue.uTable ? truePValue : falsePValue;
     case PVList: return pvalue.value.uList;
     default: return false;
     }

@@ -119,7 +119,8 @@ String valueOfPValue(PValue pvalue) {
     case PVFamily:
     case PVSource:
     case PVEvent:
-    case PVOther:    sprintf(scratch, "%s", gnodeToString(pvalue.value.uGNode, 0)); break;
+    case PVOther:    sprintf(scratch, "%s",
+                             gnodeToString(pvalue.value.uGNode, gnodeLevel(pvalue.value.uGNode))); break;
     case PVList:     sprintf(scratch, "write later if needed"); break;
     case PVTable:    sprintf(scratch, "write later if needed"); break;
     case PVSequence: sprintf(scratch, "write later if needed"); break;

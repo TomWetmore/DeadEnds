@@ -5,7 +5,7 @@
 //  persons and other record types. It underlies the indiseq data type of DeadEnds Script.
 //
 //  Created by Thomas Wetmore on 1 March 2023.
-//  Last changed on 4 June 2025.
+//  Last changed on 9 July 2025.
 //
 
 #include "database.h"
@@ -111,6 +111,7 @@ void appendToSequence(Sequence* sequence, String key, void* value) {
 	//SequenceEl* element = createSequenceEl(sequence->database, key, value);
 	SequenceEl* element = createSequenceEl(sequence->index, key, value);
 	appendToBlock(&(sequence->block), element);
+    sequence->sortType = SequenceNotSorted;
 }
 
 // appendSequenceToSequence appends a Sequence to another Sequence. The Sequences must be distinct.
@@ -119,6 +120,7 @@ void appendSequenceToSequence(Sequence* destination, Sequence* source) {
 	FORSEQUENCE(source, element, count)
 		appendToSequence(destination, element->root->key, element->value);
 	ENDSEQUENCE
+    destination->sortType = SequenceNotSorted;
 }
 
 // renameElementInSequence updates an element in a Sequence with a new name.
@@ -132,6 +134,8 @@ void renameElementInSequence(Sequence* sequence, String key) {
 			(elements[i])->name = NAME(root)->value;
 		}
 	}
+    if (sequence->sortType == SequenceNameSorted)
+        sequence->sortType == SequenceNotSorted;
 }
 
 // isInSequence checks if a SequenceEl with given key is in a Sequence.

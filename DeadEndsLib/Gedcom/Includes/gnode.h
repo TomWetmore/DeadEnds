@@ -68,4 +68,4 @@ String recordKey(GNode* node);
 int numGNodeAllocs(void);
 int numGNodeFrees(void);
 
-#endif // node_h
+#endif // gnode_h

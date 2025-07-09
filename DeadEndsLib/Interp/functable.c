@@ -272,7 +272,7 @@ BuiltIn builtIns[] = {
     "gt",           2,    2,    __gt,
     "husband",      1,    1,    __husband,
     "incr",         1,    1,    __incr,
-//  "index",        3,    3,    __index,
+    "index",        3,    3,    __index,
     "indi",         1,    1,    __indi,
     "indiset",      1,    1,    __indiset,
     "inode",        1,    1,    __inode,

@@ -553,15 +553,18 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
     PNode *cvar = lexp->next;
     GNode *node = evaluateGNode(nexp, context, errflg); // First arg is a Gedcom node.
     if (*errflg) return nullPValue; // Error will have been reported.
-    if (nestr(node->tag, "PLAC")) {
-        node = PLAC(node);
-        if (!node) {
-            *errflg = true;
-            scriptError(pnode, "the first arg to extractplaces must be a PLAC node or a parent of one");
-            return nullPValue;
+
+    // There are a number of edge cases to handle. There may or may not be a string to process.
+    String str = null;
+    if (node) {
+        if (eqstr(node->tag, "PLAC")) {
+            str = node->value;
+        } else {
+            GNode* plac = PLAC(node);
+            if (plac) str = plac->value;
         }
     }
-    // Get the list to put the name parts in
+    // Get the list to put the place parts in
     PValue pvalue = evaluate(lexp, context, errflg);
     if (*errflg || pvalue.type != PVList) {
         *errflg = true;
@@ -570,7 +573,7 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
     }
     // list will be filled with the place parts as PVStrings.
     List* list = pvalue.value.uList;
-    if (list) emptyList(list); // Free any contents but keeps list
+    if (list) emptyList(list); // Frees contents but keeps the list.
     bool error = false;
     if (!iistype(cvar, PNIdent)) error = true;
     if (error) {
@@ -578,17 +581,13 @@ PValue __extractplaces(PNode *pnode, Context *context, bool *errflg) {
         scriptError(pnode, "the third arg to extractplaces must be an identifier");
         return nullPValue;
     }
-    String str = node->value;
     if (!str || *str == 0) { // Return an empty list.
         assignValueToSymbol(context, cvar->identifier, PVALUE(PVInt, uInt, 0));
+        return nullPValue;
     }
     // Use placeToList to separate a PLAC value into list of string parts.
     List* parts = createList(null, null, null, false); // No delete function.
-    if (!placeToList(str, parts)) {
-        scriptError(pnode, "place value could not be split into parts");
-        *errflg = true;
-        return nullPValue;
-    }
+    placeToList(str, parts);
     // Transform the list of Strings into a list of PValues.
     FORLIST(parts, element)
         String string = (String) element;
