@@ -141,7 +141,7 @@ void freePValue(PValue* ppvalue) {
         // MNOTE: Possible memory leak, but fixes subtle bug.
         break;
     case PVList:
-        printf("We are supposed to be freeing a PVList. What should we do?\n");
+        deleteList(ppvalue->value.uList);
         break;
     case PVTable:
         printf("We are supposed to be freeing a PVTable. What should we do?\n");

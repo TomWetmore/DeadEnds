@@ -795,41 +795,56 @@ PValue __reference (PNode* pnode, Context* context, bool* errflg) {
 	return PVALUE(PVBool, uBool, rvalue);
 }
 
-// __extracttokens -- Extract tokens from a STRING value
+// __extracttokens extracts tokens from a STRING value
 // usage: extracttokens(STRING, LIST, VARB, STRING) -> VOID
+// String to tokenize; List to hold tokens; variable to hold count; delimiter.
 PValue __extracttokens (PNode *pnode, Context *context, bool *errflg) {
 	// Get the String to be tokenized.
 	PNode *sexp = pnode->arguments;
 	String str = evaluateString(sexp, context, errflg);
 	if (*errflg) {
-		scriptError(pnode, "The first argument to extracttokens must be a string.");
+		scriptError(pnode, "the first arg to extracttokens must be a string");
 		return nullPValue;
 	}
 	// Get the List to hold the tokens.
 	PNode *lexp = sexp->next;
 	PValue pvalue = evaluate(lexp, context, errflg);
-	if (*errflg || pvalue.type != PVList) {
-		scriptError(pnode, "The second argument to extracttokens must be a list.");
+    if (*errflg) return nullPValue;
+    if (pvalue.type != PVList) {
+		scriptError(pnode, "the second arg to extracttokens must be a list");
 		*errflg = true;
 		return nullPValue;
 	}
 	List *list = pvalue.value.uList;
-	// Get the identifier to hold the number of tokens returned.
+    if (list) emptyList(list);
+	// Get the variable to hold the number of tokens found.
 	PNode *lvar = lexp->next;
 	if (lvar->type != PNIdent) {
-		scriptError(pnode, "The third argument to extracttokens must be an identifier.");
+		scriptError(pnode, "the third arg to extracttokens must be an identifier");
 		*errflg = true;
 		return nullPValue;
 	}
 	// Get the delimiter between tokens.
 	String dlm = evaluateString(lvar->next, context, errflg);
-	if (*errflg || !dlm || *dlm == 0) {
-		scriptError(pnode, "The fourth argument to extracttokens must be a string delimiter");
+    if (*errflg) return nullPValue;
+	if (!dlm || *dlm == 0) {
+		scriptError(pnode, "The fourth arg to extracttokens must be a string delimiter");
 		*errflg = true;
 		return nullPValue;
 	}
-	valueToList(str, list, dlm);
+    // Break the string into a temp              List of String tokens.
+    List* tokens = createList(null, null, null, false);
+	valueToList(str, tokens, dlm);
+    // Transform the Strings into PValues and put them in list.
+    FORLIST(tokens, element)
+        String string = (String) element;
+        PValue* svalue = stdalloc(sizeof(PValue));
+        svalue->type = PVString;
+        svalue->value.uString = string; // Transfer memory ownership.
+        appendToList(list, svalue);
+    ENDLIST
 	assignValueToSymbol(context, lvar->identifier, PVALUE(PVInt, uInt, lengthList(list)));
+    deleteList(tokens);
 	return nullPValue;
 }
 
