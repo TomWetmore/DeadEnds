@@ -1,53 +1,45 @@
-
-global(tagnames)
-global(taglevels)
-global(content)
-
-proc main ()
-{
-   list(tagnames)
-   list(taglevels)
-   table(content)
-
-   forindi(pers,x) {
-       call out(pers)
-   }
-   forfam(fm,x) {
-       call out(fm)
-   }
-   foreven(evn, n) {
-       call out(evn)
-   }
-   forsour(src, n) {
-       call out(src)
-   }
-   forothr(oth, n) {
-       call out(oth)
-   }
-
-   /* insert sorting code here if desired */
-
-   forlist(tagnames,n,p) { n "\n" }
+proc mainx () {
+    /*call ahnen("i1")*/
+    call testextracttokens()
 }
 
-proc out(item)
-{
-   traverse(root(item),y,level) {
+proc main() {
+    list(alist)
+    set(alist, alist)
+    set(alist, alist)
+}
 
-     setel(taglevels,add(level,1),tag(y))
+proc testextracttokens() {
+    set(s, "This is a string representing a sentence in English")
+    list(l)
+    extracttokens(s, l, n, " ")
+    print("n is ", d(n), nl())
+}
 
-     set(i,0)
-     set(s,"")
-     while(le(i,level)) {
-       if(gt(i,0)) {
-         set(s,concat(s,"."))
-       }
-       set(s,concat(s, getel(taglevels,add(i,1))))
-       incr(i)
-     }
-     if(eq(lookup(content, s),0)) {
-       enqueue(tagnames,s)
-       insert(content,s,1)
-     }
-   }
+proc f(p) { p nl nl() }
+
+func g(p) { p nl return("bbbb") }
+
+proc ahnen (key) {
+    "ahnen called with " key "\n"
+    set(indi, indi(key))
+    list(ilist)
+    list(alist)
+    enqueue(ilist, indi)
+    enqueue(alist, 1)
+    showstack()
+    while(indi, dequeue(ilist)) {
+        set(ahnen, dequeue(alist))
+        d(ahnen) ". " name(indi) " (" key(indi) ")\n"
+        if (e, birth(indi)) { " b. " long(e) nl() }
+        if (e, death(indi)) { " d. " long(e) nl() }
+        if (par, father(indi)) {
+            enqueue(ilist, par)
+            enqueue(alist, mul(2,ahnen))
+        }
+        if (par,mother(indi)) {
+            enqueue(ilist, par)
+            enqueue(alist, add(1,mul(2,ahnen)))
+        }
+    }
 }

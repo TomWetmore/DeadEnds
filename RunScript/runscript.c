@@ -54,8 +54,8 @@ int main(int argc, char* argv[]) {
     context->file = stdOutputFile();
     // Try out the file feature.
     File* file = openFile("/Users/ttw4/runscript.out.txt", "w");
-    //interpScript(context, stdOutputFile());
-    interpScript(context, file);
+    interpScript(context, stdOutputFile());
+    //interpScript(context, file);
     fprintf(stderr, "%s: RunScript done.\n", getMsecondsStr());
 }
 

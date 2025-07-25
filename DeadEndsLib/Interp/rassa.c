@@ -3,7 +3,7 @@
 //  rassa.c handles the page mode builtins for DeadEnds script programs.
 //
 //  Created by Thomas Wetmore on 10 February 2024.
-//  Last changed on 26 June 2025.
+//  Last changed on 23 July 2025.
 //
 
 #include <string.h>
@@ -231,7 +231,7 @@ PValue __VALUEOF(PNode* pnode, Context* context, bool *errflg) {
     PValue pvalue = evaluate(pnode->arguments, context, errflg);
     String type = typeOfPValue(pvalue);
     String value = valueOfPValue(pvalue);
-    sprintf(scratch, "(%s, %s)", type, value);
+    sprintf(scratch, "(%s, %s) ", type, value);
     return createStringPValue(scratch);
 }
 

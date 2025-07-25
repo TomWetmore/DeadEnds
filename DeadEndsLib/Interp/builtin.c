@@ -3,7 +3,7 @@
 //  builtin.c contains many built-in functions of the DeadEnds script language.
 //
 //  Created by Thomas Wetmore on 14 December 2022.
-//  Last changed on 9 July 2025.
+//  Last changed on 25 July 2025.
 //
 
 #include "context.h"
@@ -423,8 +423,6 @@ PValue __print(PNode *pnode, Context *context, bool *errflg) {
     return nullPValue;
 }
 
-static bool localDebugging = false;
-
 // __root returns the root node of the record the argument node is in.
 // usage: root(NODE) -> NODE
 PValue __root (PNode* pnode, Context* context, bool* errflg) {
@@ -486,7 +484,7 @@ PValue __extractdate(PNode *pnode, Context *context, bool* errflg) {
 
 //  __extractnames tries to extract name parts from person or NAME node.
 //  usage: extractnames(NODE, LIST, VARB, VARB) -> VOID
-static void sdelete(void* element) { stdfree(element); } // The elements are Strings that are freed.
+//static void sdelete(void* element) { stdfree(element); } // The elements are Strings that are freed.
 PValue __extractnames (PNode *pnode, Context *context, bool *errflg) {
 	PNode *nexp = pnode->arguments;
 	PNode *lexp = nexp->next;

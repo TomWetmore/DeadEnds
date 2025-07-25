@@ -7,6 +7,8 @@
 // Created by Thomas Wetmore on 14 July 2024.
 // Last changed on 25 November 2024.
 
+#include "errors.h"
+#include "integertable.h"
 #include "randomizekeys.h"
 
 static void getArguments(int, char**, String*);
@@ -26,15 +28,15 @@ int main(int argc, char** argv) {
 	gedcomFile = resolveFile(gedcomFile, searchPath);
 	if (debugging) printf("Resolved file: %s\n", gedcomFile);
 	// Get the Gedcom records from a file.
-	File* file = openFile(gedcomFile, "r");
+	//File* file = openFile(gedcomFile, "r");
 	ErrorLog* log = createErrorLog();
 
 	// Parse the Gedcom file and build a GNodeList of its records.
 	IntegerTable* keymap = createIntegerTable(4097);
-	RootList* roots = getRootListFromFile(file, keymap, log);
+	RootList* roots = getRecordListFromFile(gedcomFile, keymap, log);
 	printf("ramdomize keys: %s: read gedcom file.\n", getMsecondsStr());
 	if (lengthList(log) > 0) goAway(log);
-	closeFile(file);
+	//closeFile(file);
 
 	// Validate the keys.
 	checkKeysAndReferences(roots, file->name, keymap, log);

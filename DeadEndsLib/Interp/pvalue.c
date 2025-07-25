@@ -5,11 +5,23 @@
 //  DeadEnds scripts.
 //
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 7 July 2025.
+//  Last changed on 23 July 2025.
 //
+
+/*
+When PValues for Lists, Tables, and Sequences are retrieved from symbol tables, deep copies are not made. This
+can get scripts into deep trouble.
+
+A couple solutions are possible -- this singles out the List case -- the others are similar.
+1. Make a deep copy when extracting from symbol tables. This adds heap memory. The issue is figuring out where and
+   when to free it.
+2. Keep the value a shallow copy unless it is stored somewhere (eg., as an element in a table, or an element in an
+   enclosing list, or stored in a symbol table with a different identifier. At that point a deep copy must be made.
+*/
 
 #include "gedcom.h"
 #include "gnode.h"
+#include "hashtable.h"
 #include "list.h"
 #include "pvalue.h"
 #include "standard.h"
@@ -121,8 +133,8 @@ String valueOfPValue(PValue pvalue) {
     case PVEvent:
     case PVOther:    sprintf(scratch, "%s",
                              gnodeToString(pvalue.value.uGNode, gnodeLevel(pvalue.value.uGNode))); break;
-    case PVList:     sprintf(scratch, "write later if needed"); break;
-    case PVTable:    sprintf(scratch, "write later if needed"); break;
+    case PVList:     sprintf(scratch, "%d elements", lengthList(pvalue.value.uList)); break;
+    case PVTable:    sprintf(scratch, "%d elements", sizeHashTable(pvalue.value.uTable)); break;
     case PVSequence: sprintf(scratch, "write later if needed"); break;
     default:         sprintf(scratch, "unknown"); break;
     }
@@ -140,8 +152,8 @@ void freePValue(PValue* ppvalue) {
         //deleteSequence(ppvalue->value.uSequence);
         // MNOTE: Possible memory leak, but fixes subtle bug.
         break;
-    case PVList:
-        deleteList(ppvalue->value.uList);
+    case PVList: // Cannot delete Lists until additional deep copies are added.
+        //deleteList(ppvalue->value.uList);
         break;
     case PVTable:
         printf("We are supposed to be freeing a PVTable. What should we do?\n");

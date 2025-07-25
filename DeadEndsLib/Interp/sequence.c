@@ -5,7 +5,7 @@
 //  persons and other record types. It underlies the indiseq data type of DeadEnds Script.
 //
 //  Created by Thomas Wetmore on 1 March 2023.
-//  Last changed on 9 July 2025.
+//  Last changed on 25 July 2025.
 //
 
 #include "database.h"
@@ -135,7 +135,7 @@ void renameElementInSequence(Sequence* sequence, String key) {
 		}
 	}
     if (sequence->sortType == SequenceNameSorted)
-        sequence->sortType == SequenceNotSorted;
+        sequence->sortType = SequenceNotSorted;
 }
 
 // isInSequence checks if a SequenceEl with given key is in a Sequence.

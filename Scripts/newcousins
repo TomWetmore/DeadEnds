@@ -1,0 +1,425 @@
+/*=====================================================================
+* base: cousins version 4; modified to test C deadends
+*=====================================================================*/
+
+global(links)	/* table of links back one person */
+global(rels)	/* table showing direction of the links */
+global(klist)	/* list of found persons not linked back to yet */
+global(numb)	/* number of persons considered so far */
+
+/*=====================================================================
+ * links implements the function links(key1) -> key2, where key1  is the key of a person,
+ * and key2 is the key of the person that person key1 links back to.
+ *
+ * rels implements the function rels(key1) -> dir, where key1 is the key of a person, and
+ * dir is the relationship direction (up or down) between this person and person link(key1).
+/*=====================================================================*/
+
+/*=====================================================================
+ * main -- Get the user to identify two persons; if all goes well, call
+ *   relate to do the hard stuff.
+ *===================================================================*/
+proc main ()
+{
+/*	print("This program finds the relationship between two persons.\n\n")
+	getindimsg(from, "Please identify the first person.")
+	set(to, 0)
+	if (from) {
+		getindimsg(to, "Please identify the second person.")
+	}
+	if (and(from, to)) { 
+		print("Searching for a relationship between:\n  ")
+		print(name(from)) print(" and ")
+		print(name(to)) print(".\n\nThis may take a while -- ")
+		print("each dot is 25 persons considered.\n")
+		set(fkey, save(key(from)))
+		set(tkey, save(key(to)))
+		call relate(tkey, fkey)
+	} else {
+		print("Please call again.\n")
+	}
+*/
+	call undefinedfunction()
+	"hello world\n"
+	set(to, indi("i1"))
+	name(to) nl()
+	set(from, indi("i32"))
+	name(from) nl()
+	set(fkey, key(from))
+	set(tkey, key(to))
+	call relate(tkey, fkey)
+}
+
+/*======================================================================
+ * relate -- Attempt to find a relationship between two persons by
+ *   constructing a path of parent and/or child links between them; if a
+ *   path is found, call foundpath to display the results; else report
+ *   that there is no relation between the persons.
+ *====================================================================*/
+proc relate (fkey, tkey)
+{
+"relate called: fkey=" fkey "; tkey=" tkey "\n" /* DEBUG */
+	table(links)	/* table of links back one person */
+	table(rels)
+	list(klist)	/* keys of persons not linked back to yet */
+"tables and lists created\n" /* DEBUG */
+
+	set(up, 1)
+	set(down, neg(1))
+	set(numb, 0)
+"up, down, numb: " d(up) ", " d(down) ", " d(numb) "\n"  /* DEBUG */
+
+/* Link the first person to him/herself with no direction, and make
+   him/her the first entry in the list of unlinked back to persons. */
+
+	showstack()
+	insert(links, fkey, fkey)
+	insert(rels, fkey, 0)
+	enqueue(klist, fkey)
+	set(again, 1)
+
+/* Iterate through the list of unlinked back to persons; remove them one by
+   one; link their parents and children back to them; add their parents and
+   children to the unlinked back to list; check each iteration to see if
+   one of the new parents or children is the searched for person; if so
+   quit the iteration and call foundpath; else continue iterating. */
+
+	while (and(again, not(empty(klist)))) {
+		set(key, dequeue(klist))
+		set(indi, indi(key))
+/*"From queues: " key " & " name(indi) "\n" */
+		call include(key, father(indi), down)
+		call include(key, mother(indi), down)
+		families(indi, fam, spouse, num1) {
+			children(fam, child, num2) {
+				call include(key, child, up)
+			}
+		}
+		if (key, lookup(links, tkey)) {
+			"Relationship from " name(indi(tkey))
+			" to " name(indi(fkey)) ":\n"
+			call foundpath(tkey)
+			call fullpath(tkey)
+			set(again, 0)	
+		}
+	}
+
+/* Check to see if there is no relation between the persons, and if there
+   is none let the user know and quit. */
+
+	if (again) {
+		print("They are not blood-related to one another.")
+		"They are not blood-related to one another."
+	}
+}
+
+/*=========================================================================
+ * include -- Links a newly discovered person (indi) back to another person
+ *   (key), with a specified direction (rel); the new person is then put on
+ *   the list of unlinked back to persons.
+ *=======================================================================*/
+proc include (key, indi, rel) {
+/*"include: key, ind, rel = " key ", " name(indi) ", " d(rel) "\n"*/
+/* Only include the person if he/she has not been found before. */
+
+	if (and(indi, not(lookup(links, key(indi))))) { 
+
+/* Keep user happy watching those dots! */
+
+		set(numb, add(numb, 1))
+		if (eq(0, mod(numb, 25))) {
+			print(".")
+		}
+
+/* Update the data structures. */
+
+		set(new, save(key(indi)))
+		insert(links, new, key)
+		insert(rels, new, rel)
+		enqueue(klist, new)
+	}
+}
+
+/*=================================================================
+ * foundpath -- Show the relationship path between the two persons.
+ *===============================================================*/
+proc foundpath (key)
+{
+	"\n"
+	list(nexkeys)
+	list(nexlens)
+
+/* Init the nexus person from the first (to) person. */
+
+	set(nexus, key)
+	set(dir, lookup(rels, key))
+	set(len, dir)
+	set(again, 1)
+showframe()
+
+/* Create the nexus list, the list of persons where relationships change
+   direction; a nexus person is either the first person, the last person,
+   or the common ancestor or descendent of two other nexus persons. */
+
+	while (again) {
+
+/* Get the next person from the path. */
+
+		set(key, lookup(links, key))
+		set(rel, lookup(rels, key))
+
+/* If the new person's direction is 0 this is the last person in the path
+   (the from person) so add the current nexus person and the last person
+   to the nexus list and quit the loop */
+
+		if (eq(0, rel)) {
+			enqueue(nexkeys, nexus)
+			enqueue(nexlens, len)
+			enqueue(nexkeys, key)
+			enqueue(nexlens, 0)
+			set(again, 0)
+
+/* if new person changes direction, add the current nexus person to the
+   nexus list, and make the new person the new current nexus person */
+
+		} elsif (ne(rel, dir)) {
+			enqueue(nexkeys, nexus)
+			enqueue(nexlens, len)
+			set(nexus, key)	
+			set(dir, rel)
+			set(len, rel)
+
+/* if the new person continues in the same direction, record the step */
+
+		} else {
+			set(len, add(len, rel))	
+		}
+		
+	}
+
+	set(one, dequeue(nexkeys))
+	set(len, dequeue(nexlens))
+	set(again, 1)
+
+/* step down the nexus list, computing and displaying the relationships
+   between either two nexus persons (where it is appropriate to show pure
+   ancestry or descendency) or three nexus persons (where it is appropriate
+   to show two nexus persons as cousins with their common ancestor) */
+
+	while (and(again, length(nexkeys))) {
+		set(llen, length(nexkeys))
+
+/* If the initial direction is down, show first nexus person as a simple
+   ancestor of the second nexus person; this condition can only be true
+   in the first iteration */
+
+		if (lt(len, 0)) {
+			set(two, dequeue(nexkeys))
+			set(new, dequeue(nexlens))
+			call showancs(one, two, neg(len))
+			set(one, two)
+			set(len, new)
+
+/* If the direction is up, there are two subcases: */
+
+		} elsif (gt(len, 0)) {
+
+/* If the nexus list has only one remaining entry then show the (last-1)th
+   nexus person as a simple descendent of the last nexus person */
+
+			if (eq(1, llen)) {
+				set(two, dequeue(nexkeys))
+				set(new, dequeue(nexlens))
+				call showdesc(one, two, len)
+				set(again, 0)
+
+/* If the nexus list has more than one remaining entry then show the
+   current nexus person and the next two as two "cousins" with an
+   intervening common ancestor, and make the last of the three persons the
+   current nexus person for the next loop iteration */
+
+			} else {
+				set(two, dequeue(nexkeys))
+				set(tmp, dequeue(nexlens))
+				set(three, dequeue(nexkeys))
+				set(new, dequeue(nexlens))
+				call showcous(one, two, three, len, neg(tmp))
+				set(one, three)
+				set(len, new)
+			}
+
+/* This is the special case where a person is related to him/herself. */
+
+		} else {
+			print("They're the same person.\n")
+			"They're the same person.\n"
+			set(again, 0)
+		}
+	}
+}
+
+/*=================================================
+ * showancs -- Show a direct ancestry relationship.
+ *==============================================*/
+proc showancs (one, two, len)
+{
+	set(indi, indi(one))
+	if (male(indi))      { set(pword, "father ") }
+	elsif (female(indi)) { set(pword, "mother ") }
+	else                 { set(pword, "parent ") }
+	if (eq(1, len))      { set(aword, "the ") }
+	else                 { set(aword, "a ") }
+
+	print(name(indi)) name(indi)
+	print(" is ") " is "
+	print(aword)
+	if (eq(2, len))    { print("grand") "grand" }
+	elsif (eq(3, len)) { print("great grand") "great grand" }
+	elsif (lt(3, len)) {
+		print("great(") "great("
+		print(d(sub(len, 2))) d(sub(len, 2))
+		print(") grand") ") grand"
+	}
+	print(pword) pword
+	print("of\n  ") "of\n  "
+	print(name(indi(two))) name(indi(two))
+	print(".\n") ".\n"
+}
+
+/*====================================================
+ * showdesc -- Show a direct descendency relationship.
+ *==================================================*/
+proc showdesc (one, two, len)
+{
+	set(indi, indi(one))
+	if (male(indi))      { set(pword, "son ") }
+	elsif (female(indi)) { set(pword, "daughter ") }
+	else                 { set(pword, "child ") }
+
+	print(name(indi)) name(indi)
+	print(" is a ") " is a "
+	if (eq(2, len))    { print("grand") "grand" }
+	elsif (eq(3, len)) { print("great grand") "great grand" }
+	elsif (lt(3, len)) {
+		print("great(") "great("
+		print(d(sub(len, 2))) d(sub(len, 2))
+		print(") grand") ") grand"
+	}
+	print(pword) pword
+	print("of\n  ") "of\n  "
+	print(name(indi(two))) name(indi(two))
+	print(".\n") ".\n"
+}
+
+/*=========================================================================
+ * showcous -- Show a cousin relationship; for the purposes of this
+ *   program, siblings, uncles, aunts, nieces and nephews are considered to
+ *   be special cases of cousins.
+ *=======================================================================*/
+proc showcous (one, two, three, up, down)
+{
+	set(indi, indi(one))
+	if (male(indi)) {
+		set(sword, " brother ")
+		set(nword, " nephew ")
+		set(uword, " uncle ")
+	} elsif (female(indi)) {
+		set(sword, " sister ")
+		set(nword, " niece ")
+		set(uword, " aunt ")
+	} else {
+		set(sword, " sibling ")
+		set(nword, " niece or nephew ")
+		set(uword, " uncle or aunt ")
+	}
+	print(name(indi(one))) name(indi(one))
+	print(" is a") " is a"
+	if (and(eq(up,1), eq(down, 1))) {	/* sibling cases */
+		print(sword) sword
+		print("of") "of"
+	} elsif (eq(up, 1)) {			/* uncle/aunt cases */
+		if (eq(down, 2)) {
+			print("n") print(uword) print("of")
+			"n" uword "of"
+		} elsif (eq(down, 3)) {
+			print(" great") print(uword) print("of")
+			" great" uword "of"
+		} else {
+			print(" great(") print(d(sub(down, 2))) print(")")
+			print(uword) print("of")
+			" great(" d(sub(down, 2)) ")" uword "of"
+		}
+	} elsif (eq(down, 1)) {			/* niece/nephew cases */
+		if (eq(up, 2)) {
+			print(nword) print("of")
+			nword "of"
+		} elsif (eq(up, 3)) {
+			print("great") print(nword) print("of")
+			"great" nword "of"
+		} else {
+			print(" great(") print(d(sub(up, 2))) print(")")
+			print(nword) print("of")
+			" great(" d(sub(up, 2)) ")" nword "of"
+		}
+	} else {				/* cousin cases */
+		if (gt(up, down)) {
+			set(gen, down)
+			set(rem, sub(up, down))
+		} else {
+			set(gen, up)
+			set(rem, sub(down, up))
+		}
+		print(" ") print(ord(sub(gen,1))) print(" cousin ")
+		" " ord(sub(gen,1)) " cousin "
+		if (ne(rem, 0)) {
+			print(card(rem)) print(" times removed ")
+			card(rem) " times removed "
+		}
+		print("of") "of"
+	}
+	print("\n  ") print(name(indi(three)))
+	"\n  " name(indi(three))
+	print(", through their ancestor,\n  ") print(name(indi(two)))
+	print(".\n")
+	", through their ancestor,\n  " name(indi(two)) ".\n"
+}
+
+/*======================================================================= 
+ * fullpath -- Show full path between the two persons.
+ *======================================================================*/
+proc fullpath (key)
+{
+	"\nThe full relationship path between them is:\n\n"
+        set(again, 1)
+        while (again) {
+                name(indi(key))
+                set(new, lookup(links, key))
+		set(dir, lookup(rels, key))
+		if (gt(dir, 0)) {
+			" is the child of"
+		}
+		if (lt(dir, 0)) {
+			" is the parent of"
+		}
+		"\n"
+                if (eq(0, strcmp(key, new))) {
+                        set(again, 0)
+                } else {
+                        set(key, new)
+                }
+        }
+}
+/*
+		print(" ")
+		print(ord(sub(gen,1)))
+		print(" cousin ")
+		if (ne(rem, 0)) {
+			if (eq(rem,1)) {print("once")}
+			elsif (eq(rem,2)) {print("twice")}
+			elsif (eq(rem,3)) {print("thrice")}
+			else {
+				print(card(rem))
+				print(" times") }
+			print(" removed ")
+		}
+*/

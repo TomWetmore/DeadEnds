@@ -1,0 +1,44 @@
+/* 4gen1.ll */
+
+proc main ()
+{
+	set(indi, indi("i1"))
+	pagemode(100, 100)
+	call pedout(indi,1,3,1,64)
+	pageout()
+	print(nl())
+}
+
+proc pedout (indi, gen, max, top, bot)
+{
+	if (and(indi,le(gen,max))) {
+		set(gen,add(1,gen))
+		set(fath,father(indi))
+		set(moth,mother(indi))
+		set(height,add(1,sub(bot,top)))
+		set(offset,div(sub(height,8),2))
+		call block(indi,add(top,offset),mul(10,sub(gen,2)))
+		set(half,div(height,2))
+		call pedout(fath,gen,max,top,sub(add(top,half),1))
+		call pedout(moth,gen,max,add(top,half),bot)
+	}
+}
+
+proc block (indi, row, col)
+{
+	print(".")
+	set(row,add(3,row))
+	set(col,add(3,col))
+	pos(row,col)
+	name(indi)
+	set(row,add(row,1))
+	pos(row,col)
+	set(e,birth(indi))
+	" b. "
+	if (and(e,date(e))) { date(e) }
+	set(row,add(row,1))
+	pos(row,col)
+	" bp. "
+	if (and(e,place(e))) { place(e) }
+}
+

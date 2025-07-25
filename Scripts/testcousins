@@ -1,0 +1,88 @@
+/* testcousins -- trying to get the frame version of C deadends going. */
+
+global(links)	/* table of links back one person */
+global(rels)	/* table showing direction of the links */
+global(klist)	/* list of found persons not linked back to yet */
+global(numb)	/* number of persons considered so far */
+
+/* main -- identify two persons and call relate. */
+proc main () {
+	set(to, indi("i6"))
+	set(from, indi("i1"))
+	set(fkey, key(from))
+	set(tkey, key(to))
+
+	"about to start with these two persons:\n"
+	"from person: " fkey " " name(from) nl()
+	"to   person: " tkey " " name(to) nl()
+
+	call relate(fkey, tkey)
+}
+
+/* relate tries to find a relationship between persons -- this is simplified so not really */
+proc relate (fkey, tkey) {
+	"relate: fkey=" fkey "; tkey=" tkey "\n"
+	table(links)
+	table(rels)
+	list(klist)
+	"relate: tables and lists created\n"
+	set(up, 1)
+	set(down, neg(1))
+	set(numb, 0)
+	"relate: up, down, numb: " d(up) ", " d(down) ", " d(numb) "\n"  /* DEBUG */
+
+	insert(links, fkey, fkey)
+	insert(rels, fkey, 0)
+	enqueue(klist, fkey)
+	set(again, 1)
+
+/* Iterate list; remove person; link parents and children back; add parents and children to list;
+   check each iteration to see if one of the new parents or children is the target */
+
+	while (and(again, not(empty(klist)))) {
+		set(key, dequeue(klist))
+		set(indi, indi(key))
+"relate: dequeued key " key " for person " name(indi) "\n"
+"relate: a: down is now a " typeof(down) nl()
+		call include(key, father(indi), down)
+"relate: b: down is now a " typeof(down) nl()
+		call include(key, mother(indi), down)
+"relate: c: down is now a " typeof(down) nl()
+		families(indi, fam, spouse, num1) {
+			children(fam, child, num2) {
+				call include(key, child, up)
+			}
+		}
+		if (key, lookup(links, tkey)) {
+			"Found path from from " name(indi(tkey))
+			" to " name(indi(fkey)) ":\n"
+			set(again, 0)	
+		}
+	}
+	if (again) {
+		"They are not blood-related to one another."
+	}
+}
+
+/* include new person (indi) back to another (key) with direction (rel) */
+proc include (key, indi, rel) {
+	/* using typeof to find out what rel is */
+	"include: key, indi, rel = " key ", " name(indi) ", " typeof(rel) "\n"
+	"gross debugging:\n"
+	"key(indi) = " key(indi) nl()
+	"lookup(links(key, key(indi)) = " lookup(links, key(indi)) nl()
+	if (and(indi, not(lookup(links, key(indi))))) { 
+		"include: person has not been seen before\n"
+		set(numb, add(numb, 1))
+		"include: numb is now " d(numb) nl()
+		if (eq(0, mod(numb, 25))) { print(".") }
+
+		set(new, save(key(indi)))
+		"include: new is " new nl()
+		insert(links, new, key)
+		insert(rels, new, rel)
+		enqueue(klist, new)
+		"insert: updated links, rels, and klist)\n"
+		"insert: klist now has " d(length(klist)) " elements\n"
+	}
+}

@@ -1,0 +1,15 @@
+proc main () {
+
+	set(i, indi("i1"))
+	list(l)
+	while (i) {
+		"name: " name(i) "\n"
+		extractnames(child(i), l, n, s)
+		"length of list is " d(n) "\n"
+		forlist(l, e, c) {
+			d(c) ", " e "\n"
+		}
+		"s index is " d(s) "\n"
+		set(i, father(i))
+	}
+}

@@ -842,8 +842,7 @@ void showRuntimeStack(Context* context, PNode* pnode) {
     }
     printf("Global symbols:\n");
     FORHASHTABLE(context->globals, element)
-    Symbol* symbol = (Symbol*) element;
-    String ident = symbol->ident;
+        Symbol* symbol = (Symbol*) element;
         String svalue = pvalueToString(*(symbol->value), false);
         String type = typeOfPValue(*(symbol->value));
         printf("    %s: %s: %s\n", symbol->ident, svalue, type);
@@ -864,18 +863,23 @@ void showFrame(Frame* frame) {
     FORSET(params, element)
         String param = (String) element;
         PValue pvalue = getValueFromSymbolTable(table, param);
-        String svalue = pvalueToString(pvalue, false);
-        printf("    %s: %s\n", param, svalue);
-        stdfree(svalue);
+        String type = typeOfPValue(pvalue);
+        String value = valueOfPValue(pvalue);
+        printf("    %s: %s: %s\n", param, type, value);
+        //stdfree(svalue);
     ENDSET
     printf("  automatics:\n");
     FORHASHTABLE(table, element)
         Symbol* symbol = (Symbol*) element;
         String ident = symbol->ident;
         if (!isInSet(params, ident)) {
-            String svalue = pvalueToString(*(symbol->value), false);
-            printf("    %s: %s\n", symbol->ident, svalue);
-            stdfree(svalue);
+            //String svalue = pvalueToString(*(symbol->value), false);
+            PValue pvalue = getValueFromSymbolTable(table, ident);
+            String type = typeOfPValue(pvalue);
+            String value = valueOfPValue(pvalue);
+            printf("    %s: %s: %s\n", ident, type, value);
+            //printf("    %s: %s\n", symbol->ident, svalue);
+            //stdfree(svalue);
         }
     ENDHASHTABLE
     deleteStringSet(params, false);
