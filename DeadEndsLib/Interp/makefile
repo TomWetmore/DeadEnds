@@ -5,7 +5,7 @@ AR=ar
 ARFLAGS=-cr
 OFILES= builtin.o builtintable.o evaluate.o functable.o functiontable.o interp.o intrpevent.o intrpfamily.o intrpgnode.o \
     intrpmath.o intrpperson.o intrpseq.o pnode.o pvalue.o pvaluetable.o sequence.o symboltable.o builtinlist.o rassa.o \
-	intrpstring.o frame.o context.o
+	intrpstring.o frame.o context.o pvaluelist.o
 LIBNAME=interp
 
 lib$(LIBNAME).a: $(OFILES)
