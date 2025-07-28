@@ -5,44 +5,33 @@
 //  DeadEnds scripts.
 //
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 23 July 2025.
+//  Last changed on 28 July 2025.
 //
-
-/*
-When PValues for Lists, Tables, and Sequences are retrieved from symbol tables, deep copies are not made. This
-can get scripts into deep trouble.
-
-A couple solutions are possible -- this singles out the List case -- the others are similar.
-1. Make a deep copy when extracting from symbol tables. This adds heap memory. The issue is figuring out where and
-   when to free it.
-2. Keep the value a shallow copy unless it is stored somewhere (eg., as an element in a table, or an element in an
-   enclosing list, or stored in a symbol table with a different identifier. At that point a deep copy must be made.
-*/
 
 #include "gedcom.h"
 #include "gnode.h"
 #include "hashtable.h"
 #include "list.h"
 #include "pvalue.h"
+#include "pvaluelist.h"
+#include "pvaluetable.h"
+#include "sequence.h"
 #include "standard.h"
 
 extern const PValue nullPValue;  // Defined in builtin.c
 
-// isPVGNodeType return true if a PVType is one of the GNode types.
+/// Returns true if a PVType is one of the GNode types.
 bool isGNodeType(PVType type) {
     return type >= PVGNode && type <= PVOther;
 }
 
-// pvalueTypes is the array of PValue type names for debugging. NOT CURRENTLY USED.
-//static char *pvalueTypes[] = {
-//    "PVNull", "PVInt", "PVFloat", "PVBool", "PVString", "PVGNode", "PVPerson",
-//    "PVFamily", "PVSource", "PVEvent", "PVOther", "PVList", "PVTable", "PVSequence"};
-
 static bool isZero(PValue);
 bool isZeroVUnion(PVType, VUnion);
 
-// allocPValue allocates a PValue. PValues are usually value types, but when stored in tables or
-// lists they must be in the heap.
+/// Allocates a PValue in the heap.
+///
+/// PValues are usually value types, but when stored in tables or
+/// lists they must be in the heap.
 PValue *allocPValue(PVType type, VUnion value) {
     PValue* ppvalue = (PValue*) stdalloc(sizeof(PValue));
     ppvalue->type = type;
@@ -50,10 +39,11 @@ PValue *allocPValue(PVType type, VUnion value) {
     return ppvalue;
 }
 
-// createStringPValue creates string PValues; Strings are copied to the help.
+/// Creates a String PValue with the String in the heap.
 PValue createStringPValue(String string) {
     PValue pvalue;
     pvalue.type = PVString;
+    // Save the String in the heap.
     pvalue.value.uString = string ? strsave(string) : null;
     return pvalue; // Returned on stack.
 }
@@ -93,7 +83,7 @@ PValue cloneAndReturnPValue(const PValue* original) {
     return result;
 }
 
-// typeOf returns the 'type' of a PValue as a String.
+// typeOfPValue returns the 'type' of a PValue as a String.
 String typeOfPValue(PValue pvalue) {
     String typename;
     switch (pvalue.type) {
@@ -116,64 +106,113 @@ String typeOfPValue(PValue pvalue) {
     return typename;
 }
 
-// valueOfPValue returns a string representation of the value of a PValue.
 #define BIGNUMBER 4000
+
+/// Returns the value of a `PValue` as a `String`.
+///
+/// The caller is responsible for freeing the `String`.
 String valueOfPValue(PValue pvalue) {
-    static char scratch[BIGNUMBER];
+
+    char *scratch = (char *) stdalloc(BIGNUMBER);
+    scratch[0] = '\0';
+
     switch (pvalue.type) {
-    case PVNull:     sprintf(scratch, "null"); break;
-    case PVInt:      sprintf(scratch, "%ld", pvalue.value.uInt); break;
-    case PVFloat:    sprintf(scratch, "%g", pvalue.value.uFloat); break;
-    case PVBool:     sprintf(scratch, "%s", pvalue.value.uBool ? "true" : "false"); break;
-    case PVString:   sprintf(scratch, "%s", pvalue.value.uString); break;
+    case PVNull:
+        strcpy(scratch, "null");
+        break;
+    case PVInt:
+        sprintf(scratch, "%ld", pvalue.value.uInt);
+        break;
+    case PVFloat:
+        sprintf(scratch, "%g", pvalue.value.uFloat);
+        break;
+    case PVBool:
+        sprintf(scratch, "%s", pvalue.value.uBool ? "true" : "false");
+        break;
+    case PVString:
+        snprintf(scratch, BIGNUMBER, "%s", pvalue.value.uString ? pvalue.value.uString : "(null)");
+        break;
     case PVGNode:
     case PVPerson:
     case PVFamily:
     case PVSource:
     case PVEvent:
-    case PVOther:    sprintf(scratch, "%s",
-                             gnodeToString(pvalue.value.uGNode, gnodeLevel(pvalue.value.uGNode))); break;
-    case PVList:     sprintf(scratch, "%d elements", lengthList(pvalue.value.uList)); break;
-    case PVTable:    sprintf(scratch, "%d elements", sizeHashTable(pvalue.value.uTable)); break;
-    case PVSequence: sprintf(scratch, "write later if needed"); break;
-    default:         sprintf(scratch, "unknown"); break;
+    case PVOther:
+        snprintf(scratch, BIGNUMBER, "%s",
+                 gnodeToString(pvalue.value.uGNode, gnodeLevel(pvalue.value.uGNode)));
+        break;
+
+    case PVList: {
+        List *list = pvalue.value.uList;
+        if (!list) {
+            strcpy(scratch, "{null}");
+            break;
+        }
+        size_t remaining = BIGNUMBER;
+        char *p = scratch;
+        size_t written = snprintf(p, remaining, "{");
+        p += written; remaining -= written;
+
+        FORLIST(list, element)
+            String el = valueOfPValue(*((PValue *) element)); // Recursive.
+            written = snprintf(p, remaining, "%s, ", el);
+            stdfree(el); // Free String from recursive call.
+            if (written >= remaining) break; // Avoid overflow.
+            p += written; remaining -= written;
+        ENDLIST
+
+        if (p > scratch + 1) { // remove last ", " if added
+            p[-2] = '}';
+            p[-1] = '\0';
+        } else {
+            strcat(scratch, "}");
+        }
+        break;
     }
-    return scratch;
+    case PVTable:
+        snprintf(scratch, BIGNUMBER, "%d elements", sizeHashTable(pvalue.value.uTable));
+        break;
+    case PVSequence:
+        snprintf(scratch, BIGNUMBER, "(sequence)");
+        break;
+    default:
+        strcpy(scratch, "(unknown)");
+        break;
+    }
+    return scratch; // safe because caller owns memory
 }
 
-// freePValue frees an allocated PValue.
+/// Frees the memory of an allocated PValue.
 void freePValue(PValue* ppvalue) {
     switch (ppvalue->type) {
     case PVString:
         if (ppvalue->value.uString) stdfree(ppvalue->value.uString);
         break;
-    case PVSequence:
-        printf("We are supposed to be freeing a PVSequence. What should we do?\n");
+    case PVSequence: // Cannot delete Sequences until more memory management added.
         //deleteSequence(ppvalue->value.uSequence);
-        // MNOTE: Possible memory leak, but fixes subtle bug.
         break;
-    case PVList: // Cannot delete Lists until additional deep copies are added.
+    case PVList: // Cannot delete lists until more memory management added.
         //deleteList(ppvalue->value.uList);
         break;
-    case PVTable:
-        printf("We are supposed to be freeing a PVTable. What should we do?\n");
+    case PVTable: // Cannot delete tables until more memory management added.
+        break;
     default:
         break;
     }
     stdfree(ppvalue);
 }
 
-// numericPValue checks if a PValue has numeric type.
+/// Checks if a PValue has numeric type.
 bool numericPValue(PValue value) {
     return value.type == PVInt || value.type == PVFloat;
 }
 
-//  isPValue checks a PValue for validity by checking its type.
+/// Checks a PValue for validity by checking its type.
 bool isPValue(PValue pvalue) {
     return pvalue.type >= PVNull && pvalue.type <= PVSequence;
 }
 
-// isRecordType checks if a PValue is a Gedcom node type.
+/// Checks if a PValue is a Gedcom node type.
 bool isRecordType(PVType type) {
     return type >= PVPerson && type <= PVOther;
 }
@@ -420,71 +459,4 @@ PValue negPValue(PValue value, bool* eflg) {
         return PVALUE(PVFloat, uFloat, -value.value.uFloat);
     *eflg = true;
     return nullPValue;
-}
-
-// pvalueToString returns a string representation of a PValue. Caller must free the string.
-char* pvalueToString(PValue value, bool showtype) {
-    char* buffer = stdalloc(1024);  // Fixed-size buffer; adjust if needed
-    char* p = buffer;
-
-    switch (value.type) {
-    case PVNull:
-        sprintf(p, "null");
-        break;
-    case PVBool:
-        sprintf(p, value.value.uBool ? "true" : "false");
-        break;
-    case PVInt:
-        sprintf(p, "%ld", value.value.uInt);
-        break;
-    case PVFloat:
-        sprintf(p, "%.4f", value.value.uFloat);
-        break;
-    case PVString:
-        if (value.value.uString)
-            sprintf(p, "\"%s\"", value.value.uString);
-        else
-            sprintf(p, "\"\"");
-        break;
-    case PVPerson: {
-        GNode* gnode = value.value.uGNode;
-        sprintf(p, "%s %s %s", gnode->key, gnode->tag, gnode->child->value);
-        break;
-    }
-    case PVFamily:
-    case PVGNode:
-    case PVSource:
-    case PVEvent:
-    case PVOther: {
-        GNode* gnode = value.value.uGNode;
-        sprintf(p, "%s", gnodeToString(gnode, gnodeLevel(gnode)));
-        break;
-    }
-    case PVList: {
-        List* list = value.value.uList;
-        if (!list) {
-            sprintf(p, "{null}");
-            break;
-        }
-        p += sprintf(p, "{");
-        int len = lengthList(list);
-        for (int i = 0; i < len; i++) {
-            if (i > 0) p += sprintf(p, ", ");
-            String phrase = (String) getListElement(list, i);
-            p += sprintf(p, "%s ", phrase);
-        }
-        p += sprintf(p, "}");
-        break;
-    }
-    case PVTable:
-        sprintf(p, "<table>");
-        break;
-    case PVSequence:
-        sprintf(p, "<Sequence>");
-        break;
-    default:
-        sprintf(p, "<unknown PValue type %d>", value.type);
-        break;
-    }
-    return buffer;
 }

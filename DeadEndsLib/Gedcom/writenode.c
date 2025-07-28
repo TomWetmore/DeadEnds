@@ -68,7 +68,7 @@ String gnodesToString(GNode* gnode) {
     return string;
 }
 
-// gnodeToString returns a GNode as a String without newline.
+/// Returns a `GNode` as a Gedcom `String` without newline.
 String gnodeToString(GNode* gnode, int level) {
     int length = nodeStringLength(level, gnode);
     String string = (String) stdalloc(length);

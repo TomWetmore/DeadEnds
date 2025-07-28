@@ -6,7 +6,7 @@
 //  or call a more specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 3 July 2025.
+//  Last changed on 26 July 2025.
 //
 
 #include <stdarg.h>
@@ -732,7 +732,7 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
     }
 
     // Create the frame for the called procedure. Add the frame to the context. Call the procedure.
-    // Remove the frame from the context. Delete the frame while deletes the symbol table.
+    // Remove the frame from the context. Delete the frame which deletes the symbol table.
     Frame* frame = createFrame(pnode, proc, table, context->frame);
     context->frame = frame;
     InterpType returnCode = interpret(proc->procBody, context, pval);
@@ -843,14 +843,14 @@ void showRuntimeStack(Context* context, PNode* pnode) {
     printf("Global symbols:\n");
     FORHASHTABLE(context->globals, element)
         Symbol* symbol = (Symbol*) element;
-        String svalue = pvalueToString(*(symbol->value), false);
+        String svalue = valueOfPValue(*(symbol->value));
         String type = typeOfPValue(*(symbol->value));
         printf("    %s: %s: %s\n", symbol->ident, svalue, type);
         stdfree(svalue);
     ENDHASHTABLE
 }
 
-// showFrame shows one frame of the run time stack.
+/// Shows one frame of the run time stack.
 void showFrame(Frame* frame) {
     if (!frame) return;
     String name = frame->call->procName;
@@ -866,20 +866,16 @@ void showFrame(Frame* frame) {
         String type = typeOfPValue(pvalue);
         String value = valueOfPValue(pvalue);
         printf("    %s: %s: %s\n", param, type, value);
-        //stdfree(svalue);
     ENDSET
     printf("  automatics:\n");
     FORHASHTABLE(table, element)
         Symbol* symbol = (Symbol*) element;
         String ident = symbol->ident;
         if (!isInSet(params, ident)) {
-            //String svalue = pvalueToString(*(symbol->value), false);
             PValue pvalue = getValueFromSymbolTable(table, ident);
             String type = typeOfPValue(pvalue);
             String value = valueOfPValue(pvalue);
             printf("    %s: %s: %s\n", ident, type, value);
-            //printf("    %s: %s\n", symbol->ident, svalue);
-            //stdfree(svalue);
         }
     ENDHASHTABLE
     deleteStringSet(params, false);

@@ -5,7 +5,7 @@
 //  datatype. The elements of the lists are program values.
 //
 //  Created by Thomas Wetmore on 16 April 2023.
-//  Last changed on 7 July 2025.
+//  Last changed on 27 July 2025.
 //
 
 #include "context.h"
@@ -15,6 +15,7 @@
 #include "list.h"
 #include "pnode.h"
 #include "pvalue.h"
+#include "pvaluelist.h"
 #include "sequence.h"
 #include "symboltable.h"
 
@@ -22,7 +23,6 @@ static bool localDebugging = false;
 
 // __list creates a list.
 // usage: list(IDENT) -> VOID
-static void delete(void* element) { freePValue(element); } // Free PValue elements when the list freed.
 // TODO: Script Lists are composed of PValues. The Lists will own their elements. So when lists are emptied or
 // freed the delete function should free the PValues. This is how we have set things in the List's delete
 // function above.
@@ -35,7 +35,7 @@ PValue __list(PNode* pnode, Context* context, bool* errflg) {
     }
     String ident = var->identifier;
     ASSERT(ident);
-    List *list = createList(null, null, delete, false);
+    List *list = createPValueList();
     assignValueToSymbol(context, ident, PVALUE(PVList, uList, list));
     if (localDebugging) showSymbolTable(context->frame->table);
     return nullPValue;

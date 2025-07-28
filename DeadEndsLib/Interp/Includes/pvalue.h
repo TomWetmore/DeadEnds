@@ -109,8 +109,6 @@ void setPValue(PValue, int, VUnion);
 //void insert_pvtable(Table, String, int, VPTR);
 //void remove_pvtable(Table);
 
-String pvalueToString(PValue pvalue, bool showType);
-
 // Functions that allocate and free PValues.
 PValue copyPValue(PValue);
 PValue* allocPValue(PVType type, VUnion value);

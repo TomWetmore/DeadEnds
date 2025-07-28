@@ -11,7 +11,15 @@
 #include "symboltable.h"
 #include "frame.h"
 
-// createFrame creates a new frame for the run time stack.
+/// Creates a new frame for the run time stack.
+///
+/// Called by interpProcCall and evaluateUserFunc.
+///
+/// - Parameters:
+///   - pnode: `PNProcCall` node in the calling function.
+///   - routine: `PNProcDef` node of the called function.
+///   - table: `SymbolTable` for the called function.
+///   - caller: `Frame` of the calling function.
 Frame* createFrame(PNode* pnode, PNode* routine, SymbolTable* table, Frame* caller) {
     Frame* frame = (Frame*) stdalloc(sizeof(Frame));
     frame->call = pnode;
@@ -20,7 +28,6 @@ Frame* createFrame(PNode* pnode, PNode* routine, SymbolTable* table, Frame* call
     frame->caller = caller;
     return frame;
 }
-
 
 // deleteFrame frees the memory of a frame. Deletes the SymbolTable and the shell.
 void deleteFrame(Frame* frame) {
