@@ -850,42 +850,4 @@ void showRuntimeStack(Context* context, PNode* pnode) {
     ENDHASHTABLE
 }
 
-/// Shows one frame of the run time stack.
-void showFrame(Frame* frame) {
-    if (!frame) return;
-    String name = frame->call->procName;
-    int callline = frame->call->lineNumber;
-    int defnline = frame->defn->lineNumber;
-    printf("Frame: %s: defined: %d called: %d\n", name, defnline, callline);
-    printf("  parameters:\n");
-    StringSet* params = getParameterSet(frame->defn);
-    SymbolTable* table = frame->table;
-    FORSET(params, element)
-        String param = (String) element;
-        PValue pvalue = getValueFromSymbolTable(table, param);
-        String type = typeOfPValue(pvalue);
-        String value = valueOfPValue(pvalue);
-        printf("    %s: %s: %s\n", param, type, value);
-    ENDSET
-    printf("  automatics:\n");
-    FORHASHTABLE(table, element)
-        Symbol* symbol = (Symbol*) element;
-        String ident = symbol->ident;
-        if (!isInSet(params, ident)) {
-            PValue pvalue = getValueFromSymbolTable(table, ident);
-            String type = typeOfPValue(pvalue);
-            String value = valueOfPValue(pvalue);
-            printf("    %s: %s: %s\n", ident, type, value);
-        }
-    ENDHASHTABLE
-    deleteStringSet(params, false);
-}
 
-// getParameterSet gets the set of parameter names for a procedure or user function.
-static StringSet* getParameterSet(PNode* pnode) {
-    StringSet* set = createStringSet();
-    for (PNode* param = pnode->parameters; param; param = param->next) {
-        addToSet(set, param->identifier);
-    }
-    return set;
-}
