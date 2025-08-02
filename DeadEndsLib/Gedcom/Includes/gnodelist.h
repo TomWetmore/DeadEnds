@@ -4,7 +4,7 @@
 //  gnodelist.h
 //
 //  Created by Thomas Wetmore on 27 May 2024.
-//  Last changed on 4 June 2025.
+//  Last changed on 2 August 2025.
 //
 
 #ifndef gnodelist_h
@@ -25,18 +25,19 @@ typedef List GNodeList;
 // GNodeListEl is the type of GNodeList elements.
 typedef struct GNodeListEl {
 	GNode *node;
-	void* data;
+    int level;
+	//void* data;
 } GNodeListEl;
 
 // User interface to GNodeList.
-GNodeListEl* createGNodeListEl(GNode*, void*);
+GNodeListEl* createGNodeListEl(GNode*, int);
 GNodeList* createGNodeList(void);
-void deleteGNodeList(GNodeList*, void(*delete)(void*));
+void deleteGNodeList(GNodeList*);
 GNodeList* getGNodeListFromFile(File*, IntegerTable*, ErrorLog*);
 GNodeList* getGNodeListFromString(String, ErrorLog*);
 GNodeList* getGNodeTreesFromString(String, String, ErrorLog* errorLog);
 void writeGNodeTreesToFile(GNodeList*, File*);
-void appendToGNodeList(GNodeList*, GNode*, void*);
+void appendToGNodeList(GNodeList*, GNode*, int);
 void showGNodeList(GNodeList* nodeList); // Debugging.
 
 #endif // gnodelist_h

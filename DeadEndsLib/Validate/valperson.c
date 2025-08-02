@@ -31,6 +31,7 @@ static bool importDebugging = true;
 void validatePersons(RecordIndex* index, String name, IntegerTable* keymap, ErrorLog* elog) {
 	int numPersonsValidated = 0;
 	FORHASHTABLE(index, element)
+        printf("Validating Person %d\n", numPersonsValidated + 1);
 		GNode* root = (GNode*) element;
 		if (recordType(root) == GRPerson) {
 			validatePerson(root, name, index, keymap, elog);

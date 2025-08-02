@@ -20,10 +20,10 @@
 //static bool debugging = true;
 
 // createNodeListEl creates a GNodeList element. gnode is the GNode, and data is arbitrary.
-GNodeListEl* createGNodeListEl(GNode* gnode, void* data) {
+GNodeListEl* createGNodeListEl(GNode* gnode, int level) {
 	GNodeListEl *element = (GNodeListEl*) malloc(sizeof(GNodeListEl));
 	element->node = gnode;
-	element->data = data;
+	element->level = level;
 	return element;
 }
 
@@ -32,27 +32,25 @@ static String getKey(void* element) {
 	return ((GNodeListEl*) element)->node->key;
 }
 
-// delete is the delete function for GNodeLists. It frees the GNodes.
+// delete is the delete function for GNodeLists. It frees the elements but not the GNodes the elements point to.
 static void delete(void* element) {
-	freeGNodes(((GNodeListEl*) element)->node);
+	stdfree(element);
 }
 
-// createGNodeList creates a GNodeList. delete function not set; it is controlled by the boolean
-// parameter to the deleteGNodeList function.
+// createGNodeList creates a GNodeList.
 GNodeList* createGNodeList(void) {
-	GNodeList *nodeList = createList(getKey, null, null, false);
+	GNodeList *nodeList = createList(getKey, null, delete, false);
 	return nodeList;
 }
 
 // addToGNodeList adds a new element to a GNodeList.
-void appendToGNodeList(GNodeList* list, GNode* gnode, void* data) {
-	GNodeListEl* el = createGNodeListEl(gnode, data);
+void appendToGNodeList(GNodeList* list, GNode* gnode, int level) {
+	GNodeListEl* el = createGNodeListEl(gnode, level);
 	appendToList(list, el);
 }
 
 // deleteGNodeList deletes a GNodeList using caller provided delete function.
-void deleteGNodeList(GNodeList* list, void (*delete)(void*)) {
-	list->delete = delete;
+void deleteGNodeList(GNodeList* list) {
 	deleteList(list);
 }
 
@@ -76,7 +74,7 @@ GNodeList* getGNodeListFromFile(File* file, IntegerTable* keymap, ErrorLog* elog
 	while (rc != ReadAtEnd) {
 		if (rc == ReadOkay) {
 			GNode* gnode = createGNode(key, tag, value, null);
-			GNodeListEl* el = createGNodeListEl(gnode, (void*)(long) level);
+			GNodeListEl* el = createGNodeListEl(gnode, level);
 			if (key && keymap) insertInIntegerTable(keymap, gnode->key, line);
 			appendToList(nodeList, el);
 		} else {
@@ -96,15 +94,16 @@ GNodeList* getGNodeTreesFromString(String string, String name, ErrorLog* errorLo
 	int numErrors = lengthList(errorLog);
 	GNodeList* nodeList = getGNodeListFromString(string, errorLog);
 	if (numErrors != lengthList(errorLog)) {
-		if (nodeList) deleteGNodeList(nodeList, null);
+		if (nodeList) deleteGNodeList(nodeList);
 		return null;
 	}
 	RootList* rootList = getRootListFromGNodeList(nodeList, name, errorLog);
 	if (numErrors != lengthList(errorLog)) {
-		deleteGNodeList(nodeList, null); // TODO: GET DELETE DONE RIGHT.
-		if (rootList) deleteGNodeList(rootList, null); // TODO: GET DELETE DONE RIGHT.
+		deleteGNodeList(nodeList);
+		if (rootList) deleteGNodeList(rootList);
 		return null;
 	}
+    deleteGNodeList(nodeList);
 	return rootList;
 }
 
@@ -122,7 +121,7 @@ GNodeList* getGNodeListFromString(String string, ErrorLog* errorLog) {
 	while (rc != ReadAtEnd) {
 		if (rc == ReadOkay) {
 			GNode* gnode = createGNode(key, tag, value, null);
-			GNodeListEl* el = createGNodeListEl(gnode, (void*)(long) level);
+			GNodeListEl* el = createGNodeListEl(gnode, level);
 			appendToList(nodeList, el);
 		} else {
 			Error* error = createError(gedcomError, "string", line, errstr);

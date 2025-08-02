@@ -4,7 +4,7 @@
 //  rootlist.h
 //
 //  Created by Thomas Wetmore on 2 March 2024.
-//  Last changed on 4 June 2025.
+//  Last changed on 2 August 2025.
 
 #ifndef rootlist_h
 #define rootlist_h
@@ -22,6 +22,7 @@ typedef List RootList;
 RootList *createRootList(void);  // Create a root list.
 void deleteRootList(RootList*);
 void insertInRootList(RootList*, GNode*);
+void appendToRootList(RootList*, GNode*);
 //RootList* getRootListFromFile(File*, IntegerTable*, ErrorLog*);
 RootList* getRootListFromGNodeList(GNodeList*, String file, ErrorLog*);
 void showRootList(RootList*);

@@ -51,6 +51,7 @@ Database* getDatabaseFromFile(String path, int vcodes, ErrorLog* errlog) {
     checkKeysAndReferences(records, path, keymap, errlog);
     if (lengthList(errlog) != numErrors) {
         deleteRootList(records);
+        deleteHashTable(keymap);
         return null;
     }
     if (timing) printf("%s: getDatabaseFromFile: checkKeysAndReferences called\n", gms);
@@ -58,15 +59,18 @@ Database* getDatabaseFromFile(String path, int vcodes, ErrorLog* errlog) {
 	Database* database = createDatabase(path, records, keymap, errlog);
 	if (lengthList(errlog)) {
 		deleteDatabase(database);
+        deleteHashTable(keymap);
 		return null;
 	}
     validatePersons(database->recordIndex, database->name, keymap, errlog);
     validateFamilies(database->recordIndex, database->name, keymap, errlog);
     if (lengthList(errlog)) {
         deleteDatabase(database);
+        deleteHashTable(keymap);
         return null;
     }
     if (timing) printf("%s: getDatabaseFromFile: database created.\n", gms);
+    deleteHashTable(keymap);
 	return database;
 }
 
@@ -136,20 +140,21 @@ RootList* getRecordListFromFile(String path, IntegerTable* keymap, ErrorLog* elo
     GNodeList* nodes = getGNodeListFromFile(file, keymap, elog);
     closeFile(file);
     if (lengthList(elog) > initialErrorCount || !nodes) {
-        if (nodes) deleteGNodeList(nodes, null); // GET DELETE DONE RIGHT
+        if (nodes) deleteGNodeList(nodes);
         deleteHashTable(keymap);
         return null;
     }
     // Convert GNode list to RootList (records)
     RootList* roots = getRootListFromGNodeList(nodes, file->name, elog);
     if (lengthList(elog) > initialErrorCount || !roots) {
-        deleteGNodeList(nodes, null);
+        deleteGNodeList(nodes);
         deleteHashTable(keymap);
-        if (roots) deleteGNodeList(roots, null);  // GET DELETE DONE RIGHT
+        if (roots) deleteRootList(roots); // This doesn't free the roots, but who cares
         return null;
     }
     if (timing) printf("%s: getRecordIndexFromFile: got list of records.\n", gms);
     if (importDebugging) printf("rootList contains %d records.\n", lengthList(roots));
+    deleteGNodeList(nodes);
     return roots;
 }
 
