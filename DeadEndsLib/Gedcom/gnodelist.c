@@ -4,7 +4,7 @@
 //  gnodelist.c implements the GNodeList data type.
 //
 //  Created by Thomas Wetmore on 27 May 2024.
-//  Last changed on 25 July 2025.
+//  Last changed on 2 August 2025.
 //
 
 #include "errors.h"

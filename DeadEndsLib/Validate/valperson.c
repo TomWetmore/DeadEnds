@@ -4,7 +4,7 @@
 //  valperson.c contains functions that validate person records in a Database.
 //
 //  Created by Thomas Wetmore on 17 December 2023.
-//  Last changed on 4 June 2025.
+//  Last changed on 2 August 2025.
 //
 
 #include "database.h"
@@ -31,7 +31,6 @@ static bool importDebugging = true;
 void validatePersons(RecordIndex* index, String name, IntegerTable* keymap, ErrorLog* elog) {
 	int numPersonsValidated = 0;
 	FORHASHTABLE(index, element)
-        printf("Validating Person %d\n", numPersonsValidated + 1);
 		GNode* root = (GNode*) element;
 		if (recordType(root) == GRPerson) {
 			validatePerson(root, name, index, keymap, elog);
