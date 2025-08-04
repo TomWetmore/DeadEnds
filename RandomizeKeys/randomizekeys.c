@@ -5,7 +5,7 @@
 // randomized Gedcom file to standard output.
 //
 // Created by Thomas Wetmore on 14 July 2024.
-// Last changed on 26 July 2025.
+// Last changed on 3 August 2025.
 
 #include "errors.h"
 #include "gedcom.h"
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
 	checkKeysAndReferences(roots, gedcomFile, keymap, log);
 	printf("ramdomize keys: %s: validated keys.\n", getMsecondsStr());
 	if (lengthList(log)) {
-		deleteGNodeList(roots, basicDelete);
+		deleteGNodeList(roots);
 		goAway(log);
 	}
 

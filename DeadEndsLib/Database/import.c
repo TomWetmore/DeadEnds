@@ -4,7 +4,7 @@
 //  import.c has functions that import Gedcom files into internal structures.
 //
 //  Created by Thomas Wetmore on 13 November 2022.
-//  Last changed on 4 June 2025.
+//  Last changed on 3 August 2025.
 //
 
 #include "database.h"
@@ -30,6 +30,7 @@ bool importDebugging = false;
 // If errors are found in a file its Database is not created and the errors are logged.
 static void deletedbase(void* element) { deleteDatabase((Database*) element); }
 List* getDatabasesFromFiles(List* filePaths, int vcodes, ErrorLog* errorLog) {
+    ASSERT(filePaths && errorLog);
 	List* databases = createList(null, null, deletedbase, false);
 	Database* database = null;
 	FORLIST(filePaths, path)
@@ -42,6 +43,7 @@ List* getDatabasesFromFiles(List* filePaths, int vcodes, ErrorLog* errorLog) {
 // getDatabaseFromFile returns the Database of a single Gedcom file. Returns null if no Database
 // is created, and errorLog holds the Errors found.
 Database* getDatabaseFromFile(String path, int vcodes, ErrorLog* errlog) {
+    ASSERT(path && errlog);
 	if (timing) printf("%s: getDatabaseFromFile: started\n", gms);
 	IntegerTable* keymap = createIntegerTable(4097); // Map keys to lines; for error messages.
     int numErrors = lengthList(errlog);
@@ -78,6 +80,7 @@ Database* getDatabaseFromFile(String path, int vcodes, ErrorLog* errlog) {
 // and checks for duplicates. Checks that all keys found as values refer to records.
 #define getline(key) (searchIntegerTable(keymap, key))
 void checkKeysAndReferences(RootList* records, String name, IntegerTable* keymap, ErrorLog* log) {
+    ASSERT(records && name && keymap && log);
 	StringSet* keySet = createStringSet();
 	FORLIST(records, element)
 		GNode* root = (GNode*) element;
@@ -107,10 +110,9 @@ void checkKeysAndReferences(RootList* records, String name, IntegerTable* keymap
 			nodesTraversed++;
 			if (isKey(node->value)) numReferences++;
 			if (isKey(node->value) && !isInSet(keySet, node->value)) {
-				Error* error = createError(gedcomError, name,
-								getline(node->key) + countNodesBefore(node), "invalid key value");
-					addErrorToLog(log, error);
-				}
+				Error* error = createError(gedcomError, name, LN(root, keymap, node), "invalid key value");
+                addErrorToLog(log, error);
+            }
 		ENDTRAVERSE
 	ENDLIST
 	if (importDebugging) {
@@ -124,16 +126,16 @@ void checkKeysAndReferences(RootList* records, String name, IntegerTable* keymap
 	deleteStringSet(keySet, false);
 }
 
-// getRecordListFromFile reads a Gedcom file and creates a RootList of all records in the file. Each record is the
-// root GNode of the record's GNode tree.
+// getRecordListFromFile reads a Gedcom file and creates a RootList of all records in the file.
+// Each record is the root GNode of the record's GNode tree.
 RootList* getRecordListFromFile(String path, IntegerTable* keymap, ErrorLog* elog) {
+    ASSERT(path && keymap && elog);
     if (timing) printf("%s: getRecordIndexFromFile: started.\n", gms);
     File* file = openFile(path, "r"); // Open the Gedcom file.
     if (!file) {
         addErrorToLog(elog, createError(systemError, path, 0, "Could not open file."));
         return null;
     }
-    if (!keymap) keymap = createIntegerTable(4097); // Create line number map if needed.
     int initialErrorCount = lengthList(elog);
 
     // Read Gedcom file into flat GNode list

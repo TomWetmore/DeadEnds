@@ -5,7 +5,7 @@
 //  structs that represents a path from a GNode to one or more GNodes in the tree below.
 //
 //  Created by Thomas Wetmore on 13 October 2024.
-//  Last changed on 4 June 2025.
+//  Last changed on 4 August 2025.
 //
 
 #include "gedpath.h"
@@ -20,7 +20,7 @@ static bool traverseDebug = true;
 GedPath* buildGedPath(String string) {
 	GedPath* first = null;
 	GedPath* prev = null;
-	char *expression = strdup(string);
+	char *expression = strsave(string);
 	String token = strtok(expression, "->"); // First component.
 	while (token) {
 		GedPath* path = createGedPath();
@@ -33,7 +33,7 @@ GedPath* buildGedPath(String string) {
 			path->tag = null; // Any tag component.
 			path->any = true;
 		} else {
-			path->tag = strdup(token);
+			path->tag = strsave(token);
 		}
 		path->next = null;
 		if (!first) first = path;

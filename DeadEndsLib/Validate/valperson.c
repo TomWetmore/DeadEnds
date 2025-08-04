@@ -4,7 +4,7 @@
 //  valperson.c contains functions that validate person records in a Database.
 //
 //  Created by Thomas Wetmore on 17 December 2023.
-//  Last changed on 2 August 2025.
+//  Last changed on 3 August 2025.
 //
 
 #include "database.h"
@@ -19,8 +19,6 @@
 #include "splitjoin.h"
 #include "utils.h"
 #include "validate.h"
-
-#define LC(line, node) (line + countNodesBefore(node))
 
 static bool validatePerson(GNode*, String name, RecordIndex*, IntegerTable*, ErrorLog*);
 static bool hasValidNameGNode(GNode* root, GNode** pname);
@@ -56,14 +54,13 @@ static bool validatePerson(GNode* person, String name, RecordIndex* index, Integ
 	FORFAMCS(person, family, key, index) // Check FAMC links to families.
 		if (!family) {
 			sprintf(s, "INDI %s (line %d): FAMC %s (line %d) does not exist.",
-					person->key, line, key, line + countNodesBefore(__node));
+					person->key, line, key, LC(line, __node));
 			addErrorToLog(elog, createError(linkageError, name, line, s));
 			errorCount++;
 		}
 	ENDFAMCS
 	FORFAMSS(person, family, key, index) // Check FAMS links to families.
 		if (!family) {
-				//int lineNumber = rootLine(person, database);
 				sprintf(s, "INDI %s (line %d): FAMS %s (line %d) does not exist.",
 						person->key, line, key, LC(line, __node));
 				addErrorToLog(elog, createError(linkageError, name, line, s));
@@ -95,10 +92,7 @@ static bool validatePerson(GNode* person, String name, RecordIndex* index, Integ
 		} else {
 			int lineNumber = rootLine(person, keymap);
 			sprintf(s, "INDI %s (line %d) with FAMS %s (line %d) link has no sex value.",
-					person->key,
-					lineNumber,
-					key,
-					lineNumber + countNodesBefore(__node));
+                    person->key, lineNumber, key, LC(lineNumber, __node));
 			addErrorToLog(elog, createError(linkageError, name, 0, s));
 			errorCount++;
 			goto a;

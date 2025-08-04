@@ -4,7 +4,7 @@
 //  valfamily.c has the functions that validate family records.
 //
 //  Created by Thomas Wetmore on 18 December 2023.
-//  Last changed on 4 June 2025.
+//  Last changed on 3 July 2025.
 //
 
 #include "database.h"
@@ -44,39 +44,34 @@ static bool validateFamily(GNode* family, String name, RecordIndex* index, Integ
 	// HUSB, WIFE and CHIL nodes must point to persons.
 	FORHUSBS(family, husband, key, index)
 		if (!husband) {
-			//printf("%s ", family->key); // DEBUG
 			int lineNumber = rootLine(family, keymap);
 			sprintf(s, "FAM %s (line %d): HUSB %s (line %d) does not exist.",
 					family->key, lineNumber, key,
-					lineNumber + countNodesBefore(__node));
+					LC(lineNumber, __node));
 			addErrorToLog(elog, createError(linkageError, name, 0, s));
 			errorCount++;
 		}
 	ENDHUSBS
-	//printf("\nALL FAM KEYS FROM FORWIVES\n"); // DEBUG
 	FORWIFES(family, wife, key, index)
-		//printf("%s ", family->key); // DEBUG
 		if (!wife) {
 			int lineNumber = rootLine(family, keymap);
 			sprintf(s, "FAM %s (line %d): WIFE %s (line %d) does not exist.",
 					family->key,
 					lineNumber,
 					key,
-					lineNumber + countNodesBefore(__node));
+                    LC(lineNumber, __node));
 			addErrorToLog(elog, createError(linkageError, name, 0, s));
 			errorCount++;
 		}
 	ENDWIFES
-	//printf("\nALL FAM KEYS FROM FORCHILDREN\n"); // DEBUG
 	FORCHILDREN(family, child, key, n, index)
 	if (!child) {
-			//printf("%s ", family->key); // DEBUG
 			int lineNumber = rootLine(family, keymap);
 			sprintf(s, "FAM %s (line %d): CHIL %s (line %d) does not exist.",
 					family->key,
 					lineNumber,
 					key,
-					lineNumber + countNodesBefore(__node));
+					LC(lineNumber, __node));
 			addErrorToLog(elog, createError(linkageError, name, lineNumber, s));
 			errorCount++;
 		}

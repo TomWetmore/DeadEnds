@@ -19,7 +19,7 @@
 
 //static bool debugging = true;
 
-// createNodeListEl creates a GNodeList element. gnode is the GNode, and data is arbitrary.
+// createNodeListEl creates a GNodeList element. gnode is the GNode and level is its Gedcom level.
 GNodeListEl* createGNodeListEl(GNode* gnode, int level) {
 	GNodeListEl *element = (GNodeListEl*) malloc(sizeof(GNodeListEl));
 	element->node = gnode;
@@ -49,7 +49,7 @@ void appendToGNodeList(GNodeList* list, GNode* gnode, int level) {
 	appendToList(list, el);
 }
 
-// deleteGNodeList deletes a GNodeList using caller provided delete function.
+// deleteGNodeList deletes a GNodeList.
 void deleteGNodeList(GNodeList* list) {
 	deleteList(list);
 }
@@ -58,8 +58,7 @@ void deleteGNodeList(GNodeList* list) {
 // the keymap is not null it is used to map record keys to the lines where defined. Syntax errors
 // are added to the ErrorLog. The file is fully processed regardless of errors. If errors are
 // found the list is deleted and null is returned. The data field in the GNodeListEl holds the
-// Gedcom level of the GNode. This is necessary because getRootListFromGNodeList needs that
-// informmation for its state machine.
+// Gedcom level of the GNode. getRootListFromGNodeList needs the node levels for its state machine.
 GNodeList* getGNodeListFromFile(File* file, IntegerTable* keymap, ErrorLog* elog) {
 	ASSERT(file && file->fp && elog);
 	FILE* fp = file->fp;
@@ -88,7 +87,7 @@ GNodeList* getGNodeListFromFile(File* file, IntegerTable* keymap, ErrorLog* elog
 	return null;
 }
 
-// getGnodeTreesFromString reads a String holding Gedcom records and returns them as a GNodeList.
+// getGNodeTreesFromString reads a String holding Gedcom records and returns them as a GNodeList.
 // TODO: The string functions have not caught up!!
 GNodeList* getGNodeTreesFromString(String string, String name, ErrorLog* errorLog) {
 	int numErrors = lengthList(errorLog);
