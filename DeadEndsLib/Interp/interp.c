@@ -466,7 +466,7 @@ InterpType interpFornotes(PNode* pnode, Context* context, PValue *pval) {
     }
     if (!root) return InterpOkay;
     FORTAGVALUES(root, "NOTE", sub, vstring) {
-        assignValueToSymbol(context, pnode->gnodeIden, createStringPValue(vstring));
+        assignValueToSymbol(context, pnode->noteIden, createStringPValue(vstring));
         irc = interpret(pnode->loopState, context, pval);
         switch (irc) {
         case InterpContinue:
