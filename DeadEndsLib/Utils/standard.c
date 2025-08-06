@@ -60,7 +60,7 @@ void* _alloc(size_t len, String file, int line) {
 	return p;
 }
 
-// _free deallocates memory; called by sdtfree.
+// _free deallocates memory; called by stdfree.
 void _free (void* ptr, String file, int line) {
 	if (loggingAllocs) {
         fprintf(allocLogFile, "F  %s\t%d\t%ld\t%ld\n", lastPathSegment(file), line,

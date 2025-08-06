@@ -51,6 +51,7 @@ void* nextInHashTable(HashTable*, int*, int*);
 
 int sizeHashTable(HashTable*);
 void showHashTable(HashTable*, void(*show)(void*));
+void dumpHashTable(HashTable*, void(*show)(void*));
 /*static*/ int getHash(String, int);
 void removeFromHashTable(HashTable*, String key);
 int iterateHashTableWithPredicate(HashTable*, bool(*)(void*));

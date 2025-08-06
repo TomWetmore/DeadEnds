@@ -23,13 +23,13 @@ Context* createEmptyContext(void) {
 }
 
 // createContext creates a Context from a Database and a File.
-Context* createContext(Database *database, File* file) {
-    Context* context = (Context*) stdalloc(sizeof(Context));
-    context->frame = null;
-    context->database = database;
-    context->file = file;
-    return context;
-}
+//Context* createContext(Database *database, File* file) {
+//    Context* context = (Context*) stdalloc(sizeof(Context));
+//    context->frame = null;
+//    context->database = database;
+//    context->file = file;
+//    return context;
+//}
 
 // deleteContext deletes a Context; it deletes the run time stack and closes the file, but leaves the database.
 void deleteContext(Context *context) {

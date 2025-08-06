@@ -434,7 +434,8 @@ combine:
 /*static*/ void setExtractString (String str) {
     extractString = str;
 	extractCursor = str;
-    if (!monthTable) initMonthTable();
+    if (!monthTable)
+        initMonthTable();
 }
 
 // getDateToken returns the next token from the date extraction string.

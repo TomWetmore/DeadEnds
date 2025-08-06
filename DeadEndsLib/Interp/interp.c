@@ -49,12 +49,12 @@ bool programDebugging = false;
 // Number of script errors.
 int Perrors = 0;
 
-// interpScript interprets a DeadEnds script. A script must contain a main procedure (named "main"). interpScript
-// arranges to call that procedure. The function creates a procedure call PNode to call main procecure, updates
-// the script output file in the Context if the caller provided one, and then calls that PNode with the Context.
+// interpScript interprets a DeadEnds script. A script must contain procedure named "main". interpScript calls
+// that procedure. This function creates a procedure call PNode to call main procecure, updates the script
+// output file in the Context if the caller provides one, and then calls the PNode with the Context.
 void interpScript(Context* context, File* outfile) {
-    // Create a PNProcCall PNode that calls the main procedure.
-    curFileName = "..synthetic.."; // Think of a cleverer name.
+    // Create a PNProcCall PNode to call the main procedure.
+    curFileName = "deadends";
     curLine = 1;
     PNode* pnode = procCallPNode("main", null);
     // If there is an output file use it.
