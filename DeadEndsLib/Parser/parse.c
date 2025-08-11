@@ -4,7 +4,7 @@
 //  parse.c contains two functions, parseProgram and parseFile, which parse DeadEnds scripts.
 //
 //  Created by Thomas Wetmore on 4 January 2023.
-//  Last changed on 18 June 2025.
+//  Last changed on 11 August 2025.
 //
 
 #include <stdarg.h>
@@ -87,14 +87,15 @@ Context* parseProgram(String fileName, String searchPath) {
 
     // Parsing was successful. Create and return a context.
     Context* context = createEmptyContext();
-    context->fileNames = parsedFiles;
+    //context->fileNames = parsedFiles;
     context->globals = globals;
     context->procedures = procedures;
     context->functions = functions;
     // Null the globals after the context has taken ownership.
     globals = null;
     procedures = functions = null;
-    parsedFiles = null;
+    deleteList(parsedFiles); /// NEW
+    parsedFiles = null; // NEEDED?
     programParsing = false;
     return context;
 }

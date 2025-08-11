@@ -3,7 +3,7 @@
 //  context.h
 //
 //  Created by Thomas Wetmore on 21 May 2025.
-//  Last changed on 3 July 2025.
+//  Last changed on 11 August 2025.
 //
 
 #ifndef context_h
@@ -29,8 +29,6 @@ typedef struct Context {
     SymbolTable* globals; // Global symbol table.
     FunctionTable* procedures; // User defined procedures.
     FunctionTable* functions; // User defined functions.
-    List* fileNames; // Names of script files making up this program.
-    int parseErrors;
 } Context;
 
 
