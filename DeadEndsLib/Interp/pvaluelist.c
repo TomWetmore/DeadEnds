@@ -3,7 +3,7 @@
 //  Library
 //
 //  Created by Thomas Wetmore on 27 July 2025.
-//  Last changed on 28 July 2025.
+//  Last changed on 15 August 2025.
 //
 
 #include "list.h"
@@ -17,10 +17,9 @@ static int pvlistFrees = 0;
 /// Frees an element of a PValueList.
 static void delete(void* element) { freePValue(element); }
 
-
 /// Creates a PValueList.
 PValueList* createPValueList(void) {
-    List* list = createList(null, null, null, false);
+    List* list = createList(null, null, delete, false);
     pvlistAllocs++;
     return list;
 }

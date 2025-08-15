@@ -6,7 +6,7 @@
 //  or call a more specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 26 July 2025.
+//  Last changed on 15 August 2025.
 //
 
 #include <stdarg.h>
@@ -644,7 +644,9 @@ InterpType interpretSequenceLoop(PNode* pnode, Context* context, PValue* pval) {
     FORSEQUENCE(seq, el, ncount) {
         GNode *indi = keyToPerson(el->root->key, index); // Update person in symbol table.
         assignValueToSymbol(context, pnode->elementIden, PVALUE(PVPerson, uGNode, indi));
-        PValue pvalue = (PValue) {PVInt, el->value}; // Update person's value in symbol table.
+        //PValue pvalue = (PValue) {PVInt, el->value}; // Update person's value in symbol table.
+        //PValue pvalue = (PValue) {el->value->type, el->value->value};
+        PValue pvalue = *(el->value);
         assignValueToSymbol(context, pnode->valueIden, pvalue);
         assignValueToSymbol(context, pnode->countIden, PVALUE(PVInt, uInt, ncount));
         switch (irc = interpret(pnode->loopState, context, pval)) {

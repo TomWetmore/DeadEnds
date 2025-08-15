@@ -3,7 +3,7 @@
 //  context.c
 //
 //  Created by Thomas Wetmore on 21 May 2025.
-//  Last changed on 11 August 2025.
+//  Last changed on 12 August 2025.
 //
 
 #include <stdio.h>
@@ -22,15 +22,6 @@ Context* createEmptyContext(void) {
     return context;
 }
 
-// createContext creates a Context from a Database and a File.
-//Context* createContext(Database *database, File* file) {
-//    Context* context = (Context*) stdalloc(sizeof(Context));
-//    context->frame = null;
-//    context->database = database;
-//    context->file = file;
-//    return context;
-//}
-
 // deleteContext deletes a Context; it deletes the run time stack and closes the file, but leaves everything else.
 void deleteContext(Context *context) {
     Frame* frame = context->frame;
@@ -46,24 +37,21 @@ void deleteContext(Context *context) {
 static void validatePNodeCalls(PNode* node, Context* context);
 static bool isBuiltinFunction(const char* name);
 
-// validateCalls checks that all functions and procedures called in a script are already defined.
+/// Checks that the functions and procedures called by a script are defined.
 void validateCalls(Context* context) {
-    ASSERT(context);
 
-    // Check that all user defined procedures call defined modules.
-    FORHASHTABLE(context->procedures, entry)
+    ASSERT(context);
+    FORHASHTABLE(context->procedures, entry) // Check procedures.
         PNode* proc = ((FunctionElement*) entry)->function;
         validatePNodeCalls(proc->procBody, context);
     ENDHASHTABLE
-
-    // Check that all user defined functions call defined modules.
-    FORHASHTABLE(context->functions, entry)
+    FORHASHTABLE(context->functions, entry) // Check functions.
         PNode* func = ((FunctionElement*) entry)->function;
         validatePNodeCalls(func->funcBody, context);
     ENDHASHTABLE
 }
 
-// validatePNodeCalls validates that individual PNodes that call modules call defined modules.
+/// Checks that PNProcCall and PNFuncCall PNodes that call defined modules.
 static void validatePNodeCalls(PNode* node, Context* context) {
     while (node) {
         switch (node->type) {
@@ -82,7 +70,7 @@ static void validatePNodeCalls(PNode* node, Context* context) {
             }
             break;
         }
-        case PNBltinCall: /* skip; already handled above */ break;
+        case PNBltinCall: break;
         case PNIf:
             validatePNodeCalls(node->condExpr, context);
             validatePNodeCalls(node->thenState, context);
