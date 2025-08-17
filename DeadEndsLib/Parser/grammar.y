@@ -6,7 +6,7 @@
 //  I do not like the code that bison produces, and this is the 'version' of yacc supported by Apple.
 //
 //  Created by Thomas Wetmore on 8 December 2022.
-//  Last changed 3 June 2025.
+//  Last changed 16 August 2025.
 //
 
 %{
@@ -23,6 +23,7 @@ extern SymbolTable *globals; // Global variables.
 extern FunctionTable *procedures;// User procedures.
 extern FunctionTable *functions; // User functions.
 extern List *pendingFiles; // Pending list of included files.
+extern List* globalIdents; // List of global identifiers.
 extern int curLine; // Line number in current file.
 
 static PNode *this, *prev, *tnode;;
@@ -63,7 +64,8 @@ static void yyerror(String str);
     |	func
     |	IDEN '(' IDEN ')' {  // Interested in "global".
         if (eqstr("global", $1))
-            assignValueToSymbolTable(globals, $3, (PValue) {PVNull});
+            //assignValueToSymbolTable(globals, $3, (PValue) {PVNull});
+            appendToList(globalIdents, $3);
     }
     |	IDEN '(' SCONS ')' {  // Interested in "include".
         if (eqstr("include", $1))

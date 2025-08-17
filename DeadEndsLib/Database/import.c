@@ -4,7 +4,7 @@
 //  import.c has functions that import Gedcom files into internal structures.
 //
 //  Created by Thomas Wetmore on 13 November 2022.
-//  Last changed on 3 August 2025.
+//  Last changed on 16 August 2025.
 //
 
 #include "database.h"
@@ -29,12 +29,12 @@ bool importDebugging = false;
 // getDatabasesFromFiles imports a list of Gedcom files into a List of Databases, one per file.
 // If errors are found in a file its Database is not created and the errors are logged.
 static void deletedbase(void* element) { deleteDatabase((Database*) element); }
-List* getDatabasesFromFiles(List* filePaths, int vcodes, ErrorLog* errorLog) {
+List* getDatabasesFromFiles(List* filePaths, ErrorLog* errorLog) {
     ASSERT(filePaths && errorLog);
 	List* databases = createList(null, null, deletedbase, false);
 	Database* database = null;
 	FORLIST(filePaths, path)
-		if ((database = getDatabaseFromFile(path, vcodes, errorLog)))
+		if ((database = getDatabaseFromFile(path, errorLog)))
 			appendToList(databases, database);
 	ENDLIST
 	return databases;
@@ -42,7 +42,7 @@ List* getDatabasesFromFiles(List* filePaths, int vcodes, ErrorLog* errorLog) {
 
 // getDatabaseFromFile returns the Database of a single Gedcom file. Returns null if no Database
 // is created, and errorLog holds the Errors found.
-Database* getDatabaseFromFile(String path, int vcodes, ErrorLog* errlog) {
+Database* getDatabaseFromFile(String path, ErrorLog* errlog) {
     ASSERT(path && errlog);
 	if (timing) printf("%s: getDatabaseFromFile: started\n", gms);
 	IntegerTable* keymap = createIntegerTable(4097); // Map keys to lines; for error messages.

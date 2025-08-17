@@ -6,7 +6,7 @@
 //  or call a more specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 15 August 2025.
+//  Last changed on 17 August 2025.
 //
 
 #include <stdarg.h>
@@ -48,6 +48,29 @@ bool programDebugging = false;
 
 // Number of script errors.
 int Perrors = 0;
+
+/// Runs a program.
+void runProgram(Program* program, Database* database, File* outfile) {
+    // Create a Context from the Program, Database and File.
+    Context* context = createContext();
+    context->database = database;
+    context->program = program;
+    context->file = outfile;
+    context->frame = null;
+
+    // Create the global SymbolTable from the globalIdents.
+    context->globals = createSymbolTable();
+    FORLIST(program->globalIdents, ident)
+        assignValueToSymbolTable(context->globals, (String) ident, nullPValue);
+    ENDLIST
+
+    // Call interpScript which will call the main function. This runs the program.
+    interpScript(context, outfile);
+
+    // The sript program has finished funning. Free the Context.
+    deleteSymbolTable(context->globals);
+    stdfree(context); // Leave the Program, Database, and File intact.
+}
 
 // interpScript interprets a DeadEnds script. A script must contain procedure named "main". interpScript calls
 // that procedure. This function creates a procedure call PNode to call main procecure, updates the script
@@ -701,7 +724,7 @@ InterpType interpProcCall(PNode* pnode, Context* context, PValue* pval) {
     // Get the procedure from the procedure table.
     String name = pnode->procName;
     if (callTracing) printf("calling: %s (line %d)\n", name, pnode->lineNumber);
-    PNode* proc = searchFunctionTable(context->procedures, name);
+    PNode* proc = searchFunctionTable(context->program->procedures, name);
     if (!proc) {
         scriptError(pnode, "procedure %s is undefined", name);
         return InterpError;

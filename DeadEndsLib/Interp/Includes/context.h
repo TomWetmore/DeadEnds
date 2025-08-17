@@ -3,7 +3,7 @@
 //  context.h
 //
 //  Created by Thomas Wetmore on 21 May 2025.
-//  Last changed on 11 August 2025.
+//  Last changed on 16 August 2025.
 //
 
 #ifndef context_h
@@ -19,22 +19,29 @@ typedef struct Frame Frame;
 typedef struct File File;
 typedef struct List List;
 
-void validateCalls(Context*);
+// Program holds a (non running) DeadEnds script program.
+typedef struct Program {
+    FunctionTable* procedures;
+    FunctionTable* functions;
+    List* globalIdents;
+    List* parsedFiles;
+} Program;
+
+Program* createProgram(void); // Create an empty Program.
+void deleteProgram(Program*);
+void validateCalls(Program*);
 
 // Context holds the context in which interpretation takes place.
 typedef struct Context {
     Database* database; // The database.
-    Frame* frame; // The bottom frame on the run time stack.
-    File* file; // Current program output file.
+    Program* program;
     SymbolTable* globals; // Global symbol table.
-    FunctionTable* procedures; // User defined procedures.
-    FunctionTable* functions; // User defined functions.
+    Frame* frame; // Bottom frame of run time stack.
+    File* file; // Current program output file.
 } Context;
 
-
-// Public interface.
-Context* createEmptyContext(void); // Create an empty context.
-Context* createContext(Database*, File*); // Create a with a database and file.
-void deleteContext(Context*);  // Delete a context.
+// Interface.
+Context* createContext(void); // Create a Context.
+//void deleteContext(Context*);  // Delete a context.
 
 #endif // context_h

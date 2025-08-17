@@ -11,7 +11,7 @@
 //  If DE_GEDCOM_PATH and/or DE_SCRIPTS_PATH are defined, they may be used as search paths.
 //
 //  Created by Thomas Wetmore on 21 July 2024
-//  Last changed on 3 July 2025.
+//  Last changed on 17 August 2025.
 //
 
 #include "context.h"
@@ -33,29 +33,28 @@ int main(int argc, char* argv[]) {
     String scriptPath = null;
     getArguments(argc, argv, &gedcomFile, &scriptFile);
     getEnvironment(&gedcomPath, &scriptPath);
+
     // Build the Database from the Gedcom file.
     gedcomFile = resolveFile(gedcomFile, gedcomPath);
     ErrorLog* errorLog = createErrorLog();
-    Database* database = getDatabaseFromFile(gedcomFile, 0, errorLog);
+    Database* database = getDatabaseFromFile(gedcomFile, errorLog);
     if (lengthList(errorLog)) {
         showErrorLog(errorLog);
         exit(1);
     }
     fprintf(stderr, "%s: Database created.\n", getMsecondsStr());
-    // Parse and run the script.
+
+    // Parse the program script.
     fprintf(stderr, "%s: Script parsed.\n", getMsecondsStr());
-    Context* context = parseProgram(scriptFile, scriptPath);
-    if (!context) {
+    Program* program = parseProgram(scriptFile, scriptPath);
+    if (!program) {
         fprintf(stderr, "Error parsing program\n");
         exit(1);
     }
-    validateCalls(context);
-    context->database = database;
-    context->file = stdOutputFile();
-    // Try out the file feature.
-    File* file = openFile("/Users/ttw4/runscript.out.txt", "w");
-    interpScript(context, stdOutputFile());
-    //interpScript(context, file);
+    validateCalls(program); // This should be done somewhere else. TODO TODO TODO.
+
+    // Run the program.
+    runProgram(program, database, stdOutputFile());
     fprintf(stderr, "%s: RunScript done.\n", getMsecondsStr());
 }
 

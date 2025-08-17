@@ -9,7 +9,7 @@
 //  identifiers to PValue pointers.
 
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 10 June 2025.
+//  Last changed on 16 August 2025.
 //
 
 #include "evaluate.h"
@@ -106,7 +106,7 @@ PValue evaluateBuiltin(PNode* pnode, Context* context, bool* errflg) {
 PValue evaluateUserFunc(PNode *pnode, Context *context, bool* errflg) {
     String name = pnode->funcName;
     if (debugging) printf("evaulateUserFunc: %s\n", name);
-    PNode *func = searchFunctionTable(context->functions, name);
+    PNode *func = searchFunctionTable(context->program->functions, name);
     if (!func) {
         scriptError(pnode, "function %s is undefined", name);
         *errflg = true;

@@ -4,7 +4,7 @@
 //  interp.h is the header file for the DeadEnds script interpreter.
 //
 //  Created by Thomas Wetmore on 8 December 2022.
-//  Last changed on 3 June 2025.
+//  Last changed on 17 August 2025.
 //
 
 #ifndef interp_h
@@ -21,6 +21,7 @@ typedef struct HashTable SymbolTable;
 typedef struct PNode PNode;
 typedef struct PValue PValue;
 typedef struct Script Script;
+typedef struct Program Program;
 
 #define CC 32 // 'Commutative constant'.
 
@@ -32,8 +33,8 @@ typedef enum InterpType {
 // Report Interpreter.
 void initializeInterpreter(Database*);
 void initset(void);
-Context* parseProgram(String fileName, String searchPath);
-
+Program* parseProgram(String, String);
+void runProgram(Program*, Database*, File*);
 void interpScript(Context*, File*);
 InterpType interpret(PNode*, Context*, PValue*);
 InterpType interpChildren(PNode*, Context*, PValue*);

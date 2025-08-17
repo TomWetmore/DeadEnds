@@ -5,7 +5,7 @@
 //  TODO: The string functions aren't here yet.
 //
 //  Created by Thomas Wetmore on 13 November 2022.
-//  Last changed on 3 June 2025.
+//  Last changed on 16 August 2025.
 //
 
 #ifndef import_h
@@ -22,8 +22,8 @@ typedef List RootList;
 typedef List GNodeList;
 typedef List ErrorLog;
 
-List *getDatabasesFromFiles(List*, int vcodes, ErrorLog*);
-Database* getDatabaseFromFile(String, int vcodes, ErrorLog*);
+List *getDatabasesFromFiles(List*, ErrorLog*);
+Database* getDatabaseFromFile(String, ErrorLog*);
 RootList* getRecordListFromFile(String, IntegerTable*, ErrorLog*);
 void checkKeysAndReferences(GNodeList*, String name, IntegerTable*, ErrorLog*);
 
