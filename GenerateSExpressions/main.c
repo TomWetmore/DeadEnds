@@ -10,12 +10,13 @@
 //  usage: gensexpr -s scriptfile
 //
 //  Created by Thomas Wetmore on 4 March 2025.
-//  Last changed on 3 July 2025.
+//  Last changed on 18 August 2025.
 //
 
 #include <stdio.h>
 #include "context.h"
 #include "hashtable.h"
+#include "list.h"
 #include "parse.h"
 #include "pnode.h"
 #include "functiontable.h"
@@ -27,7 +28,7 @@ extern void printPNodeTreeAsSExpr(FILE *out, PNode *root);
 static void usage(void);
 static void getArguments(int, char**, String*);
 static void getEnvironment(String*);
-static void genSExpressions(Context*);
+static void genSExpressions(Program*);
 
 // External functions (avoid header file).
 String getMsecondsStr(void);
@@ -43,10 +44,11 @@ int main(int argc, char* argv[]) {
     fprintf(stderr, "scriptFile is %s\n", scriptFile);
     fprintf(stderr, "scriptPath is %s\n", scriptPath);
 	// Parse the script into PNode trees.
-	Context* context = parseProgram(scriptFile, scriptPath);
+	Program* program = parseProgram(scriptFile, scriptPath);
 	fprintf(stderr, "%s: Script parsed.\n", getMsecondsStr());
 	// Generate S-Expressions from the PNode trees.
-	genSExpressions(context);
+	genSExpressions(program);
+    deleteProgram(program);
 }
 
 // getArguments gets the arguments from the command line.
@@ -76,28 +78,27 @@ static void getEnvironment(String* script) {
 }
 
 // genSExpressions generates the S-Expressions from the PNode trees in the procedure and function tables.
-static void genSExpressions(Context* context) {
-	fprintf(stderr, "procedures holds %d procedures\n", sizeHashTable(context->procedures));
-	fprintf(stderr, "functions holds %d functions\n", sizeHashTable(context->functions));
-    fprintf(stderr, "globals holds %d variables\n", sizeHashTable(context->globals));
+static void genSExpressions(Program* program) {
+	fprintf(stderr, "procedures holds %d procedures\n", sizeHashTable(program->procedures));
+	fprintf(stderr, "functions holds %d functions\n", sizeHashTable(program->functions));
+    fprintf(stderr, "globals holds %d variables\n", lengthList(program->globalIdents));
 
     printf("{\n");
-	FORHASHTABLE(context->procedures, element)
+	FORHASHTABLE(program->procedures, element)
 		FunctionElement* functionElement = (FunctionElement*) element;
 		PNode* root = functionElement->function;
 		printPNodeTreeAsSExpr(stdout, root);
 	ENDHASHTABLE
 
-	FORHASHTABLE(context->functions, element)
+	FORHASHTABLE(program->functions, element)
 		FunctionElement* functionElement = (FunctionElement*) element;
 		PNode* root = functionElement->function;
 		printPNodeTreeAsSExpr(stdout, root);
 	ENDHASHTABLE
 
-    FORHASHTABLE(context->globals, element)
-        Symbol* symbol = (Symbol*) element;
-        printf("(global %s\n)\n", symbol->ident);
-    ENDHASHTABLE
+    FORLIST(program->globalIdents, ident)
+        printf("(global %s\n)\n", (String) ident);
+    ENDLIST
     printf("\n}\n");
 }
 

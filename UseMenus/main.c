@@ -4,7 +4,7 @@
 //  main.c is the main program of the UseMenus test program.
 //
 //  Created by Thomas Wetmore on 31 July 2024.
-//  Last changed on 4 June 2025.
+//  Last changed on 18 August 2025.
 //
 
 #include "ask.h"
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
 	if (debugging) fprintf(stderr, "resolved gedcomFile = %s\n", gedcomFile);
 	ErrorLog* errorLog = createErrorLog();
 	int vcodes = VCclosedKeys | VClineageLinking | VCnamesAndSex;
-	Database* database = getDatabaseFromFile(gedcomFile, vcodes, errorLog);
+	Database* database = getDatabaseFromFile(gedcomFile, errorLog);
 	if (lengthList(errorLog)) {
 		showErrorLog(errorLog);
 		exit(1);

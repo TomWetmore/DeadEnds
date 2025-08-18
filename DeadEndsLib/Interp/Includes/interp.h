@@ -4,7 +4,7 @@
 //  interp.h is the header file for the DeadEnds script interpreter.
 //
 //  Created by Thomas Wetmore on 8 December 2022.
-//  Last changed on 17 August 2025.
+//  Last changed on 18 August 2025.
 //
 
 #ifndef interp_h
@@ -35,7 +35,7 @@ void initializeInterpreter(Database*);
 void initset(void);
 Program* parseProgram(String, String);
 void runProgram(Program*, Database*, File*);
-void interpScript(Context*, File*);
+InterpType interpScript(Context*, File*);
 InterpType interpret(PNode*, Context*, PValue*);
 InterpType interpChildren(PNode*, Context*, PValue*);
 InterpType interpSpouses(PNode*, Context*, PValue*);

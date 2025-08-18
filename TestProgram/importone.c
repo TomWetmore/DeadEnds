@@ -14,8 +14,7 @@
 	String gedcomFile = "/Users/ttw4/Desktop/DeadEndsVSCode/Gedfiles/unknownsex.ged";
 	String lastSegment = lastPathSegment(gedcomFile);
 	printf("lastPathSegment: %s\n", lastSegment);
-	int vcodes = 31; // First five bits sest.
-	Database* database = getDatabaseFromFile(gedcomFile, vcodes, log);
+	Database* database = getDatabaseFromFile(gedcomFile, log);
 	if (lengthList(log)) {
 		printf("Import cancelled because of errors:\n");
 		showErrorLog(log);

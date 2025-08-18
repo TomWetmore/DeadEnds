@@ -6,7 +6,7 @@
 //  or call a more specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 17 August 2025.
+//  Last changed on 18 August 2025.
 //
 
 #include <stdarg.h>
@@ -49,45 +49,36 @@ bool programDebugging = false;
 // Number of script errors.
 int Perrors = 0;
 
-/// Runs a program.
+/// Runs a DeadEnds script program.
 void runProgram(Program* program, Database* database, File* outfile) {
-    // Create a Context from the Program, Database and File.
-    Context* context = createContext();
-    context->database = database;
-    context->program = program;
-    context->file = outfile;
-    context->frame = null;
 
-    // Create the global SymbolTable from the globalIdents.
-    context->globals = createSymbolTable();
-    FORLIST(program->globalIdents, ident)
-        assignValueToSymbolTable(context->globals, (String) ident, nullPValue);
-    ENDLIST
+    // Create the Context.
+    Context* context = createContext(program, database, outfile);
 
-    // Call interpScript which will call the main function. This runs the program.
-    interpScript(context, outfile);
+    // Call the main function.
+    InterpType itype = interpScript(context, outfile);
 
-    // The sript program has finished funning. Free the Context.
-    deleteSymbolTable(context->globals);
-    stdfree(context); // Leave the Program, Database, and File intact.
+    // Free the Context.
+    deleteContext(context);
 }
 
-// interpScript interprets a DeadEnds script. A script must contain procedure named "main". interpScript calls
-// that procedure. This function creates a procedure call PNode to call main procecure, updates the script
-// output file in the Context if the caller provides one, and then calls the PNode with the Context.
-void interpScript(Context* context, File* outfile) {
-    // Create a PNProcCall PNode to call the main procedure.
+// Interprets a DeadEnds script. A script must contain procedure named "main" which interpScript
+// calls. Creates a PNProcCall PNode to call "main" and inteprets it.
+InterpType interpScript(Context* context, File* outfile) {
+
+    // Create a PNProcCall PNode to call "main".
     curFileName = "deadends";
     curLine = 1;
     PNode* pnode = procCallPNode("main", null);
+
     // If there is an output file use it.
     if (outfile && context->file != outfile) {
         closeFile(context->file);
         context->file = outfile;
     }
+
     // Run the script by interpreting the main procedure.
-    // TODO: Should look at the return code.
-    (void) interpret(pnode, context, null);
+    return interpret(pnode, context, null);
 }
 
 // interpret interprets a list of PNodes. If a return statement is found it returns the return value through the

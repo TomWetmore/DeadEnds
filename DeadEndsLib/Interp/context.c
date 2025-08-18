@@ -3,7 +3,7 @@
 //  context.c
 //
 //  Created by Thomas Wetmore on 21 May 2025.
-//  Last changed on 17 August 2025.
+//  Last changed on 18 August 2025.
 //
 
 #include <stdio.h>
@@ -13,31 +13,45 @@
 #include "functiontable.h"
 #include "hashtable.h"
 #include "interp.h"
+#include "list.h"
 #include "pnode.h"
+#include "pvalue.h"
+#include "symboltable.h"
 
-// Creates an empty Program structure.
+/// Creates a Program structure.
 Program* createProgram(void) {
     return (Program*) stdalloc(sizeof(Program));
 }
 
-// createContext creates an empty Context.
-Context* createContext(void) {
+/// Deletes a Program structure.
+void deleteProgram(Program* program) {
+    deleteFunctionTable(program->procedures);
+    deleteFunctionTable(program->functions);
+    deleteList(program->parsedFiles);
+    deleteList(program->globalIdents);
+    stdfree(program);
+}
+
+/// Creates a Context structure.
+Context* createContext(Program* program, Database* database, File* outfile) {
     Context* context = (Context*) stdalloc(sizeof(Context));
-    if (context) memset(context, 0, sizeof(Context));
+    context->program = program;
+    context->database = database;
+    context->file = outfile;
+    context->frame = null;
+    context->globals = createSymbolTable();
+    FORLIST(program->globalIdents, ident)
+        assignValueToSymbolTable(context->globals, (String) ident, nullPValue);
+    ENDLIST
     return context;
 }
 
-// deleteContext deletes a Context; it deletes the run time stack and closes the file, but leaves everything else.
-//void deleteContext(Context *context) {
-//    Frame* frame = context->frame;
-//    while (frame) {
-//        Frame* parent = frame->caller;
-//        deleteFrame(frame);
-//        frame = parent;
-//    }
-//    if (context->file) closeFile(context->file);
-//    stdfree(context);
-//}
+/// Deletes a Context structure.
+void deleteContext(Context *context) {
+    deleteSymbolTable(context->globals);
+    if (context->file) closeFile(context->file);
+    stdfree(context);
+}
 
 static void validatePNodeCalls(PNode*, Program*);
 static bool isBuiltinFunction(const char* name);
@@ -56,7 +70,7 @@ void validateCalls(Program* program) {
     ENDHASHTABLE
 }
 
-/// Checks that PNProcCall and PNFuncCall PNodes that call defined modules.
+/// Checks that PNProcCall and PNFuncCall PNodes call defined procedures and functions.
 static void validatePNodeCalls(PNode* node, Program* program) {
     while (node) {
         switch (node->type) {

@@ -27,7 +27,7 @@ typedef struct Program {
     List* parsedFiles;
 } Program;
 
-Program* createProgram(void); // Create an empty Program.
+Program* createProgram(void); // TODO: Change to take parameters.
 void deleteProgram(Program*);
 void validateCalls(Program*);
 
@@ -41,7 +41,7 @@ typedef struct Context {
 } Context;
 
 // Interface.
-Context* createContext(void); // Create a Context.
-//void deleteContext(Context*);  // Delete a context.
+Context* createContext(Program*, Database*, File*);
+void deleteContext(Context*);
 
 #endif // context_h

@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 	// Get the List of Databases from the List of Gedcom files.
 	ErrorLog* errorLog = createErrorLog();
 	// Argument to be replaced with a List of DBaseActions.
-	List* databases = getDatabasesFromFiles(resolvedNames, 0, errorLog);
+	List* databases = getDatabasesFromFiles(resolvedNames, errorLog);
 
 	// Show the results.
 	printf("The number of databases created was %d\n", lengthList(databases));
