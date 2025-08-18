@@ -21,7 +21,6 @@
 #include "pnode.h"
 #include "pvalue.h"
 #include "set.h"
-#include "stringlist.h"
 #include "stringset.h"
 #include "symboltable.h"
 
