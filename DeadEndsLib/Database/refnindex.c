@@ -5,12 +5,17 @@
 //  1 REFN nodes whose values give records unique identifiers.
 //
 //  Created by Thomas Wetmore on 16 December 2023.
-//  Last changed on 3 June 2025.
+//  Last changed on 22 August 2025.
 //
 
+#include "errors.h"
 #include "gedcom.h"
+#include "gnode.h"
 #include "hashtable.h"
+#include "integertable.h"
+#include "recordindex.h"
 #include "refnindex.h"
+#include "validate.h"
 
 static int numRefnIndexBuckets = 1024;
 
@@ -47,10 +52,7 @@ static String getKey(void* a) {
 
 // delete frees a RefnIndexEl.
 static void delete(void* element) {
-    RefnIndexEl* el = (RefnIndexEl*) element;
-    stdfree(el->key);
-	stdfree(el->refn);
-    stdfree(el);
+    stdfree(element);
 }
 
 // createRefnIndex creates a RefnIndex.
@@ -66,9 +68,33 @@ void deleteRefnIndex(RefnIndex *index) {
 // addToRefnIndex adds a new RefnIndexEl to a RefnIndex. Returns true on success; returns false
 // if the REFN value is already in the table.
 bool addToRefnIndex(RefnIndex *index, String refn, String key) {
-	RefnIndexEl* element = createRefnIndexEl(strsave(refn), strsave(key));
+	RefnIndexEl* element = createRefnIndexEl(refn, key);
 	bool added = addToHashTableIfNew(index, element);
 	if (added) return true;
 	delete(element);
 	return false;
+}
+
+// getReferenceIndex creates the reference index while validating the 1 REFN nodes in a Database.
+RefnIndex* getReferenceIndex(RecordIndex *index, String fname, IntegerTable* keymap, ErrorLog* elog) {
+    RefnIndex* refnIndex = createRefnIndex();
+    FORHASHTABLE(index, element)
+        GNode* root = (GNode*) element;
+        GNode* refn = findTag(root->child, "REFN");
+        while (refn) {
+            String value = refn->value;
+            if (value == null || strlen(value) == 0) {
+                Error* err = createError(gedcomError, fname, LN(root, keymap, refn),
+                                           "Missing REFN value");
+                addErrorToLog(elog, err);
+            } else if (!addToRefnIndex (refnIndex, value, root->key)) {
+                Error *err = createError(gedcomError, fname, LN(root, keymap, refn),
+                                           "REFN value already defined");
+                addErrorToLog(elog, err);
+            }
+            refn = refn->sibling;
+            if (refn && nestr(refn->tag, "REFN")) refn = null;
+        }
+    ENDHASHTABLE
+    return refnIndex;
 }
