@@ -47,7 +47,10 @@ static String getKey(void* a) {
 
 // delete frees a RefnIndexEl.
 static void delete(void* element) {
-	stdfree(element);
+    RefnIndexEl* el = (RefnIndexEl*) element;
+    stdfree(el->key);
+	stdfree(el->refn);
+    stdfree(el);
 }
 
 // createRefnIndex creates a RefnIndex.
