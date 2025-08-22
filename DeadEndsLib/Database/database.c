@@ -6,7 +6,7 @@
 //  and used to build an internal database.
 //
 //  Created by Thomas Wetmore on 10 November 2022.
-//  Last changed on 4 June 2025.
+//  Last changed on 22 August 2025.
 //
 
 #include "database.h"
@@ -45,11 +45,13 @@ Database *createDatabase(String path, RootList* records, IntegerTable* keymap, E
         GNode* root = (GNode*) element;
         if (root->key) addToRecordIndex(database->recordIndex, root);
         RecordType rtype = recordType(root);
+        if (rtype == GRHeader) database->header = root;
         if (rtype == GRPerson) insertInRootList(database->personRoots, root);
         if (rtype == GRFamily) insertInRootList(database->familyRoots, root);
         if (rtype == GRSource) insertInRootList(database->sourceRoots, root);
         if (rtype == GREvent) insertInRootList(database->eventRoots, root);
         if (rtype == GROther) insertInRootList(database->otherRoots, root);
+        if (rtype == GRTrailer) stdfree(root);
     ENDLIST
     deleteRootList(records);
 	database->nameIndex = getNameIndex(database->personRoots);
@@ -67,6 +69,7 @@ void deleteDatabase(Database* database) {
     if (database->sourceRoots) deleteList(database->sourceRoots);
     if (database->eventRoots) deleteList(database->eventRoots);
     if (database->otherRoots) deleteList(database->otherRoots);
+    if (database->header) freeGNodes(database->header);
 }
 
 // writeDatabase writes the contents of a Database to a Gedcom file.
