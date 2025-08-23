@@ -3,7 +3,7 @@
 //  refnindex.h is the hearder file for the reference (REFN) index features.
 //
 //  Created on 17 December 2023.
-//  Last changed on 3 June 2025.
+//  Last changed on 23 August 2025.
 
 #ifndef refnindex_h
 #define refnindex_h
@@ -13,8 +13,8 @@
 // RefnIndexEl is the type for elements in RefnIndexes. refn is the value of a 1 REFN Gedcom line
 // and key is the tag of the record it is in. Each refn key must be unique.
 typedef struct RefnIndexEl {
-	String refn;
-	String key;
+	String refn; // value of a 1 REFN line.
+	String key; // key of record the REFN line is in.
 } RefnIndexEl;
 
 // RefnIndex is a HashTable holding RefnIndexEls.

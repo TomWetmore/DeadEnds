@@ -5,7 +5,7 @@
 //  1 REFN nodes whose values give records unique identifiers.
 //
 //  Created by Thomas Wetmore on 16 December 2023.
-//  Last changed on 22 August 2025.
+//  Last changed on 23 August 2025.
 //
 
 #include "errors.h"
@@ -19,15 +19,14 @@
 
 static int numRefnIndexBuckets = 1024;
 
-// searchRefnIndex searches a RefnIndex for a 1 REFN value and returns the key of the record with
-// that value.
+/// Searches a RefnIndex for a 1 REFN value and returns the key of the record with that value.
 String searchRefnIndex(RefnIndex* index, String refn) {
 	if (!index || !refn) return null;
 	RefnIndexEl* el = (RefnIndexEl*) searchHashTable(index, refn);
 	return el ? el->key : null;
 }
 
-// createRefnIndexEl creates a new reference index entry.
+/// Creates a new reference index entry.
 RefnIndexEl *createRefnIndexEl(String refn, String key) {
 	RefnIndexEl *el = (RefnIndexEl*) stdalloc(sizeof(RefnIndexEl));
 	el->refn = refn;
@@ -35,38 +34,43 @@ RefnIndexEl *createRefnIndexEl(String refn, String key) {
 	return el;
 }
 
-// showRefnIndex show a RefnIndex, for debugging.
-void showRefnIndex(RefnIndex* index) {
-	printf("showRefnIndex: Write me\n");
+/// Shows a RefnIndexEl, for debugging
+static void showRefnIndexEl(RefnIndexEl* element) {
+  printf("refn: %s, key: %s\n", element->refn, element->key);
 }
 
-// compare compares two record keys.
+/// Shows a RefnIndex, for debugging.
+void showRefnIndex(RefnIndex* index) {
+    showHashTable(index, (void*) showRefnIndexEl);
+}
+
+/// Compares two record keys.
 static int compare (String a, String b) {
 	return strcmp(a, b);
 }
 
-// getKey returns the key of a RefnIndexEl, a 1 REFN value.
+/// Returns the key of a RefnIndexEl which is a 1 REFN value.
 static String getKey(void* a) {
-	return ((RefnIndexEl*) a)->key;
+	return ((RefnIndexEl*) a)->refn;
 }
 
-// delete frees a RefnIndexEl.
+/// Frees a RefnIndexEl.
 static void delete(void* element) {
     stdfree(element);
 }
 
-// createRefnIndex creates a RefnIndex.
+/// Creates a RefnIndex.
 RefnIndex *createRefnIndex(void) {
 	return (RefnIndex*) createHashTable(getKey, compare, delete, numRefnIndexBuckets);
 }
 
-// deleteRefnIndex deletes a RefnIndex.
+/// Deletes a RefnIndex.
 void deleteRefnIndex(RefnIndex *index) {
 	deleteHashTable(index);
 }
 
-// addToRefnIndex adds a new RefnIndexEl to a RefnIndex. Returns true on success; returns false
-// if the REFN value is already in the table.
+/// Adds a new RefnIndexEl to a RefnIndex. Returns true on success and false if the REFN value is
+// already in the table.
 bool addToRefnIndex(RefnIndex *index, String refn, String key) {
 	RefnIndexEl* element = createRefnIndexEl(refn, key);
 	bool added = addToHashTableIfNew(index, element);
@@ -75,7 +79,7 @@ bool addToRefnIndex(RefnIndex *index, String refn, String key) {
 	return false;
 }
 
-// getReferenceIndex creates the reference index while validating the 1 REFN nodes in a Database.
+/// Creates a reference index while validating the 1 REFN nodes in a Database.
 RefnIndex* getReferenceIndex(RecordIndex *index, String fname, IntegerTable* keymap, ErrorLog* elog) {
     RefnIndex* refnIndex = createRefnIndex();
     FORHASHTABLE(index, element)
@@ -84,12 +88,10 @@ RefnIndex* getReferenceIndex(RecordIndex *index, String fname, IntegerTable* key
         while (refn) {
             String value = refn->value;
             if (value == null || strlen(value) == 0) {
-                Error* err = createError(gedcomError, fname, LN(root, keymap, refn),
-                                           "Missing REFN value");
+                Error* err = createError(gedcomError, fname, LN(root, keymap, refn), "Missing REFN value");
                 addErrorToLog(elog, err);
             } else if (!addToRefnIndex (refnIndex, value, root->key)) {
-                Error *err = createError(gedcomError, fname, LN(root, keymap, refn),
-                                           "REFN value already defined");
+                Error *err = createError(gedcomError, fname, LN(root, keymap, refn), "REFN value already defined");
                 addErrorToLog(elog, err);
             }
             refn = refn->sibling;
