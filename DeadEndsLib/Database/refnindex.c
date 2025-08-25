@@ -79,7 +79,7 @@ bool addToRefnIndex(RefnIndex *index, String refn, String key) {
 	return false;
 }
 
-/// Creates a reference index while validating the 1 REFN nodes in a Database.
+/// Creates a reference index from the records in a Database It checks that REFN values are defined once.
 RefnIndex* getReferenceIndex(RecordIndex *index, String fname, IntegerTable* keymap, ErrorLog* elog) {
     RefnIndex* refnIndex = createRefnIndex();
     FORHASHTABLE(index, element)

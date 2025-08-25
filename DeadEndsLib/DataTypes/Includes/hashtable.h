@@ -7,7 +7,7 @@
 //  use to keep the elements in a Bucket sorted.
 //
 //  Created by Thomas Wetmore 29 November 2022.
-//  Last changed on 4 June 2025.
+//  Last changed on 23 August 2025.
 //
 
 #ifndef hashtable_h
@@ -39,13 +39,13 @@ typedef struct HashTable {
 } HashTable;
 
 // User interface to HashTable.
-HashTable* createHashTable(String(*g)(void*), int(*c)(String, String), void(*d)(void*), int numBuckets);
+HashTable* createHashTable(String(*)(void*), int(*)(String, String), void(*)(void*), int);
 void deleteHashTable(HashTable*);
 bool isInHashTable(HashTable*, String key);
 void* searchHashTable(HashTable*, String key);
 
 void addToHashTable(HashTable*, void*, bool);
-bool addToHashTableIfNew(HashTable*, void*); // WARNING: NOT IMPLEMENTED YET.
+bool addToHashTableIfNew(HashTable*, void*);
 void *firstInHashTable(HashTable*, int*, int*);
 void* nextInHashTable(HashTable*, int*, int*);
 
