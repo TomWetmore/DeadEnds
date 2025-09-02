@@ -6,7 +6,7 @@
 //  or call a more specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 18 August 2025.
+//  Last changed on 2 September 2025.
 //
 
 #include <stdarg.h>
@@ -50,7 +50,7 @@ bool programDebugging = false;
 int Perrors = 0;
 
 /// Runs a DeadEnds script program.
-void runProgram(Program* program, Database* database, File* outfile) {
+InterpType runProgram(Program* program, Database* database, File* outfile) {
 
     // Create the Context.
     Context* context = createContext(program, database, outfile);
@@ -60,6 +60,7 @@ void runProgram(Program* program, Database* database, File* outfile) {
 
     // Free the Context.
     deleteContext(context);
+    return itype;
 }
 
 // Interprets a DeadEnds script. A script must contain procedure named "main" which interpScript
