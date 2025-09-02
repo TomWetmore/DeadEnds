@@ -43,16 +43,15 @@ String resolveFile(String name, String path, String suffix) {
         snprintf(fullPath, sizeof(fullPath), "%s/%s", dir, name);
         if (access(fullPath, F_OK) == 0) return strsave(fullPath);
     }
-
     // Try with suffix if provided
     if (suffix && *suffix != 0) {
-        strcpy(buf1, path); // reset buf1 because strtok modifies it
+        strcpy(buf1, path);  // Reset buf1 because strtok modifies it
+        String fmt = (*suffix == '.') ? "%s/%s%s" : "%s/%s.%s";
         for (char* dir = strtok(buf1, ":"); dir; dir = strtok(NULL, ":")) {
-            snprintf(fullPath, sizeof(fullPath), "%s/%s%s", dir, name, suffix);
+            snprintf(fullPath, sizeof(fullPath), fmt, dir, name, suffix);
             if (access(fullPath, F_OK) == 0) return strsave(fullPath);
         }
     }
-
     return null;
 }
 
