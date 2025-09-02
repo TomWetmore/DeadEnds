@@ -4,7 +4,7 @@
 //  parse.c contains two functions, parseProgram and parseFile, which parse DeadEnds scripts.
 //
 //  Created by Thomas Wetmore on 4 January 2023.
-//  Last changed on 16 August 2025.
+//  Last changed on 2 September 2025.
 //
 
 #include <stdarg.h>
@@ -96,7 +96,7 @@ Program* parseProgram(String fileName, String searchPath) {
 static void parseFile(String fileName, String searchPath) {
     if (!fileName || *fileName == 0) return;
     curFileName = fileName;
-    currentFile = fopenPath(fileName, "r", searchPath);
+    currentFile = fopenPath(fileName, "r", searchPath, "ll");
     if (!currentFile) {
         printf("Error: file \"%s\" cannot be found.\n", fileName);
         curFileName = null;

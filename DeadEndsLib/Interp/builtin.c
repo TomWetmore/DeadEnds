@@ -3,7 +3,7 @@
 //  builtin.c contains many built-in functions of the DeadEnds script language.
 //
 //  Created by Thomas Wetmore on 14 December 2022.
-//  Last changed on 25 July 2025.
+//  Last changed on 2 September 2025.
 //
 
 #include "context.h"
@@ -610,7 +610,7 @@ PValue __copyfile (PNode *pnode, Context *context, bool *errflg) {
 		scriptError(pnode, "The argument to copyfile must be a string.");
 		return nullPValue;
 	}
-	FILE *cfp = fopenPath(fileName, "r", null);
+	FILE *cfp = fopenPath(fileName, "r", null, null);
 	if (cfp == null) {
 		scriptError(pnode, "Could not open file for copying.");
 		*errflg = true;

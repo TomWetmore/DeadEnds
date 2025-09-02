@@ -3,7 +3,7 @@
 // path.c has functions to manipulate UNIX file paths.
 //
 // Created by Thomas Wetmore on 14 December 2022.
-// Last changed on 4 August 2025.
+// Last changed on 2 September 2025.
 
 #include <unistd.h>
 #include "standard.h"
@@ -11,7 +11,7 @@
 #define MAXPATHBUFFER 4096
 
 // resolveFile tries to find a file within a sequence of paths.
-String resolveFile(String name, String path) {
+String oldResolveFile(String name, String path, String suffix) {
     if (!name || *name == 0) return null;
     if (!path || *path == 0) return strsave(name);
     if (strchr(name, '/') != null) return strsave(name);
@@ -27,10 +27,39 @@ String resolveFile(String name, String path) {
     return null;
 }
 
+/// resolveFile tries to find a file within a colon-separated path list.
+/// If not found, and a suffix is provided, tries again with the suffix appended.
+String resolveFile(String name, String path, String suffix) {
+
+    if (!name || *name == 0) return null;  // No file name.
+    if (!path || *path == 0) return strsave(name);  // No path.
+    if (strchr(name, '/')) return strsave(name);  // File name is absolute.
+    char buf1[MAXPATHBUFFER];
+    char fullPath[MAXPATHBUFFER];
+
+    // Search path list for original name
+    strcpy(buf1, path);
+    for (char* dir = strtok(buf1, ":"); dir; dir = strtok(NULL, ":")) {
+        snprintf(fullPath, sizeof(fullPath), "%s/%s", dir, name);
+        if (access(fullPath, F_OK) == 0) return strsave(fullPath);
+    }
+
+    // Try with suffix if provided
+    if (suffix && *suffix != 0) {
+        strcpy(buf1, path); // reset buf1 because strtok modifies it
+        for (char* dir = strtok(buf1, ":"); dir; dir = strtok(NULL, ":")) {
+            snprintf(fullPath, sizeof(fullPath), "%s/%s%s", dir, name, suffix);
+            if (access(fullPath, F_OK) == 0) return strsave(fullPath);
+        }
+    }
+
+    return null;
+}
+
 // fopenPath attempta to open a file using a path variable.
-FILE *fopenPath(String name, String mode, String path) {
+FILE *fopenPath(String name, String mode, String path, String suffix) {
     String str;
-    if (!(str = resolveFile(name, path))) return null;
+    if (!(str = resolveFile(name, path, suffix))) return null;
     return fopen(str, mode);
 }
 

@@ -5,7 +5,7 @@
 //  into closed sets of persons and families.
 //
 //  Created by Thomas Wetmore on 4 October 2024.
-//  Last changed on 5 June 2025.
+//  Last changed on 2 September 2025.
 //
 
 #include <stdio.h>
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 	// Get the Gedcom file.
 	getArguments(argc, argv, &gedcomFile);
 	getEnvironment(&searchPath);
-	String resolvedFile = resolveFile(gedcomFile, searchPath);
+	String resolvedFile = resolveFile(gedcomFile, searchPath, "ged");
 	if (!resolvedFile) {
 		fprintf(stderr, "Could not open file %s.\n", gedcomFile);
 		exit(1);

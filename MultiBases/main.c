@@ -5,7 +5,7 @@
 // will experiment with Database merging.
 //
 // Created by Thomas Wetmore on 16 November 2024.
-// Last changed on 12 December 2024.
+// Last changed on 2 September 2024.
 
 #include "standard.h"
 #include "utils.h"
@@ -19,7 +19,7 @@ static bool timing = true;
 static String getGedcomPath(void);
 static List* getFileNames(int, char**);
 static List* listFromStrings(String); // Should this be an 'official' List function?
-static List* resolveFileNames(List*, String);
+static List* resolveFileNames(List*, String, String);
 
 // main is the main program of the MultiBases test program.
 int main(int argc, char *argv[]) {
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	// Try to resolve the file names. Continue processing if some don't resolve.
-	List* resolvedNames = resolveFileNames(names, gedcomPath);
+	List* resolvedNames = resolveFileNames(names, gedcomPath, "ged");
 	deleteList(names);
 
 	// Get the List of Databases from the List of Gedcom files.
@@ -90,10 +90,10 @@ List* listFromStrings(const String string) {
 }
 
 // resolveFileNames resolves a List of file names with a path environment variable.
-List* resolveFileNames(List* names, String path) {
+List* resolveFileNames(List* names, String path, String suffix) {
 	List* resolvedNames = createList(null, null, delete, false);
 	FORLIST(names, element)
-		String resolved = resolveFile(element, path);
+		String resolved = resolveFile(element, path, suffix);
 		if (resolved) appendToList(resolvedNames, resolved);
 		else fprintf(stderr, "Could not resolve %s\n", (String) element);
 	ENDLIST

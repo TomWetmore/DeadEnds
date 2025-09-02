@@ -11,7 +11,7 @@
 //  If DE_GEDCOM_PATH and/or DE_SCRIPTS_PATH are defined, they may be used as search paths.
 //
 //  Created by Thomas Wetmore on 21 July 2024
-//  Last changed on 18 August 2025.
+//  Last changed on 2 Septembe 2025.
 //
 
 #include "deadends.h"
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     getEnvironment(&gedcomPath, &scriptPath);
 
     // Build the Database from the Gedcom file.
-    gedcomFile = resolveFile(gedcomFile, gedcomPath);
+    gedcomFile = resolveFile(gedcomFile, gedcomPath, "ged");
     ErrorLog* errorLog = createErrorLog();
     Database* database = getDatabaseFromFile(gedcomFile, errorLog);
     if (lengthList(errorLog)) {
