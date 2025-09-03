@@ -5,7 +5,7 @@
 // randomized Gedcom file to standard output.
 //
 // Created by Thomas Wetmore on 14 July 2024.
-// Last changed on 3 August 2025.
+// Last changed on 3 September 2025.
 
 #include "errors.h"
 #include "gedcom.h"
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 	printf("%s: RandomizeKeys begin.\n", getMsecondsStr());
 	getArguments(argc, argv, &gedcomFile);
 	getEnvironment(&searchPath);
-	gedcomFile = resolveFile(gedcomFile, searchPath);
+	gedcomFile = resolveFile(gedcomFile, searchPath, "ged");
 	if (debugging) printf("Resolved file: %s\n", gedcomFile);
 	// Get the Gedcom records from a file.
 	ErrorLog* log = createErrorLog();
