@@ -23,7 +23,13 @@ PValue __key(PNode* pnode, Context* context, bool* errflg) {
     PValue value = evaluate(pnode->arguments, context, errflg);
     if (*errflg || !isRecordType(value.type)) return nullPValue;
     GNode* gnode = value.value.uGNode;
-    if (gnode && gnode->key) return createStringPValue(gnode->key);
+    if (gnode && gnode->key) {
+        int len = (int) strlen(gnode->key);
+        char key[len + 1];
+        strcpy(key, gnode->key);
+        key[len - 1] = 0; // strip trailing '@'
+        return createStringPValue(key + 1); // skip leading '@'
+    }
     return nullPValue;
 }
 
