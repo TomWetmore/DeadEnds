@@ -6,7 +6,7 @@
 //  or call a more specific function.
 //
 //  Created by Thomas Wetmore on 9 December 2022.
-//  Last changed on 2 September 2025.
+//  Last changed on 10 September 2025.
 //
 
 #include <stdarg.h>
@@ -624,7 +624,7 @@ InterpType interpForeven (PNode* node, Context* context, PValue *pvalue) {
 InterpType interpForothr(PNode *node, Context *context, PValue *pval) {
     SymbolTable* table = context->frame->table;
     RootList* roots = context->database->otherRoots;
-    for (int i = 0; i <= lengthList(roots); i++) {
+    for (int i = 0; i < lengthList(roots); i++) {
         GNode* othr = getListElement(roots, i);
         assignValueToSymbol(context, node->otherIden, PVALUE(PVEvent, uGNode, othr));
         assignValueToSymbol(context, node->countIden, PVALUE(PVInt, uInt, i));
