@@ -54,7 +54,7 @@ Program* parseProgram(String fileName, String searchPath) {
     globalIdents = createList(null, null, delete, null); // Global identifiers.
 
     // Start the pending files queue with the main program.
-    enqueueList(pendingFiles, fileName);
+    enqueueList(pendingFiles, strsave(fileName));
     programParsing = true;
 
     // Process the pendingFiles queue by parsing each file.
