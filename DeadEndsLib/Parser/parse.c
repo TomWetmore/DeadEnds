@@ -4,7 +4,7 @@
 //  parse.c contains two functions, parseProgram and parseFile, which parse DeadEnds scripts.
 //
 //  Created by Thomas Wetmore on 4 January 2023.
-//  Last changed on 2 September 2025.
+//  Last changed on 13 September 2025.
 //
 
 #include <stdarg.h>
@@ -26,8 +26,9 @@
 
 static bool debugging = false;
 extern bool programParsing;
+static void parseFile(String, String);
 
-// Shared global variables. Memory ownership of the first four are taken over by the context.
+// Shared global variables. Memory ownership of the first four are taken over by a Program object.
 SymbolTable* globals; // Global symbol table.
 FunctionTable* functions; // User functions.
 FunctionTable* procedures; // User procedures.
@@ -39,10 +40,7 @@ String curFileName = null; // File being parsed
 FILE* currentFile = null; // FILE being parsed.
 int curLine = 1; // Line number in current file.
 
-static void parseFile(String file, String path); // Private function defined below.
-
-// parseProgram parses a DeadEnds script program and returns the Program object that is
-// to interpret it.
+// parseProgram parses a DeadEnds program and returns a Program object to be interpreted.
 static void delete(void* a) { stdfree(a); }
 Program* parseProgram(String fileName, String searchPath) {
 
@@ -53,17 +51,17 @@ Program* parseProgram(String fileName, String searchPath) {
     functions = createFunctionTable(); // User-defined functions.
     globalIdents = createList(null, null, delete, null); // Global identifiers.
 
-    // Start the pending files queue with the main program.
+    // Init pendingFiles with main program. Use strsave so parsedFiles can be deleted safely.
     enqueueList(pendingFiles, strsave(fileName));
     programParsing = true;
 
-    // Process the pendingFiles queue by parsing each file.
+    // Parse the files in the pendingFiles queue.
     while (!isEmptyList(pendingFiles)) {
         String nextFile = (String) dequeueList(pendingFiles);
         if (!isInSet(included, nextFile)) {
             addToSet(included, nextFile);
             appendToList(parsedFiles, nextFile);
-            parseFile(nextFile, searchPath); // May add to pendingFiles.
+            parseFile(nextFile, searchPath); // May add to queue.
         }
     }
     // Delete structures no longer needed.
@@ -72,7 +70,7 @@ Program* parseProgram(String fileName, String searchPath) {
     // If there were errors delete the other structures and return null.
     if (Perrors) {
         deleteList(parsedFiles);
-        deleteSymbolTable(globals);
+        deleteList(globalIdents);
         deleteFunctionTable(procedures);
         deleteFunctionTable(functions);
         return null;
@@ -84,7 +82,7 @@ Program* parseProgram(String fileName, String searchPath) {
     program->procedures = procedures;
     program->functions = functions;
     program->parsedFiles = parsedFiles;
-    // Null the C globals after the Program assumes ownership.
+    // Null the shared globals after the Program assumes ownership.
     procedures = functions = null;
     globalIdents = null;
     parsedFiles = null;
