@@ -11,7 +11,7 @@
 //  If DE_GEDCOM_PATH and/or DE_SCRIPTS_PATH are defined, they may be used as search paths.
 //
 //  Created by Thomas Wetmore on 21 July 2024
-//  Last changed on 2 Septembe 2025.
+//  Last changed on 13 September 2025.
 //
 
 #include "deadends.h"
@@ -49,7 +49,6 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "Error parsing program\n");
         exit(1);
     }
-    validateCalls(program); // This should be done somewhere else. TODO TODO TODO.
 
     // Run the program.
     runProgram(program, database, stdOutputFile());

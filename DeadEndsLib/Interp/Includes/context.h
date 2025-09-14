@@ -3,7 +3,7 @@
 //  context.h
 //
 //  Created by Thomas Wetmore on 21 May 2025.
-//  Last changed on 16 August 2025.
+//  Last changed on 13 September 2025.
 //
 
 #ifndef context_h
@@ -29,7 +29,7 @@ typedef struct Program {
 
 Program* createProgram(void); // TODO: Change to take parameters.
 void deleteProgram(Program*);
-void validateCalls(Program*);
+void validateCalls(FunctionTable*, FunctionTable*);
 
 // Context holds the context in which interpretation takes place.
 typedef struct Context {

@@ -76,6 +76,10 @@ Program* parseProgram(String fileName, String searchPath) {
         return null;
     }
 
+    // Check that all called functions and procedures are defined.
+    validateCalls(procedures, functions);
+
+
     // Parsing was successful. Create and return a Program.
     Program* program = createProgram();
     program->globalIdents = globalIdents;

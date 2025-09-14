@@ -3,7 +3,7 @@
 //  context.c
 //
 //  Created by Thomas Wetmore on 21 May 2025.
-//  Last changed on 18 August 2025.
+//  Last changed on 13 September 2025.
 //
 
 #include <stdio.h>
@@ -53,37 +53,36 @@ void deleteContext(Context *context) {
     stdfree(context);
 }
 
-static void validatePNodeCalls(PNode*, Program*);
+static void validatePNodeCalls(PNode*, FunctionTable*, FunctionTable*);
 static bool isBuiltinFunction(const char* name);
 
-/// Checks that the functions and procedures called by a script are defined.
-void validateCalls(Program* program) {
-
-    ASSERT(program);
-    FORHASHTABLE(program->procedures, entry) // Check procedures.
+/// Checks that functions and procedures called by a program are defined.
+void validateCalls(FunctionTable* procedures, FunctionTable* functions) {
+    ASSERT(procedures && functions);
+    FORHASHTABLE(procedures, entry) // Check procedures.
         PNode* proc = ((FunctionElement*) entry)->function;
-        validatePNodeCalls(proc->procBody, program);
+        validatePNodeCalls(proc->procBody, procedures, functions);
     ENDHASHTABLE
-    FORHASHTABLE(program->functions, entry) // Check functions.
+    FORHASHTABLE(functions, entry) // Check functions.
         PNode* func = ((FunctionElement*) entry)->function;
-        validatePNodeCalls(func->funcBody, program);
+        validatePNodeCalls(func->funcBody, procedures, functions);
     ENDHASHTABLE
 }
 
 /// Checks that PNProcCall and PNFuncCall PNodes call defined procedures and functions.
-static void validatePNodeCalls(PNode* node, Program* program) {
+static void validatePNodeCalls(PNode* node, FunctionTable* procedures, FunctionTable* functions) {
     while (node) {
         switch (node->type) {
         case PNProcCall: {
             String name = node->procName;
-            if (!searchHashTable(program->procedures, name)) {
+            if (!searchHashTable(procedures, name)) {
                 scriptError(node, "undefined procedure: %s", name);
             }
             break;
         }
         case PNFuncCall: {
             String name = node->funcName;
-            if (!searchHashTable(program->functions, name) &&
+            if (!searchHashTable(functions, name) &&
                 !isBuiltinFunction(name)) {
                 scriptError(node, "undefined function: %s", name);
             }
@@ -91,27 +90,27 @@ static void validatePNodeCalls(PNode* node, Program* program) {
         }
         case PNBltinCall: break;
         case PNIf:
-            validatePNodeCalls(node->condExpr, program);
-            validatePNodeCalls(node->thenState, program);
-            validatePNodeCalls(node->elseState, program);
+            validatePNodeCalls(node->condExpr, procedures, functions);
+            validatePNodeCalls(node->thenState, procedures, functions);
+            validatePNodeCalls(node->elseState, procedures, functions);
             break;
         case PNWhile:
-            validatePNodeCalls(node->condExpr, program);
-            validatePNodeCalls(node->loopState, program);
+            validatePNodeCalls(node->condExpr, procedures, functions);
+            validatePNodeCalls(node->loopState, procedures, functions);
             break;
         case PNReturn:
-            validatePNodeCalls(node->returnExpr, program);
+            validatePNodeCalls(node->returnExpr, procedures, functions);
             break;
         default:
             // Loops and blocks
-            validatePNodeCalls(node->condExpr, program);
-            validatePNodeCalls(node->expression, program);
-            validatePNodeCalls(node->gnodeExpr, program);
-            validatePNodeCalls(node->listExpr, program);
-            validatePNodeCalls(node->setExpr, program);
-            validatePNodeCalls(node->sequenceExpr, program);
-            validatePNodeCalls(node->pnodeOne, program);
-            validatePNodeCalls(node->pnodeTwo, program);
+            validatePNodeCalls(node->condExpr, procedures, functions);
+            validatePNodeCalls(node->expression, procedures, functions);
+            validatePNodeCalls(node->gnodeExpr, procedures, functions);
+            validatePNodeCalls(node->listExpr, procedures, functions);
+            validatePNodeCalls(node->setExpr, procedures, functions);
+            validatePNodeCalls(node->sequenceExpr, procedures, functions);
+            validatePNodeCalls(node->pnodeOne, procedures, functions);
+            validatePNodeCalls(node->pnodeTwo, procedures, functions);
             break;
         }
         node = node->next;
