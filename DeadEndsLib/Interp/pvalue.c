@@ -5,7 +5,7 @@
 //  DeadEnds scripts.
 //
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 28 July 2025.
+//  Last changed on 17 September 2025.
 //
 
 #include "gedcom.h"
@@ -323,6 +323,20 @@ static bool isZero(PValue value) {
 //	}
 //	return PVALUE(PVBool, uBool, b);
 //}
+
+// eqPValues returns whether two PValue are equal.
+bool equalPValues(PValue val1, PValue val2) {
+    PVType type = val1.type;
+    if (type != val2.type) return false;
+    switch (type) {
+    case PVInt: return val1.value.uInt == val2.value.uInt;
+    case PVFloat:return val1.value.uFloat == val2.value.uFloat;
+    case PVString: return eqstr(val1.value.uString, val2.value.uString);;
+        // TODO: ADD MORE CASES AS NEEDS ARISE.
+    default: return false;
+    }
+}
+
 
 // nePValues -- See if two PValues are not equal. First PValue is converted to a PVBool value
 // with the result. The second PValue is freed.

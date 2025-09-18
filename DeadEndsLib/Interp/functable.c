@@ -4,7 +4,7 @@
 //  functable.c has the table of built-in functions in the DeadEnds scripting language.
 //
 //  Created by Thomas Wetmore on 10 January 2023.
-//  Last changed on 3 July 2025.
+//  Last changed on 17 September 2025.
 //
 
 #include "standard.h"
@@ -85,6 +85,7 @@ extern PValue __incr(PNode*, Context*, bool*);
 extern PValue __index(PNode*, Context*, bool*);
 extern PValue __indi(PNode*, Context*, bool*);
 extern PValue __indiset(PNode*, Context*, bool*);
+extern PValue __inlist(PNode*, Context*, bool*);
 extern PValue __inode(PNode*, Context*, bool*);
 extern PValue __insert(PNode*, Context*, bool*);
 extern PValue __inset(PNode*, Context*, bool*);
@@ -275,6 +276,7 @@ BuiltIn builtIns[] = {
     "index",        3,    3,    __index,
     "indi",         1,    1,    __indi,
     "indiset",      1,    1,    __indiset,
+    "inlist",       2,    2,    __inlist,
     "inode",        1,    1,    __inode,
     "insert",       3,    3,    __insert,
     "inset",        2,    2,    __inset,

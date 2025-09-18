@@ -6,7 +6,7 @@
 //  returned by script functions.
 //
 //  Created by Thomas Wetmore on 15 December 2022.
-//  Last changed on 7 July 2025.
+//  Last changed on 17 September 2025.
 //
 
 #ifndef pvalue_h
@@ -88,6 +88,7 @@ PValue ltPValues(PValue, PValue, bool* eflag);
 PValue lePValues(PValue, PValue, bool* eflag);
 PValue nePValues(PValue, PValue, bool* eflag);
 PValue eqPValues(PValue, PValue, bool* eflag);
+bool equalPValues(PValue, PValue);
 
 // PValue Functions.
 void coercePValue(PValue* pvalue, int newType, bool* errorFlag);

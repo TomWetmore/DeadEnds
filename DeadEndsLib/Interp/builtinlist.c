@@ -234,6 +234,25 @@ PValue __length(PNode* pnode, Context* context, bool* errflg) {
     }
 }
 
+// __inlist checks whether a specific PValue is found in a List of PValues.
+PValue __inlist(PNode* pnode, Context* context, bool* errflg) {
+    PNode* arg = pnode->arguments;
+    PValue plist = evaluate(arg, context, errflg);
+    if (*errflg) return nullPValue;
+    if (plist.type != PVList) {
+        scriptError(pnode, "the first argument to inlist must be a list");
+        *errflg = true;
+        return nullPValue;
+    }
+    PValue parg = evaluate(arg->next, context, errflg);
+    if (*errflg) return nullPValue;
+    FORLIST(plist.value.uList, element)
+        PValue el = *((PValue*) element);
+        if (equalPValues(parg, el)) return truePValue;
+    ENDLIST
+    return falsePValue;
+}
+
 // interpForList interprets the list loop.
 // usage: forlist(LIST, ANY, INT) { BODY }
 InterpType oldinterpForList(PNode* pnode, Context* context, PValue* pval) {
@@ -300,4 +319,6 @@ InterpType interpForList(PNode* pnode, Context* context, PValue* pval) {
     }
     return InterpOkay;
 }
+
+
 

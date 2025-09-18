@@ -19,7 +19,7 @@ typedef struct Frame Frame;
 typedef struct File File;
 typedef struct List List;
 
-// Program holds a (non running) DeadEnds script program.
+// Structure that holds parsed DeadEnds programs.
 typedef struct Program {
     FunctionTable* procedures;
     FunctionTable* functions;

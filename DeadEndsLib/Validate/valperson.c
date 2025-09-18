@@ -51,6 +51,7 @@ static bool validatePerson(GNode* person, String name, RecordIndex* index, Integ
 	int errorCount = 0;
 	static char s[512]; // For error strings.
 	// Warning: use of __node is fragile because it uses internal details of the macros.
+
 	FORFAMCS(person, family, key, index) // Check FAMC links to families.
 		if (!family) {
 			sprintf(s, "INDI %s (line %d): FAMC %s (line %d) does not exist.",
@@ -68,20 +69,27 @@ static bool validatePerson(GNode* person, String name, RecordIndex* index, Integ
 		}
 	ENDFAMSS
 	if (errorCount) return false;
-	FORFAMCS(person, family, key, index) // Check FAMC links back to person.
-		int numOccurrences = 0;
-		FORCHILDREN(family, child, chilKey, count, index) // Find child that links to person.
-			if (person == child) numOccurrences++;
-		ENDCHILDREN
-		if (numOccurrences == 0) {
-			addErrorToLog(elog, createError(linkageError, name, 0, "Child not found"));
-			errorCount++;
-		} else if (numOccurrences > 1) {
-			addErrorToLog(elog, createError(linkageError, name, 0, "Too many children found"));
-			errorCount++;
-		}
-	ENDFAMCS
-	if (errorCount) return false;
+    FORFAMCS(person, family, key, index) // Check FAMC links back to person.
+        int numOccurrences = 0;
+        FORCHILDREN(family, child, chilKey, count, index) // Find child that links to person.
+            if (person == child) numOccurrences++;
+        ENDCHILDREN
+        if (numOccurrences == 0) {
+            sprintf(s, "Person %s (line %d) has FAMC link to family %s (line %d) but family has no CHIL link",
+                person->key, rootLine (person, keymap),
+                family->key, rootLine (family, keymap));
+            addErrorToLog(elog, createError(linkageError, name, 0, s));
+            errorCount++;
+        } else if (numOccurrences > 1) {
+            sprintf(s, "Person %s (line %d) has multiple CHIL links in family %s (line %d)",
+                person->key, rootLine (person, keymap),
+                family->key, rootLine (family, keymap));
+            addErrorToLog(elog, createError(linkageError, name, 0, "Too many children found"));
+            errorCount++;
+        }
+    ENDFAMCS
+    if (errorCount) return false;
+
 	SexType sex = SEXV(person);
 	FORFAMSS(person, family, key, index) // Check FAMS links back to person.
 		GNode *parent = null;
@@ -109,6 +117,38 @@ static bool validatePerson(GNode* person, String name, RecordIndex* index, Integ
 		}
 a:;
 	ENDFAMSS
+
+    //    SexType sex = SEXV(person);
+    //    FORFAMSS(person, family, key, index) // Check FAMS links back to person.
+    //        bool found = false;
+    //        GNode *parent = null;
+    //        FORHUSBS(family, parent, key, index)
+    //          if (parent == person) {
+    //            found = true;
+    //            break;
+    //          }
+    //        ENDHUSBS
+    //        if (! found)
+    //          FORWIFES(family, parent, key, index)
+    //            if (parent == person) {
+    //              found = true;
+    //              break;
+    //            }
+    //          ENDWIFES
+    //            if (! found) {
+    //            sprintf(s, "FAM %s (line %d) should have %s link to INDI %s (line %d).",
+    //                    key,
+    //                    rootLine(family, keymap),
+    //                    sex == sexMale ? "HUSB" : "WIFE",
+    //                    person->key,
+    //                    line);
+    //            addErrorToLog(elog, createError(linkageError, name, rootLine(family, keymap), s));
+    //            errorCount++;
+    //        }
+    //a:;
+    //    ENDFAMSS
+
+
 
 	//  Validate NAME and SEX lines.
 	GNode* nnode = null;
@@ -165,3 +205,5 @@ bool hasValidSexGNode(GNode* root, GNode** psex) {
 	*psex = sex;
 	return validSexString(sex->value);
 }
+
+
