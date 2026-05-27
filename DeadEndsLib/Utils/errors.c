@@ -9,18 +9,19 @@
 #include "list.h"
 
 #define NUMKEYS 64
+#define ERRORKEYSIZE 128
 static bool debugging = false;
 
 // getKey returns the comparison key of an error.
 static String getKey(void* error) {
-	static char buffer[NUMKEYS][128];
+	static char buffer[NUMKEYS][ERRORKEYSIZE];
 	static int dex = 0;
 	if (++dex > NUMKEYS - 1) dex = 0;
 	String scratch = buffer[dex];
 	String fileName = ((Error*) error)->fileName;
 	if (!fileName) fileName = "";
 	int lineNumber = ((Error*) error)->lineNumber;
-	sprintf(scratch, "%s%09d", fileName, lineNumber);
+	snprintf(scratch, ERRORKEYSIZE, "%s%09d", fileName, lineNumber);
 	return scratch; // Static memory!
 }
 

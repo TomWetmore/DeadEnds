@@ -70,7 +70,7 @@ String gnodesToString(GNode* gnode) {
 
 /// Returns a `GNode` as a Gedcom `String` without newline.
 String gnodeToString(GNode* gnode, int level) {
-    int length = nodeStringLength(level, gnode);
+    int length = nodeStringLength(level, gnode) + 1;
     String string = (String) stdalloc(length);
     swriteGNode(level, gnode, string);
     string[strlen(string) - 1] = 0;
@@ -79,25 +79,16 @@ String gnodeToString(GNode* gnode, int level) {
 
 // swriteGNode writes a GNode to a string and returns the position in string of next GNode.
 static String swriteGNode(int level, GNode* node, String p) {
-    char scratch[600];
-    String q = scratch;
-    sprintf(q, "%d ", level);
-    q += strlen(q);
-    if (node->key) {
-        strcpy(q, node->key);
-        q += strlen(q);
-        *q++ = ' ';
+    size_t length = (size_t) nodeStringLength(level, node) + 1;
+    if (node->key && node->value) {
+        snprintf(p, length, "%d %s %s %s\n", level, node->key, node->tag, node->value);
+    } else if (node->key) {
+        snprintf(p, length, "%d %s %s\n", level, node->key, node->tag);
+    } else if (node->value) {
+        snprintf(p, length, "%d %s %s\n", level, node->tag, node->value);
+    } else {
+        snprintf(p, length, "%d %s\n", level, node->tag);
     }
-    strcpy(q, node->tag);
-    q += strlen(q);
-    if (node->value) {
-        *q++ = ' ';
-        strcpy(q, node->value);
-        q += strlen(q);
-    }
-    *q++ = '\n';
-    *q = 0;
-    strcpy(p, scratch);
     return p + strlen(p);
 }
 
@@ -125,10 +116,10 @@ int treeStringLength(int level, GNode* gnode) {
 
 // nodeStringLength returns the a GNode's string length; it counts the \n but not the final 0.
 static int nodeStringLength(int level, GNode* gnode) {
-    size_t len;
-    char scratch[10];  // To hold the level.
-    sprintf(scratch, "%d", level);
-    len = strlen(scratch) + 1;
+    char scratch[32];
+    int wrote = snprintf(scratch, sizeof(scratch), "%d", level);
+    if (wrote < 0) return 0;
+    size_t len = (size_t) wrote + 1;
     if (gnode->key) len += strlen(gnode->key) + 1;
     len += strlen(gnode->tag);
     if (gnode->value) len += strlen(gnode->value) + 1;

@@ -88,12 +88,15 @@ int main(int argc, char** argv) {
 		GNodeIndexEl* element = searchHashTable(index, person->key);
 		ConnectData* data = element->data;
 		int score = data->numAncestors + data->numDescendents;
-		if (score > max) {
+		if (!topGun || score > max) {
 			max = score;
 			topGun = person;
 		}
 	ENDLIST
-	printf("Person: %s %s %d\n", topGun->key, topGun->child->value, max);
+	if (topGun)
+		printf("Person: %s %s %d\n", topGun->key, topGun->child->value, max);
+	else
+		printf("Person: (none) (none) 0\n");
 	if (timing) printf("%s: Partition: done.\n", gms);
 }
 

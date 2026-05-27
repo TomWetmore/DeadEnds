@@ -21,14 +21,14 @@ String resolveFile(String name, String path, String suffix) {
     char fullpath[MAXPATHBUFFER];
 
     // Search path list for the filename.
-    strcpy(pathbuf, path);
+    if (snprintf(pathbuf, sizeof(pathbuf), "%s", path) >= sizeof(pathbuf)) return null;
     for (char* dir = strtok(pathbuf, ":"); dir; dir = strtok(null, ":")) {
         snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, name);
         if (access(fullpath, F_OK) == 0) return strsave(fullpath);
     }
     // Try with suffix if provided.
     if (!suffix || !*suffix) return null;
-    strcpy(pathbuf, path);  // Reset buf because strtok modifies it
+    if (snprintf(pathbuf, sizeof(pathbuf), "%s", path) >= sizeof(pathbuf)) return null; // Reset buf because strtok modifies it
     String fmt = (*suffix == '.') ? "%s/%s%s" : "%s/%s.%s";
     for (char* dir = strtok(pathbuf, ":"); dir; dir = strtok(null, ":")) {
         snprintf(fullpath, sizeof(fullpath), fmt, dir, name, suffix);

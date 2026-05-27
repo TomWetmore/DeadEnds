@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
 
     // Parse the program script.
     fprintf(stderr, "%s: Script parsed.\n", getMsecondsStr());
-    Program* program = parseProgram(scriptFile, scriptPath);
+    Program* program = parseProgram(scriptFile, scriptPath, errorLog);
     if (!program) {
         fprintf(stderr, "Error parsing program\n");
         exit(1);
